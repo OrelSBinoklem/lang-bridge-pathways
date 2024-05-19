@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@wordpress/scripts": "^27.9.0"
+  }
+}
