@@ -5,11 +5,13 @@
 	<div class="wp-block-group alignwide">
 		<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"},"layout":{"selfStretch":"fit","flexSize":null}},"layout":{"type":"flex"}} -->
 		<div class="wp-block-group">
-			<!-- wp:site-logo {"width":60 } /-->
-
 			<!-- wp:group {"style":{"spacing":{"blockGap":"0px"}}} -->
 			<div class="wp-block-group">
-				<!-- wp:site-title {"level":0} /-->
+				<div class="site-logo">
+					<a href="<?php echo esc_url(home_url('/')); ?>">
+						<img src="<?php echo esc_url(get_template_directory_uri() . '/assets/logo.png'); ?>" alt="<?php bloginfo('name'); ?>">
+					</a>
+				</div>
 			</div>
 			<!-- /wp:group -->
 		</div>
@@ -24,3 +26,10 @@
 	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->
+
+<style>
+	.wp-block-site-title a {
+		font-size: 30px;
+		text-decoration: none;
+	}
+</style>

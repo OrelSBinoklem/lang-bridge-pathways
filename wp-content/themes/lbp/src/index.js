@@ -1,12 +1,14 @@
 const { render, useEffect } = wp.element;
 import axios from 'axios';
+import env from './env'
+require('./WaterLogo');
 
-//todo посмотреть как использовать ключи из .env https://www.youtube.com/watch?v=EaC7x6QCjjQ
+//https://www.youtube.com/watch?v=EaC7x6QCjjQ
 
 
 const App = () => {
 	useEffect(() => {
-		let url = `${process.env.REACT_APP_API_ROOT}/posts?per_page=1&page=1`;
+		let url = `${env.REACT_APP_API_ROOT}/posts?per_page=1&page=1`;
 		axios.get(url).then((res) => {
 			const { data, headers } = res;
 			console.log(data)
@@ -21,3 +23,4 @@ const App = () => {
 	);
 };
 render(<App />, document.getElementById(`react-app`));
+

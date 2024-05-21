@@ -4210,7 +4210,7 @@ const {
 } = wp.element;
 
 
-//https://www.youtube.com/watch?v=EaC7x6QCjjQ
+//todo посмотреть как использовать ключи из .env https://www.youtube.com/watch?v=EaC7x6QCjjQ
 
 const App = () => {
   useEffect(() => {

@@ -1,0 +1,277 @@
+/*
+Theme Name: Lang Bridge Pathways
+Theme URI: http://example.com/mytheme
+Author: Your Name
+Author URI: http://example.com
+Description: A custom WordPress theme.
+Version: 1.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: custom, theme
+Text Domain: mytheme
+*/
+
+/* Стили сброса (Reset CSS) */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+
+body {
+    line-height: 1;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+blockquote, q {
+    quotes: none;
+}
+
+blockquote::before, blockquote::after,
+q::before, q::after {
+    content: '';
+    content: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Убедитесь, что все элементы и псевдоэлементы имеют базовые стили */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+input, button, textarea, select {
+    font: inherit;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}
+
+/* Стили для предотвращения overflow */
+html {
+    overflow-y: scroll;
+}
+
+body {
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: Arial, sans-serif;
+}
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.admin-bar .wrap {
+    min-height: calc(100vh - 32px);
+}
+
+.site-content {
+    flex: 1;
+}
+
+.site-footer {
+    background: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Основные стили */
+
+.site-header {
+    background: #333;
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-logo-link {
+    position: relative;
+    z-index: 1;
+}
+
+.custom-logo-link img {
+    width: auto;
+    height: 60px;
+}
+
+.site-navigation {
+    display: flex;
+    align-items: center;
+}
+
+.site-navigation.__dark a {
+    color: #000;
+}
+
+.menu-toggle {
+    display: none;
+    background: #fff;
+    color: #333;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.site-navigation ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.site-navigation li {
+    margin-right: 20px;
+}
+
+.site-navigation a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.site-navigation a:hover {
+    text-decoration: underline;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .site-navigation ul {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: #333;
+        position: absolute;
+        top: 130px;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .site-navigation .menu.open ul {
+        display: flex;
+    }
+
+    .site-navigation li {
+        margin: 0;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+
+    .site-navigation a {
+        padding: 15px;
+        display: block;
+    }
+}
+
+.super-logo {
+    position: relative;
+    margin-right: 120px;
+    margin-bottom: -10px;
+}
+
+#super-logo-bg {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 300px;
+    height: 60px;
+    transform: translateX(-50%);
+    overflow: hidden;
+    border-radius: 19px;
+}
+
+#super-logo-bg canvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+.gradient {
+    position: absolute;
+    pointer-events: none; /* Чтобы градиенты не мешали взаимодействию с канвасом */
+}
+
+.top, .bottom {
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+/*.bottom {
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(51,51,51, 1), rgba(51,51,51, 1));
+}*/
+
+.left, .right {
+    top: 0;
+    height: 100%;
+    width: 30px;
+}
+
+.left {
+    left: 0;
+    background: linear-gradient(to left, rgba(51,51,51, 0), rgba(51,51,51, 1));
+}
+
+.right {
+    right: 0;
+    background: linear-gradient(to right, rgba(51,51,51, 0), rgba(51,51,51, 1));
+}
