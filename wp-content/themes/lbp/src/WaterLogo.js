@@ -13,7 +13,8 @@ const params = {
 	developerMode: false,
 	waveHeight: 1.0,
 	waveSpeed: 0.5,
-	dayWaterColor: 0x88ccee,
+	//dayWaterColor: 0x88ccee,
+	dayWaterColor: 0xD3FBFB,
 	nightWaterColor: 0x446688,
 	sunIntensity: 1.0,
 	moonIntensity: 0.5
@@ -21,14 +22,14 @@ const params = {
 
 function init() {
 	scene = new THREE.Scene();
-	camera = new THREE.PerspectiveCamera(75, 300 / 80, 1, 2000);
-	camera.position.set(0, 5, 50); // Устанавливаем камеру ближе и выше
+	camera = new THREE.PerspectiveCamera(75, 300 / 100, 1, 2000);
+	camera.position.set(0, 5, 60); // Устанавливаем камеру ближе и выше
 	
 	// Указание, куда должна смотреть камера
-	camera.lookAt(0, 0, 30);
+	camera.lookAt(0, 50, 40);
 	
 	renderer = new THREE.WebGLRenderer({ alpha: true });
-	renderer.setSize(300, 80);
+	renderer.setSize(300, 100);
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setClearColor(0x000000, 0); // Прозрачный фон
 	document.getElementById('super-logo-bg').appendChild(renderer.domElement);
@@ -134,10 +135,10 @@ function toggleDeveloperMode(value) {
 }
 
 function onWindowResize() {
-	camera.aspect = 300 / 80;
+	camera.aspect = 300 / 100;
 	camera.updateProjectionMatrix();
-	renderer.setSize(300, 80);
-	composer.setSize(300, 80);
+	renderer.setSize(300, 100);
+	composer.setSize(300, 100);
 }
 
 // Функция для определения цвета неба

@@ -11,7 +11,7 @@
 
 <?php
     $skyColor = $_COOKIE['skyColor']??'51,51,51';
-    $isBright = $_COOKIE['isBright'] == 'true';
+    $isBright = ($_COOKIE['isBright']??'true') == 'true';
 ?>
 <header class="site-header" style="background: rgb(<?=$skyColor?>);">
 
