@@ -34,19 +34,24 @@
                 $item_output .= $args->link_before . apply_filters('the_title', $item->title, $item->ID) . $args->link_after;
                 $item_output .= '</h2>';
 
-                  $item_output .= '<div class="image-container cursor-effect-radial-highlight-container">';
+                  $item_output .= '<div class="image-container cursor-effect-mask-container">';
 
                     // Custom Field Output
                     $custom_field = get_field('logo', $item);
                     if ($custom_field) {
-                        $item_output .= '<img src="' . esc_url($custom_field['url']) . '" alt="' . esc_attr($custom_field['alt']) . '">';
+                        $item_output .= '<img src="' . esc_url($custom_field['url']) . '" alt="' . esc_attr($custom_field['alt']) . '" class="menu-langs-img">';
                     }
 
                     $item_output .= '<svg class="line-animation" viewBox="0 0 100 100">
                         <rect x="2" y="2" width="96" height="96" rx="5" ry="5" class="line"></rect>
                     </svg>';
 
-                  $item_output .= '<div class="cursor-effect-radial-highlight"></div>';
+                  $item_output .= '<div class="cursor-effect-mask">';
+                  $custom_field = get_field('logo_effect', $item);
+                  if ($custom_field) {
+                      $item_output .= '<img src="' . esc_url($custom_field['url']) . '" alt="' . esc_attr($custom_field['alt']) . '">';
+                  }
+                  $item_output .= '</div>';
 
                   $item_output .= '</div>';
                 $item_output .= '</a>';

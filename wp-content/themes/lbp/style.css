@@ -309,7 +309,7 @@ body {
     position: relative;
 }
 
-.menu-langs img {
+.menu-langs .menu-langs-img {
     margin-top: 10px;
     border-radius: 12px;
     box-shadow: -1px 1px 7px 0 #0007;
@@ -346,7 +346,7 @@ body {
 /*cursor radial gradient effect*/
 
 .menu-langs a {
-    cursor: none;
+    /*cursor: none;*/
 }
 
 .cursor-effect-radial-highlight-container {
@@ -398,6 +398,50 @@ body {
 .menu-langs #menu-item-86 .line {
     stroke: #FFDE7A;
 }
+
+/*Эффект курсора картинка под картинкой!*/
+.menu-langs .image-container {
+    cursor: none;
+}
+
+.cursor-effect-mask-container {
+    position: relative;
+}
+
+.cursor-effect-mask {
+    position: absolute;
+    width: 3.5vw;
+    height: 3.5vw;
+    border-radius: 50%;
+    /*background: rgba(0, 0, 0, 0.5);*/
+    pointer-events: none;
+    transition: transform 0.1s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+    /*animation: pulse-box-size 2s infinite;*/
+    opacity: 0;
+    overflow: hidden;
+    box-shadow: -1px 1px 7px 0 #0007;
+}
+
+@keyframes pulse-box-size {
+    0% {
+        width: 2vw;
+        height: 2vw;
+    }
+    50% {
+        width: 3vw;
+        height: 3vw;
+    }
+    100% {
+        width: 2vw;
+        height: 2vw;
+    }
+}
+
+.cursor-effect-mask img {
+    position: absolute;
+    max-width: none;
+}
+
 
 @media screen and (max-width: 1365px) {
 
