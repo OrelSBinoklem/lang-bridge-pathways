@@ -11,6 +11,11 @@ Tags: custom, theme
 Text Domain: mytheme
 */
 
+:root {
+    --header-height: 70px;
+    --footer-height: 64px;
+}
+
 /* Стили сброса (Reset CSS) */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -274,4 +279,130 @@ body {
 .right {
     right: 0;
     background: linear-gradient(to right, rgba(51,51,51, 0), rgba(51,51,51, 1));
+}
+
+.menu-langs {
+    padding: 15px;
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.admin-bar .menu-langs {
+    height: calc(100vh - var(--header-height) - var(--footer-height) - var(--wp-admin--admin-bar--height));
+}
+
+.menu-langs .menu-item {
+    margin: 15px;
+    width: calc(10vw + 100px);
+}
+
+.menu-langs a {
+    position: relative;
+    font-size: 22px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.menu-langs .image-container {
+    position: relative;
+}
+
+.menu-langs img {
+    margin-top: 10px;
+    border-radius: 12px;
+    box-shadow: -1px 1px 7px 0 #0007;
+}
+
+.menu-langs .line-animation {
+    position: absolute;
+    top: -3%;
+    left: -3%;
+    width: 106%;
+    height: 106%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+.menu-langs .line {
+    fill: none;
+    stroke: black;
+    stroke-width: 2;
+    stroke-dasharray: 60 128;/*376 all length*/
+    stroke-dashoffset: 0;
+    animation: move-line 5s linear infinite paused;
+}
+
+.menu-langs a:hover .line-animation {
+    opacity: 1;
+}
+
+.menu-langs a:hover .line {
+    animation-play-state: running;
+}
+
+/*cursor radial gradient effect*/
+
+.menu-langs a {
+    cursor: none;
+}
+
+.cursor-effect-radial-highlight-container {
+    position: relative;
+}
+
+.cursor-effect-radial-highlight {
+    position: absolute;
+    width: 2vw;
+    height: 2vw;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    transition: transform 0.1s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+    transform: scale(0);
+    animation: pulse 2s infinite;
+    opacity: 0;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.cursor-effect-radial-highlight-container:hover .cursor-effect-radial-highlight {
+    transform: scale(1);
+}
+
+@keyframes move-line {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: -376;
+    }
+}
+
+.menu-langs #menu-item-82 .line {
+    stroke: #0C80A3;
+}
+
+.menu-langs #menu-item-86 .line {
+    stroke: #FFDE7A;
+}
+
+@media screen and (max-width: 1365px) {
+
+}
+
+@media screen and (max-width: 767px) {
+
 }
