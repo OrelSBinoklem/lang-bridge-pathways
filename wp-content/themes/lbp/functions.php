@@ -1,5 +1,6 @@
 <?php
 require "system/migrations.php";
+require "system/dictionaries_to_db.php";
 
 //
 
@@ -115,63 +116,6 @@ function my_theme_enqueue_styles() {
 
 }
 
-// Парсим слова из JSON
-
-function register_custom_admin_menu() {
-    add_menu_page(
-        'JSON Parser',         // Название страницы
-        'JSON Parser',         // Название меню
-        'manage_options',      // Способность
-        'json-parser',         // Слаг страницы
-        'json_parser_page',    // Функция, которая отображает содержимое страницы
-        'dashicons-admin-tools', // Иконка меню
-        20                     // Позиция в меню
-    );
-}
-
-add_action('admin_menu', 'register_custom_admin_menu');
-
-function json_parser_page() {
-    ?>
-    <div class="wrap">
-        <h1>JSON Parser</h1>
-        <form method="post" action="">
-            <input type="hidden" name="json_parser_action" value="parse_json">
-            <input type="submit" class="button button-primary" value="Parse JSON">
-        </form>
-    </div>
-    <?php
-
-    // Обработка отправки формы
-    if (isset($_POST['json_parser_action']) && $_POST['json_parser_action'] === 'parse_json') {
-        // Укажите путь к вашему JSON файлу
-        $json_file = get_template_directory() . '/words.json';
-        add_words_from_json($json_file);
-        echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
-    }
-}
-
-function add_words_from_json($json_file) {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'words';
-
-    $json_data = file_get_contents($json_file);
-    $words = json_decode($json_data, true);
-
-    foreach ($words as $word) {
-        $wpdb->insert(
-            $table_name,
-            array(
-                'word' => $word['word'],
-                'level' => $word['level']
-            ),
-            array(
-                '%s',
-                '%s'
-            )
-        );
-    }
-}
 
 
 

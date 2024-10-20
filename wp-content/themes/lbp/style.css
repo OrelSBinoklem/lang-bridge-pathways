@@ -322,6 +322,7 @@ body {
     width: 106%;
     height: 106%;
     opacity: 0;
+    z-index: 1;
     transition: opacity 0.5s ease-in-out;
     pointer-events: none;
 }
@@ -440,6 +441,7 @@ body {
 .cursor-effect-mask img {
     position: absolute;
     max-width: none;
+    border-radius: 12px;
 }
 
 
