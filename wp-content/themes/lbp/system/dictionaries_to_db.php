@@ -51,7 +51,7 @@ function json_parser_page() {
                 'words' => 644,
                 'level' => 1,
                 'maxLevel' => 1,
-                'sound' => 0,
+                'sound' => 1,
             ],
             [
                 'src' => '/system/dictionaries/a2.json',
@@ -61,7 +61,7 @@ function json_parser_page() {
                 'words' => 1020,
                 'level' => 2,
                 'maxLevel' => 2,
-                'sound' => 0,
+                'sound' => 1,
             ],
             [
                 'src' => '/system/dictionaries/b1.json',
@@ -71,7 +71,7 @@ function json_parser_page() {
                 'words' => 1609,
                 'level' => 3,
                 'maxLevel' => 3,
-                'sound' => 0,
+                'sound' => 1,
             ],
             [
                 'src' => '/system/dictionaries/c2.json',
@@ -81,7 +81,7 @@ function json_parser_page() {
                 'words' => 10000,
                 'level' => 6,
                 'maxLevel' => 6,
-                'sound' => 0,
+                'sound' => 1,
             ],
             [
                 'src' => '/system/dictionaries/Latyshskij_razgovornik_i_kratkij_slovar_1500_slov_parsed-objects.json',
@@ -184,9 +184,6 @@ function add_words_recursion($data, $id_dictionary, $parent_category_id = null, 
             add_words_recursion($item['sub_catgories'] ?? $item['catgories'] ?? $item['words'], $id_dictionary, $current_category_id, $learn_lang);
         } else {
             $table_name = $wpdb->prefix . 'd_words';
-            if ( ! $item['word']) {
-                print_r($item);
-            }
             $wpdb->insert(
                 $table_name,
                 array(
