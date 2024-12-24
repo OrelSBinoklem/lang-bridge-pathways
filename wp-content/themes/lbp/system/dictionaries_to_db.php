@@ -31,13 +31,89 @@ function json_parser_page() {
     // Обработка отправки формы
     if (isset($_POST['json_parser_action']) && $_POST['json_parser_action'] === 'parse_json') {
         // Укажите путь к вашему JSON файлу
-        $json_file = get_template_directory() . '/system/dictionaries/Russko-angliyskiy-britanskiy_slovar_3000_slov_Kirillicheskaya_transliteratsiya-result.json';
-        add_words_from_json($json_file, 'RU', 'EN', 'Русско-Английский (Британский)', 3000, 3);
-        echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
+
+        $dicts = [
+            [
+                'src' => '/system/dictionaries/Russko-angliyskiy-britanskiy_slovar_3000_slov_Kirillicheskaya_transliteratsiya-result.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'Русско-Английский (Британский)',
+                'words' => 3000,
+                'level' => 1,
+                'maxLevel' => 3,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/a1.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'AmE (American English)',
+                'words' => 644,
+                'level' => 1,
+                'maxLevel' => 1,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/a2.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'AmE (American English)',
+                'words' => 1020,
+                'level' => 2,
+                'maxLevel' => 2,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/b1.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'AmE (American English)',
+                'words' => 1609,
+                'level' => 3,
+                'maxLevel' => 3,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/c2.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'AmE (American English)',
+                'words' => 10000,
+                'level' => 6,
+                'maxLevel' => 6,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/Latyshskij_razgovornik_i_kratkij_slovar_1500_slov_parsed-objects.json',
+                'lang' => 'RU',
+                'learn_lang' => 'LV',
+                'name' => 'Латвийский разговорник и краткий словарь',
+                'words' => 1500,
+                'level' => 1,
+                'maxLevel' => 2,
+                'sound' => 0,
+            ],
+            [
+                'src' => '/system/dictionaries/Laipa-A1-A2-vardi_parsed-translated.json',
+                'lang' => 'RU',
+                'learn_lang' => 'LV',
+                'name' => 'Из учебника Laipa',
+                'words' => 2447,
+                'level' => 1,
+                'maxLevel' => 2,
+                'sound' => 0,
+            ],
+        ];
+
+        foreach ([$dicts[6]] as $dict) {
+            $json_file = get_template_directory() . $dict['src'];
+            add_words_from_json($json_file, $dict['lang'], $dict['learn_lang'], $dict['name'], $dict['words'], $dict['level'], $dict['maxLevel'], $dict['sound']);
+            echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
+        }
     }
 }
 
-function add_words_from_json($json_file, $lang, $learn_lang, $name, $words, $level) {
+function add_words_from_json($json_file, $lang, $learn_lang, $name, $words, $level, $maxLevel, $sound) {
     global $wpdb;
     $json_data = file_get_contents($json_file);
     $data = json_decode($json_data, true);
@@ -51,12 +127,16 @@ function add_words_from_json($json_file, $lang, $learn_lang, $name, $words, $lev
             'lang' => $lang,
             'learn_lang' => $learn_lang,
             'words' => $words,
-            'level' => 3,
+            'level' => $level,
+            'maxLevel' => $maxLevel,
+            'sound' => $sound,
         ),
         array(
             '%s',
             '%s',
             '%s',
+            '%d',
+            '%d',
             '%d',
             '%d',
         )
@@ -104,6 +184,9 @@ function add_words_recursion($data, $id_dictionary, $parent_category_id = null, 
             add_words_recursion($item['sub_catgories'] ?? $item['catgories'] ?? $item['words'], $id_dictionary, $current_category_id, $learn_lang);
         } else {
             $table_name = $wpdb->prefix . 'd_words';
+            if ( ! $item['word']) {
+                print_r($item);
+            }
             $wpdb->insert(
                 $table_name,
                 array(

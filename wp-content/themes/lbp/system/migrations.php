@@ -17,6 +17,7 @@ function create_dictionaries_table() {
             learn_lang varchar(10) NOT NULL,
             words mediumint(9) NOT NULL,
             level mediumint(9) NOT NULL,
+            maxLevel mediumint(9) NOT NULL,
             sound BOOLEAN NOT NULL DEFAULT 0,
             PRIMARY KEY (id)
         ) $charset_collate;";
