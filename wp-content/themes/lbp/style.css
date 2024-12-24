@@ -124,6 +124,11 @@ body {
 }
 
 .site-content {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    max-width: 1200px;
+    width: 100%;
     flex: 1;
 }
 
@@ -138,11 +143,18 @@ body {
 
 .site-header {
     background: #333;
-    color: #fff;
     padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.site-header-content {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    color: #fff;
 }
 
 .custom-logo-link {

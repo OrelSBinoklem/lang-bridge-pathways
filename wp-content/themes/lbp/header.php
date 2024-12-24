@@ -15,28 +15,35 @@
 ?>
 <header class="site-header" style="background: rgb(<?=$skyColor?>);">
 
-    <div class="super-logo">
-        <div id="super-logo-bg">
-            <div class="gradient top"></div>
-            <div class="gradient bottom"></div>
-            <div class="gradient left" style="background: linear-gradient(to left, rgba(<?=$skyColor?>, 0), rgba(<?=$skyColor?>, 1));"></div>
-            <div class="gradient right" style="background: linear-gradient(to right, rgba(<?=$skyColor?>, 0), rgba(<?=$skyColor?>, 1));"></div>
+    <div class="site-header-content">
+
+        <div class="super-logo">
+            <div id="super-logo-bg">
+                <div class="gradient top"></div>
+                <div class="gradient bottom"></div>
+                <div class="gradient left" style="background: linear-gradient(to left, rgba(<?=$skyColor?>, 0), rgba(<?=$skyColor?>, 1));"></div>
+                <div class="gradient right" style="background: linear-gradient(to right, rgba(<?=$skyColor?>, 0), rgba(<?=$skyColor?>, 1));"></div>
+            </div>
+            <?php
+            if (function_exists('the_custom_logo')) {
+                the_custom_logo();
+            }
+            ?>
         </div>
-        <?php
-        if (function_exists('the_custom_logo')) {
-            the_custom_logo();
-        }
-        ?>
+
+        <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
+            <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e('Menu', 'mytheme'); ?></button>
+            <?php
+            wp_nav_menu(array(
+                'theme_location' => 'menu-1',
+                'menu_id'        => 'primary-menu',
+            ));
+            ?>
+        </nav>
+
     </div>
-    <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
-        <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e('Menu', 'mytheme'); ?></button>
-        <?php
-        wp_nav_menu(array(
-            'theme_location' => 'menu-1',
-            'menu_id'        => 'primary-menu',
-        ));
-        ?>
-    </nav>
+
+
 </header>
 </body>
 </html>
