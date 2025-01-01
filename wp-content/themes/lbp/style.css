@@ -100,6 +100,19 @@ button:focus {
     outline: none;
 }
 
+h1, h2, h3 {
+    font-family: "Arial", sans-serif; /* Для заголовков */
+}
+
+body {
+    font-family: "Tahoma", sans-serif; /* Для основного текста */
+}
+
+button {
+    font-family: "Trebuchet MS", sans-serif; /* Для кнопок */
+    font-weight: bold;
+}
+
 /* Стили для предотвращения overflow */
 html {
     overflow-y: scroll;
@@ -448,6 +461,66 @@ body {
         width: 2vw;
         height: 2vw;
     }
+}
+
+.menu-dictionaries {
+
+}
+
+.menu-dictionaries h2 {
+    display: inline-block;
+    margin-left: 86px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.menu-dictionaries .menu-item {
+    position: relative;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #FFF6D5, #FFE8A3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 7px;
+}
+
+.menu-dictionaries .menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-dictionaries-level {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    padding: 10px 15px;
+    display: inline-block;
+    width: 86px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 7px 0 0 7px;
+    /*background: #E1F0FF;*/
+    /*background: linear-gradient(135deg, #FFE8A3, #FFD77B);*/
+    /*background: radial-gradient(circle, #FFE8A3 50%, #FFF6D5 100%);*/
+    background: radial-gradient(circle at 50% 120%, #FFE8A3 0%, #FFD77B 100%);
+}
+
+.menu-dictionaries-cnt {
+    margin-left: 15px;
+    display: inline-block;
+    width: 35px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.menu-dictionaries-exist-sound {
+    margin-left: 15px;
+    font-size: 12px;
+    font-style: italic;
 }
 
 .cursor-effect-mask img {

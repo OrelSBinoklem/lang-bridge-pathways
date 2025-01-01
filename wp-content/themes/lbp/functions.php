@@ -36,6 +36,7 @@ function mytheme_setup() {
     register_nav_menus(array(
         'menu-1' => esc_html__('Primary'),
         'menu-langs' => esc_html__('Langs'),
+        'menu-dictionaries' => esc_html__('Dictionaries'),
     ));
 
     // Switch default core markup for search form, comment form, and comments to output valid HTML5.

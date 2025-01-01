@@ -79,7 +79,7 @@ function json_parser_page() {
                 'learn_lang' => 'EN',
                 'name' => 'AmE (American English)',
                 'words' => 10000,
-                'level' => 6,
+                'level' => 1,
                 'maxLevel' => 6,
                 'sound' => 1,
             ],
