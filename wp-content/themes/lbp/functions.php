@@ -1,6 +1,8 @@
 <?php
 require "system/migrations.php";
 require "system/dictionaries_to_db.php";
+require "system/models/MWords.php";
+require "system/services/SWords.php";
 
 //
 
@@ -117,7 +119,66 @@ function my_theme_enqueue_styles() {
 
 }
 
+// Класс для обработки AJAX-запросов
+class WordsAjaxHandler {
+    /**
+     * AJAX-метод для получения списка слов.
+     */
+    public static function handle_get_user_words() {
+        // Проверяем ID словаря
+        $dictionary_id = intval($_POST['dictionary_id']);
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Invalid dictionary_id']);
+            wp_die();
+        }
+
+        // Получаем слова через сервис
+        $words = WordsService::get_words_by_dictionary($dictionary_id);
+
+        // Отправляем ответ
+        wp_send_json_success($words);
+        wp_die();
+    }
+
+    public static function handle_get_words_by_category() {
+        $dictionary_id = intval($_POST['dictionary_id']);
+
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Invalid dictionary_id']);
+            wp_die();
+        }
+
+        // Получаем данные через сервис
+        $grouped_words = WordsService::get_words_grouped_by_category($dictionary_id);
+
+        // Отправляем ответ
+        wp_send_json_success($grouped_words);
+        wp_die();
+    }
+}
+
+// Привязка метода AJAX-обработчика
+add_action('wp_ajax_get_dictionary_words', ['WordsAjaxHandler', 'handle_get_user_words']);
+add_action('wp_ajax_nopriv_get_dictionary_words', ['WordsAjaxHandler', 'handle_get_user_words']);
+
+
+// Привязка метода AJAX-обработчика
+add_action('wp_ajax_get_words_by_category', ['WordsAjaxHandler', 'handle_get_words_by_category']);
+add_action('wp_ajax_nopriv_get_words_by_category', ['WordsAjaxHandler', 'handle_get_words_by_category']);
 
 
 
+
+// NOTE: 8 - before `wp_print_head_scripts`
+add_action( 'wp_head', 'myajax_data', 8 );
+function myajax_data(){
+    $data = [
+        'url' => admin_url( 'admin-ajax.php' ),
+    ];
+    ?>
+    <script id="myajax_data">
+      window.myajax = <?= wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ?>
+    </script>
+    <?php
+}
 ?>

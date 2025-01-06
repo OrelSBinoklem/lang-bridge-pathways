@@ -130,8 +130,6 @@ Template Name: Lang
           blocks.forEach(block => {
             block.style.width = `${maxWidth}px`;
           });
-
-          console.log(`Максимальная ширина: ${maxWidth}px`);
         };
 
         // Выполнить расчет при загрузке страницы

@@ -1,161 +1,85 @@
 <?php
 
+// Сервис для работы с таблицей слов
+class WordsService {
+    /**
+     * Получить список слов из словаря.
+     *
+     * @param int $dictionary_id ID словаря
+     * @return array Список слов
+     */
+    public static function get_words_by_dictionary($dictionary_id) {
+        global $wpdb;
 
-// Парсим слова из JSON
+        $unique_words_table = $wpdb->prefix . 'unique_words';
+        $words_table = $wpdb->prefix . 'd_words';
 
-function register_custom_admin_menu() {
-    add_menu_page(
-        'JSON Parser',         // Название страницы
-        'JSON Parser',         // Название меню
-        'manage_options',      // Способность
-        'json-parser',         // Слаг страницы
-        'json_parser_page',    // Функция, которая отображает содержимое страницы
-        'dashicons-admin-tools', // Иконка меню
-        20                     // Позиция в меню
-    );
-}
+        // SQL-запрос для получения списка слов и их переводов
+        $query = $wpdb->prepare("
+            SELECT uw.word,
+                   dw.translation_1,
+                   dw.translation_2,
+                   dw.translation_3
+            FROM $unique_words_table AS uw
+            INNER JOIN $words_table AS dw
+            ON uw.word = dw.word AND uw.lang = dw.learn_lang
+            WHERE dw.dictionary_id = %d
+        ", $dictionary_id);
 
-add_action('admin_menu', 'register_custom_admin_menu');
-
-function json_parser_page() {
-    ?>
-    <div class="wrap">
-        <h1>JSON Parser</h1>
-        <form method="post" action="">
-            <input type="hidden" name="json_parser_action" value="parse_json">
-            <input type="submit" class="button button-primary" value="Parse JSON">
-        </form>
-    </div>
-    <?php
-
-    // Обработка отправки формы
-    if (isset($_POST['json_parser_action']) && $_POST['json_parser_action'] === 'parse_json') {
-        // Укажите путь к вашему JSON файлу
-        $json_file = get_template_directory() . '/system/dictionaries/Russko-angliyskiy-britanskiy_slovar_3000_slov_Kirillicheskaya_transliteratsiya-result.json';
-        add_words_from_json($json_file, 'RU', 'EN', 'Русско-Английский (Британский)', 3000, 3);
-        echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
+        return $wpdb->get_results($query, ARRAY_A);
     }
-}
 
-function add_words_from_json($json_file, $lang, $learn_lang, $name, $words, $level) {
-    global $wpdb;
-    $json_data = file_get_contents($json_file);
-    $data = json_decode($json_data, true);
+    /**
+     * Получить список слов, сгруппированных по категориям.
+     *
+     * @param int $dictionary_id ID словаря
+     * @return array Слова, сгруппированные по категориям
+     */
+    public static function get_words_grouped_by_category($dictionary_id) {
+        global $wpdb;
 
+        $categories_table = $wpdb->prefix . 'd_categories';
+        $words_table = $wpdb->prefix . 'd_words';
+        $word_category_table = $wpdb->prefix . 'd_word_category';
 
-    $table_name = $wpdb->prefix . 'dictionaries';
-    $wpdb->insert(
-        $table_name,
-        array(
-            'name' => $name,
-            'lang' => $lang,
-            'learn_lang' => $learn_lang,
-            'words' => $words,
-            'level' => 3,
-        ),
-        array(
-            '%s',
-            '%s',
-            '%s',
-            '%d',
-            '%d',
-        )
-    );
+        // SQL-запрос для получения слов, сгруппированных по категориям
+        $query = $wpdb->prepare("
+            SELECT c.id AS category_id,
+                   c.name AS category_name,
+                   w.word,
+                   w.translation_1,
+                   w.translation_2,
+                   w.translation_3
+            FROM $categories_table AS c
+            LEFT JOIN $word_category_table AS wc ON c.id = wc.category_id
+            LEFT JOIN $words_table AS w ON wc.word_id = w.id
+            WHERE c.dictionary_id = %d
+            ORDER BY c.id, w.word
+        ", $dictionary_id);
 
-    $id_dictionary = $wpdb->insert_id;
+        $results = $wpdb->get_results($query, ARRAY_A);
 
-    add_words_recursion($data, $id_dictionary, null, $learn_lang);
-}
+        // Группируем слова по категориям
+        $grouped_words = [];
+        foreach ($results as $row) {
+            $category_id = $row['category_id'];
+            $category_name = $row['category_name'];
 
-
-
-
-
-
-
-
-
-
-function add_words_recursion($data, $id_dictionary, $parent_category_id = null, $learn_lang) {
-    global $wpdb;
-    $indexWord = 0;
-
-    foreach ($data as $item) {
-        $isCategory1 = isset($item['category']) || isset($item['sub_category']);
-
-        if($isCategory1) {
-            $table_name = $wpdb->prefix . 'd_categories';
-            $wpdb->insert(
-                $table_name,
-                array(
-                    'dictionary_id' => $id_dictionary,
-                    'name' => $item['category'] ?? $item['sub_category'],
-                    'parent_id' => $parent_category_id,
-                ),
-                array(
-                    '%d',
-                    '%s',
-                    '%d'
-                )
-            );
-
-            $current_category_id = $wpdb->insert_id;
-
-            add_words_recursion($item['sub_catgories'] ?? $item['catgories'] ?? $item['words'], $id_dictionary, $current_category_id, $learn_lang);
-        } else {
-            $table_name = $wpdb->prefix . 'd_words';
-            $wpdb->insert(
-                $table_name,
-                array(
-                    'dictionary_id' => $id_dictionary,
-                    'word' => $item['word'],
-                    'learn_lang' => $learn_lang,
-                    'is_phrase' => count(preg_split("/[\s,]+/", $item['word'])) > 1 ? 1 : 0,
-                    'translation_1' => is_array($item['translated']) ? $item['translated'][0] : $item['translated'],
-                    'translation_2' => is_array($item['translated']) && isset($item['translated'][1]) ? $item['translated'][1] : null,
-                    'translation_3' => is_array($item['translated']) && isset($item['translated'][2]) ? $item['translated'][2] : null,
-                    'difficult_translation' => $item['difficult_translation'] ?? null,
-                    'sound_url' => $item['sound'] ?? null,
-                    'level' => $item['level'],
-                    'maxLevel' => $item['maxLevel'],
-                    'type' => $item['type'] ?? null,
-                    'gender' => $item['gender'] ?? null,
-                    'order' => ++$indexWord
-                ),
-                array('%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%d')
-            );
-
-            $id_word = $wpdb->insert_id;
-
-            if($parent_category_id !== null) {
-                $table_name = $wpdb->prefix . 'd_word_category';
-
-                $result = $wpdb->insert(
-                    $table_name,
-                    array('word_id' => $id_word, 'category_id' => $parent_category_id,),
-                    array('%d', '%d')
-                );
-
-                if ($result === false) {
-                    error_log('Insert into word_category failed: ' . $wpdb->last_error);
-                    return false;
-                }
+            if (!isset($grouped_words[$category_id])) {
+                $grouped_words[$category_id] = [
+                    'category_name' => $category_name,
+                    'words' => []
+                ];
             }
 
-            // Уникальные слова
-            $table_name = $wpdb->prefix . 'unique_words';
-            $sql = $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE word = %s AND lang = %s", $item['word'], $learn_lang);
-            if( $wpdb->get_var($sql) == 0) {
-
-                $wpdb->insert(
-                    $table_name,
-                    array(
-                        'word' => $item['word'],
-                        'lang' => $learn_lang
-                    ),
-                    array('%s', '%s')
-                );
-            }
+            $grouped_words[$category_id]['words'][] = [
+                'word' => $row['word'],
+                'translation_1' => $row['translation_1'],
+                'translation_2' => $row['translation_2'],
+                'translation_3' => $row['translation_3']
+            ];
         }
+
+        return $grouped_words;
     }
 }
