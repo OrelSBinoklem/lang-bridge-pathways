@@ -20,22 +20,7 @@ Template Name: Dictionary
     <div class="site-content">
 
         <?php
-
-        /*$current_user_id = get_current_user_id();
-        $dictionary_id = get_field('id'); // ID словаря
-
-        $words_status_by_dict = get_user_word_status_by_dictionary($current_user_id, $dictionary_id);
-
-        if (!empty($words_status_by_dict)) {
-            foreach ($words_status_by_dict as $word_status) {
-                echo 'Слово: ' . $word_status['word'] . ' — ';
-                echo $word_status['is_learned'] ? 'Выучено' : 'Не выучено';
-                echo '<br>';
-            }
-        } else {
-            echo 'Нет слов для изучения в выбранном словаре.';
-        }*/
-        $dictionary_id = get_field('id');
+            $dictionary_id = get_field('id');
         ?>
 
         <div id="react-app-dictionary" data-id="<?=$dictionary_id?>"></div><!-- #react-app-dictionary -->

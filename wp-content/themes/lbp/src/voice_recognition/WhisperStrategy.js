@@ -67,3 +67,5 @@ class WhisperStrategy {
     }
   }
 }
+
+export {WhisperStrategy};

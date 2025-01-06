@@ -1,5 +1,5 @@
-require('./voice_recognition/GoogleStrategy');
-require('./voice_recognition/WhisperStrategy');
+const {GoogleStrategy} = require('./voice_recognition/GoogleStrategy');
+const {WhisperStrategy} = require('./voice_recognition/WhisperStrategy');
 import { diffChars } from 'diff';
 
 class SpokenTextChecker {
@@ -55,3 +55,5 @@ class SpokenTextChecker {
     return similarity >= threshold;
   }
 }
+
+export {SpokenTextChecker}

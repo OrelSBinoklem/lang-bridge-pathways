@@ -4,28 +4,32 @@ import axios from "axios";
 import WordsMatrix from "./WordsMatrix";
 
 const { render, useEffect, useState } = wp.element;
-require('./SpokenTextChecker');
+let {SpokenTextChecker} = require('./SpokenTextChecker.js');
 
 let mode = 'google';
-let text = 'one two three';
+let text = 'chicken yellow';
 
 if(document.getElementById('react-app-dictionary')) {
 
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
 	const TrainingSpeak = () => {
 		const [progressText, setProgressText] = useState('');
+		const [check, setCheck] = useState(null);
 
-		/*useEffect(() => {
+		useEffect(async () => {
 			let checker = new SpokenTextChecker(text, 'en-GB', mode, (recognizedText) => {
 				setProgressText(recognizedText);
 			});
 
-			checker.checkRun()
-		}, []);*/
+			setCheck(await checker.checkRun());
+		}, []);
 
 		return (
 			<div>
 				<h3>{progressText}</h3>
+				{check === null && <h2>ожидание!</h2>}
+				{check === false && <h2>ошибка!</h2>}
+				{check === true && <h2>правильно!</h2>}
 
 				<h2>Матрица слов (декорация)</h2>
 
