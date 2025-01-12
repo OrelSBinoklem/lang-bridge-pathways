@@ -17,7 +17,7 @@ if(document.getElementById('react-app-dictionary')) {
 		const [check, setCheck] = useState(null);
 
 		useEffect(async () => {
-			let checker = new SpokenTextChecker(text, 'en-GB', mode, (recognizedText) => {
+			let checker = new SpokenTextChecker(text, 'lv', mode, (recognizedText) => {
 				setProgressText(recognizedText);
 			});
 

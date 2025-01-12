@@ -12,6 +12,7 @@
     "@wordpress/scripts": "^27.9.0"
   },
   "dependencies": {
+    "@ricky0123/vad-web": "^0.0.22",
     "axios": "^1.6.8",
     "dat.gui": "^0.7.9",
     "diff": "^7.0.0",

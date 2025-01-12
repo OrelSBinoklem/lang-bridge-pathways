@@ -21,6 +21,8 @@ class SpokenTextChecker {
 
         let isCompleted = this.compareWithThreshold(recognizedText, this.#text);
 
+        console.log(isCompleted);
+
         if(isCompleted) {
           this.#strategy.stop();
           resolve(true);
@@ -37,7 +39,7 @@ class SpokenTextChecker {
   }
 
   compareWithThreshold(recognizedText, referenceText, threshold = 0.8) {
-    const diffs = diffChars(referenceText, recognizedText);
+    const diffs = diffChars(referenceText.toLowerCase(), recognizedText.toLowerCase());
     let totalLength = referenceText.length;
     let changes = 0;
 
@@ -49,6 +51,7 @@ class SpokenTextChecker {
     });
 
     // Вычисляем процент изменений
+    console.log(changes, totalLength);
     const similarity = 1 - (changes / totalLength);
 
     // Проверка, превышает ли процент схожести порог
