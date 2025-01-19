@@ -2,8 +2,8 @@ const { render, useEffect } = wp.element;
 import axios from 'axios';
 import env from './env'
 require('./WaterLogo');
-require('./TrainingSpeak.jsx');
-require('./Dictionaries.jsx');
+require('./TrainingWords.jsx');
+require('./Dictionary.jsx');
 
 //https://www.youtube.com/watch?v=EaC7x6QCjjQ
 

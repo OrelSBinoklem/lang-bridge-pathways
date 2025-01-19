@@ -537,6 +537,61 @@ body {
     white-space: nowrap;
 }
 
+.words-education-window {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 200px);
+}
+
+.words-education-window__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.words-education-window__close:hover {
+    background-color: #e63939; /* Тёмно-красный при наведении */
+}
+
+/* Большие кнопки выбора режима */
+.mode-button {
+    padding: 20px 40px;
+    font-size: 20px;
+    margin: 10px;
+    background-color: #007bff; /* Синий фон */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mode-button:hover {
+    background-color: #0056b3; /* Более тёмный синий при наведении */
+}
+
+/* Альтернативный цвет для кнопки */
+.mode-button.green {
+    background-color: #28a745; /* Зелёный фон */
+}
+
+.mode-button.green:hover {
+    background-color: #1e7e34; /* Более тёмный зелёный при наведении */
+}
+
 
 @media screen and (max-width: 1365px) {
 
