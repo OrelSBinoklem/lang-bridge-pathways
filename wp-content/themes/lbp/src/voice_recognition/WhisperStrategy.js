@@ -2,26 +2,26 @@ import { MicVAD } from '@ricky0123/vad-web';
 
 class WhisperStrategy {
   #lang;
-  #endpointUrl;
+  #openaiApiKey;
   #mediaRecorder = null;
   #vadInstance = null;
 
-  #audioChunks = []; // Все накопленные чанки аудио
-  #silenceDuration = 2000; // Максимальная длительность тишины
-  #silenceStartTime = null; // Время начала тишины
-  #silenceCount = 0; // Счётчик тишины (попыток)
-  #maxAttempts = 3; // Максимальное количество попыток
+  #audioChunks = [];
+  #silenceDuration = 2000;
+  #silenceStartTime = null;
+  #silenceCount = 0;
+  #maxAttempts = 3;
 
   isListening = false;
   #isSending = false;
 
-  constructor(lang = 'en', endpointUrl = '/wp-json/whisper/v1/upload') {
+  constructor(lang = 'en', openaiApiKey) {
     this.#lang = lang;
-    this.#endpointUrl = endpointUrl;
+    this.#openaiApiKey = openaiApiKey;
   }
 
   init() {
-    console.log('WhisperStrategy init. Endpoint:', this.#endpointUrl);
+    console.log('WhisperStrategy initialized.');
   }
 
   async start(callback) {
@@ -44,9 +44,7 @@ class WhisperStrategy {
     this.#audioChunks = [];
     this.#mediaRecorder = new MediaRecorder(stream);
 
-    // Сохраняем все чанки в общий массив
     this.#mediaRecorder.ondataavailable = (e) => {
-      //console.log('e', e);
       if (e.data.size > 0) {
         this.#audioChunks.push(e.data);
       }
@@ -90,7 +88,7 @@ class WhisperStrategy {
             this.#silenceStartTime &&
             Date.now() - this.#silenceStartTime > this.#silenceDuration
           ) {
-            if(this.#isSending) {
+            if (this.#isSending) {
               this.stop();
             } else {
               this.#isSending = true;
@@ -135,7 +133,7 @@ class WhisperStrategy {
   }
 
   /**
-   * Отправляет все накопленные данные на сервер.
+   * Отправляет накопленные аудиоданные в Whisper API OpenAI.
    */
   async sendAllAudio(callback) {
     console.log('sendAllAudio');
@@ -144,36 +142,43 @@ class WhisperStrategy {
     const blob = new Blob(this.#audioChunks, { type: 'audio/wav' });
 
     try {
-      const recognizedText = await this.sendToServer(blob);
+      const recognizedText = await this.sendToWhisper(blob);
       if (callback && typeof callback === 'function') {
         callback(recognizedText);
       }
     } catch (err) {
-      console.error('Ошибка отправки на сервер:', err);
+      console.error('Ошибка отправки в OpenAI Whisper:', err);
       if (callback && typeof callback === 'function') {
         callback('');
       }
     }
   }
 
-  async sendToServer(audioBlob) {
+  /**
+   * Отправляет аудиофайл напрямую в OpenAI Whisper API.
+   */
+  async sendToWhisper(audioBlob) {
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'chunk.wav');
+    formData.append('file', audioBlob, 'audio.wav');
+    formData.append('model', 'whisper-1');
     formData.append('language', this.#lang);
 
-    const response = await fetch(this.#endpointUrl, {
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.#openaiApiKey}`,
+      },
       body: formData,
     });
 
-    console.log('response', response);
+    console.log('OpenAI Whisper response:', response);
 
     if (!response.ok) {
-      throw new Error(`WP server error: ${response.statusText}`);
+      throw new Error(`OpenAI error: ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.recognizedText || '';
+    return data.text || '';
   }
 }
 

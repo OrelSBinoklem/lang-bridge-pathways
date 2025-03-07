@@ -3,13 +3,14 @@ import axios from "axios";
 const { render, useEffect, useState } = wp.element;
 let {SpokenTextChecker} = require('../SpokenTextChecker.js');
 
-const WordCheck = ({ modeRecognition, text }) => {
+const WordCheck = ({ modeRecognition, openaiApiKey, text }) => {
 	const [progressText, setProgressText] = useState('');
 	const [check, setCheck] = useState(null);
 
+	//todo сделать чтобы двумя сервисами велассь проверка есл юзер введёт опенаитокен "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"
 	useEffect(() => {
 		(async () => {
-			let checker = new SpokenTextChecker(text, 'lv', modeRecognition, (recognizedText) => {
+			let checker = new SpokenTextChecker(text, 'lv', modeRecognition, openaiApiKey, (recognizedText) => {
 				setProgressText(recognizedText);
 			});
 

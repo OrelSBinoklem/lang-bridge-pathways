@@ -7,10 +7,10 @@ class SpokenTextChecker {
   #lang;
   #strategy;
   #progressCallback;
-  constructor(text, lang, strategy, progressCallback) {
+  constructor(text, lang, strategy, openaiApiKey, progressCallback) {
     this.#text = text;
     this.#lang = lang;
-    this.#strategy = strategy === 'google' ? new GoogleStrategy(lang) : new WhisperStrategy(lang);
+    this.#strategy = strategy === 'google' ? new GoogleStrategy(lang) : new WhisperStrategy(lang, openaiApiKey);
     this.#progressCallback = progressCallback;
   }
 
