@@ -2,28 +2,29 @@ import env from "./env";
 import axios from "axios";
 
 const { render, useEffect, useState } = wp.element;
-let {SpokenTextChecker} = require('./SpokenTextChecker.js');
+import CategoryTree from "./EducationWords/CategoryTree";
+import Training from "./TrainingWords/Training";
 
-const TrainingWords = ({ modeRecognition, text }) => {
-	const [progressText, setProgressText] = useState('');
-	const [check, setCheck] = useState(null);
+const TrainingWords = ({ dictionaryId, mode, onChangeMode }) => {
+	const [categoryId, setCategoryId] = useState(0);
 
 	useEffect(() => {
-		(async () => {
-			let checker = new SpokenTextChecker(text, 'lv', modeRecognition, (recognizedText) => {
-				setProgressText(recognizedText);
-			});
 
-			setCheck(await checker.checkRun());
-		})();
 	}, []);
 
 	return (
 		<div>
-			<h3>{progressText}</h3>
-			{check === null && <h2>ожидание!</h2>}
-			{check === false && <h2>ошибка!</h2>}
-			{check === true && <h2>правильно!</h2>}
+			<h3 style={{ display: mode === null ? "block" : "none" }}>Выбери категорию</h3>
+			<div style={{ display: mode === null ? "block" : "none" }}>
+				<CategoryTree dictionaryId={dictionaryId} onCategoryClick={(cat) => {onChangeMode('training'); setCategoryId(cat.id);}} />
+			</div>
+
+			<h2 style={{ display: mode === 'training' ? "block" : "none" }}>Проверяем слова</h2>
+			{
+				mode === 'training'&&
+				<Training categoryId={categoryId} />
+			}
+			<button onClick={() => onChangeMode(null)} type={"button"} className={'words-education-window__close'} style={{ display: mode === 'training' ? "block" : "none" }}>×</button>
 		</div>
 	);
 };

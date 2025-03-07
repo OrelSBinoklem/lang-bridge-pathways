@@ -104,6 +104,14 @@ h1, h2, h3 {
     font-family: "Arial", sans-serif; /* Для заголовков */
 }
 
+.h1 { display: block; font-size: 2em; margin: 0.67em 0; font-weight: bold; }
+.h2 { display: block; font-size: 1.5em; margin: 0.75em 0; font-weight: bold; }
+.h3 { display: block; font-size: 1.17em; margin: 1em 0; font-weight: bold; }
+.h4 { display: block; font-size: 1em; margin: 1.12em 0; font-weight: bold; }
+.h5 { display: block; font-size: 0.83em; margin: 1.5em 0; font-weight: bold; }
+.h6 { display: block; font-size: 0.67em; margin: 1.67em 0; font-weight: bold; }
+
+
 body {
     font-family: "Tahoma", sans-serif; /* Для основного текста */
 }
@@ -540,21 +548,20 @@ body {
 .words-education-window {
     position: relative;
     width: 100%;
-    height: calc(100vh - 200px);
 }
 
 .words-education-window__close {
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #ff4d4f;
     color: white;
-    font-size: 20px;
+    font-size: 35px;
     font-weight: bold;
     border: none;
     border-radius: 50%;
@@ -564,6 +571,18 @@ body {
 
 .words-education-window__close:hover {
     background-color: #e63939; /* Тёмно-красный при наведении */
+}
+
+.words-education-list__word {
+    display: inline-block;
+    min-width: 200px;
+    text-align: right;
+}
+
+.words-education-list__translation_1,
+.words-education-list__translation_2,
+.words-education-list__translation_3 {
+    display: inline-block;
 }
 
 /* Большие кнопки выбора режима */
@@ -591,6 +610,61 @@ body {
 .mode-button.green:hover {
     background-color: #1e7e34; /* Более тёмный зелёный при наведении */
 }
+
+.category-three {
+
+}
+
+.category-three > li {
+    margin-top: 25px;
+    font-weight: bold;
+    display: flex;
+}
+
+.category-three > li > .category-three-name {
+    width: 25%;
+}
+
+.category-three > li > ul {
+    column-count: 3; /* Количество колонок */
+    column-gap: 1rem; /* Расстояние между колонками */
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0;
+    font-weight: normal;
+    width: 75%;
+}
+
+.category-three > li > ul > li {
+    break-inside: avoid; /* Предотвращает разрыв элемента между колонками */
+    margin-bottom: 0.5rem;
+    background-color: #f9f9f9;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+}
+
+.category-three li li {
+
+}
+
+.category-three > li > ul > li {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.category-three > li > ul > li > .category-tree-name {
+    position: relative;
+    z-index: 3;
+}
+
+/*!* Hover-эффект *!
+.category-three > li > ul > li:hover::after {
+    opacity: 1; !* Повышаем яркость при наведении *!
+}
+
+.category-three > li > ul > li:hover::before {
+    opacity: 0.6; !* Немного увеличиваем видимость категорий *!
+}*/
 
 
 @media screen and (max-width: 1365px) {

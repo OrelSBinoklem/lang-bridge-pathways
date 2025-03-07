@@ -215,3 +215,36 @@ function create_user_words_table() {
 }
 
 add_action('after_setup_theme', 'create_user_words_table');
+
+function create_user_categories_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'd_user_categories';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) UNSIGNED NOT NULL,
+            category_id mediumint(9) NOT NULL,
+            attempts mediumint(9) NOT NULL DEFAULT 0,
+            correct_attempts mediumint(9) NOT NULL DEFAULT 0,
+            last_shown datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (user_id) REFERENCES {$wpdb->users}(ID) ON DELETE CASCADE,
+            FOREIGN KEY (category_id) REFERENCES {$wpdb->prefix}d_categories(id) ON DELETE CASCADE
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+        // Выполнение запроса и логирование ошибок
+        $result = dbDelta($sql);
+        if (!empty($result)) {
+            error_log(print_r($result, true)); // Логирование результата dbDelta
+        } else {
+            error_log('Table creation failed: no result from dbDelta');
+        }
+    }
+}
+
+add_action('after_setup_theme', 'create_user_categories_table');

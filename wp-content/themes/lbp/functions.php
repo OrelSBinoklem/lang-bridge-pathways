@@ -140,7 +140,7 @@ class WordsAjaxHandler {
         wp_die();
     }
 
-    public static function handle_get_words_by_category() {
+    /*public static function handle_get_words_by_category() {
         $dictionary_id = intval($_POST['dictionary_id']);
 
         if (!$dictionary_id) {
@@ -154,6 +154,45 @@ class WordsAjaxHandler {
         // Отправляем ответ
         wp_send_json_success($grouped_words);
         wp_die();
+    }*/
+
+    public static function handle_get_category_tree() {
+        $dictionary_id = intval($_POST['dictionary_id']);
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Invalid dictionary_id']);
+            wp_die();
+        }
+
+        // Получаем дерево категорий через сервис
+        $category_tree = WordsService::get_category_tree($dictionary_id);
+
+        if (empty($category_tree)) {
+            wp_send_json_error(['message' => 'Categories not found']);
+            wp_die();
+        }
+
+        // Отправляем дерево категорий
+        wp_send_json_success($category_tree);
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для получения списка слов по ID категории.
+     */
+    public static function handle_get_words_by_category() {
+        $category_id = intval($_POST['category_id']);
+
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Invalid category ID']);
+            wp_die();
+        }
+
+        // Получаем слова через сервис
+        $words = WordsService::get_words_by_category($category_id);
+
+        // Отправляем ответ
+        wp_send_json_success($words);
+        wp_die();
     }
 }
 
@@ -165,6 +204,9 @@ add_action('wp_ajax_nopriv_get_dictionary_words', ['WordsAjaxHandler', 'handle_g
 // Привязка метода AJAX-обработчика
 add_action('wp_ajax_get_words_by_category', ['WordsAjaxHandler', 'handle_get_words_by_category']);
 add_action('wp_ajax_nopriv_get_words_by_category', ['WordsAjaxHandler', 'handle_get_words_by_category']);
+
+add_action('wp_ajax_get_category_tree', ['WordsAjaxHandler', 'handle_get_category_tree']);
+add_action('wp_ajax_nopriv_get_category_tree', ['WordsAjaxHandler', 'handle_get_category_tree']);
 
 
 

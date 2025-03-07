@@ -2,11 +2,11 @@ import env from "./env";
 import axios from "axios";
 
 const { render, useEffect, useState } = wp.element;
-let {SpokenTextChecker} = require('./SpokenTextChecker.js');
+import CategoryTree from "./EducationWords/CategoryTree";
+import Education from "./EducationWords/Education";
 
-const EducationWords = ({  }) => {
-	const [progressText, setProgressText] = useState('');
-	const [check, setCheck] = useState(null);
+const EducationWords = ({ dictionaryId, mode, onChangeMode }) => {
+	const [categoryId, setCategoryId] = useState(0);
 
 	useEffect(() => {
 
@@ -14,8 +14,17 @@ const EducationWords = ({  }) => {
 
 	return (
 		<div>
-			<h3>2222222222222222222222222222</h3>
+			<h3 style={{ display: mode === null ? "block" : "none" }}>Выбери категорию</h3>
+			<div style={{ display: mode === null ? "block" : "none" }}>
+				<CategoryTree dictionaryId={dictionaryId} onCategoryClick={(cat) => {onChangeMode('education'); setCategoryId(cat.id);}} />
+			</div>
 
+			<h2 style={{ display: mode === 'education' ? "block" : "none" }}>Учим слова</h2>
+			{
+				mode === 'education'&&
+				<Education categoryId={categoryId} />
+			}
+			<button onClick={() => onChangeMode(null)} type={"button"} className={'words-education-window__close'} style={{ display: mode === 'education' ? "block" : "none" }}>×</button>
 		</div>
 	);
 };

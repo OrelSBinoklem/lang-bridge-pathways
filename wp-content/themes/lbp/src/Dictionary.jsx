@@ -5,18 +5,35 @@ const { render, useEffect, useState } = wp.element;
 import EducationWords from "./EducationWords";
 import TrainingWords from "./TrainingWords";
 import WordsMatrix from "./WordsMatrix";
-
-let modeRecognition = 'google';
-let text = 'chicken yellow';
+import CategoryTree from "./EducationWords/CategoryTree";
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
 	const Dictionary = () => {
 		const [mode, setMode] = useState(null);
+		const [modeEducation, setModeEducation] = useState(null);
+		const [modeTraining, setModeTraining] = useState(null);
+
+		const onChangeModeEducation = (mode) => {
+			setModeEducation(mode);
+		}
+		const onChangeModeTraining = (mode) => {
+			setModeTraining(mode);
+		}
 
 		useEffect(() => {
 
 		}, []);
+
+		const onCloseCurrentWindow = () => {
+			if(modeTraining !== null) {
+				setModeTraining(null);
+			} else if(modeEducation !== null) {
+				setModeEducation(null);
+			} else {
+				setMode(null);
+			}
+		}
 
 		return (
 			<div>
@@ -30,17 +47,20 @@ if(document.getElementById('react-app-dictionary')) {
 					<div className={'words-education-window'}>
 						{
 							mode === 'education-words'&&
-							<EducationWords />
+							<EducationWords dictionaryId={dictionaryId} mode={modeEducation} onChangeMode={onChangeModeEducation} />
 						}
 						{
 							mode === 'training-words'&&
-							<TrainingWords modeRecognition={modeRecognition} text={text} />
+							<TrainingWords dictionaryId={dictionaryId} mode={modeTraining} onChangeMode={onChangeModeTraining} />
 						}
-						<button onClick={() => setMode(null)} type={"button"} className={'words-education-window__close'}>×</button>
+						<button onClick={onCloseCurrentWindow} type={"button"} className={'words-education-window__close'}>×</button>
 					</div>
 				}
-				<h2>Матрица слов (декорация)</h2>
-				<WordsMatrix dictionaryId={dictionaryId} />
+
+				<div style={{ display: mode === null ? "block" : "none" }}>
+					<h2>Матрица слов (декорация)</h2>
+					<WordsMatrix dictionaryId={dictionaryId} />
+				</div>
 			</div>
 		);
 	};

@@ -82,4 +82,64 @@ class WordsService {
 
         return $grouped_words;
     }
+
+    public static function get_category_tree($dictionary_id) {
+        global $wpdb;
+
+        // Таблица категорий
+        $categories_table = $wpdb->prefix . 'd_categories';
+
+        // Получаем все категории словаря
+        $query = $wpdb->prepare("
+        SELECT id, name, parent_id
+        FROM $categories_table
+        WHERE dictionary_id = %d
+        ORDER BY id ASC
+    ", $dictionary_id);
+
+        $categories = $wpdb->get_results($query, ARRAY_A);
+
+        // Преобразуем в дерево
+        return self::build_category_tree($categories);
+    }
+
+    public static function build_category_tree(array $categories, $parent_id = null) {
+        $tree = [];
+
+        foreach ($categories as $category) {
+            if ($category['parent_id'] == $parent_id) {
+                // Рекурсивно получаем детей
+                $children = self::build_category_tree($categories, $category['id']);
+                if ($children) {
+                    $category['children'] = $children;
+                }
+                $tree[] = $category;
+            }
+        }
+
+        return $tree;
+    }
+
+    /**
+     * Получить список слов из категории.
+     *
+     * @param int $category_id ID категории
+     * @return array Список слов
+     */
+    public static function get_words_by_category($category_id) {
+        global $wpdb;
+
+        $words_table = $wpdb->prefix . 'd_words';
+        $word_category_table = $wpdb->prefix . 'd_word_category';
+
+        // SQL-запрос для получения слов по категории
+        $query = $wpdb->prepare("
+            SELECT w.id, w.word, w.translation_1, w.translation_2, w.translation_3, w.level, w.maxLevel, w.type, w.gender
+            FROM $words_table AS w
+            INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+            WHERE wc.category_id = %d
+        ", $category_id);
+
+        return $wpdb->get_results($query, ARRAY_A);
+    }
 }
