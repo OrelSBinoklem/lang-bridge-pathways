@@ -21,9 +21,27 @@ if(document.getElementById('react-app-dictionary')) {
 			setModeTraining(mode);
 		}
 
-		useEffect(() => {
+		const handlePopState = (event) => {
+			let { mode = null, modeEducation = null, modeTraining = null } = event.state || {};
+			setMode(mode);
+			setModeEducation(modeEducation);
+			setModeTraining(modeTraining);
+		};
 
+		useEffect(() => {
+			window.addEventListener('popstate', handlePopState);
+			// Очистка: удаляем обработчик и возвращаем историю в исходное состояние
+			return () => {
+				window.removeEventListener('popstate', handlePopState);
+			};
 		}, []);
+
+		useEffect(() => {
+			let state = window.history.state || {};
+			if (mode !== (state?.mode??null) || modeEducation !== (state?.modeEducation??null) || modeTraining !== (state?.modeTraining??null)) {
+				window.history.pushState({ mode, modeEducation, modeTraining }, '');
+			}
+		}, [mode, modeEducation, modeTraining]);
 
 		const onCloseCurrentWindow = () => {
 			if(modeTraining !== null) {

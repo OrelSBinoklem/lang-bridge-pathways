@@ -226,4 +226,110 @@ function myajax_data(){
     </script>
     <?php
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Добавляем страницу в админку
+function add_words_export_page() {
+    add_menu_page(
+        'Экспорт словаря',
+        'Экспорт слов',
+        'manage_options',
+        'export-dictionary',
+        'render_words_export_page',
+        'dashicons-download',
+        20
+    );
+}
+add_action('admin_menu', 'add_words_export_page');
+
+// Функция рендеринга страницы
+function render_words_export_page() {
+    ?>
+    <div class="wrap">
+        <h1>Экспорт слов из словаря</h1>
+        <p>Введите ID словаря и нажмите "Экспортировать".</p>
+        <input type="number" id="dictionary_id" value="5" min="1" />
+        <button id="export_words_btn" class="button button-primary">Экспортировать</button>
+        <p id="export_status"></p>
+
+        <script>
+          document.getElementById('export_words_btn').addEventListener('click', function() {
+            let dictionaryId = document.getElementById('dictionary_id').value;
+            if (!dictionaryId) {
+              alert('Введите ID словаря!');
+              return;
+            }
+
+            document.getElementById('export_status').textContent = 'Экспорт в процессе...';
+
+            fetch(ajaxurl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: `action=export_dictionary_words&dictionary_id=${dictionaryId}`
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  document.getElementById('export_status').innerHTML =
+                    `Файл успешно создан: <a href="${data.file_url}" target="_blank">Скачать JSON</a>`;
+                } else {
+                  document.getElementById('export_status').textContent = 'Ошибка: ' + data.message;
+                }
+              })
+              .catch(error => {
+                document.getElementById('export_status').textContent = 'Ошибка: ' + error;
+              });
+          });
+        </script>
+    </div>
+    <?php
+}
+
+// Обработчик AJAX-запроса
+function export_dictionary_words() {
+    global $wpdb;
+
+    $dictionary_id = intval($_POST['dictionary_id']);
+    if (!$dictionary_id) {
+        wp_send_json_error(['message' => 'Некорректный ID словаря']);
+    }
+
+    $words_table = $wpdb->prefix . 'd_words';
+
+    // Запрос к базе данных
+    $query = $wpdb->prepare("
+        SELECT id, word, translation_1, translation_2, translation_3, level, maxLevel, type, gender, sound_url
+        FROM $words_table
+        WHERE dictionary_id = %d
+    ", $dictionary_id);
+
+    $words = $wpdb->get_results($query, ARRAY_A);
+
+    if (empty($words)) {
+        wp_send_json_error(['message' => 'Слова не найдены']);
+    }
+
+    // Создание JSON-файла
+    $upload_dir = wp_upload_dir();
+    $file_name = "dictionary_{$dictionary_id}.json";
+    $file_path = $upload_dir['path'] . '/' . $file_name;
+    $file_url = $upload_dir['url'] . '/' . $file_name;
+
+    file_put_contents($file_path, json_encode($words, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+    wp_send_json_success(['file_url' => $file_url]);
+}
+add_action('wp_ajax_export_dictionary_words', 'export_dictionary_words');
+
 ?>

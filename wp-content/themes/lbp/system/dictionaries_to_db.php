@@ -103,9 +103,29 @@ function json_parser_page() {
                 'maxLevel' => 2,
                 'sound' => 0,
             ],
+			[
+                'src' => '/system/dictionaries/Russko-angliyskiy-britanskiy_slovar_9000_slov_Mezhdunarodnaya_transkriptsiya-result.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'Русско-Английский (Британский) Тематический',
+                'words' => 9000,
+                'level' => 1,
+                'maxLevel' => 5,
+                'sound' => 1,
+            ],
+			[
+                'src' => '/system/dictionaries/Lat_9000_9781839554582-result.json',
+                'lang' => 'RU',
+                'learn_lang' => 'LV',
+                'name' => 'Русско-Латышский Тематический',
+                'words' => 9000,
+                'level' => 1,
+                'maxLevel' => 5,
+                'sound' => 1,
+            ],
         ];
 
-        foreach ([$dicts[6]] as $dict) {
+        foreach ([$dicts[8]] as $dict) {
             $json_file = get_template_directory() . $dict['src'];
             add_words_from_json($json_file, $dict['lang'], $dict['learn_lang'], $dict['name'], $dict['words'], $dict['level'], $dict['maxLevel'], $dict['sound']);
             echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
