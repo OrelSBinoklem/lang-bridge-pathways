@@ -1,4 +1,5 @@
 import axios from "axios";
+import WordCheck from "./WordCheck";
 
 const { render, useEffect, useState } = wp.element;
 
@@ -6,6 +7,9 @@ const Training = ({ categoryId }) => {
 	const [words, setWords] = useState([]); // Храним дерево категорий
 	const [loading, setLoading] = useState(true); // Состояние загрузки
 	const [error, setError] = useState(null); // Состояние ошибки
+
+	let modeRecognition = 'google-cloud';
+	let text = 'laba diena';
 
 	// Функция для запроса данных с бэкенда
 	const fetchWords = async () => {
@@ -37,16 +41,19 @@ const Training = ({ categoryId }) => {
 
 	const renderEducation = () => {
 		return (
-			<ul className='words-education-list'>
-				{words.map((word) => (
-					<li key={word.id}>
-						<span className="words-education-list__word">{word.word}</span>
-						<span className="words-education-list__translation_1"> - {word.translation_1}</span>
-						{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
-						{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
-					</li>
-				))}
-			</ul>
+			<div>
+				<ul className='words-education-list'>
+					{words.map((word) => (
+						<li key={word.id}>
+							<span className="words-education-list__word">{word.word}</span>
+							<span className="words-education-list__translation_1"> - {word.translation_1}</span>
+							{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
+							{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
+						</li>
+					))}
+				</ul>
+				<WordCheck modeRecognition={modeRecognition} text={text} />
+			</div>
 		);
 	};
 

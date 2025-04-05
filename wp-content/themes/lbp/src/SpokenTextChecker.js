@@ -1,5 +1,6 @@
 const {GoogleStrategy} = require('./voice_recognition/GoogleStrategy');
 const {WhisperStrategy} = require('./voice_recognition/WhisperStrategy');
+const {GoogleCloudStrategy} = require('./voice_recognition/GoogleCloudStrategy');
 import { diffChars } from 'diff';
 
 class SpokenTextChecker {
@@ -8,9 +9,11 @@ class SpokenTextChecker {
   #strategy;
   #progressCallback;
   constructor(text, lang, strategy, openaiApiKey, progressCallback) {
+    const socketUrl = 'ws://localhost:3000';
+
     this.#text = text;
     this.#lang = lang;
-    this.#strategy = strategy === 'google' ? new GoogleStrategy(lang) : new WhisperStrategy(lang, openaiApiKey);
+    this.#strategy = strategy === 'google' ? new GoogleStrategy(lang) : strategy === 'google-cloud' ? new GoogleCloudStrategy(lang, socketUrl) : new WhisperStrategy(lang, openaiApiKey);
     this.#progressCallback = progressCallback;
   }
 

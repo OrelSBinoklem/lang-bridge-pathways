@@ -4,7 +4,8 @@
   "description": "<!DOCTYPE html> <html lang=\"en\"> <head> \t<meta name=\"viewport\" content=\"width=device-width\" /> \t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /> \t<title>WordPress &#8250; ReadMe</title> \t<link rel=\"stylesheet\" href=\"wp-admin/css/install.css?ver=20100228\" type=\"text/css\" /> </head> <body> <h1 id=\"logo\"> \t<a href=\"https://wordpress.org/\"><img alt=\"WordPress\" src=\"wp-admin/images/wordpress-logo.png\" /></a> </h1> <p style=\"text-align: center\">Semantic Personal Publishing Platform</p>",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "voice": "node ./src/voice_recognition/google_cloud_redirect_server.js"
   },
   "author": "",
   "license": "MIT",
@@ -12,11 +13,15 @@
     "@wordpress/scripts": "^27.9.0"
   },
   "dependencies": {
+    "@google-cloud/speech": "^7.0.1",
     "@ricky0123/vad-web": "^0.0.22",
     "axios": "^1.6.8",
     "dat.gui": "^0.7.9",
     "diff": "^7.0.0",
     "dotenv": "^16.4.5",
-    "three": "^0.164.1"
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
+    "three": "^0.164.1",
+    "ws": "^8.18.1"
   }
 }
