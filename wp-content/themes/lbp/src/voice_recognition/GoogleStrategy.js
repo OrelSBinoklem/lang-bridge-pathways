@@ -18,7 +18,7 @@ class GoogleStrategy {
     this.recognition = new SpeechRecognition();
     this.recognition.lang = this.#lang;
     this.recognition.interimResults = true; // Отображать промежуточные результаты
-    this.recognition.continuous = false; // Останавливать после завершения одной фразы
+    this.recognition.continuous = true; // Останавливать после завершения одной фразы
 
     this.recognition.onstart = () => {
       console.log('Speech recognition started.');
@@ -42,17 +42,22 @@ class GoogleStrategy {
       return;
     }
 
-    this.recognition.onresult = (event) => {
-      let transcriptResult = '';
+    let finalTranscript = '';
+    let interimTranscript = '';
 
-      for (let i = 0; i < event.results.length; i++) {
+    this.recognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript;
-        transcriptResult += transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+          interimTranscript = '';
+        } else {
+          interimTranscript = transcript;
+        }
       }
 
-      // Вызов колбэка с промежуточным и финальным результатами
       if (callback && typeof callback === 'function') {
-        callback(transcriptResult);
+        callback(finalTranscript + interimTranscript);
       }
     };
 

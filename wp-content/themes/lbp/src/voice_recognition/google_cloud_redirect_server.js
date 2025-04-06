@@ -34,7 +34,7 @@ const requestConfig = {
   config: {
     encoding: 'WEBM_OPUS',       // Формат аудио, отправляемого с клиента (audio/webm)
     sampleRateHertz: 16000,       // Должна совпадать с настройками клиента
-    languageCode: 'en-US',        // Например, латышский ('lv-LV'); можно изменить на 'ru-RU', 'en-US'
+    languageCode: 'lv-LV',        // Например, латышский ('lv-LV'); можно изменить на 'ru-RU', 'en-US'
     enableAutomaticPunctuation: true,
     // singleUtterance не используется, чтобы не сбрасывать контекст между чанками
   },
@@ -46,7 +46,7 @@ wss.on('connection', async (ws, req) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const token = url.searchParams.get('token');
 
-  /* При необходимости включите проверку:
+  /* todo При необходимости включите проверку:
   if (!token) {
     ws.close(1008, 'Требуется токен');
     return;

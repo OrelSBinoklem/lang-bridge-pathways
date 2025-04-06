@@ -8,8 +8,8 @@ const Training = ({ categoryId }) => {
 	const [loading, setLoading] = useState(true); // Состояние загрузки
 	const [error, setError] = useState(null); // Состояние ошибки
 
-	let modeRecognition = 'google-cloud';
-	let text = 'good day';
+	let modeRecognition = 'google';
+	let text = 'laba diena';
 
 	// Функция для запроса данных с бэкенда
 	const fetchWords = async () => {

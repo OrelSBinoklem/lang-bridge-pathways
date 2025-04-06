@@ -3,6 +3,8 @@ const {WhisperStrategy} = require('./voice_recognition/WhisperStrategy');
 const {GoogleCloudStrategy} = require('./voice_recognition/GoogleCloudStrategy');
 import { diffChars } from 'diff';
 
+const maxLenRecognitionQuantity = 3;
+
 class SpokenTextChecker {
   #text;
   #lang;
@@ -29,7 +31,7 @@ class SpokenTextChecker {
           resolve(true);
         }
 
-        if (recognizedText.length > this.#text.length * 2) {
+        if (recognizedText.length > this.#text.length * maxLenRecognitionQuantity) {
           this.#strategy.stopAndWaitingFinal();
           resolve(false);
         }
@@ -39,31 +41,50 @@ class SpokenTextChecker {
 
   }
 
-  compareWithThreshold(recognizedText, referenceText, threshold = 0.8, softMode = false) {
-    const diffs = diffChars(referenceText.toLowerCase(), recognizedText.toLowerCase());
-    let totalLength = referenceText.length;
-    let totalLengthRecognized = recognizedText.length;
-    let changes = 0;
+  longestCommonSubsequence(a, b) {
+    // Удаляем пробелы из строк
+    const cleanA = a.replace(/\s/g, '');
+    const cleanB = b.replace(/\s/g, '');
 
-    // Подсчет изменений (вставки, удаления, замены)
-    diffs.forEach(part => {
-      if (part.added || part.removed) {
-        changes += part.value.length; // Количество измененных символов
+    const m = cleanA.length;
+    const n = cleanB.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (cleanA[i - 1] === cleanB[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1] + 1;
+        } else {
+          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        }
       }
-    });
-
-    // Вычисляем процент изменений
-    //console.log(changes, totalLength);
-    let similarity;
-    if(softMode) {
-      similarity = totalLengthRecognized - changes / totalLength;
-    } else {
-      similarity = 1 - (changes / totalLength);
     }
+    return dp[m][n];
+  }
 
+  compareWithThreshold(recognizedText, referenceText, threshold = 0.8, softMode = false) {
+    const ref = referenceText.toLowerCase();
+    const rec = recognizedText.toLowerCase();
 
-    // Проверка, превышает ли процент схожести порог
-    return similarity >= threshold;
+    if (softMode) {
+      const lcsLength = this.longestCommonSubsequence(ref, rec);
+      const similarity = lcsLength / ref.replace(/\s/g, '').length;
+
+      console.log(`[SOFT] LCS: ${lcsLength} / ${ref.replace(/\s/g, '').length} = ${similarity.toFixed(2)}`);
+      return similarity >= threshold;
+    } else {
+      const diffs = diffChars(ref, rec);
+      let changes = 0;
+
+      diffs.forEach(part => {
+        if (part.added || part.removed) {
+          changes += part.value.length;
+        }
+      });
+
+      const similarity = 1 - changes / ref.length;
+      return similarity >= threshold;
+    }
   }
 }
 
