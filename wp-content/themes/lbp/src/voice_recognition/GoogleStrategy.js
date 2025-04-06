@@ -66,6 +66,10 @@ class GoogleStrategy {
       this.recognition.stop();
     }
   }
+
+  stopAndWaitingFinal() {
+    this.stop();
+  }
 }
 
 export {GoogleStrategy};

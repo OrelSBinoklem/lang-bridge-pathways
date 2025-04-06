@@ -101,6 +101,17 @@ class GoogleCloudStrategy {
     if (this.#mediaRecorder && this.isListening) {
       this.#mediaRecorder.stop();
     }
+    if (this.#socket && this.#socket.readyState === WebSocket.OPEN) {
+      this.#socket.close();
+    }
+    this.#waitLastResult = false;
+    this.isListening = false;
+  }
+
+  stopAndWaitingFinal() {
+    if (this.#mediaRecorder && this.isListening) {
+      this.#mediaRecorder.stop();
+    }
   }
 }
 

@@ -22,9 +22,7 @@ class SpokenTextChecker {
       this.#strategy.start((recognizedText) => {
         this.#progressCallback(recognizedText);
 
-        let isCompleted = this.compareWithThreshold(recognizedText, this.#text);
-
-        console.log(isCompleted);
+        let isCompleted = this.compareWithThreshold(recognizedText, this.#text, 0.8, true);
 
         if(isCompleted) {
           this.#strategy.stop();
@@ -32,7 +30,7 @@ class SpokenTextChecker {
         }
 
         if (recognizedText.length > this.#text.length * 2) {
-          this.#strategy.stop();
+          this.#strategy.stopAndWaitingFinal();
           resolve(false);
         }
       });
@@ -41,9 +39,10 @@ class SpokenTextChecker {
 
   }
 
-  compareWithThreshold(recognizedText, referenceText, threshold = 0.8) {
+  compareWithThreshold(recognizedText, referenceText, threshold = 0.8, softMode = false) {
     const diffs = diffChars(referenceText.toLowerCase(), recognizedText.toLowerCase());
     let totalLength = referenceText.length;
+    let totalLengthRecognized = recognizedText.length;
     let changes = 0;
 
     // Подсчет изменений (вставки, удаления, замены)
@@ -55,7 +54,13 @@ class SpokenTextChecker {
 
     // Вычисляем процент изменений
     //console.log(changes, totalLength);
-    const similarity = 1 - (changes / totalLength);
+    let similarity;
+    if(softMode) {
+      similarity = totalLengthRecognized - changes / totalLength;
+    } else {
+      similarity = 1 - (changes / totalLength);
+    }
+
 
     // Проверка, превышает ли процент схожести порог
     return similarity >= threshold;

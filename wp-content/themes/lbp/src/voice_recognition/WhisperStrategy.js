@@ -132,6 +132,10 @@ class WhisperStrategy {
     this.isListening = false;
   }
 
+  stopAndWaitingFinal() {
+    this.stop();
+  }
+
   /**
    * Отправляет накопленные аудиоданные в Whisper API OpenAI.
    */
