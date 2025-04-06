@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Функция для проверки JWT-токена через WP
+// Функция для проверки JWT-токена через WP (опционально)
 async function verifyWpToken(token) {
   try {
     const response = await fetch('https://lbp.loc/wp-json/jwt-auth/v1/token/validate', {
@@ -26,29 +26,27 @@ async function verifyWpToken(token) {
 
 // Инициализация клиента Google Cloud Speech-to-Text
 const speechClient = new SpeechClient({
-  // Замените на путь к вашему сервисному аккаунту ключа
-  keyFilename: './latvieshu-reco-efbf06fcdbfd.json'
+  keyFilename: './latvieshu-reco-efbf06fcdbfd.json', // Укажите путь к вашему ключу
 });
 
 // Конфигурация для потокового распознавания с interimResults
 const requestConfig = {
   config: {
     encoding: 'WEBM_OPUS',       // Формат аудио, отправляемого с клиента (audio/webm)
-    sampleRateHertz: 16000,       // Частота дискретизации — должна совпадать с настройками клиента
-    languageCode: 'lv-LV',        // Например: латышский ('lv-LV'); можно изменить на 'ru-RU', 'en-US' и т.д.
+    sampleRateHertz: 16000,       // Должна совпадать с настройками клиента
+    languageCode: 'en-US',        // Например, латышский ('lv-LV'); можно изменить на 'ru-RU', 'en-US'
     enableAutomaticPunctuation: true,
-    // Свойство singleUtterance не используется, чтобы не сбрасывать контекст между чанками
-    singleUtterance: true
+    // singleUtterance не используется, чтобы не сбрасывать контекст между чанками
   },
   interimResults: true,           // Возвращать промежуточные результаты
 };
 
 wss.on('connection', async (ws, req) => {
-  // Извлекаем JWT-токен из URL (?token=...)
+  // Извлекаем JWT-токен из URL (?token=...) – опционально
   const url = new URL(req.url, `http://${req.headers.host}`);
   const token = url.searchParams.get('token');
 
-  /* Если нужна проверка:
+  /* При необходимости включите проверку:
   if (!token) {
     ws.close(1008, 'Требуется токен');
     return;
@@ -72,8 +70,8 @@ wss.on('connection', async (ws, req) => {
       console.error('Google Cloud Speech ошибка:', error);
     })
     .on('data', (data) => {
-      console.log(data)
       if (data.results && data.results.length > 0) {
+        //console.log(data)
         data.results.forEach((result) => {
           const transcript = result.alternatives[0].transcript;
           if (result.isFinal) {
@@ -83,15 +81,22 @@ wss.on('connection', async (ws, req) => {
             interimTranscript = transcript;
           }
         });
-        // Объединяем окончательные и промежуточные результаты
-        const combinedTranscript = finalTranscript + '<i>' + interimTranscript + '</i>';
-        ws.send(combinedTranscript);
+
+        ws.send(JSON.stringify({ finalTranscript, interimTranscript }));
       }
     });
 
   // Получаем аудиочанки от клиента и передаем их в потоковое распознавание
   ws.on('message', (message) => {
-    if (recognizeStream) {
+    console.log('STOP');
+    console.log(message);
+    if ( Buffer.isBuffer(message) && message.equals(Buffer.from('STOP')) ) {
+      console.log('Получена команда STOP, выполняем финальное распознавание.');
+      // Завершаем потоковое распознавание, если оно еще активно
+      if (recognizeStream) {
+        recognizeStream.end();
+      }
+    } else if (recognizeStream) {
       recognizeStream.write(message);
     }
   });

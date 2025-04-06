@@ -3,6 +3,7 @@ class GoogleCloudStrategy {
   #endpointUrl; // URL WebSocket‑сервера (Node.js‑прокси), который обрабатывает аудио через Google Cloud
   #socket = null;
   #mediaRecorder = null;
+  #waitLastResult = false;
   isListening = false;
 
   /**
@@ -43,9 +44,20 @@ class GoogleCloudStrategy {
         };
 
         this.#socket.onmessage = (event) => {
+          //console.log('onmessage', event);
           // Результаты распознавания приходят от сервера (как итоговые или interim)
+          const { finalTranscript, interimTranscript } = JSON.parse(event.data);
           if (callback && typeof callback === "function") {
-            callback(event.data);
+            callback(finalTranscript + interimTranscript);
+          }
+
+          if(this.#waitLastResult && ( ! interimTranscript )) {
+            if (this.#socket && this.#socket.readyState === WebSocket.OPEN) {
+              this.#socket.close();
+            }
+            this.#waitLastResult = false;
+            this.isListening = false;
+            stream.getTracks().forEach(track => track.stop());
           }
         };
 
@@ -55,10 +67,12 @@ class GoogleCloudStrategy {
 
         this.#socket.onclose = () => {
           console.log("WebSocket соединение закрыто.");
+          this.#waitLastResult = false;
           this.isListening = false;
         };
 
         this.#mediaRecorder.ondataavailable = (event) => {
+          console.log('ondataavailable');
           if (event.data.size > 0 && this.#socket.readyState === WebSocket.OPEN) {
             this.#socket.send(event.data);
           }
@@ -66,15 +80,16 @@ class GoogleCloudStrategy {
 
         this.#mediaRecorder.onstop = () => {
           console.log("MediaRecorder остановлен.");
-          if (this.#socket && this.#socket.readyState === WebSocket.OPEN) {
-            this.#socket.close();
+          if (this.#waitLastResult === false) {
+            this.#waitLastResult = true;
+            //console.log('send STOP');
+            this.#socket.send("STOP", { binary: false });
           }
-          this.isListening = false;
-          stream.getTracks().forEach(track => track.stop());
         };
       })
       .catch(error => {
         console.error("Ошибка доступа к микрофону:", error);
+        this.#waitLastResult = false;
         this.isListening = false;
       });
   }
@@ -86,10 +101,6 @@ class GoogleCloudStrategy {
     if (this.#mediaRecorder && this.isListening) {
       this.#mediaRecorder.stop();
     }
-    if (this.#socket && this.#socket.readyState === WebSocket.OPEN) {
-      this.#socket.close();
-    }
-    this.isListening = false;
   }
 }
 

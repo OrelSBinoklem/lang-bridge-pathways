@@ -9,7 +9,7 @@ const Training = ({ categoryId }) => {
 	const [error, setError] = useState(null); // Состояние ошибки
 
 	let modeRecognition = 'google-cloud';
-	let text = 'laba diena';
+	let text = 'good day';
 
 	// Функция для запроса данных с бэкенда
 	const fetchWords = async () => {

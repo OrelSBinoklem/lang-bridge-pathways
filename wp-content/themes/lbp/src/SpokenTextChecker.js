@@ -54,7 +54,7 @@ class SpokenTextChecker {
     });
 
     // Вычисляем процент изменений
-    console.log(changes, totalLength);
+    //console.log(changes, totalLength);
     const similarity = 1 - (changes / totalLength);
 
     // Проверка, превышает ли процент схожести порог
