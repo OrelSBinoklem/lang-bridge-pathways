@@ -142,4 +142,47 @@ class WordsService {
 
         return $wpdb->get_results($query, ARRAY_A);
     }
+
+    /**
+     * Обновить слово в словаре.
+     *
+     * @param int $dictionary_id
+     * @param int $word_id
+     * @param array $fields — ассоциативный массив с новыми значениями
+     * @return bool|WP_Error
+     */
+    public static function update_word_in_dictionary($dictionary_id, $word_id, $fields) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'd_words';
+
+        // Убедимся, что слово принадлежит словарю
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table WHERE id = %d AND dictionary_id = %d",
+            $word_id,
+            $dictionary_id
+        ));
+
+        if (!$exists) {
+            return new WP_Error('not_found', 'Слово не найдено в указанном словаре');
+        }
+
+        // Фильтруем допустимые поля
+        $allowed_fields = [
+            'word', 'translation_1', 'translation_2', 'translation_3',
+            'difficult_translation', 'sound_url', 'level', 'maxLevel',
+            'type', 'gender', 'is_phrase'
+        ];
+
+        $update_data = array_intersect_key($fields, array_flip($allowed_fields));
+
+        if (empty($update_data)) {
+            return new WP_Error('no_fields', 'Нет данных для обновления');
+        }
+
+        // Обновление
+        $updated = $wpdb->update($table, $update_data, ['id' => $word_id], null, ['%d']);
+
+        return $updated !== false;
+    }
 }
