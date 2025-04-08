@@ -134,7 +134,7 @@ class WordsService {
 
         // SQL-запрос для получения слов по категории
         $query = $wpdb->prepare("
-            SELECT w.id, w.word, w.translation_1, w.translation_2, w.translation_3, w.level, w.maxLevel, w.type, w.gender
+            SELECT w.id, w.word, w.translation_1, w.translation_2, w.translation_3, w.difficult_translation, w.sound_url, w.level, w.maxLevel, w.type, w.gender
             FROM $words_table AS w
             INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
             WHERE wc.category_id = %d

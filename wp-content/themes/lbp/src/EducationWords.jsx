@@ -22,7 +22,7 @@ const EducationWords = ({ dictionaryId, mode, onChangeMode }) => {
 			<h2 style={{ display: mode === 'education' ? "block" : "none" }}>Учим слова</h2>
 			{
 				mode === 'education'&&
-				<Education categoryId={categoryId} />
+				<Education categoryId={categoryId} dictionaryId={dictionaryId} />
 			}
 			<button onClick={() => onChangeMode(null)} type={"button"} className={'words-education-window__close'} style={{ display: mode === 'education' ? "block" : "none" }}>×</button>
 		</div>

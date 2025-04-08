@@ -1,12 +1,14 @@
 import axios from "axios";
+import WordEditor from "../WordEditor";
+
 const { useEffect, useState } = wp.element;
 
-const Education = ({ categoryId }) => {
-  const [words, setWords] = useState([]); // Храним дерево категорий
-  const [loading, setLoading] = useState(true); // Состояние загрузки
-  const [error, setError] = useState(null); // Состояние ошибки
+const Education = ({ categoryId, dictionaryId }) => {
+  const [words, setWords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
 
-  // Функция для запроса данных с бэкенда
   const fetchWords = async () => {
     try {
       setLoading(true);
@@ -34,27 +36,41 @@ const Education = ({ categoryId }) => {
     fetchWords();
   }, [categoryId]);
 
-  // Функция для рекурсивного рендера дерева категорий
-  const renderEducation = () => {
-    return (
-      <ul className='words-education-list'>
-        {words.map((word) => (
-          <li key={word.id}>
-            <span className="words-education-list__word">{word.word}</span>
-            <span className="words-education-list__translation_1"> - {word.translation_1}</span>
-            {word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
-            {word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
-          </li>
-        ))}
-      </ul>
-    );
+  const toggleEdit = (id) => {
+    setEditingWordId((prevId) => (prevId === id ? null : id));
   };
 
   return (
     <div>
       {loading && <p>Загрузка слов...</p>}
       {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
-      {!loading && !error && renderEducation(words)}
+      {!loading && !error && (
+        <ul className="words-education-list">
+          {words.map((word) => (
+            <li key={word.id}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span className="words-education-list__word">{word.word}</span>
+                <span className="words-education-list__translation_1"> - {word.translation_1}</span>
+                {word.translation_2 && <span className="words-education-list__translation_2">, {word.translation_2}</span>}
+                {word.translation_3 && <span className="words-education-list__translation_3">, {word.translation_3}</span>}
+                <button
+                  className="edit-button"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() => toggleEdit(word.id)}
+                >
+                  ✏️
+                </button>
+              </div>
+
+              {editingWordId === word.id && (
+                <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
+                  <WordEditor dictionaryId={dictionaryId} word={word} />
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

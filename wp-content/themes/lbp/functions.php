@@ -204,7 +204,8 @@ class WordsAjaxHandler {
 
         $dictionary_id = intval($_POST['dictionary_id']);
         $word_id = intval($_POST['word_id']);
-        $fields = $_POST['fields'] ?? [];
+        $fields_raw = $_POST['fields'] ?? '';
+        $fields = json_decode(stripslashes($fields_raw), true); // Декодируем JSON → массив
 
         if (!$dictionary_id || !$word_id || empty($fields) || !is_array($fields)) {
             wp_send_json_error(['message' => 'Некорректные входные данные']);

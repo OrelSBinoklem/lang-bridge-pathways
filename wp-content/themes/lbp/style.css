@@ -657,6 +657,16 @@ body {
     z-index: 3;
 }
 
+.edit-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+.edit-button:hover {
+    color: #0073aa;
+}
+
 /*!* Hover-эффект *!
 .category-three > li > ul > li:hover::after {
     opacity: 1; !* Повышаем яркость при наведении *!

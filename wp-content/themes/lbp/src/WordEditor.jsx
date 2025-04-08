@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const WordEditor = ({ dictionaryId, word }) => {
+  console.log(word);
   const [formData, setFormData] = useState({ ...word });
   const [status, setStatus] = useState(null);
 
@@ -49,6 +50,12 @@ const WordEditor = ({ dictionaryId, word }) => {
 
       <label>Перевод 3:</label>
       <input name="translation_3" value={formData.translation_3 || ''} onChange={handleChange} />
+
+      <label>Сложный перевод:</label>
+      <input name="difficult_translation" value={formData.difficult_translation || ''} onChange={handleChange} />
+
+      <label>Ссылка на звук (sound_url):</label>
+      <input name="sound_url" value={formData.sound_url || ''} onChange={handleChange} />
 
       <label>Уровень:</label>
       <input name="level" type="number" min="1" max="6" value={formData.level || ''} onChange={handleChange} />
