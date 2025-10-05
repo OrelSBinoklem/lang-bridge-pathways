@@ -3,19 +3,26 @@ import axios from "axios";
 const { render, useEffect, useState } = wp.element;
 let {SpokenTextChecker} = require('../SpokenTextChecker.js');
 
-const WordCheck = ({ modeRecognition, openaiApiKey, text }) => {
+const WordCheck = ({ modeRecognition, openaiApiKey, text, lang }) => {
+	const [checker, setChecker] = useState(null);
 	const [progressText, setProgressText] = useState('');
 	const [check, setCheck] = useState(null);
 
 	useEffect(() => {
 		(async () => {
-			let checker = new SpokenTextChecker(text, 'lv', modeRecognition, openaiApiKey, (recognizedText) => {
+			if(checker) {
+				checker.stop();
+			}
+
+			let checkerLocal = new SpokenTextChecker(text, 'lv', modeRecognition, openaiApiKey, (recognizedText) => {
 				setProgressText(recognizedText);
 			});
 
+			setChecker(checkerLocal)
+
 			setCheck(await checker.checkRun());
 		})();
-	}, []);
+	}, [modeRecognition, openaiApiKey, text]);
 
 	return (
 		<div>

@@ -3,7 +3,7 @@ import WordCheck from "./WordCheck";
 
 const { render, useEffect, useState } = wp.element;
 
-const Training = ({ categoryId }) => {
+const Training = ({ categoryId, dictionary }) => {
 	const [words, setWords] = useState([]); // Храним дерево категорий
 	const [loading, setLoading] = useState(true); // Состояние загрузки
 	const [error, setError] = useState(null); // Состояние ошибки

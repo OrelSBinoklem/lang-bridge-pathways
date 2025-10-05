@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const WordEditor = ({ dictionaryId, word }) => {
-  console.log(word);
   const [formData, setFormData] = useState({ ...word });
   const [status, setStatus] = useState(null);
 

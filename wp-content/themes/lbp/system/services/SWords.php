@@ -3,6 +3,23 @@
 // Сервис для работы с таблицей слов
 class WordsService {
     /**
+     * Получить данные словаря по его ID.
+     *
+     * @param int $dictionary_id
+     * @return array|null
+     */
+    public static function get_dictionary_by_id($dictionary_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dictionaries';
+
+        $query = $wpdb->prepare("SELECT * FROM $table WHERE id = %d", $dictionary_id);
+        $dictionary = $wpdb->get_row($query, ARRAY_A);
+
+        return $dictionary ?: null;
+    }
+
+
+    /**
      * Получить список слов из словаря.
      *
      * @param int $dictionary_id ID словаря

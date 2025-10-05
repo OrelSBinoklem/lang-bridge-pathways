@@ -27,7 +27,7 @@ const CategoryTree = ({ dictionaryId, onCategoryClick }) => {
             "name": "Категории",
             "parent_id": null,
             children: response.data.data
-          }]); // Устанавливаем дерево категорий и в корне делаем мокавую категориюresponse.data.data
+          }]); // Устанавливаем дерево категорий и в корне делаем мокавую категорию response.data.data
         }
 
       } else {

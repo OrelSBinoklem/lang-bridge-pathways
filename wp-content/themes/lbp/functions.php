@@ -121,6 +121,25 @@ function my_theme_enqueue_styles() {
 
 // Класс для обработки AJAX-запросов
 class WordsAjaxHandler {
+    public static function handle_get_dictionary() {
+        $dictionary_id = intval($_POST['dictionary_id'] ?? 0);
+
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Не передан ID словаря']);
+            wp_die();
+        }
+
+        $dictionary = WordsService::get_dictionary_by_id($dictionary_id);
+
+        if (!$dictionary) {
+            wp_send_json_error(['message' => 'Словарь не найден']);
+        } else {
+            wp_send_json_success($dictionary);
+        }
+
+        wp_die();
+    }
+
     /**
      * AJAX-метод для получения списка слов.
      */
@@ -225,6 +244,9 @@ class WordsAjaxHandler {
 }
 
 // Привязка метода AJAX-обработчика
+add_action('wp_ajax_get_dictionary', ['WordsAjaxHandler', 'handle_get_dictionary']);
+add_action('wp_ajax_nopriv_get_dictionary', ['WordsAjaxHandler', 'handle_get_dictionary']);
+
 add_action('wp_ajax_get_dictionary_words', ['WordsAjaxHandler', 'handle_get_user_words']);
 add_action('wp_ajax_nopriv_get_dictionary_words', ['WordsAjaxHandler', 'handle_get_user_words']);
 

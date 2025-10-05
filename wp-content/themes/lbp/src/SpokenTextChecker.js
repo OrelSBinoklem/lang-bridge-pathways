@@ -86,6 +86,10 @@ class SpokenTextChecker {
       return similarity >= threshold;
     }
   }
+
+  stop() {
+    this.#strategy.stop();
+  }
 }
 
 export {SpokenTextChecker}
