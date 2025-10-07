@@ -52,7 +52,8 @@ const Training = ({ categoryId, dictionary }) => {
 						</li>
 					))}
 				</ul>
-				<WordCheck modeRecognition={modeRecognition} text={text} />
+
+
 			</div>
 		);
 	};

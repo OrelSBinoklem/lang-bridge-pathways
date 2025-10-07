@@ -676,9 +676,95 @@ body {
     opacity: 0.6; !* Немного увеличиваем видимость категорий *!
 }*/
 
+.d-none {
+    display: none;
+}
+
 
 @media screen and (max-width: 1365px) {
 
+}
+
+/* Стили для полезных ссылок */
+.useful-links {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #007bff;
+}
+
+.useful-links h2 {
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+}
+
+.useful-links a {
+    display: block;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    background: #fff;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.useful-links a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 123, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.useful-links a:hover {
+    background: #007bff;
+    color: #fff;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    border-color: #007bff;
+}
+
+.useful-links a:hover::before {
+    left: 100%;
+}
+
+.useful-links a:last-child {
+    margin-bottom: 0;
+}
+
+.useful-links a strong {
+    font-weight: bold;
+}
+
+/* Адаптивные стили для полезных ссылок */
+@media screen and (max-width: 768px) {
+    .useful-links {
+        padding: 20px 15px;
+        margin-top: 20px;
+    }
+    
+    .useful-links h2 {
+        font-size: 20px;
+    }
+    
+    .useful-links a {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
 }
 
 @media screen and (max-width: 767px) {

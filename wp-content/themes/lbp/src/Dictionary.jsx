@@ -57,8 +57,8 @@ if(document.getElementById('react-app-dictionary')) {
 			<div>
 				{mode === null&& (
 					<>
-						<button onClick={() => setMode('education-words')} className={'mode-button'}>Education Words</button>
-						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Training Words</button>
+						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
+						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Экзамен</button>
 					</>
 				)}
 				{mode !== null&&
