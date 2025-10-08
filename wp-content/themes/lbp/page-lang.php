@@ -97,7 +97,7 @@ Template Name: Lang
         ?>
 
 
-        <div class="<?=$lang !== 'LV'?'d-none':''?>">
+        <div class="useful-links <?=$lang !== 'LV'?'d-none':''?>">
             <h2>Полезные ссылки</h2>
             <a href="https://maciunmacies.valoda.lv/16-un-vairak" target="_blank">Главный сайт где всё! (примеры экзаменов, озвучка заданий учебника Laipa, ссылки на интерактивные задания)</a>
             <a href="https://www.viaa.gov.lv/lv/parbaudes-programma" target="_blank">Примеры экзаменов</a>
@@ -109,7 +109,6 @@ Template Name: Lang
             <a href="https://www.valodukursi.lv/en/language-training-courses-classes-lessons/latvian-for-foreigners" target="_blank">Платный разговорный клуб</a>
             <a href="https://t.me/uaenlv" target="_blank">Бесплатный для беженцев разговорный клуб</a>
             <a href="https://www.youtube.com/@%D0%9B%D0%B0%D1%82%D1%8B%D1%88%D1%81%D0%BA%D0%B8%D0%B9_%D0%B1%D0%B5%D0%B7_%D0%B7%D1%83%D0%B1%D1%80%D1%91%D0%B6%D0%BA%D0%B8/videos" target="_blank">Расказы в картинках с переводом (Канал: Латышский без зубрёжки!)</a>
-
         </div>
 
 

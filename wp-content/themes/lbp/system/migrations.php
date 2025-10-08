@@ -248,3 +248,43 @@ function create_user_categories_table() {
 }
 
 add_action('after_setup_theme', 'create_user_categories_table');
+
+/** Создаём таблицу пользовательских слов из словаря
+ * @return void
+ */
+function create_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) UNSIGNED NOT NULL,
+            dict_word_id mediumint(9) NOT NULL,
+            attempts mediumint(9) NOT NULL DEFAULT 0,
+            correct_attempts mediumint(9) NOT NULL DEFAULT 0,
+            last_shown datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            easy_education tinyint(1) NOT NULL DEFAULT 0,
+            mode_education tinyint(1) NOT NULL DEFAULT 0,
+            attempts_all mediumint(9) NOT NULL DEFAULT 0,
+            correct_attempts_all mediumint(9) NOT NULL DEFAULT 0,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY dict_word_id (dict_word_id)
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+        // Выполнение запроса и логирование ошибок
+        $result = dbDelta($sql);
+        if (!empty($result)) {
+            error_log(print_r($result, true)); // Логирование результата dbDelta
+        } else {
+            error_log('Table creation failed: no result from dbDelta');
+        }
+    }
+}
+
+add_action('after_setup_theme', 'create_user_dict_words_table');
