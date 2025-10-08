@@ -20,9 +20,9 @@ const TrainingWords = ({ dictionaryId, mode, onChangeMode }) => {
 	}, []);
 
 	return (
-		<div>
-			<p>{ dictionary?.lang ?? 'lang' }</p>
-			<p>{ dictionary?.learn_lang ?? 'learn_lang' }</p>
+		<div className={'training-words'}>
+			{/*<p>{ dictionary?.lang ?? 'lang' }</p>
+			<p>{ dictionary?.learn_lang ?? 'learn_lang' }</p>*/}
 			<h3 style={{ display: mode === null ? "block" : "none" }}>Выбери категорию</h3>
 			<div style={{ display: mode === null ? "block" : "none" }}>
 				<CategoryTree dictionaryId={dictionaryId} onCategoryClick={(cat) => {onChangeMode('training'); setCategoryId(cat.id);}} />

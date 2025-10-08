@@ -45,10 +45,35 @@ const Training = ({ categoryId, dictionary }) => {
 				<ul className='words-education-list'>
 					{words.map((word) => (
 						<li key={word.id}>
-							<span className="words-education-list__word">{word.word}</span>
-							<span className="words-education-list__translation_1"> - {word.translation_1}</span>
-							{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
-							{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
+							{word.is_learned ? (
+								<>
+									<span className="words-education-list__word">{word.word}</span>
+									<span className="words-education-list__translation_1">&nbsp;- {word.translation_1}</span>
+									{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
+									{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
+								</>
+							) : (
+								<>
+									<span className="words-education-list__word" style={{color: '#ccc'}}>
+										{word.word.split('').map((char, index) => 
+											char === ' ' ? ' ' : '█ '
+										).join('')}
+									</span>
+									<span className="words-education-list__translation_1" style={{color: '#ccc'}}>&nbsp;- {word.translation_1.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>
+									{word.translation_2 && <span className="words-education-list__translation_2" style={{color: '#ccc'}}>{word.translation_2.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>}
+									{word.translation_3 && <span className="words-education-list__translation_3" style={{color: '#ccc'}}>{word.translation_3.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>}
+								</>
+							)}
+						</li>
+					))}
+					{words.map((word) => (
+						<li key={word.id}>
+							<>
+								<span className="words-education-list__word">{word.word}</span>
+								<span className="words-education-list__translation_1">&nbsp;- {word.translation_1}</span>
+								{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
+								{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
+							</>
 						</li>
 					))}
 				</ul>

@@ -573,9 +573,13 @@ body {
     background-color: #e63939; /* Тёмно-красный при наведении */
 }
 
+.words-education-list li {
+    display: flex;
+}
+
 .words-education-list__word {
     display: inline-block;
-    min-width: 200px;
+    width: 50%;
     text-align: right;
 }
 
@@ -765,6 +769,13 @@ body {
         padding: 10px 12px;
         font-size: 14px;
     }
+}
+
+.training-words h2 {
+    margin-bottom: 30px;
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
 }
 
 @media screen and (max-width: 767px) {
