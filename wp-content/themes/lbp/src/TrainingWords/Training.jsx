@@ -48,7 +48,7 @@ const Training = ({ categoryId, dictionary }) => {
 							{word.is_learned ? (
 								<>
 									<span className="words-education-list__word">{word.word}</span>
-									<span className="words-education-list__translation_1">&nbsp;- {word.translation_1}</span>
+									<span className="words-education-list__translation_1">&nbsp;&mdash; {word.translation_1}</span>
 									{word.translation_2 && <span className="words-education-list__translation_2">{word.translation_2}</span>}
 									{word.translation_3 && <span className="words-education-list__translation_3">{word.translation_3}</span>}
 								</>

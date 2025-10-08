@@ -271,6 +271,9 @@ add_action( 'wp_head', 'myajax_data', 8 );
 function myajax_data(){
     $data = [
         'url' => admin_url( 'admin-ajax.php' ),
+        'is_admin' => current_user_can('manage_options'),
+        'user_id' => get_current_user_id(),
+        'is_logged_in' => is_user_logged_in()
     ];
     ?>
     <script id="myajax_data">

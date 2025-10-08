@@ -578,9 +578,12 @@ body {
 }
 
 .words-education-list__word {
+    padding-top: 2px;
+    padding-bottom: 2px;
     display: inline-block;
     width: 50%;
     text-align: right;
+    font-weight: bold;
 }
 
 .words-education-list__translation_1,

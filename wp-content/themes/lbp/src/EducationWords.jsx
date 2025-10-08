@@ -13,7 +13,7 @@ const EducationWords = ({ dictionaryId, mode, onChangeMode }) => {
 	}, []);
 
 	return (
-		<div>
+		<div className={'training-words'}>
 			<h3 style={{ display: mode === null ? "block" : "none" }}>Выбери категорию</h3>
 			<div style={{ display: mode === null ? "block" : "none" }}>
 				<CategoryTree dictionaryId={dictionaryId} onCategoryClick={(cat) => {onChangeMode('education'); setCategoryId(cat.id);}} />

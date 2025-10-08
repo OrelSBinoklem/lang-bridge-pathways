@@ -48,19 +48,19 @@ const Education = ({ categoryId, dictionaryId }) => {
         <ul className="words-education-list">
           {words.map((word) => (
             <li key={word.id}>
-              <div style={{ display: "flex", alignItems: "center" }}>
                 <span className="words-education-list__word">{word.word}</span>
-                <span className="words-education-list__translation_1"> - {word.translation_1}</span>
+                <span className="words-education-list__translation_1">&nbsp;&mdash; {word.translation_1}</span>
                 {word.translation_2 && <span className="words-education-list__translation_2">, {word.translation_2}</span>}
                 {word.translation_3 && <span className="words-education-list__translation_3">, {word.translation_3}</span>}
-                <button
-                  className="edit-button"
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => toggleEdit(word.id)}
-                >
-                  ✏️
-                </button>
-              </div>
+                {window.myajax && window.myajax.is_admin && (
+                  <button
+                    className="edit-button"
+                    style={{ marginLeft: "10px" }}
+                    onClick={() => toggleEdit(word.id)}
+                  >
+                    ✏️
+                  </button>
+                )}
 
               {editingWordId === word.id && (
                 <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
