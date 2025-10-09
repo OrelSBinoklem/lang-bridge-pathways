@@ -49,3 +49,35 @@ function get_user_word_status_by_dictionary($user_id, $dictionary_id) {
     return $wpdb->get_results($query, ARRAY_A);
 }
 
+/**
+ * Получает данные пользователя из таблицы user_dict_words для определённого словаря
+ * @param int $user_id ID пользователя
+ * @param int $dictionary_id ID словаря
+ * @return array Массив данных пользователя, индексированный по dict_word_id
+ */
+function get_user_dict_words_data($user_id, $dictionary_id) {
+    global $wpdb;
+    
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    
+    $query = $wpdb->prepare("
+        SELECT dict_word_id, attempts, correct_attempts, last_shown, 
+               easy_education, mode_education, attempts_all, correct_attempts_all
+        FROM $user_dict_words_table 
+        WHERE user_id = %d AND dict_word_id IN (
+            SELECT id FROM $words_table WHERE dictionary_id = %d
+        )
+    ", $user_id, $dictionary_id);
+
+    $results = $wpdb->get_results($query, ARRAY_A);
+    
+    // Преобразуем в объект для удобства поиска по dict_word_id
+    $user_words_data = [];
+    foreach ($results as $row) {
+        $user_words_data[$row['dict_word_id']] = $row;
+    }
+
+    return $user_words_data;
+}
+
