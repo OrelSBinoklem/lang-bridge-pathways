@@ -24,7 +24,9 @@ const WordsMatrix = ({
       console.log(userData)
     }
 
-    return userData ? userData.correct_attempts >= 2 : false;
+    return userData ? 
+      (userData.correct_attempts >= 2 && userData.correct_attempts_revert >= 2) : 
+      false;
   };
 
   // Обновление размеров и рисование

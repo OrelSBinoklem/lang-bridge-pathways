@@ -63,7 +63,8 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
     
     $query = $wpdb->prepare("
         SELECT dict_word_id, attempts, correct_attempts, last_shown, 
-               easy_education, mode_education, attempts_all, correct_attempts_all
+               easy_education, mode_education, attempts_all, correct_attempts_all,
+               attempts_revert, correct_attempts_revert
         FROM $user_dict_words_table 
         WHERE user_id = %d AND dict_word_id IN (
             SELECT id FROM $words_table WHERE dictionary_id = %d
@@ -83,6 +84,8 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
         $row['mode_education'] = intval($row['mode_education']);
         $row['attempts_all'] = intval($row['attempts_all']);
         $row['correct_attempts_all'] = intval($row['correct_attempts_all']);
+        $row['attempts_revert'] = intval($row['attempts_revert']);
+        $row['correct_attempts_revert'] = intval($row['correct_attempts_revert']);
         
         $user_words_data[$row['dict_word_id']] = $row;
     }

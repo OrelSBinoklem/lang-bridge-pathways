@@ -288,3 +288,26 @@ function create_user_dict_words_table() {
 }
 
 add_action('after_setup_theme', 'create_user_dict_words_table');
+
+/** Добавляем поля для мониторинга обратного перевода в таблицу user_dict_words
+ * @return void
+ */
+function add_revert_fields_to_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+
+    // Проверяем, существуют ли уже эти поля
+    $columns = $wpdb->get_col("DESCRIBE $table_name");
+    
+    if (!in_array('attempts_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN attempts_revert mediumint(9) NOT NULL DEFAULT 0 AFTER correct_attempts_all");
+        error_log('Added attempts_revert field to user_dict_words table');
+    }
+    
+    if (!in_array('correct_attempts_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN correct_attempts_revert mediumint(9) NOT NULL DEFAULT 0 AFTER attempts_revert");
+        error_log('Added correct_attempts_revert field to user_dict_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_revert_fields_to_user_dict_words_table');
