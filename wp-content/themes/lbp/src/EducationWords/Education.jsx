@@ -46,7 +46,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     setEditingWordId((prevId) => (prevId === id ? null : id));
   };
 
-  // Проверить, изучено ли слово (easy_correct И easy_correct_revert = 1)
+  // Проверить, изучено ли слово (easy_correct ИЛИ easy_correct_revert = 1)
   const isWordLearned = (wordId) => {
     const userData = userWordsData[wordId];
     if (!userData) return false;
@@ -55,7 +55,41 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     if (userData.easy_education === 0) return true;
     
     // Если режим обучения включен, проверяем флаги правильных ответов
-    return userData.easy_correct === 1 && userData.easy_correct_revert === 1;
+    // Показываем слово, если правильно ответили хотя бы в одном направлении
+    return userData.easy_correct === 1 || userData.easy_correct_revert === 1;
+  };
+
+  // Получить статус изучения для умного отображения
+  const getWordDisplayStatus = (wordId) => {
+    const userData = userWordsData[wordId];
+    
+    // Если нет записи в БД, показываем все (слово не в тренировке)
+    if (!userData) {
+      return {
+        showWord: true,
+        showTranslation: true,
+        fullyLearned: false
+      };
+    }
+    
+    // Если режим обучения отключен, показываем все
+    if (userData.easy_education === 0) {
+      return {
+        showWord: true,
+        showTranslation: true,
+        fullyLearned: false // Не показываем индикатор "изучено" когда режим отключен
+      };
+    }
+    
+    // Если режим обучения включен, проверяем флаги
+    const directLearned = userData.easy_correct === 1;
+    const revertLearned = userData.easy_correct_revert === 1;
+    
+    return {
+      showWord: directLearned, // Показываем слово только если изучен прямой перевод
+      showTranslation: revertLearned, // Показываем перевод только если изучен обратный перевод
+      fullyLearned: directLearned && revertLearned // Полностью изучено только если оба перевода
+    };
   };
 
   // Получить слова для тренировки (easy_education = 1)
@@ -154,7 +188,42 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     setIsCorrect(correct);
     setShowResult(true);
 
-    // TODO: Здесь будет обновление прогресса в базе данных
+    // Обновляем прогресс в базе данных при правильном ответе
+    if (correct) {
+      updateWordProgress(currentWord.id, currentMode);
+    }
+
+    // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
+    setTimeout(() => {
+      const nextButton = document.querySelector('[data-next-word]');
+      if (nextButton) {
+        nextButton.focus();
+      }
+    }, 100);
+  };
+
+  // Обновить прогресс слова на сервере
+  const updateWordProgress = async (wordId, isRevertMode) => {
+    try {
+      const formData = new FormData();
+      formData.append("action", "update_word_progress");
+      formData.append("word_id", wordId);
+      formData.append("is_revert", isRevertMode ? 1 : 0);
+
+      const response = await axios.post(window.myajax.url, formData);
+
+      if (response.data.success) {
+        console.log('Прогресс обновлен успешно');
+        // Обновляем локальные данные пользователя
+        if (onRefreshUserData) {
+          onRefreshUserData();
+        }
+      } else {
+        console.error('Ошибка при обновлении прогресса:', response.data.message);
+      }
+    } catch (err) {
+      console.error('Ошибка при отправке прогресса:', err.message);
+    }
   };
 
   // Следующее слово
@@ -170,6 +239,14 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     setCurrentMode(Math.random() < 0.5); // Новый режим для нового слова
     setUserAnswer('');
     setShowResult(false);
+
+    // Возвращаем фокус на поле ввода после рендера
+    setTimeout(() => {
+      const inputField = document.querySelector('[data-training-input]');
+      if (inputField) {
+        inputField.focus();
+      }
+    }, 100);
   };
 
   // Завершить тренировку
@@ -207,55 +284,56 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
   };
 
+  // Сбросить категорию из режима обучения
+  const resetCategoryFromTraining = async () => {
+    if (!confirm('Вы уверены, что хотите сбросить эту категорию из режима обучения? Все слова будут отключены от тренировки.')) {
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("action", "reset_category_from_training");
+      formData.append("category_id", categoryId);
+
+      const response = await axios.post(window.myajax.url, formData);
+
+      if (response.data.success) {
+        alert('Категория сброшена из режима обучения! Слова больше не участвуют в тренировке.');
+        // Обновляем данные пользователя
+        if (onRefreshUserData) {
+          onRefreshUserData();
+        }
+      } else {
+        throw new Error(response.data.message || "Ошибка при сбросе категории");
+      }
+    } catch (err) {
+      alert('Ошибка: ' + err.message);
+    }
+  };
+
   // Компонент тренировки
   const renderTrainingInterface = () => {
     if (!currentWord) return null;
 
     return (
-      <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        background: 'white',
-        padding: '30px',
-        borderRadius: '15px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-        zIndex: 1000,
-        minWidth: '400px',
-        textAlign: 'center'
-      }}>
-        <h3 style={{ marginBottom: '20px', color: '#333' }}>
+      <div className="training-interface">
+        <h3 className="training-title">
           {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
         </h3>
         
-        <div style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          marginBottom: '20px',
-          padding: '15px',
-          background: '#f8f9fa',
-          borderRadius: '8px',
-          border: '2px solid #dee2e6'
-        }}>
+        <div className="training-word-display">
           {currentMode ? currentWord.translation_1 : currentWord.word}
         </div>
 
         <input
+          data-training-input
           type="text"
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !showResult && checkAnswer()}
           placeholder="Введите ваш ответ..."
           autoFocus
-          style={{
-            width: '100%',
-            padding: '12px',
-            fontSize: '16px',
-            border: '2px solid #ddd',
-            borderRadius: '8px',
-            marginBottom: '15px'
-          }}
+          className="training-input"
           disabled={showResult}
         />
 
@@ -263,50 +341,29 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
           <button
             onClick={checkAnswer}
             disabled={!userAnswer.trim()}
-            style={{
-              padding: '12px 24px',
-              fontSize: '16px',
-              background: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: userAnswer.trim() ? 'pointer' : 'not-allowed',
-              opacity: userAnswer.trim() ? 1 : 0.6
-            }}
+            className="training-button"
           >
             Проверить
           </button>
         ) : (
           <div>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: 'bold',
-              marginBottom: '15px',
-              color: isCorrect ? '#28a745' : '#dc3545'
-            }}>
+            <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
               {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
             </div>
             
             {!isCorrect && (
-              <div style={{ marginBottom: '15px', color: '#666' }}>
+              <div className="training-correct-answer">
                 Правильный ответ: {currentMode ? currentWord.word : currentWord.translation_1}
               </div>
             )}
 
-            <div>
+            <div className="training-controls">
               <button
+                data-next-word
                 onClick={nextWord}
                 onKeyPress={(e) => e.key === 'Enter' && nextWord()}
                 tabIndex={0}
-                style={{
-                  padding: '10px 20px',
-                  marginRight: '10px',
-                  background: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
+                className="training-next-button"
               >
                 Следующее слово
               </button>
@@ -315,14 +372,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                 onClick={finishTraining}
                 onKeyPress={(e) => e.key === 'Enter' && finishTraining()}
                 tabIndex={1}
-                style={{
-                  padding: '10px 20px',
-                  background: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
+                className="training-finish-button"
               >
                 Завершить
               </button>
@@ -336,38 +386,29 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   return (
     <div>
       {!trainingMode && (
-        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+        <div className="training-buttons-container">
           <button
             onClick={startTraining}
-            style={{
-              padding: '12px 24px',
-              fontSize: '16px',
-              background: 'linear-gradient(135deg, #28a745, #20c997)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(40, 167, 69, 0.3)'
-            }}
+            className="training-start-button"
           >
             🎯 Начать тренировку
           </button>
           
-          <button
-            onClick={resetCategoryProgress}
-            style={{
-              padding: '12px 24px',
-              fontSize: '16px',
-              background: 'linear-gradient(135deg, #dc3545, #c82333)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(220, 53, 69, 0.3)'
-            }}
-          >
-            🔄 Сбросить прогресс категории
-          </button>
+          <div className="training-control-buttons">
+            <button
+              onClick={resetCategoryProgress}
+              className="training-reset-button"
+            >
+              📚 Режим обучения
+            </button>
+            
+            <button
+              onClick={resetCategoryFromTraining}
+              className="training-clear-button"
+            >
+              🚫 Сбросить
+            </button>
+          </div>
         </div>
       )}
 
@@ -377,47 +418,108 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
       {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
       {!loading && !error && !trainingMode && (
         <ul className="words-education-list">
-          {words.map((word) => {
-            const learned = isWordLearned(word.id);
-            return (
-              <li key={word.id}>
-                {learned ? (
-                  <>
-                    <span className="words-education-list__word">{word.word}</span>
-                    <span className="words-education-list__translation_1">&nbsp;&mdash; {word.translation_1}</span>
-                    {word.translation_2 && <span className="words-education-list__translation_2">, {word.translation_2}</span>}
-                    {word.translation_3 && <span className="words-education-list__translation_3">, {word.translation_3}</span>}
-                  </>
-                ) : (
-                  <>
-                    <span className="words-education-list__word" style={{color: '#ccc'}}>
-                      {word.word.split('').map((char, index) => 
-                        char === ' ' ? ' ' : '█ '
-                      ).join('')}
-                    </span>
-                    <span className="words-education-list__translation_1" style={{color: '#ccc'}}>&nbsp;- {word.translation_1.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>
-                    {word.translation_2 && <span className="words-education-list__translation_2" style={{color: '#ccc'}}>, {word.translation_2.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>}
-                    {word.translation_3 && <span className="words-education-list__translation_3" style={{color: '#ccc'}}>, {word.translation_3.split('').map((char, index) => char === ' ' ? ' ' : '█ ').join('')}</span>}
-                  </>
-                )}
-                {window.myajax && window.myajax.is_admin && (
-                  <button
-                    className="edit-button"
-                    style={{ marginLeft: "10px" }}
-                    onClick={() => toggleEdit(word.id)}
-                  >
-                    ✏️
-                  </button>
-                )}
+          {(() => {
+            // Фильтруем слова по категории из dictionaryWords
+            const categoryWords = dictionaryWords.filter(word => {
+              if (categoryId === 0) return true;
+              const categoryIdNum = parseInt(categoryId);
+              if (Array.isArray(word.category_ids)) {
+                return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+              }
+              return false;
+            });
 
-                {editingWordId === word.id && (
-                  <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
-                    <WordEditor dictionaryId={dictionaryId} word={word} />
-                  </div>
-                )}
-              </li>
-            );
-          })}
+            return categoryWords.map((word) => {
+              const displayStatus = getWordDisplayStatus(word.id);
+              const userData = userWordsData[word.id];
+              
+              return (
+                <li key={word.id}>
+                  {/* Слово */}
+                  <span className="words-education-list__word">
+                    {displayStatus.showWord ? (
+                      word.word
+                    ) : (
+                      <span className="words-hidden-text">
+                        {word.word.split('').map((char, index) => 
+                          char === ' ' ? ' ' : '█ '
+                        ).join('')}
+                      </span>
+                    )}
+                  </span>
+                  
+                  {/* Перевод 1 */}
+                  <span className="words-education-list__translation_1">
+                    {userData && userData.easy_education === 1 && (
+                     <span className={`words-progress-indicator ${
+                        displayStatus.fullyLearned ? 'fully-learned' : 
+                        displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
+                      }`}>
+                        {displayStatus.fullyLearned ? "✓ Изучено полностью" : 
+                         displayStatus.showWord || displayStatus.showTranslation ? '✓' : 
+                         <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
+                      </span>
+                   ) || <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>}
+                    {displayStatus.showTranslation ? (
+                      word.translation_1
+                    ) : (
+                      <span className="words-hidden-text">
+                        {word.translation_1.split('').map((char, index) => 
+                          char === ' ' ? ' ' : '█ '
+                        ).join('')}
+                      </span>
+                    )}
+                  </span>
+                  
+                  {/* Перевод 2 */}
+                  {word.translation_2 && (
+                    <span className="words-education-list__translation_2">
+                      , {displayStatus.showTranslation ? (
+                        word.translation_2
+                      ) : (
+                        <span className="words-hidden-text">
+                          {word.translation_2.split('').map((char, index) => 
+                            char === ' ' ? ' ' : '█ '
+                          ).join('')}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                  
+                  {/* Перевод 3 */}
+                  {word.translation_3 && (
+                    <span className="words-education-list__translation_3">
+                      , {displayStatus.showTranslation ? (
+                        word.translation_3
+                      ) : (
+                        <span className="words-hidden-text">
+                          {word.translation_3.split('').map((char, index) => 
+                            char === ' ' ? ' ' : '█ '
+                          ).join('')}
+                        </span>
+                      )}
+                    </span>
+                  )}
+
+                  {window.myajax && window.myajax.is_admin && (
+                    <button
+                      className="edit-button"
+                      style={{ marginLeft: "10px" }}
+                      onClick={() => toggleEdit(word.id)}
+                    >
+                      ✏️
+                    </button>
+                  )}
+
+                  {editingWordId === word.id && (
+                    <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
+                      <WordEditor dictionaryId={dictionaryId} word={word} />
+                    </div>
+                  )}
+                </li>
+              );
+            });
+          })()}
         </ul>
       )}
     </div>

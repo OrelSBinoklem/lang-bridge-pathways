@@ -170,3 +170,110 @@ function reset_category_progress($user_id, $category_id) {
     return true;
 }
 
+/**
+ * Обновить прогресс пользователя по слову
+ * @param int $user_id ID пользователя
+ * @param int $word_id ID слова
+ * @param int $is_revert 0 = прямой перевод, 1 = обратный перевод
+ * @return bool Результат операции
+ */
+function update_word_progress($user_id, $word_id, $is_revert) {
+    global $wpdb;
+    
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    
+    // Проверяем, существует ли запись
+    $exists = $wpdb->get_var($wpdb->prepare("
+        SELECT COUNT(*) FROM $user_dict_words_table 
+        WHERE user_id = %d AND dict_word_id = %d
+    ", $user_id, $word_id));
+    
+    $field_to_update = $is_revert ? 'easy_correct_revert' : 'easy_correct';
+    
+    if ($exists) {
+        // Обновляем существующую запись
+        $result = $wpdb->update(
+            $user_dict_words_table,
+            [$field_to_update => 1],
+            [
+                'user_id' => $user_id,
+                'dict_word_id' => $word_id
+            ]
+        );
+        return $result !== false;
+    } else {
+        // Создаем новую запись
+        $data = [
+            'user_id' => $user_id,
+            'dict_word_id' => $word_id,
+            'attempts' => 0,
+            'correct_attempts' => 0,
+            'last_shown' => current_time('mysql'),
+            'easy_education' => 1,
+            'mode_education' => 0,
+            'attempts_all' => 0,
+            'correct_attempts_all' => 0,
+            'attempts_revert' => 0,
+            'correct_attempts_revert' => 0,
+            'easy_correct' => 0,
+            'easy_correct_revert' => 0
+        ];
+        
+        // Устанавливаем правильный флаг в зависимости от режима
+        $data[$field_to_update] = 1;
+        
+        $result = $wpdb->insert($user_dict_words_table, $data);
+        return $result !== false;
+    }
+}
+
+/**
+ * Сбросить слова категории из режима обучения (easy_education = 0)
+ * @param int $user_id ID пользователя
+ * @param int $category_id ID категории
+ * @return bool Результат операции
+ */
+function reset_category_from_training($user_id, $category_id) {
+    global $wpdb;
+    
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    $word_ids = $wpdb->get_col($wpdb->prepare("
+        SELECT w.id 
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id = %d
+    ", $category_id));
+    
+    if (empty($word_ids)) {
+        return false;
+    }
+    
+    foreach ($word_ids as $word_id) {
+        $exists = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(*) FROM $user_dict_words_table 
+            WHERE user_id = %d AND dict_word_id = %d
+        ", $user_id, $word_id));
+        
+        if ($exists) {
+            $wpdb->update(
+                $user_dict_words_table,
+                [
+                    'easy_education' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0
+                ],
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+        }
+        // Не создаем новую запись, если пользователь не участвует в тренировке
+    }
+    
+    return true;
+}
+

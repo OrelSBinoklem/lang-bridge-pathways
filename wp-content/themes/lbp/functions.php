@@ -288,6 +288,52 @@ class WordsAjaxHandler {
         }
         wp_die();
     }
+
+    public static function handle_update_word_progress() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $word_id = intval($_POST['word_id'] ?? 0);
+        $is_revert = intval($_POST['is_revert'] ?? 0); // 0 = прямой перевод, 1 = обратный
+
+        if (!$word_id) {
+            wp_send_json_error(['message' => 'Не передан ID слова']);
+            wp_die();
+        }
+
+        $result = update_word_progress($user_id, $word_id, $is_revert);
+        if ($result) {
+            wp_send_json_success(['message' => 'Прогресс обновлен']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при обновлении прогресса']);
+        }
+        wp_die();
+    }
+
+    public static function handle_reset_category_from_training() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $result = reset_category_from_training($user_id, $category_id);
+        if ($result) {
+            wp_send_json_success(['message' => 'Слова категории сброшены из режима обучения']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при сбросе категории']);
+        }
+        wp_die();
+    }
 }
 
 // Привязка метода AJAX-обработчика
@@ -309,6 +355,8 @@ add_action('wp_ajax_update_word', ['WordsAjaxHandler', 'handle_update_word']);
 
 add_action('wp_ajax_get_user_dict_words', ['WordsAjaxHandler', 'handle_get_user_dict_words']);
 add_action('wp_ajax_reset_category_progress', ['WordsAjaxHandler', 'handle_reset_category_progress']);
+add_action('wp_ajax_update_word_progress', ['WordsAjaxHandler', 'handle_update_word_progress']);
+add_action('wp_ajax_reset_category_from_training', ['WordsAjaxHandler', 'handle_reset_category_from_training']);
 
 
 

@@ -914,6 +914,172 @@ h2 .small {
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
+/* Стили для индикаторов прогресса слов */
+.words-progress-indicator {
+    margin-left: 10px;
+    font-size: 12px;
+}
+
+.words-progress-indicator.fully-learned {
+    color: green;
+}
+
+.words-progress-indicator.partially-learned {
+    color: orange;
+}
+
+.words-progress-indicator.not-learned {
+    color: gray;
+}
+
+/* Стили для скрытых частей слов */
+.words-hidden-text {
+    color: #ccc;
+}
+
+/* Стили для интерфейса тренировки */
+.training-interface {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 1000;
+    min-width: 400px;
+    text-align: center;
+}
+
+.training-title {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.training-word-display {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+}
+
+.training-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.training-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 1;
+}
+
+.training-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.training-result {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.training-result.correct {
+    color: #28a745;
+}
+
+.training-result.incorrect {
+    color: #dc3545;
+}
+
+.training-correct-answer {
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.training-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.training-next-button {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.training-finish-button {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Стили для кнопок тренировки */
+.training-start-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.training-reset-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.training-clear-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.training-buttons-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.training-control-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 /* Адаптивные стили для кнопок */
 @media screen and (max-width: 768px) {
     .mode-buttons-container {
@@ -935,5 +1101,19 @@ h2 .small {
         margin: 6px 0 4px 0;
         padding: 1px 0;
         letter-spacing: 0.1px;
+    }
+
+    .training-interface {
+        min-width: 300px;
+        padding: 20px;
+    }
+
+    .training-buttons-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .training-control-buttons {
+        justify-content: center;
     }
 }
