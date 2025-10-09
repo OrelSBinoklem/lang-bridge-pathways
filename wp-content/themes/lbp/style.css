@@ -781,6 +781,20 @@ body {
     text-align: center;
 }
 
+h2 .small {
+    position: absolute;
+    top: 4px;
+    right: -29px;
+    font-size: 12px;
+    font-weight: normal;
+    color: #888;
+    margin-left: 8px;
+}
+
+.wrap-h2 {
+    position: relative;
+}
+
 @media screen and (max-width: 767px) {
 
 }
