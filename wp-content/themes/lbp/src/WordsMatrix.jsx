@@ -1,99 +1,119 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 
-const WordsMatrix = ({ dictionaryId }) => {
+const WordsMatrix = ({ 
+  dictionaryId,
+  dictionaryWords = [],
+  loadingDictionaryWords = false,
+  userWordsData = {},
+  loadingUserData = false
+}) => {
   const canvasRef = useRef(null);
   const squaresRef = useRef([]); // Храним квадратики в useRef
-  const [dictionaryWords, setDictionaryWords] = useState([]);
   const [hoveredWord, setHoveredWord] = useState(null); // Состояние для подсказки
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 }); // Позиция подсказки
 
-  // Загрузка данных через AJAX
-  useEffect(() => {
-    const fetchWords = async () => {
-      try {
-        const formData = new FormData();
-        formData.append("action", "get_dictionary_words");
-        formData.append("dictionary_id", dictionaryId);
+  // Функция для получения данных пользователя для конкретного слова
+  const getUserWordData = (wordId) => {
+    return userWordsData[wordId] || null;
+  };
 
-        const response = await axios.post(window.myajax.url, formData);
+  // Функция для проверки, изучено ли слово
+  const isWordLearned = (wordId) => {
+    const userData = getUserWordData(wordId);
+    if(userData) {
+      console.log(userData)
+    }
 
-        if (response.data.success) {
-          setDictionaryWords(response.data.data);
-        } else {
-          console.error("Ошибка получения слов:", response.data);
-        }
-      } catch (error) {
-        console.error("Ошибка AJAX-запроса:", error);
-      }
-    };
-
-    fetchWords();
-  }, [dictionaryId]);
+    return userData ? userData.correct_attempts >= 2 : false;
+  };
 
   // Обновление размеров и рисование
   useEffect(() => {
-    const updateCanvasSize = () => {
-      const canvas = canvasRef.current;
-      const parent = canvas.parentElement;
-
-      if (parent) {
-        canvas.width = parent.offsetWidth;
-        canvas.height = parent.offsetWidth * 0.5; // Пример пропорции
+    // Функция для инициализации canvas с повторными попытками
+    const initializeCanvas = () => {
+      if (!canvasRef.current) {
+        setTimeout(initializeCanvas, 50);
+        return;
       }
-    };
 
-    const drawMatrix = () => {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      const sizeWithGap = 8; // Общий размер с отступом
-      const size = 7; // Размер квадрата
-      const cols = Math.floor(canvas.width / sizeWithGap);
 
-      // Очистка canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const updateCanvasSize = () => {
+        if (!canvas) return;
+        
+        const parent = canvas.parentElement;
 
-      const squares = []; // Локальный массив для сохранения квадратиков
+        if (parent) {
+          canvas.width = parent.offsetWidth;
+          canvas.height = parent.offsetWidth * 0.5; // Пример пропорции
+        }
+      };
 
-      dictionaryWords.forEach((wordObj, index) => {
-        const x = (index % cols) * sizeWithGap;
-        const y = Math.floor(index / cols) * sizeWithGap;
+      const drawMatrix = () => {
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext("2d");
+        const sizeWithGap = 8; // Общий размер с отступом
+        const size = 7; // Размер квадрата
+        const cols = Math.floor(canvas.width / sizeWithGap);
 
-        // Сохраняем координаты квадратика
-        squares.push({
-          x,
-          y,
-          size,
-          wordObj,
-        });
+        // Очистка canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Используем новые цвета
-        ctx.fillStyle = wordObj.is_learned ? "lawngreen" : "darkgray";
+        const squares = []; // Локальный массив для сохранения квадратиков
+
+        dictionaryWords.forEach((wordObj, index) => {
+          const x = (index % cols) * sizeWithGap;
+          const y = Math.floor(index / cols) * sizeWithGap;
+          
+          // Проверяем статус изучения слова
+          const isLearned = isWordLearned(wordObj.id);
+
+          // Сохраняем координаты квадратика
+          squares.push({
+            x,
+            y,
+            size,
+            wordObj: {
+              ...wordObj,
+              is_learned: isLearned
+            },
+          });
+
+         // Используем новые цвета
+         ctx.fillStyle = isLearned ? "#32cd32" : "darkgray";
         ctx.fillRect(x, y, size, size);
 
         /*ctx.strokeStyle = "black";
         ctx.strokeRect(x, y, size, size);*/
       });
 
-      squaresRef.current = squares; // Сохраняем квадраты в ref
-    };
+        squaresRef.current = squares; // Сохраняем квадраты в ref
+      };
 
-    const handleResize = () => {
+      const handleResize = () => {
+        updateCanvasSize();
+        drawMatrix();
+      };
+
+      // Инициализация
       updateCanvasSize();
-      drawMatrix();
+      if (dictionaryWords.length > 0) {
+        drawMatrix();
+      }
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
     };
 
-    updateCanvasSize();
-    if (dictionaryWords.length > 0) {
-      drawMatrix();
-    }
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [dictionaryWords]);
+    // Запускаем инициализацию
+    const cleanup = initializeCanvas();
+    
+    return cleanup;
+  }, [dictionaryWords, userWordsData]);
 
   // Обработчик наведения мыши
   const handleMouseMove = (event) => {
@@ -117,6 +137,10 @@ const WordsMatrix = ({ dictionaryId }) => {
       setHoveredWord(null);
     }
   };
+
+  if (loadingDictionaryWords) {
+    return <div>Загрузка матрицы слов...</div>;
+  }
 
   return (
     <div className={'words-matrix'} style={{ position: "relative" }}>

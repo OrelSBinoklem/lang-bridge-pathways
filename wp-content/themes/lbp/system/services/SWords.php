@@ -27,23 +27,44 @@ class WordsService {
      */
     public static function get_words_by_dictionary($dictionary_id) {
         global $wpdb;
-
-        $unique_words_table = $wpdb->prefix . 'unique_words';
+        
         $words_table = $wpdb->prefix . 'd_words';
 
-        // SQL-запрос для получения списка слов и их переводов
+        // SQL-запрос для получения всех полей слов словаря
         $query = $wpdb->prepare("
-            SELECT uw.word,
-                   dw.translation_1,
-                   dw.translation_2,
-                   dw.translation_3
-            FROM $unique_words_table AS uw
-            INNER JOIN $words_table AS dw
-            ON uw.word = dw.word AND uw.lang = dw.learn_lang
-            WHERE dw.dictionary_id = %d
+            SELECT id, 
+                   word,
+                   learn_lang,
+                   is_phrase,
+                   translation_1,
+                   translation_2,
+                   translation_3,
+                   difficult_translation,
+                   sound_url,
+                   level,
+                   maxLevel,
+                   type,
+                   gender,
+                   `order`
+            FROM $words_table
+            WHERE dictionary_id = %d
+            ORDER BY `order`
         ", $dictionary_id);
 
-        return $wpdb->get_results($query, ARRAY_A);
+        $results = $wpdb->get_results($query, ARRAY_A);
+        
+        // Приводим числовые поля к правильным типам
+        foreach ($results as &$word) {
+            // Числовые поля
+            $word['id'] = intval($word['id']);
+            $word['is_phrase'] = intval($word['is_phrase']);
+            $word['level'] = $word['level'] ? intval($word['level']) : null;
+            $word['maxLevel'] = intval($word['maxLevel']);
+            $word['gender'] = $word['gender'] ? intval($word['gender']) : null;
+            $word['order'] = intval($word['order']);
+        }
+        
+        return $results;
     }
 
     /**

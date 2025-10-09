@@ -181,9 +181,15 @@ if(document.getElementById('react-app-dictionary')) {
 					</div>
 				}
 
-				<div style={{ display: mode === null ? "block" : "none" }}>
+				<div style={{ visibility: mode === null ? "visible" : "hidden", position: mode === null ? "static" : "absolute", top: mode === null ? "auto" : "-9999px" }}>
 					<h2>Матрица слов (декорация)</h2>
-					<WordsMatrix dictionaryId={dictionaryId} />
+					<WordsMatrix 
+						dictionaryId={dictionaryId} 
+						userWordsData={userWordsData}
+						loadingUserData={loadingUserData}
+						dictionaryWords={dictionaryWords}
+						loadingDictionaryWords={loadingDictionaryWords}
+					/>
 				</div>
 			</div>
 		);

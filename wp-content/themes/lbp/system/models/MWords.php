@@ -72,9 +72,18 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
 
     $results = $wpdb->get_results($query, ARRAY_A);
     
-    // Преобразуем в объект для удобства поиска по dict_word_id
+    // Преобразуем в объект для удобства поиска по dict_word_id и приводим типы
     $user_words_data = [];
     foreach ($results as $row) {
+        // Приводим числовые поля к правильным типам
+        $row['dict_word_id'] = intval($row['dict_word_id']);
+        $row['attempts'] = intval($row['attempts']);
+        $row['correct_attempts'] = intval($row['correct_attempts']);
+        $row['easy_education'] = intval($row['easy_education']);
+        $row['mode_education'] = intval($row['mode_education']);
+        $row['attempts_all'] = intval($row['attempts_all']);
+        $row['correct_attempts_all'] = intval($row['correct_attempts_all']);
+        
         $user_words_data[$row['dict_word_id']] = $row;
     }
 
