@@ -147,11 +147,11 @@ if(document.getElementById('react-app-dictionary')) {
 
 		return (
 			<div>
-				{mode === null&& (
-					<>
+				{mode === null && (
+					<div className="mode-buttons-container">
 						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
 						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Экзамен</button>
-					</>
+					</div>
 				)}
 				{mode !== null&&
 					<div className={'words-education-window'}>
@@ -182,7 +182,7 @@ if(document.getElementById('react-app-dictionary')) {
 				}
 
 				<div style={{ visibility: mode === null ? "visible" : "hidden", position: mode === null ? "static" : "absolute", top: mode === null ? "auto" : "-9999px" }}>
-					<h2>Матрица слов (декорация)</h2>
+					<h2 className="words-matrix-title">Матрица слов (декорация)</h2>
 					<WordsMatrix 
 						dictionaryId={dictionaryId} 
 						userWordsData={userWordsData}

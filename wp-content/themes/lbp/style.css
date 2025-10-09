@@ -798,3 +798,142 @@ h2 .small {
 @media screen and (max-width: 767px) {
 
 }
+
+/* Стили для кнопок режимов словаря */
+.mode-buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.mode-button {
+    position: relative;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #dee2e6;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mode-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+}
+
+.mode-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+    border-color: #007bff;
+}
+
+.mode-button:hover::before {
+    left: 100%;
+}
+
+.mode-button:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.1s ease;
+}
+
+.mode-button.green {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.mode-button.green:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, #34ce57, #28a745);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    border-color: #28a745;
+}
+
+/* Эффект пульсации для активной кнопки */
+.mode-button.active {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+/* Стили для заголовка матрицы слов */
+.words-matrix-title {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    text-align: left;
+    margin: 10px 0 6px 0;
+    padding: 2px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.2px;
+    position: relative;
+}
+
+.words-matrix-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Адаптивные стили для кнопок */
+@media screen and (max-width: 768px) {
+    .mode-buttons-container {
+        flex-direction: column;
+        gap: 15px;
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .mode-button {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px 25px;
+        font-size: 14px;
+    }
+    
+    .words-matrix-title {
+        font-size: 16px;
+        margin: 6px 0 4px 0;
+        padding: 1px 0;
+        letter-spacing: 0.1px;
+    }
+}
