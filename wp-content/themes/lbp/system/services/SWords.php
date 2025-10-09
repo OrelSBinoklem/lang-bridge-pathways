@@ -29,26 +29,30 @@ class WordsService {
         global $wpdb;
         
         $words_table = $wpdb->prefix . 'd_words';
+        $word_category_table = $wpdb->prefix . 'd_word_category';
 
-        // SQL-запрос для получения всех полей слов словаря
+        // SQL-запрос для получения всех полей слов словаря с категориями
         $query = $wpdb->prepare("
-            SELECT id, 
-                   word,
-                   learn_lang,
-                   is_phrase,
-                   translation_1,
-                   translation_2,
-                   translation_3,
-                   difficult_translation,
-                   sound_url,
-                   level,
-                   maxLevel,
-                   type,
-                   gender,
-                   `order`
-            FROM $words_table
-            WHERE dictionary_id = %d
-            ORDER BY `order`
+            SELECT w.id, 
+                   w.word,
+                   w.learn_lang,
+                   w.is_phrase,
+                   w.translation_1,
+                   w.translation_2,
+                   w.translation_3,
+                   w.difficult_translation,
+                   w.sound_url,
+                   w.level,
+                   w.maxLevel,
+                   w.type,
+                   w.gender,
+                   w.`order`,
+                   GROUP_CONCAT(wc.category_id) as category_ids
+            FROM $words_table AS w
+            LEFT JOIN $word_category_table AS wc ON w.id = wc.word_id
+            WHERE w.dictionary_id = %d
+            GROUP BY w.id
+            ORDER BY w.`order`
         ", $dictionary_id);
 
         $results = $wpdb->get_results($query, ARRAY_A);
@@ -62,6 +66,13 @@ class WordsService {
             $word['maxLevel'] = intval($word['maxLevel']);
             $word['gender'] = $word['gender'] ? intval($word['gender']) : null;
             $word['order'] = intval($word['order']);
+            
+            // Преобразуем category_ids в массив
+            if ($word['category_ids']) {
+                $word['category_ids'] = array_map('intval', explode(',', $word['category_ids']));
+            } else {
+                $word['category_ids'] = [];
+            }
         }
         
         return $results;

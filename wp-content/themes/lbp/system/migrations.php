@@ -308,6 +308,16 @@ function add_revert_fields_to_user_dict_words_table() {
         $wpdb->query("ALTER TABLE $table_name ADD COLUMN correct_attempts_revert mediumint(9) NOT NULL DEFAULT 0 AFTER attempts_revert");
         error_log('Added correct_attempts_revert field to user_dict_words table');
     }
+    
+    if (!in_array('easy_correct', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN easy_correct tinyint(1) NOT NULL DEFAULT 0 AFTER correct_attempts_revert");
+        error_log('Added easy_correct field to user_dict_words table');
+    }
+    
+    if (!in_array('easy_correct_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN easy_correct_revert tinyint(1) NOT NULL DEFAULT 0 AFTER easy_correct");
+        error_log('Added easy_correct_revert field to user_dict_words table');
+    }
 }
 
 add_action('after_setup_theme', 'add_revert_fields_to_user_dict_words_table');

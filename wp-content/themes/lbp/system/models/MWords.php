@@ -64,7 +64,7 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
     $query = $wpdb->prepare("
         SELECT dict_word_id, attempts, correct_attempts, last_shown, 
                easy_education, mode_education, attempts_all, correct_attempts_all,
-               attempts_revert, correct_attempts_revert
+               attempts_revert, correct_attempts_revert, easy_correct, easy_correct_revert
         FROM $user_dict_words_table 
         WHERE user_id = %d AND dict_word_id IN (
             SELECT id FROM $words_table WHERE dictionary_id = %d
@@ -86,10 +86,87 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
         $row['correct_attempts_all'] = intval($row['correct_attempts_all']);
         $row['attempts_revert'] = intval($row['attempts_revert']);
         $row['correct_attempts_revert'] = intval($row['correct_attempts_revert']);
+        $row['easy_correct'] = intval($row['easy_correct']);
+        $row['easy_correct_revert'] = intval($row['easy_correct_revert']);
         
         $user_words_data[$row['dict_word_id']] = $row;
     }
 
     return $user_words_data;
+}
+
+/**
+ * Сбросить прогресс категории - установить easy_education = 1 для всех слов категории
+ * @param int $user_id ID пользователя
+ * @param int $category_id ID категории
+ * @return bool Результат операции
+ */
+function reset_category_progress($user_id, $category_id) {
+    global $wpdb;
+    
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    // Получаем все слова из категории
+    $word_ids = $wpdb->get_col($wpdb->prepare("
+        SELECT w.id 
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id = %d
+    ", $category_id));
+    
+    if (empty($word_ids)) {
+        return false;
+    }
+    
+    $placeholders = implode(',', array_fill(0, count($word_ids), '%d'));
+    
+    // Обновляем или создаем записи для всех слов категории
+    foreach ($word_ids as $word_id) {
+        // Проверяем, существует ли запись
+        $exists = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(*) FROM $user_dict_words_table 
+            WHERE user_id = %d AND dict_word_id = %d
+        ", $user_id, $word_id));
+        
+        if ($exists) {
+            // Обновляем существующую запись
+            $wpdb->update(
+                $user_dict_words_table,
+                [
+                    'easy_education' => 1,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0
+                ],
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+        } else {
+            // Создаем новую запись
+            $wpdb->insert(
+                $user_dict_words_table,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id,
+                    'attempts' => 0,
+                    'correct_attempts' => 0,
+                    'last_shown' => '0000-00-00 00:00:00',
+                    'easy_education' => 1,
+                    'mode_education' => 0,
+                    'attempts_all' => 0,
+                    'correct_attempts_all' => 0,
+                    'attempts_revert' => 0,
+                    'correct_attempts_revert' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0
+                ]
+            );
+        }
+    }
+    
+    return true;
 }
 

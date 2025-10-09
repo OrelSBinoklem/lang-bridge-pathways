@@ -18,7 +18,7 @@ const CategoryTree = ({ dictionaryId, onCategoryClick }) => {
 
       if (response.data.success) {
         // Если список категорий одноуровневый
-        console.log(response.data.data)
+        //console.log(response.data.data)
         if(response.data.data.some(item => Array.isArray(item.children) && item.children.length > 0)) {
           setCategories(response.data.data); // Устанавливаем дерево категорий
         } else {

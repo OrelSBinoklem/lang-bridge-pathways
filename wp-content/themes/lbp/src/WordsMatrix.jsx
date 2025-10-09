@@ -20,9 +20,6 @@ const WordsMatrix = ({
   // Функция для проверки, изучено ли слово
   const isWordLearned = (wordId) => {
     const userData = getUserWordData(wordId);
-    if(userData) {
-      console.log(userData)
-    }
 
     return userData ? 
       (userData.correct_attempts >= 2 && userData.correct_attempts_revert >= 2) : 

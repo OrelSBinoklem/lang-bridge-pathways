@@ -164,6 +164,8 @@ if(document.getElementById('react-app-dictionary')) {
 								userWordsData={userWordsData}
 								loadingUserData={loadingUserData}
 								onRefreshUserData={fetchUserWordsData}
+								dictionaryWords={dictionaryWords}
+								loadingDictionaryWords={loadingDictionaryWords}
 							/>
 						}
 						{
