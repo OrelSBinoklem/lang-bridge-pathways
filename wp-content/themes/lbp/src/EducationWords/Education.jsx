@@ -1,5 +1,6 @@
 import axios from "axios";
-import WordEditor from "../WordEditor";
+import TrainingInterface from "../components/TrainingInterface";
+import WordRow from "../components/WordRow";
 
 const { useEffect, useState } = wp.element;
 
@@ -154,53 +155,6 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
       .replace(/\s+/g, ' '); // Нормализует пробелы
   };
 
-  // Проверить ответ
-  const checkAnswer = () => {
-    if (!currentWord || !userAnswer.trim()) return;
-
-    let correct = false;
-    let correctAnswers = [];
-
-    if (currentMode) {
-      // Обратный перевод: показываем перевод, ждем слово (правильный ответ - само слово)
-      correctAnswers = [currentWord.word];
-    } else {
-      // Прямой перевод: показываем слово, ждем перевод (правильные ответы - переводы)
-      correctAnswers = [
-        currentWord.translation_1,
-        currentWord.translation_2,
-        currentWord.translation_3
-      ].filter(t => t && t !== '0');
-    }
-
-    const normalizedUserAnswer = normalizeString(userAnswer);
-    
-    correct = correctAnswers.some(answer => {
-      const normalizedAnswer = normalizeString(answer);
-      console.log('Comparing:', normalizedUserAnswer, 'vs', normalizedAnswer);
-      return normalizedAnswer === normalizedUserAnswer;
-    });
-
-    console.log('User answer:', userAnswer);
-    console.log('Correct answers:', correctAnswers);
-    console.log('Result:', correct);
-
-    setIsCorrect(correct);
-    setShowResult(true);
-
-    // Обновляем прогресс в базе данных при правильном ответе
-    if (correct) {
-      updateWordProgress(currentWord.id, currentMode);
-    }
-
-    // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
-    setTimeout(() => {
-      const nextButton = document.querySelector('[data-next-word]');
-      if (nextButton) {
-        nextButton.focus();
-      }
-    }, 100);
-  };
 
   // Обновить прогресс слова на сервере
   const updateWordProgress = async (wordId, isRevertMode) => {
@@ -226,36 +180,6 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
   };
 
-  // Следующее слово
-  const nextWord = () => {
-    const trainingWords = getTrainingWords();
-    if (trainingWords.length === 0) {
-      setTrainingMode(false);
-      return;
-    }
-    
-    const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
-    setCurrentWord(randomWord);
-    setCurrentMode(Math.random() < 0.5); // Новый режим для нового слова
-    setUserAnswer('');
-    setShowResult(false);
-
-    // Возвращаем фокус на поле ввода после рендера
-    setTimeout(() => {
-      const inputField = document.querySelector('[data-training-input]');
-      if (inputField) {
-        inputField.focus();
-      }
-    }, 100);
-  };
-
-  // Завершить тренировку
-  const finishTraining = () => {
-    setTrainingMode(false);
-    setCurrentWord(null);
-    setUserAnswer('');
-    setShowResult(false);
-  };
 
   // Сбросить прогресс категории
   const resetCategoryProgress = async () => {
@@ -311,76 +235,81 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
   };
 
-  // Компонент тренировки
-  const renderTrainingInterface = () => {
-    if (!currentWord) return null;
+  // Обработчики для TrainingInterface
+  const handleCheckAnswer = () => {
+    if (!currentWord || !userAnswer.trim()) return;
 
-    return (
-      <div className="training-interface">
-        <h3 className="training-title">
-          {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
-        </h3>
-        
-        <div className="training-word-display">
-          {currentMode ? currentWord.translation_1 : currentWord.word}
-        </div>
+    let correct = false;
+    let correctAnswers = [];
 
-        <input
-          data-training-input
-          type="text"
-          value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !showResult && checkAnswer()}
-          placeholder="Введите ваш ответ..."
-          autoFocus
-          className="training-input"
-          disabled={showResult}
-        />
+    if (currentMode) {
+      // Обратный перевод: показываем перевод, ждем слово (правильный ответ - само слово)
+      correctAnswers = [currentWord.word];
+    } else {
+      // Прямой перевод: показываем слово, ждем перевод (правильные ответы - переводы)
+      correctAnswers = [
+        currentWord.translation_1,
+        currentWord.translation_2,
+        currentWord.translation_3
+      ].filter(t => t && t !== '0');
+    }
 
-        {!showResult ? (
-          <button
-            onClick={checkAnswer}
-            disabled={!userAnswer.trim()}
-            className="training-button"
-          >
-            Проверить
-          </button>
-        ) : (
-          <div>
-            <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
-              {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
-            </div>
-            
-            {!isCorrect && (
-              <div className="training-correct-answer">
-                Правильный ответ: {currentMode ? currentWord.word : currentWord.translation_1}
-              </div>
-            )}
+    const normalizedUserAnswer = normalizeString(userAnswer);
+    
+    correct = correctAnswers.some(answer => {
+      const normalizedAnswer = normalizeString(answer);
+      console.log('Comparing:', normalizedUserAnswer, 'vs', normalizedAnswer);
+      return normalizedAnswer === normalizedUserAnswer;
+    });
 
-            <div className="training-controls">
-              <button
-                data-next-word
-                onClick={nextWord}
-                onKeyPress={(e) => e.key === 'Enter' && nextWord()}
-                tabIndex={0}
-                className="training-next-button"
-              >
-                Следующее слово
-              </button>
-              
-              <button
-                onClick={finishTraining}
-                onKeyPress={(e) => e.key === 'Enter' && finishTraining()}
-                tabIndex={1}
-                className="training-finish-button"
-              >
-                Завершить
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+    console.log('User answer:', userAnswer);
+    console.log('Correct answers:', correctAnswers);
+    console.log('Result:', correct);
+
+    setIsCorrect(correct);
+    setShowResult(true);
+
+    // Обновляем прогресс в базе данных при правильном ответе
+    if (correct) {
+      updateWordProgress(currentWord.id, currentMode);
+    }
+
+    // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
+    setTimeout(() => {
+      const nextButton = document.querySelector('[data-next-word]');
+      if (nextButton) {
+        nextButton.focus();
+      }
+    }, 100);
+  };
+
+  const handleNextWord = () => {
+    const trainingWords = getTrainingWords();
+    if (trainingWords.length === 0) {
+      setTrainingMode(false);
+      return;
+    }
+    
+    const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
+    setCurrentWord(randomWord);
+    setCurrentMode(Math.random() < 0.5); // Новый режим для нового слова
+    setUserAnswer('');
+    setShowResult(false);
+
+    // Возвращаем фокус на поле ввода после рендера
+    setTimeout(() => {
+      const inputField = document.querySelector('[data-training-input]');
+      if (inputField) {
+        inputField.focus();
+      }
+    }, 100);
+  };
+
+  const handleFinishTraining = () => {
+    setTrainingMode(false);
+    setCurrentWord(null);
+    setUserAnswer('');
+    setShowResult(false);
   };
 
   return (
@@ -412,7 +341,19 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
         </div>
       )}
 
-      {trainingMode && renderTrainingInterface()}
+      {trainingMode && (
+        <TrainingInterface
+          currentWord={currentWord}
+          currentMode={currentMode}
+          userAnswer={userAnswer}
+          setUserAnswer={setUserAnswer}
+          showResult={showResult}
+          isCorrect={isCorrect}
+          onCheckAnswer={handleCheckAnswer}
+          onNextWord={handleNextWord}
+          onFinishTraining={handleFinishTraining}
+        />
+      )}
 
       {loading && <p>Загрузка слов...</p>}
       {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
@@ -434,94 +375,17 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
               const userData = userWordsData[word.id];
               
               return (
-                <li key={word.id}>
-                  {/* Слово */}
-                  <span className="words-education-list__word">
-                    {displayStatus.showWord ? (
-                      word.word
-                    ) : (
-                      <span className="words-hidden-text">
-                        {word.word.split('').map((char, index) => 
-                          char === ' ' ? ' ' : '█ '
-                        ).join('')}
-                      </span>
-                    )}
-                  </span>
-                  
-                  {/* Перевод 1 */}
-                  <span className="words-education-list__translation_1">
-                    {userData && userData.easy_education === 1 && (
-                     <span className={`words-progress-indicator ${
-                        displayStatus.fullyLearned ? 'fully-learned' : 
-                        displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
-                      }`}>
-                        {displayStatus.fullyLearned ? "✅" : 
-                         displayStatus.showWord || displayStatus.showTranslation ? '✅' : 
-                         <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-                      </span>
-                   ) || <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>}
-                    {displayStatus.showTranslation ? (
-                      word.translation_1
-                    ) : (
-                      <span className="words-hidden-text">
-                        {word.translation_1.split('').map((char, index) => 
-                          char === ' ' ? ' ' : '█ '
-                        ).join('')}
-                      </span>
-                    )}
-                  </span>
-                  
-                  {/* Перевод 2 */}
-                  {word.translation_2 && (
-                    <span className="words-education-list__translation_2">
-                      , {displayStatus.showTranslation ? (
-                        word.translation_2
-                      ) : (
-                        <span className="words-hidden-text">
-                          {word.translation_2.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                  
-                  {/* Перевод 3 */}
-                  {word.translation_3 && (
-                    <span className="words-education-list__translation_3">
-                      , {displayStatus.showTranslation ? (
-                        word.translation_3
-                      ) : (
-                        <span className="words-hidden-text">
-                          {word.translation_3.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')}
-                        </span>
-                      )}
-                    </span>
-                  )}
-
-                  {window.myajax && window.myajax.is_admin && (
-                    <button
-                      className="edit-button"
-                      style={{ marginLeft: "10px" }}
-                      onClick={() => toggleEdit(word.id)}
-                    >
-                      ✏️
-                    </button>
-                  )}
-
-                  {editingWordId === word.id && (
-                    <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
-                      <WordEditor 
-                        dictionaryId={dictionaryId} 
-                        word={word} 
-                        onClose={() => setEditingWordId(null)}
-                        onRefreshDictionaryWords={onRefreshDictionaryWords}
-                      />
-                    </div>
-                  )}
-                </li>
+                <WordRow
+                  key={word.id}
+                  word={word}
+                  userData={userData}
+                  displayStatus={displayStatus}
+                  dictionaryId={dictionaryId}
+                  editingWordId={editingWordId}
+                  onToggleEdit={toggleEdit}
+                  onRefreshDictionaryWords={onRefreshDictionaryWords}
+                  mode="education"
+                />
               );
             });
           })()}

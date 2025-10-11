@@ -4,9 +4,9 @@ import axios from "axios";
 const { render, useEffect, useState } = wp.element;
 import useDictionary from './hooks/useDictionary';
 import CategoryTree from "./EducationWords/CategoryTree";
-import EducationExamen from "./EducationExamenWords/EducationExamen";
+import Examen from "./ExamenWords/Examen";
 
-const EducationExamenWords = ({ dictionaryId, mode, onChangeMode, userWordsData = {}, loadingUserData, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories }) => {
+const ExamenWords = ({ dictionaryId, mode, onChangeMode, userWordsData = {}, loadingUserData, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories }) => {
 
 	const { dictionary, loading, error } = useDictionary(dictionaryId);
 
@@ -36,7 +36,7 @@ const EducationExamenWords = ({ dictionaryId, mode, onChangeMode, userWordsData 
 			<h2 style={{ display: mode === 'training' ? "block" : "none" }}>Проверяем слова</h2>
 			{
 				mode === 'training'&&
-				<EducationExamen 
+				<Examen 
 					dictionary={dictionary} 
 					categoryId={categoryId}
 					dictionaryId={dictionaryId}
@@ -51,4 +51,4 @@ const EducationExamenWords = ({ dictionaryId, mode, onChangeMode, userWordsData 
 	);
 };
 
-export default EducationExamenWords;
+export default ExamenWords;

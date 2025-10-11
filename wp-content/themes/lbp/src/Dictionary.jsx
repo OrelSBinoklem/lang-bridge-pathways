@@ -3,7 +3,7 @@ import axios from "axios";
 
 const { render, useEffect, useState } = wp.element;
 import EducationWords from "./EducationWords";
-import EducationExamenWords from "./EducationExamenWords";
+import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
 import CategoryTree from "./EducationWords/CategoryTree";
 
@@ -192,7 +192,7 @@ if(document.getElementById('react-app-dictionary')) {
 						}
 						{
 							mode === 'training-words'&&
-							<EducationExamenWords 
+							<ExamenWords 
 								dictionaryId={dictionaryId} 
 								mode={modeTraining} 
 								onChangeMode={onChangeModeTraining}

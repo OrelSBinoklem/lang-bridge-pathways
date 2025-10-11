@@ -1,9 +1,10 @@
 import axios from "axios";
-import WordEditor from "../WordEditor";
+import TrainingInterface from "../components/TrainingInterface";
+import WordRow from "../components/WordRow";
 
 const { useEffect, useState } = wp.element;
 
-const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
+const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
   const [currentWord, setCurrentWord] = useState(null); // Текущее слово для тренировки
@@ -186,8 +187,75 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
       .replace(/\s+/g, ' '); // Нормализует пробелы
   };
 
-  // Проверить ответ
-  const checkAnswer = () => {
+
+  // Обновить попытки слова на сервере
+  const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
+    try {
+			const formData = new FormData();
+      formData.append("action", "update_word_attempts");
+      formData.append("word_id", wordId);
+      formData.append("is_revert", isRevertMode ? 1 : 0);
+      formData.append("is_correct", isCorrect ? 1 : 0);
+
+			const response = await axios.post(window.myajax.url, formData);
+
+			if (response.data.success) {
+        console.log('Попытка записана успешно');
+        // Обновляем локальные данные пользователя
+        if (onRefreshUserData) {
+          onRefreshUserData();
+        }
+			} else {
+        console.error('Ошибка при записи попытки:', response.data.message);
+			}
+		} catch (err) {
+      console.error('Ошибка при отправке попытки:', err.message);
+    }
+  };
+
+
+  // Сбросить категорию из тренировки (аналог Education.jsx)
+  const resetCategoryFromTraining = async () => {
+    console.log('resetCategoryFromTraining вызвана, categoryId:', categoryId);
+    
+    if (!confirm('Вы уверены, что хотите сбросить эту категорию из тренировки? Все слова будут отключены от тренировки.')) {
+      console.log('Пользователь отменил операцию');
+      return;
+    }
+
+    console.log('Отправляем AJAX запрос...');
+    try {
+      const formData = new FormData();
+      formData.append("action", "reset_training_category");
+      formData.append("category_id", categoryId);
+
+      console.log('Данные для отправки:', {
+        action: "reset_training_category",
+        category_id: categoryId,
+        url: window.myajax?.url
+      });
+
+      const response = await axios.post(window.myajax.url, formData);
+
+      console.log('Ответ сервера:', response.data);
+
+      if (response.data.success) {
+        alert('Данные категории сброшены! Все тренировочные данные обнулены.');
+        // Обновляем данные пользователя
+        if (onRefreshUserData) {
+          onRefreshUserData();
+        }
+      } else {
+        throw new Error(response.data.message || "Ошибка при сбросе категории");
+      }
+    } catch (err) {
+      console.error('Ошибка при сбросе категории:', err);
+      alert('Ошибка: ' + err.message);
+    }
+  };
+
+  // Обработчики для TrainingInterface
+  const handleCheckAnswer = () => {
     if (!currentWord || !userAnswer.trim()) return;
 
     let correct = false;
@@ -230,33 +298,7 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
     }, 100);
   };
 
-  // Обновить попытки слова на сервере
-  const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
-    try {
-			const formData = new FormData();
-      formData.append("action", "update_word_attempts");
-      formData.append("word_id", wordId);
-      formData.append("is_revert", isRevertMode ? 1 : 0);
-      formData.append("is_correct", isCorrect ? 1 : 0);
-
-			const response = await axios.post(window.myajax.url, formData);
-
-			if (response.data.success) {
-        console.log('Попытка записана успешно');
-        // Обновляем локальные данные пользователя
-        if (onRefreshUserData) {
-          onRefreshUserData();
-        }
-			} else {
-        console.error('Ошибка при записи попытки:', response.data.message);
-			}
-		} catch (err) {
-      console.error('Ошибка при отправке попытки:', err.message);
-    }
-  };
-
-  // Следующее слово
-  const nextWord = () => {
+  const handleNextWord = () => {
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
       setTrainingMode(false);
@@ -300,135 +342,13 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
     }, 100);
   };
 
-  // Завершить тренировку
-  const finishTraining = () => {
+  const handleFinishTraining = () => {
     setTrainingMode(false);
     setCurrentWord(null);
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
   };
-
-  // Сбросить категорию из тренировки (аналог Education.jsx)
-  const resetCategoryFromTraining = async () => {
-    console.log('resetCategoryFromTraining вызвана, categoryId:', categoryId);
-    
-    if (!confirm('Вы уверены, что хотите сбросить эту категорию из тренировки? Все слова будут отключены от тренировки.')) {
-      console.log('Пользователь отменил операцию');
-      return;
-    }
-
-    console.log('Отправляем AJAX запрос...');
-    try {
-      const formData = new FormData();
-      formData.append("action", "reset_training_category");
-      formData.append("category_id", categoryId);
-
-      console.log('Данные для отправки:', {
-        action: "reset_training_category",
-        category_id: categoryId,
-        url: window.myajax?.url
-      });
-
-      const response = await axios.post(window.myajax.url, formData);
-
-      console.log('Ответ сервера:', response.data);
-
-      if (response.data.success) {
-        alert('Данные категории сброшены! Все тренировочные данные обнулены.');
-        // Обновляем данные пользователя
-        if (onRefreshUserData) {
-          onRefreshUserData();
-        }
-      } else {
-        throw new Error(response.data.message || "Ошибка при сбросе категории");
-      }
-    } catch (err) {
-      console.error('Ошибка при сбросе категории:', err);
-      alert('Ошибка: ' + err.message);
-    }
-  };
-
-  // Компонент тренировки
-  const renderTrainingInterface = () => {
-    if (!currentWord) return null;
-    
-    const userData = userWordsData[currentWord.id];
-    const inEducationMode = currentMode ? userData?.mode_education_revert : userData?.mode_education;
-
-		return (
-      <div className="training-interface">
-        <h3 className="training-title">
-          {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
-        </h3>
-        
-        {inEducationMode && (
-          <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
-            📚 Режим обучения: продолжайте пытаться!
-          </div>
-        )}
-        
-        <div className="training-word-display">
-          {currentMode ? currentWord.translation_1 : currentWord.word}
-        </div>
-
-        <input
-          data-training-input
-          type="text"
-          value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !showResult && checkAnswer()}
-          placeholder="Введите ваш ответ..."
-          autoFocus
-          className="training-input"
-          disabled={showResult}
-        />
-
-        {!showResult ? (
-          <button
-            onClick={checkAnswer}
-            disabled={!userAnswer.trim()}
-            className="training-button"
-          >
-            Проверить
-          </button>
-        ) : (
-			<div>
-            <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
-              {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
-            </div>
-            
-            {!isCorrect && (
-              <div className="training-correct-answer">
-                Правильный ответ: {currentMode ? currentWord.word : currentWord.translation_1}
-              </div>
-            )}
-
-            <div className="training-controls">
-              <button
-                data-next-word
-                onClick={nextWord}
-                onKeyPress={(e) => e.key === 'Enter' && nextWord()}
-                tabIndex={0}
-                className="training-next-button"
-              >
-                Следующее слово
-              </button>
-              
-              <button
-                onClick={finishTraining}
-                onKeyPress={(e) => e.key === 'Enter' && finishTraining()}
-                tabIndex={1}
-                className="training-finish-button"
-              >
-                Завершить
-              </button>
-            </div>
-          </div>
-        )}
-			</div>
-		);
-	};
 
 	return (
 		<div>
@@ -455,7 +375,23 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
         </div>
       )}
 
-      {trainingMode && renderTrainingInterface()}
+      {trainingMode && (
+        <TrainingInterface
+          currentWord={currentWord}
+          currentMode={currentMode}
+          userAnswer={userAnswer}
+          setUserAnswer={setUserAnswer}
+          showResult={showResult}
+          isCorrect={isCorrect}
+          onCheckAnswer={handleCheckAnswer}
+          onNextWord={handleNextWord}
+          onFinishTraining={handleFinishTraining}
+          inEducationMode={(() => {
+            const userData = userWordsData[currentWord?.id];
+            return currentMode ? userData?.mode_education_revert : userData?.mode_education;
+          })()}
+        />
+      )}
 
       {!trainingMode && (
         <ul className="words-education-list">
@@ -475,114 +411,18 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
               const userData = userWordsData[word.id];
               
               return (
-                <li key={word.id}>
-                  {/* Слово */}
-                  <span className="words-education-list__word">
-                    {displayStatus.cooldownDirect ? (
-                      <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-                        ⏱️ {formatTime(displayStatus.cooldownDirect)}
-                      </span>
-                    ) : displayStatus.showWord ? (
-                      word.word
-                    ) : (
-                      <span className="words-hidden-text">
-                        {userData && userData.mode_education === 1 ? (
-                          <span className="learning-mode-text">
-                            📚 Учу
-                          </span>
-                        ) : (
-                          word.word.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')
-                        )}
-                      </span>
-                    )}
-                  </span>
-                  
-                  {/* Перевод 1 */}
-                  <span className="words-education-list__translation_1">
-                    {userData && displayStatus.hasAttempts ? (
-                     <span className={`words-progress-indicator ${
-                        displayStatus.fullyLearned ? 'fully-learned' : 
-                        (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-                      }`}>
-                        {displayStatus.fullyLearned ? "✅" : 
-                         (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✅' : 
-                         <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-                      </span>
-                   ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>}
-                    {displayStatus.cooldownRevert ? (
-                      <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-                        ⏱️ {formatTime(displayStatus.cooldownRevert)}
-                      </span>
-                    ) : displayStatus.showTranslation ? (
-                      word.translation_1
-                    ) : (
-                      <span className="words-hidden-text">
-                        {userData && userData.mode_education_revert === 1 ? (
-                          <span className="learning-mode-text">
-                            📚 Учу
-                          </span>
-                        ) : (
-                          word.translation_1.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')
-                        )}
-                      </span>
-                    )}
-                  </span>
-                  
-                  {/* Перевод 2 */}
-                  {word.translation_2 && !displayStatus.cooldownRevert && (
-                    <span className="words-education-list__translation_2">
-                      , {displayStatus.showTranslation ? (
-                        word.translation_2
-                      ) : (
-                        <span className="words-hidden-text">
-                          {word.translation_2.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                  
-                  {/* Перевод 3 */}
-                  {word.translation_3 && !displayStatus.cooldownRevert && (
-                    <span className="words-education-list__translation_3">
-                      , {displayStatus.showTranslation ? (
-                        word.translation_3
-                      ) : (
-                        <span className="words-hidden-text">
-                          {word.translation_3.split('').map((char, index) => 
-                            char === ' ' ? ' ' : '█ '
-                          ).join('')}
-                        </span>
-                      )}
-                    </span>
-                  )}
-
-                  {window.myajax && window.myajax.is_admin && (
-                    <button
-                      className="edit-button"
-                      style={{ marginLeft: "10px" }}
-                      onClick={() => toggleEdit(word.id)}
-                    >
-                      ✏️
-                    </button>
-                  )}
-
-                  {editingWordId === word.id && (
-                    <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
-                      <WordEditor 
-                        dictionaryId={dictionaryId} 
-                        word={word} 
-                        onClose={() => setEditingWordId(null)}
-                        onRefreshDictionaryWords={onRefreshDictionaryWords}
-                      />
-                    </div>
-                  )}
-                </li>
+                <WordRow
+                  key={word.id}
+                  word={word}
+                  userData={userData}
+                  displayStatus={displayStatus}
+                  formatTime={formatTime}
+                  dictionaryId={dictionaryId}
+                  editingWordId={editingWordId}
+                  onToggleEdit={toggleEdit}
+                  onRefreshDictionaryWords={onRefreshDictionaryWords}
+                  mode="examen"
+                />
               );
             });
           })()}
@@ -592,4 +432,4 @@ const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, diction
 	);
 };
 
-export default EducationExamen;
+export default Examen;
