@@ -62,8 +62,8 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
     $words_table = $wpdb->prefix . 'd_words';
     
     $query = $wpdb->prepare("
-        SELECT dict_word_id, attempts, correct_attempts, last_shown, 
-               easy_education, mode_education, attempts_all, correct_attempts_all,
+        SELECT dict_word_id, attempts, correct_attempts, last_shown, last_shown_revert,
+               easy_education, mode_education, mode_education_revert, attempts_all, correct_attempts_all,
                attempts_revert, correct_attempts_revert, easy_correct, easy_correct_revert
         FROM $user_dict_words_table 
         WHERE user_id = %d AND dict_word_id IN (
@@ -82,12 +82,14 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
         $row['correct_attempts'] = intval($row['correct_attempts']);
         $row['easy_education'] = intval($row['easy_education']);
         $row['mode_education'] = intval($row['mode_education']);
+        $row['mode_education_revert'] = intval($row['mode_education_revert']);
         $row['attempts_all'] = intval($row['attempts_all']);
         $row['correct_attempts_all'] = intval($row['correct_attempts_all']);
         $row['attempts_revert'] = intval($row['attempts_revert']);
         $row['correct_attempts_revert'] = intval($row['correct_attempts_revert']);
         $row['easy_correct'] = intval($row['easy_correct']);
         $row['easy_correct_revert'] = intval($row['easy_correct_revert']);
+        // last_shown и last_shown_revert остаются строками (datetime)
         
         $user_words_data[$row['dict_word_id']] = $row;
     }
@@ -272,6 +274,174 @@ function reset_category_from_training($user_id, $category_id) {
             );
         }
         // Не создаем новую запись, если пользователь не участвует в тренировке
+    }
+    
+    return true;
+}
+
+function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_first_attempt) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    
+    // Проверяем, существует ли запись
+    $exists = $wpdb->get_row($wpdb->prepare("
+        SELECT * FROM $user_dict_words_table 
+        WHERE user_id = %d AND dict_word_id = %d
+    ", $user_id, $word_id), ARRAY_A);
+    
+    $current_time = current_time('mysql');
+    
+    if ($exists) {
+        // Обновляем существующую запись
+        if ($is_revert) {
+            // Обратный перевод
+            $update_data = [
+                'attempts_revert' => $exists['attempts_revert'] + 1
+            ];
+            
+            if ($is_correct) {
+                // Если правильно ответил
+                if ($is_first_attempt) {
+                    // С первой попытки - добавляем балл
+                    $update_data['correct_attempts_revert'] = $exists['correct_attempts_revert'] + 1;
+                    $update_data['last_shown_revert'] = $current_time;
+                    $update_data['mode_education_revert'] = 0; // Выключаем режим обучения
+                } else {
+                    // Не с первой попытки - выходим из режима обучения и запускаем откат
+                    $update_data['last_shown_revert'] = $current_time;
+                    $update_data['mode_education_revert'] = 0;
+                }
+            } else {
+                // Если неправильно ответил - включаем режим обучения
+                $update_data['mode_education_revert'] = 1;
+            }
+            
+            $wpdb->update(
+                $user_dict_words_table,
+                $update_data,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+        } else {
+            // Прямой перевод
+            $update_data = [
+                'attempts' => $exists['attempts'] + 1
+            ];
+            
+            if ($is_correct) {
+                // Если правильно ответил
+                if ($is_first_attempt) {
+                    // С первой попытки - добавляем балл
+                    $update_data['correct_attempts'] = $exists['correct_attempts'] + 1;
+                    $update_data['last_shown'] = $current_time;
+                    $update_data['mode_education'] = 0; // Выключаем режим обучения
+                } else {
+                    // Не с первой попытки - выходим из режима обучения и запускаем откат
+                    $update_data['last_shown'] = $current_time;
+                    $update_data['mode_education'] = 0;
+                }
+            } else {
+                // Если неправильно ответил - включаем режим обучения
+                $update_data['mode_education'] = 1;
+            }
+            
+            $wpdb->update(
+                $user_dict_words_table,
+                $update_data,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+        }
+    } else {
+        // Создаем новую запись
+        $insert_data = [
+            'user_id' => $user_id,
+            'dict_word_id' => $word_id,
+            'attempts' => 0,
+            'attempts_revert' => 0,
+            'correct_attempts' => 0,
+            'correct_attempts_revert' => 0,
+            'mode_education' => 0,
+            'mode_education_revert' => 0
+        ];
+        
+        if ($is_revert) {
+            $insert_data['attempts_revert'] = 1;
+            if ($is_correct && $is_first_attempt) {
+                $insert_data['correct_attempts_revert'] = 1;
+                $insert_data['last_shown_revert'] = $current_time;
+            } else if (!$is_correct) {
+                $insert_data['mode_education_revert'] = 1;
+            }
+        } else {
+            $insert_data['attempts'] = 1;
+            if ($is_correct && $is_first_attempt) {
+                $insert_data['correct_attempts'] = 1;
+                $insert_data['last_shown'] = $current_time;
+            } else if (!$is_correct) {
+                $insert_data['mode_education'] = 1;
+            }
+        }
+        
+        $wpdb->insert($user_dict_words_table, $insert_data);
+    }
+    
+    return true;
+}
+
+function reset_training_category_data($user_id, $category_id) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    // Получаем все слова из категории
+    $word_ids = $wpdb->get_col($wpdb->prepare("
+        SELECT w.id 
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id = %d
+    ", $category_id));
+    
+    if (empty($word_ids)) {
+        return false;
+    }
+    
+    // Обновляем все записи для слов категории, сохраняя attempts_all и correct_attempts_all
+    foreach ($word_ids as $word_id) {
+        // Проверяем, существует ли запись
+        $exists = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(*) FROM $user_dict_words_table 
+            WHERE user_id = %d AND dict_word_id = %d
+        ", $user_id, $word_id));
+        
+        if ($exists) {
+            // Обновляем существующую запись, сохраняя attempts_all и correct_attempts_all
+            $wpdb->update(
+                $user_dict_words_table,
+                [
+                    'attempts' => 0,
+                    'attempts_revert' => 0,
+                    'correct_attempts' => 0,
+                    'correct_attempts_revert' => 0,
+                    'last_shown' => NULL,
+                    'last_shown_revert' => NULL,
+                    'easy_education' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0,
+                    'mode_education' => 0,
+                    'mode_education_revert' => 0
+                ],
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+        }
     }
     
     return true;

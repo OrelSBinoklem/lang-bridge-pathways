@@ -321,3 +321,28 @@ function add_revert_fields_to_user_dict_words_table() {
 }
 
 add_action('after_setup_theme', 'add_revert_fields_to_user_dict_words_table');
+
+function add_training_mode_fields_to_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+
+    // Проверяем, существуют ли уже эти поля
+    $columns = $wpdb->get_col("DESCRIBE $table_name");
+    
+    if (!in_array('last_shown_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN last_shown_revert datetime DEFAULT NULL AFTER last_shown");
+        error_log('Added last_shown_revert field to user_dict_words table');
+    }
+    
+    if (!in_array('mode_education', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN mode_education tinyint(1) NOT NULL DEFAULT 0 AFTER easy_correct_revert");
+        error_log('Added mode_education field to user_dict_words table');
+    }
+    
+    if (!in_array('mode_education_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN mode_education_revert tinyint(1) NOT NULL DEFAULT 0 AFTER mode_education");
+        error_log('Added mode_education_revert field to user_dict_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_training_mode_fields_to_user_dict_words_table');

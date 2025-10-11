@@ -166,6 +166,8 @@ if(document.getElementById('react-app-dictionary')) {
 								onRefreshUserData={fetchUserWordsData}
 								dictionaryWords={dictionaryWords}
 								loadingDictionaryWords={loadingDictionaryWords}
+								categories={categories}
+								loadingCategories={loadingCategories}
 							/>
 						}
 						{
@@ -177,6 +179,10 @@ if(document.getElementById('react-app-dictionary')) {
 								userWordsData={userWordsData}
 								loadingUserData={loadingUserData}
 								onRefreshUserData={fetchUserWordsData}
+								dictionaryWords={dictionaryWords}
+								loadingDictionaryWords={loadingDictionaryWords}
+								categories={categories}
+								loadingCategories={loadingCategories}
 							/>
 						}
 						<button onClick={onCloseCurrentWindow} type={"button"} className={'words-education-window__close'}>×</button>

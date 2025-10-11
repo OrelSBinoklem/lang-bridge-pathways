@@ -455,7 +455,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                         displayStatus.fullyLearned ? 'fully-learned' : 
                         displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
                       }`}>
-                        {displayStatus.fullyLearned ? "✓ Изучено полностью" : 
+                        {displayStatus.fullyLearned ? "✓" : 
                          displayStatus.showWord || displayStatus.showTranslation ? '✓' : 
                          <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
                       </span>
