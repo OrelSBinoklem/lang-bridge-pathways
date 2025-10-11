@@ -2,6 +2,10 @@ import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
 
+// Тестовые данные для отладки (закомментируйте следующую строку в production)
+import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
+const ENABLE_TEST_DATA = true; // Установите false, чтобы отключить тестовые строки
+
 const { useEffect, useState } = wp.element;
 
 const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
@@ -88,7 +92,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     // Если нет записи в БД, показываем слово, скрываем перевод
     if (!userData) {
       return {
-        showWord: true,
+        showWord: false,
         showTranslation: false,
         fullyLearned: false,
         hasAttempts: false,
@@ -406,7 +410,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
               return false;
             });
 
-            return categoryWords.map((word) => {
+            const realWords = categoryWords.map((word) => {
               const displayStatus = getWordDisplayStatus(word.id);
               const userData = userWordsData[word.id];
               
@@ -425,6 +429,49 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
                 />
               );
             });
+
+            // Тестовые строки для отладки (можно удалить в production)
+            if (ENABLE_TEST_DATA) {
+              const separator = (
+                <li key="test-separator" style={{ 
+                  margin: '20px 0', 
+                  padding: '10px', 
+                  background: '#f0f0f0', 
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  color: '#666',
+                  borderTop: '2px dashed #999',
+                  borderBottom: '2px dashed #999'
+                }}>
+                  ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ ⬇️
+                </li>
+              );
+              
+              const allTestWords = [...testWords, ...additionalTestWords];
+              const testRows = allTestWords.map((word) => {
+                const displayStatus = testDisplayStatuses[word.id];
+                const userData = testUserData[word.id];
+                
+                return (
+                  <WordRow
+                    key={`test-${word.id}`}
+                    word={word}
+                    userData={userData}
+                    displayStatus={displayStatus}
+                    formatTime={formatTime}
+                    dictionaryId={dictionaryId}
+                    editingWordId={editingWordId}
+                    onToggleEdit={toggleEdit}
+                    onRefreshDictionaryWords={onRefreshDictionaryWords}
+                    mode="examen"
+                  />
+                );
+              });
+              
+              return [...realWords, separator, ...testRows];
+            }
+
+            return realWords;
           })()}
         </ul>
       )}

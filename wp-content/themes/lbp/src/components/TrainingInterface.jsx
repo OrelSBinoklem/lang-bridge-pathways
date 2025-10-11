@@ -16,13 +16,22 @@ const TrainingInterface = ({
 
   return (
     <div className="training-interface">
+      <button 
+        onClick={onFinishTraining}
+        className="training-close-button"
+        title="Выйти из тренировки"
+        type="button"
+      >
+        ×
+      </button>
+      
       <h3 className="training-title">
         {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
       </h3>
       
-      {inEducationMode && (
+      {!!inEducationMode && (
         <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
-          📚 Режим обучения: продолжайте пытаться!
+          📚 Слово переведено в режим обучения!
         </div>
       )}
       
@@ -56,11 +65,20 @@ const TrainingInterface = ({
             {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
           </div>
           
-          {!isCorrect && (
-            <div className="training-correct-answer">
-              Правильный ответ: {currentMode ? currentWord.word : currentWord.translation_1}
-            </div>
-          )}
+            {!isCorrect && (
+              <div className="training-correct-answer">
+                <strong>Правильный ответ:</strong>
+                {currentMode ? (
+                  <span className="correct-answer-text"> {currentWord.word}</span>
+                ) : (
+                  <span className="correct-answer-text">
+                    {' '}{currentWord.translation_1}
+                    {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
+                    {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
+                  </span>
+                )}
+              </div>
+            )}
 
           <div className="training-controls">
             <button

@@ -15,6 +15,17 @@ const WordRow = ({
 }) => {
   const isExamenMode = mode === 'examen' && formatTime;
   
+  // Логирование для отладки
+  console.log('WordRow:', {
+    wordId: word.id,
+    wordText: word.word,
+    mode,
+    isExamenMode,
+    hasFormatTime: !!formatTime,
+    userData: userData,
+    displayStatus: displayStatus
+  });
+  
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
     if (isExamenMode) {
@@ -24,8 +35,8 @@ const WordRow = ({
           displayStatus.fullyLearned ? 'fully-learned' : 
           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
         }`}>
-          {displayStatus.fullyLearned ? "✅" : 
-           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✅' : 
+          {displayStatus.fullyLearned ? "✓" :
+           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
            <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
         </span>
       ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
@@ -36,8 +47,8 @@ const WordRow = ({
           displayStatus.fullyLearned ? 'fully-learned' : 
           displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
         }`}>
-          {displayStatus.fullyLearned ? "✅" : 
-           displayStatus.showWord || displayStatus.showTranslation ? '✅' : 
+          {displayStatus.fullyLearned ? "✓" :
+           displayStatus.showWord || displayStatus.showTranslation ? '✓' :
            <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
         </span>
       ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;

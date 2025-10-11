@@ -133,7 +133,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   const startTraining = () => {
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
-      alert('Нет слов для тренировки! Добавьте слова в легкое изучение.');
+      alert('Переведите слова в "Режим обучения", сейчас они отображаются по умолчанию чтобы вы могли просто на них посмотреть, в этом вообще главный смысл раздела "Изучение".');
       return;
     }
     
