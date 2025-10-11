@@ -5,7 +5,7 @@ const { render, useEffect, useState } = wp.element;
 import CategoryTree from "./EducationWords/CategoryTree";
 import Education from "./EducationWords/Education";
 
-const EducationWords = ({ dictionaryId, mode, onChangeMode, userWordsData = {}, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, categories = [], loadingCategories }) => {
+const EducationWords = ({ dictionaryId, mode, onChangeMode, userWordsData = {}, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories }) => {
 	const [categoryId, setCategoryId] = useState(0);
 
 	useEffect(() => {
@@ -33,6 +33,7 @@ const EducationWords = ({ dictionaryId, mode, onChangeMode, userWordsData = {}, 
 					userWordsData={userWordsData}
 					onRefreshUserData={onRefreshUserData}
 					dictionaryWords={dictionaryWords}
+					onRefreshDictionaryWords={onRefreshDictionaryWords}
 				/>
 			}
 			<button onClick={() => onChangeMode(null)} type={"button"} className={'words-education-window__close'} style={{ display: mode === 'education' ? "block" : "none" }}>×</button>

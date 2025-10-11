@@ -75,6 +75,25 @@ if(document.getElementById('react-app-dictionary')) {
 			}
 		}
 
+		// Функция для обновления слов словаря (аналог fetchDictionaryWords, но без setLoading)
+		const refreshDictionaryWords = async () => {
+			try {
+				const formData = new FormData();
+				formData.append("action", "get_dictionary_words");
+				formData.append("dictionary_id", dictionaryId);
+
+				const response = await axios.post(window.myajax.url, formData);
+
+				if (response.data.success) {
+					setDictionaryWords(response.data.data);
+				} else {
+					console.error('Ошибка обновления слов словаря:', response.data.message);
+				}
+			} catch (error) {
+				console.error('Ошибка при обновлении слов словаря:', error);
+			}
+		}
+
 		// Функция для загрузки категорий
 		const fetchCategories = async () => {
 			try {
@@ -166,6 +185,7 @@ if(document.getElementById('react-app-dictionary')) {
 								onRefreshUserData={fetchUserWordsData}
 								dictionaryWords={dictionaryWords}
 								loadingDictionaryWords={loadingDictionaryWords}
+								onRefreshDictionaryWords={refreshDictionaryWords}
 								categories={categories}
 								loadingCategories={loadingCategories}
 							/>
@@ -181,6 +201,7 @@ if(document.getElementById('react-app-dictionary')) {
 								onRefreshUserData={fetchUserWordsData}
 								dictionaryWords={dictionaryWords}
 								loadingDictionaryWords={loadingDictionaryWords}
+								onRefreshDictionaryWords={refreshDictionaryWords}
 								categories={categories}
 								loadingCategories={loadingCategories}
 							/>

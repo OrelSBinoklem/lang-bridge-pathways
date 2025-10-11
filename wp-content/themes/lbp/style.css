@@ -1117,3 +1117,128 @@ h2 .small {
         justify-content: center;
     }
 }
+
+/* Анимация пульсации для режима обучения */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Стили для режима обучения */
+.learning-mode-text {
+    color: #ff9800;
+    font-weight: bold;
+    animation: pulse 1.5s ease-in-out infinite;
+    font-size: 14px;
+}
+
+/* Стили для редактора слов */
+.word-editor {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px 0;
+}
+
+.word-editor h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.word-editor .close-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin: 0;
+}
+
+.word-editor .close-button:hover {
+    background: #c82333;
+}
+
+.word-editor .field-row {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    gap: 10px;
+}
+
+.word-editor label {
+    min-width: 140px;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.word-editor input,
+.word-editor select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.word-editor input:focus,
+.word-editor select:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.2);
+}
+
+.word-editor button {
+    background: #007cba;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.word-editor button:hover {
+    background: #005a87;
+}
+
+.word-editor button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.word-editor .success-message {
+    color: #28a745;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.word-editor .error-message {
+    color: #dc3545;
+    font-weight: 600;
+    margin-top: 10px;
+}

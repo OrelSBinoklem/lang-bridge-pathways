@@ -3,10 +3,7 @@ import WordEditor from "../WordEditor";
 
 const { useEffect, useState } = wp.element;
 
-const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
-  const [words, setWords] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const EducationExamen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
   const [currentWord, setCurrentWord] = useState(null); // Текущее слово для тренировки
@@ -14,117 +11,130 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   const [showResult, setShowResult] = useState(false); // Показать результат
   const [isCorrect, setIsCorrect] = useState(false); // Правильный ли ответ
   const [currentMode, setCurrentMode] = useState(null); // Текущий режим (прямой/обратный)
+  const [attemptCount, setAttemptCount] = useState(0); // Счетчик попыток для текущего слова
+  const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
 
-  const fetchWords = async () => {
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("action", "get_words_by_category");
-      formData.append("category_id", categoryId);
-
-      const response = await axios.post(window.myajax.url, formData);
-
-      if (response.data.success) {
-        setError(null);
-        setWords(response.data.data);
-      } else {
-        throw new Error(response.data.message || "Ошибка получения слов");
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Загружаем категории при монтировании компонента
+  // Обновляем текущее время каждую секунду для таймеров
   useEffect(() => {
-    fetchWords();
-  }, [categoryId]);
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleEdit = (id) => {
     setEditingWordId((prevId) => (prevId === id ? null : id));
   };
 
-  // Проверить, изучено ли слово (easy_correct ИЛИ easy_correct_revert = 1)
+  // Рассчитать оставшееся время отката
+  const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0) => {
+    if (!lastShown) return null;
+    
+    const lastShownTime = new Date(lastShown).getTime();
+    const now = Date.now();
+    const elapsed = now - lastShownTime;
+    
+    // Откат зависит от того, сколько баллов было ДО получения нового:
+    // 0 баллов → 1 балл: 30 минут
+    // 1 балл → 2 балла: 20 часов
+    // Восстановление после ошибки: 30 минут
+    let cooldownDuration;
+    
+    if (correctAttempts === 0) {
+      // Если 0 баллов, отката нет
+      return null;
+    } else if (correctAttempts === 1) {
+      // Если сейчас 1 балл
+      if (modeEducation === 0) {
+        // Ответили правильно с первого раза → откат 20 часов
+        cooldownDuration = 20 * 60 * 60 * 1000; // 20 часов
+      } else {
+        // В режиме обучения ответили правильно → откат 30 минут
+        cooldownDuration = 30 * 60 * 1000; // 30 минут
+      }
+    } else if (correctAttempts >= 2) {
+      // Если сейчас 2+ балла, слово выучено, отката нет
+      return null;
+    }
+    
+    const remaining = cooldownDuration - elapsed;
+    
+    if (remaining <= 0) return null;
+    
+    return remaining;
+  };
+
+  // Форматировать время в часы:минуты
+  const formatTime = (milliseconds) => {
+    const hours = Math.floor(milliseconds / (60 * 60 * 1000));
+    const minutes = Math.floor((milliseconds % (60 * 60 * 1000)) / (60 * 1000));
+    return `${hours}:${String(minutes).padStart(2, '0')}`;
+  };
+
+  // Проверить, изучено ли слово (correct_attempts >= 2 ИЛИ correct_attempts_revert >= 2)
   const isWordLearned = (wordId) => {
     const userData = userWordsData[wordId];
     if (!userData) return false;
     
-    // Если режим обучения отключен (easy_education = 0), считаем слово изученным
-    if (userData.easy_education === 0) return true;
-    
-    // Если режим обучения включен, проверяем флаги правильных ответов
-    // Показываем слово, если правильно ответили хотя бы в одном направлении
-    return userData.easy_correct === 1 || userData.easy_correct_revert === 1;
+    // Показываем слово, если правильно ответили >= 2 раз хотя бы в одном направлении
+    return userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2;
   };
 
   // Получить статус изучения для умного отображения
   const getWordDisplayStatus = (wordId) => {
     const userData = userWordsData[wordId];
     
-    // Если нет записи в БД, показываем все (слово не в тренировке)
+    // Если нет записи в БД, показываем слово, скрываем перевод
     if (!userData) {
       return {
         showWord: true,
-        showTranslation: true,
-        fullyLearned: false
+        showTranslation: false,
+        fullyLearned: false,
+        hasAttempts: false,
+        cooldownDirect: null,
+        cooldownRevert: null
       };
     }
     
-    // Если режим обучения отключен, показываем все
-    if (userData.easy_education === 0) {
-      return {
-        showWord: true,
-        showTranslation: true,
-        fullyLearned: false // Не показываем индикатор "изучено" когда режим отключен
-      };
-    }
+    // Проверяем откаты
+    const cooldownDirect = getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
+    const cooldownRevert = getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
     
-    // Если режим обучения включен, проверяем флаги
-    const directLearned = userData.easy_correct === 1;
-    const revertLearned = userData.easy_correct_revert === 1;
+    // Проверяем количество правильных ответов
+    const directLearned = userData.correct_attempts >= 2;
+    const revertLearned = userData.correct_attempts_revert >= 2;
+    const hasAnyAttempts = userData.attempts > 0 || userData.attempts_revert > 0;
     
     return {
-      showWord: directLearned, // Показываем слово только если изучен прямой перевод
-      showTranslation: revertLearned, // Показываем перевод только если изучен обратный перевод
-      fullyLearned: directLearned && revertLearned // Полностью изучено только если оба перевода
+      showWord: directLearned, // Показываем слово ТОЛЬКО если >= 2 балла
+      showTranslation: revertLearned, // Показываем перевод ТОЛЬКО если >= 2 балла
+      fullyLearned: directLearned && revertLearned, // Полностью изучено только если оба >= 2
+      hasAttempts: hasAnyAttempts,
+      cooldownDirect: cooldownDirect,
+      cooldownRevert: cooldownRevert,
+      modeEducation: userData.mode_education,
+      modeEducationRevert: userData.mode_education_revert
     };
   };
 
-  // Получить слова для тренировки (easy_education = 1)
+  // Получить слова для тренировки (те, которые еще не изучены полностью и откат закончен)
   const getTrainingWords = () => {
-    console.log('getTrainingWords: categoryId =', categoryId);
-    console.log('getTrainingWords: dictionaryWords.length =', dictionaryWords.length);
-    console.log('getTrainingWords: userWordsData =', userWordsData);
-    
-    // Проверим структуру первого слова
-    if (dictionaryWords.length > 0) {
-      console.log('First word structure:', dictionaryWords[0]);
-    }
-    
     const categoryWords = dictionaryWords.filter(word => {
       if (categoryId === 0) return true;
       const categoryIdNum = parseInt(categoryId);
-      console.log(`Checking word ${word.id}: category_ids =`, word.category_ids, 'type:', typeof word.category_ids);
       
       if (Array.isArray(word.category_ids)) {
-        const hasCategory = word.category_ids.some(id => parseInt(id) === categoryIdNum);
-        console.log(`Word ${word.id} has category ${categoryIdNum}:`, hasCategory);
-        return hasCategory;
+        return word.category_ids.some(id => parseInt(id) === categoryIdNum);
       }
       return false;
     });
 
-    console.log('getTrainingWords: categoryWords.length =', categoryWords.length);
-
     const trainingWords = categoryWords.filter(word => {
-      const userData = userWordsData[word.id];
-      console.log(`Word ${word.id} (${word.word}): userData =`, userData);
-      return userData && userData.easy_education === 1;
+      const displayStatus = getWordDisplayStatus(word.id);
+      // Включаем в тренировку только слова без активного отката и не полностью изученные
+      return !displayStatus.fullyLearned && !displayStatus.cooldownDirect && !displayStatus.cooldownRevert;
     });
 
-    console.log('getTrainingWords: trainingWords.length =', trainingWords.length);
     return trainingWords;
   };
 
@@ -132,16 +142,38 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   const startTraining = () => {
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
-      alert('Нет слов для тренировки! Добавьте слова в легкое изучение.');
+      alert('Нет доступных слов для тренировки! Все слова либо изучены, либо на откате.');
       return;
     }
     
     setTrainingMode(true);
     const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
     setCurrentWord(randomWord);
-    setCurrentMode(Math.random() < 0.5); // Фиксируем режим для этого слова
+    
+    // Определяем режим тренировки (прямой или обратный) на основе статуса слова
+    const userData = userWordsData[randomWord.id];
+    let mode;
+    
+    if (!userData) {
+      // Если нет данных, начинаем с прямого перевода (показываем слово)
+      mode = false;
+    } else {
+      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
+      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
+      
+      if (directAvailable && revertAvailable) {
+        mode = Math.random() < 0.5;
+      } else if (directAvailable) {
+        mode = false; // Прямой перевод
+      } else {
+        mode = true; // Обратный перевод
+      }
+    }
+    
+    setCurrentMode(mode);
     setUserAnswer('');
     setShowResult(false);
+    setAttemptCount(0);
   };
 
   // Нормализация строки для сравнения (убирает диакритические знаки)
@@ -177,21 +209,17 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     
     correct = correctAnswers.some(answer => {
       const normalizedAnswer = normalizeString(answer);
-      console.log('Comparing:', normalizedUserAnswer, 'vs', normalizedAnswer);
       return normalizedAnswer === normalizedUserAnswer;
     });
-
-    console.log('User answer:', userAnswer);
-    console.log('Correct answers:', correctAnswers);
-    console.log('Result:', correct);
 
     setIsCorrect(correct);
     setShowResult(true);
 
-    // Обновляем прогресс в базе данных при правильном ответе
-    if (correct) {
-      updateWordProgress(currentWord.id, currentMode);
-    }
+    // Обновляем прогресс в базе данных
+    updateWordAttempts(currentWord.id, currentMode, correct);
+    
+    // Увеличиваем счетчик попыток
+    setAttemptCount(prev => prev + 1);
 
     // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
     setTimeout(() => {
@@ -202,27 +230,28 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }, 100);
   };
 
-  // Обновить прогресс слова на сервере
-  const updateWordProgress = async (wordId, isRevertMode) => {
+  // Обновить попытки слова на сервере
+  const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
     try {
-      const formData = new FormData();
-      formData.append("action", "update_word_progress");
+			const formData = new FormData();
+      formData.append("action", "update_word_attempts");
       formData.append("word_id", wordId);
       formData.append("is_revert", isRevertMode ? 1 : 0);
+      formData.append("is_correct", isCorrect ? 1 : 0);
 
-      const response = await axios.post(window.myajax.url, formData);
+			const response = await axios.post(window.myajax.url, formData);
 
-      if (response.data.success) {
-        console.log('Прогресс обновлен успешно');
+			if (response.data.success) {
+        console.log('Попытка записана успешно');
         // Обновляем локальные данные пользователя
         if (onRefreshUserData) {
           onRefreshUserData();
         }
-      } else {
-        console.error('Ошибка при обновлении прогресса:', response.data.message);
-      }
-    } catch (err) {
-      console.error('Ошибка при отправке прогресса:', err.message);
+			} else {
+        console.error('Ошибка при записи попытки:', response.data.message);
+			}
+		} catch (err) {
+      console.error('Ошибка при отправке попытки:', err.message);
     }
   };
 
@@ -231,14 +260,36 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
       setTrainingMode(false);
+      alert('Отлично! Все доступные слова тренированы!');
       return;
     }
     
     const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
     setCurrentWord(randomWord);
-    setCurrentMode(Math.random() < 0.5); // Новый режим для нового слова
+    
+    // Определяем режим тренировки
+    const userData = userWordsData[randomWord.id];
+    let mode;
+    
+    if (!userData) {
+      mode = false;
+    } else {
+      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
+      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
+      
+      if (directAvailable && revertAvailable) {
+        mode = Math.random() < 0.5;
+      } else if (directAvailable) {
+        mode = false;
+      } else {
+        mode = true;
+      }
+    }
+    
+    setCurrentMode(mode);
     setUserAnswer('');
     setShowResult(false);
+    setAttemptCount(0);
 
     // Возвращаем фокус на поле ввода после рендера
     setTimeout(() => {
@@ -255,50 +306,36 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     setCurrentWord(null);
     setUserAnswer('');
     setShowResult(false);
+    setAttemptCount(0);
   };
 
-  // Сбросить прогресс категории
-  const resetCategoryProgress = async () => {
-    if (!confirm('Вы уверены, что хотите сбросить прогресс этой категории? Все слова будут добавлены в легкое изучение.')) {
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("action", "reset_category_progress");
-      formData.append("category_id", categoryId);
-
-      const response = await axios.post(window.myajax.url, formData);
-
-      if (response.data.success) {
-        alert('Прогресс категории сброшен! Теперь можно начать тренировку.');
-        // Обновляем данные пользователя
-        if (onRefreshUserData) {
-          onRefreshUserData();
-        }
-      } else {
-        throw new Error(response.data.message || "Ошибка при сбросе прогресса");
-      }
-    } catch (err) {
-      alert('Ошибка: ' + err.message);
-    }
-  };
-
-  // Сбросить категорию из режима обучения
+  // Сбросить категорию из тренировки (аналог Education.jsx)
   const resetCategoryFromTraining = async () => {
-    if (!confirm('Вы уверены, что хотите сбросить эту категорию из режима обучения? Все слова будут отключены от тренировки.')) {
+    console.log('resetCategoryFromTraining вызвана, categoryId:', categoryId);
+    
+    if (!confirm('Вы уверены, что хотите сбросить эту категорию из тренировки? Все слова будут отключены от тренировки.')) {
+      console.log('Пользователь отменил операцию');
       return;
     }
 
+    console.log('Отправляем AJAX запрос...');
     try {
       const formData = new FormData();
-      formData.append("action", "reset_category_from_training");
+      formData.append("action", "reset_training_category");
       formData.append("category_id", categoryId);
+
+      console.log('Данные для отправки:', {
+        action: "reset_training_category",
+        category_id: categoryId,
+        url: window.myajax?.url
+      });
 
       const response = await axios.post(window.myajax.url, formData);
 
+      console.log('Ответ сервера:', response.data);
+
       if (response.data.success) {
-        alert('Категория сброшена из режима обучения! Слова больше не участвуют в тренировке.');
+        alert('Данные категории сброшены! Все тренировочные данные обнулены.');
         // Обновляем данные пользователя
         if (onRefreshUserData) {
           onRefreshUserData();
@@ -307,6 +344,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
         throw new Error(response.data.message || "Ошибка при сбросе категории");
       }
     } catch (err) {
+      console.error('Ошибка при сбросе категории:', err);
       alert('Ошибка: ' + err.message);
     }
   };
@@ -314,12 +352,21 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   // Компонент тренировки
   const renderTrainingInterface = () => {
     if (!currentWord) return null;
+    
+    const userData = userWordsData[currentWord.id];
+    const inEducationMode = currentMode ? userData?.mode_education_revert : userData?.mode_education;
 
-    return (
+		return (
       <div className="training-interface">
         <h3 className="training-title">
           {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
         </h3>
+        
+        {inEducationMode && (
+          <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
+            📚 Режим обучения: продолжайте пытаться!
+          </div>
+        )}
         
         <div className="training-word-display">
           {currentMode ? currentWord.translation_1 : currentWord.word}
@@ -346,7 +393,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
             Проверить
           </button>
         ) : (
-          <div>
+			<div>
             <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
               {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
             </div>
@@ -379,12 +426,12 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
             </div>
           </div>
         )}
-      </div>
-    );
-  };
+			</div>
+		);
+	};
 
-  return (
-    <div>
+	return (
+		<div>
       {!trainingMode && (
         <div className="training-buttons-container">
           <button
@@ -396,14 +443,10 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
           
           <div className="training-control-buttons">
             <button
-              onClick={resetCategoryProgress}
-              className="training-reset-button"
-            >
-              📚 Режим обучения
-            </button>
-            
-            <button
-              onClick={resetCategoryFromTraining}
+              onClick={() => {
+                console.log('Кнопка сброса нажата!');
+                resetCategoryFromTraining();
+              }}
               className="training-clear-button"
             >
               🚫 Сбросить
@@ -414,9 +457,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
 
       {trainingMode && renderTrainingInterface()}
 
-      {loading && <p>Загрузка слов...</p>}
-      {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
-      {!loading && !error && !trainingMode && (
+      {!trainingMode && (
         <ul className="words-education-list">
           {(() => {
             // Фильтруем слова по категории из dictionaryWords
@@ -437,42 +478,62 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                 <li key={word.id}>
                   {/* Слово */}
                   <span className="words-education-list__word">
-                    {displayStatus.showWord ? (
+                    {displayStatus.cooldownDirect ? (
+                      <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
+                        ⏱️ {formatTime(displayStatus.cooldownDirect)}
+                      </span>
+                    ) : displayStatus.showWord ? (
                       word.word
                     ) : (
                       <span className="words-hidden-text">
-                        {word.word.split('').map((char, index) => 
-                          char === ' ' ? ' ' : '█ '
-                        ).join('')}
+                        {userData && userData.mode_education === 1 ? (
+                          <span className="learning-mode-text">
+                            📚 Учу
+                          </span>
+                        ) : (
+                          word.word.split('').map((char, index) => 
+                            char === ' ' ? ' ' : '█ '
+                          ).join('')
+                        )}
                       </span>
                     )}
                   </span>
                   
                   {/* Перевод 1 */}
                   <span className="words-education-list__translation_1">
-                    {userData && userData.easy_education === 1 && (
+                    {userData && displayStatus.hasAttempts ? (
                      <span className={`words-progress-indicator ${
                         displayStatus.fullyLearned ? 'fully-learned' : 
-                        displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
+                        (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
                       }`}>
                         {displayStatus.fullyLearned ? "✅" : 
-                         displayStatus.showWord || displayStatus.showTranslation ? '✅' : 
+                         (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✅' : 
                          <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
                       </span>
-                   ) || <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>}
-                    {displayStatus.showTranslation ? (
+                   ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>}
+                    {displayStatus.cooldownRevert ? (
+                      <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
+                        ⏱️ {formatTime(displayStatus.cooldownRevert)}
+                      </span>
+                    ) : displayStatus.showTranslation ? (
                       word.translation_1
                     ) : (
                       <span className="words-hidden-text">
-                        {word.translation_1.split('').map((char, index) => 
-                          char === ' ' ? ' ' : '█ '
-                        ).join('')}
+                        {userData && userData.mode_education_revert === 1 ? (
+                          <span className="learning-mode-text">
+                            📚 Учу
+                          </span>
+                        ) : (
+                          word.translation_1.split('').map((char, index) => 
+                            char === ' ' ? ' ' : '█ '
+                          ).join('')
+                        )}
                       </span>
                     )}
                   </span>
                   
                   {/* Перевод 2 */}
-                  {word.translation_2 && (
+                  {word.translation_2 && !displayStatus.cooldownRevert && (
                     <span className="words-education-list__translation_2">
                       , {displayStatus.showTranslation ? (
                         word.translation_2
@@ -487,7 +548,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                   )}
                   
                   {/* Перевод 3 */}
-                  {word.translation_3 && (
+                  {word.translation_3 && !displayStatus.cooldownRevert && (
                     <span className="words-education-list__translation_3">
                       , {displayStatus.showTranslation ? (
                         word.translation_3
@@ -527,8 +588,8 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
           })()}
         </ul>
       )}
-    </div>
-  );
+		</div>
+	);
 };
 
-export default Education;
+export default EducationExamen;
