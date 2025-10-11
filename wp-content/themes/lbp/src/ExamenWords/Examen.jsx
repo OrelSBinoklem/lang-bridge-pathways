@@ -1,6 +1,7 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
+import HelpModal from "../components/HelpModal";
 
 // Тестовые данные для отладки (закомментируйте следующую строку в production)
 import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
@@ -18,6 +19,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [currentMode, setCurrentMode] = useState(null); // Текущий режим (прямой/обратный)
   const [attemptCount, setAttemptCount] = useState(0); // Счетчик попыток для текущего слова
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
+  const [showHelp, setShowHelp] = useState(false); // Показать справку
 
   // Обновляем текущее время каждую секунду для таймеров
   useEffect(() => {
@@ -367,6 +369,14 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           
           <div className="training-control-buttons">
             <button
+              onClick={() => setShowHelp(true)}
+              className="training-help-button"
+              title="Показать справку"
+            >
+              ❓ Справка
+            </button>
+            
+            <button
               onClick={() => {
                 console.log('Кнопка сброса нажата!');
                 resetCategoryFromTraining();
@@ -378,6 +388,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           </div>
         </div>
       )}
+
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       {trainingMode && (
         <TrainingInterface
