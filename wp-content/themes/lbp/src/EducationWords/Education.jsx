@@ -131,6 +131,12 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
 
   // Начать тренировку
   const startTraining = () => {
+    // Проверяем авторизацию
+    if (!window.myajax || !window.myajax.is_logged_in) {
+      alert('Для тренировки необходимо войти в систему');
+      return;
+    }
+    
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
       alert('Переведите слова в "Режим обучения", сейчас они отображаются по умолчанию чтобы вы могли просто на них посмотреть, в этом вообще главный смысл раздела "Изучение".');

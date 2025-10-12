@@ -25,7 +25,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
-    }, 1000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -147,6 +147,12 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 
   // Начать тренировку
   const startTraining = () => {
+    // Проверяем авторизацию
+    if (!window.myajax || !window.myajax.is_logged_in) {
+      alert('Для тренировки необходимо войти в систему');
+      return;
+    }
+    
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
       alert('Нет доступных слов для тренировки! Все слова либо изучены, либо на откате.');
@@ -172,8 +178,11 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         mode = Math.random() < 0.5;
       } else if (directAvailable) {
         mode = false; // Прямой перевод
-      } else {
+      } else if (revertAvailable) {
         mode = true; // Обратный перевод
+      } else {
+        // Если оба недоступны, выбираем случайно
+        mode = Math.random() < 0.5;
       }
     }
     
@@ -443,7 +452,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
             });
 
             // Тестовые строки для отладки (можно удалить в production)
-            if (ENABLE_TEST_DATA) {
+            console.log('window.myajax', window.myajax);
+            if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
               const separator = (
                 <li key="test-separator" style={{ 
                   margin: '20px 0', 
@@ -455,7 +465,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
                   borderTop: '2px dashed #999',
                   borderBottom: '2px dashed #999'
                 }}>
-                  ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ ⬇️
+                  ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ (ТОЛЬКО ДЛЯ АДМИНОВ) ⬇️
                 </li>
               );
               

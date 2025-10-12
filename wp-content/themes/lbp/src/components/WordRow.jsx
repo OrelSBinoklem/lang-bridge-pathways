@@ -16,7 +16,7 @@ const WordRow = ({
   const isExamenMode = mode === 'examen' && formatTime;
   
   // Логирование для отладки
-  console.log('WordRow:', {
+  /*console.log('WordRow:', {
     wordId: word.id,
     wordText: word.word,
     mode,
@@ -24,7 +24,7 @@ const WordRow = ({
     hasFormatTime: !!formatTime,
     userData: userData,
     displayStatus: displayStatus
-  });
+  });*/
   
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
