@@ -1,4 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { AUDIO_CONFIG, getLanguageConfig, isLanguageSupported } from '../config/audioConfig';
+
+// Универсальная функция проигрывания звука
+const playAudio = (word, learnLang) => {
+  try {
+    // Определяем язык (по умолчанию из конфига)
+    const language = learnLang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+    
+    // Проверяем поддержку языка
+    if (!isLanguageSupported(language)) {
+      console.warn('⚠️ Неподдерживаемый язык:', language, 'Поддерживаемые языки:', Object.keys(AUDIO_CONFIG.SUPPORTED_LANGUAGES));
+      return;
+    }
+    
+    // Получаем конфигурацию языка
+    const langConfig = getLanguageConfig(language);
+    
+    // Генерируем имя файла используя функцию slugify из конфига
+    const fileName = langConfig.slugify(word) + AUDIO_CONFIG.AUDIO_EXTENSION;
+    
+    // Строим путь к файлу
+    const audioPath = `${AUDIO_CONFIG.BASE_PATH}/${langConfig.folder}/audio/${fileName}`;
+    
+    console.log('🔊 Воспроизводим:', word, `(${language} - ${langConfig.name}) → файл:`, fileName);
+    
+    const audio = new Audio(audioPath);
+    audio.play().catch(error => {
+      console.warn('⚠️ Не удалось воспроизвести звук для:', word, error.message);
+    });
+  } catch (error) {
+    console.warn('⚠️ Ошибка при попытке воспроизведения звука:', error.message);
+  }
+};
 
 const TrainingInterface = ({
   currentWord,
@@ -12,6 +45,29 @@ const TrainingInterface = ({
   onFinishTraining,
   inEducationMode = false
 }) => {
+  // Автоматически проигрываем слово при смене слова
+  useEffect(() => {
+    if (currentWord) {
+      // Проигрываем слово только если это прямой перевод (лат→рус)
+      // При обратном переводе (рус→лат) звук воспроизводим только после ответа
+      if (!currentMode) {
+        const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+        playAudio(currentWord.word, learnLang);
+      }
+    }
+  }, [currentWord, currentMode]);
+
+  // Воспроизводим звук после показа результата при обратном переводе
+  useEffect(() => {
+    if (showResult && currentMode && currentWord) {
+      // Небольшая задержка чтобы результат успел отобразиться
+      setTimeout(() => {
+        const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+        playAudio(currentWord.word, learnLang);
+      }, 100);
+    }
+  }, [showResult, currentMode, currentWord]);
+
   if (!currentWord) return null;
 
   return (
@@ -37,6 +93,21 @@ const TrainingInterface = ({
       
       <div className="training-word-display">
         {currentMode ? currentWord.translation_1 : currentWord.word}
+        
+        {/* Кнопка повтора звука для прямого перевода (лат→рус) */}
+        {!currentMode && (
+          <button
+            onClick={() => {
+              const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+              playAudio(currentWord.word, learnLang);
+            }}
+            className="training-audio-button"
+            title="Повторить звук"
+            type="button"
+          >
+            🔊
+          </button>
+        )}
       </div>
 
       <input
@@ -65,11 +136,23 @@ const TrainingInterface = ({
             {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
           </div>
           
+          
             {!isCorrect && (
               <div className="training-correct-answer">
                 <strong>Правильный ответ:</strong>
                 {currentMode ? (
-                  <span className="correct-answer-text"> {currentWord.word}</span>
+                  <div 
+                    className="correct-answer-with-audio"
+                    onClick={() => {
+                      const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+                      playAudio(currentWord.word, learnLang);
+                    }}
+                    title="Кликните для воспроизведения звука"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className="correct-answer-text">{currentWord.word}</span>
+                    <span className="training-audio-button-inline">🔊</span>
+                  </div>
                 ) : (
                   <span className="correct-answer-text">
                     {' '}{currentWord.translation_1}

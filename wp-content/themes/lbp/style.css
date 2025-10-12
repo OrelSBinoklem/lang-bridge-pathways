@@ -1064,6 +1064,7 @@ h2 .small {
     padding: 5px 12px;
     border-radius: 5px;
     margin-top: 5px;
+    text-align: center;
 }
 
 .training-controls {
@@ -1359,6 +1360,74 @@ h2 .small {
     .training-control-buttons {
         justify-content: center;
     }
+}
+
+/* Стили для кнопок аудио в тренировке */
+.training-audio-container {
+    margin-top: 10px;
+}
+
+.training-audio-button-bottom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.training-audio-button-bottom:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+}
+
+.training-audio-button-bottom:active {
+    transform: translateY(0);
+}
+
+.training-audio-word {
+    font-weight: 500;
+    color: #007bff;
+}
+
+/* Стили для inline кнопки аудио в правильном ответе */
+.correct-answer-with-audio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.correct-answer-with-audio:hover {
+
+}
+
+.training-audio-button-inline {
+    position: relative;
+    top: 2px;
+    padding: 0;
+    font-size: 16px;
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.training-audio-button-inline:hover {
+    color: #0056b3;
+}
+
+.training-audio-button-inline:active {
+
 }
 
 /* Анимация пульсации для режима обучения */
