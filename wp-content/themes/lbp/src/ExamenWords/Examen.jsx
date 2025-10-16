@@ -1,6 +1,7 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
+import WordManagement from "../components/WordManagement";
 import HelpModal from "../components/HelpModal";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
@@ -38,6 +39,28 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 
   const toggleEdit = (id) => {
     setEditingWordId((prevId) => (prevId === id ? null : id));
+  };
+
+  // Удалить слово
+  const handleDeleteWord = async (wordId) => {
+    try {
+      const formData = new FormData();
+      formData.append('action', 'delete_word');
+      formData.append('word_id', wordId);
+
+      const response = await axios.post(window.myajax.url, formData);
+      
+      if (response.data.success) {
+        // Обновляем список слов
+        if (onRefreshDictionaryWords) {
+          onRefreshDictionaryWords();
+        }
+      } else {
+        alert('Ошибка: ' + (response.data.message || 'Не удалось удалить слово'));
+      }
+    } catch (err) {
+      alert('Ошибка сети: ' + err.message);
+    }
   };
 
   // Форматировать время (используем функцию из helpers)
@@ -393,21 +416,40 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
           
-          return (
-            <WordRow
-              key={word.id}
-              word={word}
-              userData={userData}
-              displayStatus={displayStatus}
-              formatTime={formatTime}
-              dictionaryId={dictionaryId}
-              editingWordId={editingWordId}
-              onToggleEdit={toggleEdit}
-              onRefreshDictionaryWords={onRefreshDictionaryWords}
-              mode="examen"
-            />
-          );
+            return (
+              <WordRow
+                key={word.id}
+                word={word}
+                userData={userData}
+                displayStatus={displayStatus}
+                formatTime={formatTime}
+                dictionaryId={dictionaryId}
+                editingWordId={editingWordId}
+                onToggleEdit={toggleEdit}
+                onRefreshDictionaryWords={onRefreshDictionaryWords}
+                onDeleteWord={handleDeleteWord}
+                mode="examen"
+              />
+            );
         });
+
+        // Блок управления словами (только для админов)
+        const wordManagementBlock = window.myajax && window.myajax.is_admin && categoryId !== 0 ? (
+          <li key="word-management" style={{ 
+            margin: '20px 0', 
+            padding: '15px', 
+            backgroundColor: '#e8f5e9', 
+            border: '2px solid #4CAF50', 
+            borderRadius: '5px',
+            listStyle: 'none'
+          }}>
+            <WordManagement 
+              dictionaryId={dictionaryId}
+              categoryId={categoryId}
+              onWordsChanged={onRefreshDictionaryWords}
+            />
+          </li>
+        ) : null;
 
         // Тестовые строки для отладки (можно удалить в production)
         console.log('window.myajax', window.myajax);
@@ -450,7 +492,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           
           return (
             <ul className="words-education-list">
-              {[...realWords, separator, ...testRows]}
+              {[...realWords, wordManagementBlock, separator, ...testRows].filter(Boolean)}
             </ul>
           );
         }

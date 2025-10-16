@@ -1,6 +1,7 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
+import WordManagement from "../components/WordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getWordDisplayStatusEducation } from "../custom/utils/helpers";
 
@@ -51,6 +52,28 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
 
   const toggleEdit = (id) => {
     setEditingWordId((prevId) => (prevId === id ? null : id));
+  };
+
+  // Удалить слово
+  const handleDeleteWord = async (wordId) => {
+    try {
+      const formData = new FormData();
+      formData.append('action', 'delete_word');
+      formData.append('word_id', wordId);
+
+      const response = await axios.post(window.myajax.url, formData);
+      
+      if (response.data.success) {
+        // Обновляем список слов
+        if (onRefreshDictionaryWords) {
+          onRefreshDictionaryWords();
+        }
+      } else {
+        alert('Ошибка: ' + (response.data.message || 'Не удалось удалить слово'));
+      }
+    } catch (err) {
+      alert('Ошибка сети: ' + err.message);
+    }
   };
 
   // Проверить, изучено ли слово (easy_correct ИЛИ easy_correct_revert = 1)
@@ -393,10 +416,29 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                   editingWordId={editingWordId}
                   onToggleEdit={toggleEdit}
                   onRefreshDictionaryWords={onRefreshDictionaryWords}
+                  onDeleteWord={handleDeleteWord}
                   mode="education"
                 />
               );
             })}
+            
+            {/* Блок управления словами (только для админов) */}
+            {window.myajax && window.myajax.is_admin && categoryId !== 0 && (
+              <li key="word-management" style={{ 
+                margin: '20px 0', 
+                padding: '15px', 
+                backgroundColor: '#e8f5e9', 
+                border: '2px solid #4CAF50', 
+                borderRadius: '5px',
+                listStyle: 'none'
+              }}>
+                <WordManagement 
+                  dictionaryId={dictionaryId}
+                  categoryId={categoryId}
+                  onWordsChanged={onRefreshDictionaryWords}
+                />
+              </li>
+            )}
           </ul>
         );
       })()}

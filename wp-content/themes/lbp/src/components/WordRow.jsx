@@ -12,6 +12,7 @@ import WordEditor from '../WordEditor';
  * @param {number} editingWordId - ID редактируемого слова (null если ничего не редактируется)
  * @param {function} onToggleEdit - Колбэк переключения редактирования: (wordId) => void
  * @param {function} onRefreshDictionaryWords - Колбэк обновления списка слов после редактирования: () => void
+ * @param {function} onDeleteWord - Колбэк удаления слова: (wordId) => void
  * @param {boolean} showEditButton - Показывать кнопку редактирования ✏️ (только для админов)
  * @param {string} mode - Режим: 'examen' (с откатами и таймерами) или 'education' (без откатов)
  */
@@ -24,6 +25,7 @@ const WordRow = ({
   editingWordId,
   onToggleEdit,
   onRefreshDictionaryWords,
+  onDeleteWord,
   showEditButton = true,
   mode = 'examen'
 }) => {
@@ -149,13 +151,30 @@ const WordRow = ({
       )}
 
       {showEditButton && window.myajax && window.myajax.is_admin && (
-        <button
-          className="edit-button"
-          style={{ marginLeft: "10px" }}
-          onClick={() => onToggleEdit(word.id)}
-        >
-          ✏️
-        </button>
+        <>
+          <button
+            className="edit-button"
+            style={{ marginLeft: "10px" }}
+            onClick={() => onToggleEdit(word.id)}
+            title="Редактировать слово"
+          >
+            ✏️
+          </button>
+          {onDeleteWord && (
+            <button
+              className="delete-button"
+              style={{ marginLeft: "5px", backgroundColor: "#dc3545", color: "white", padding: "2px 6px", border: "none", borderRadius: "3px", cursor: "pointer" }}
+              onClick={() => {
+                if (confirm(`Удалить слово "${word.word}"?`)) {
+                  onDeleteWord(word.id);
+                }
+              }}
+              title="Удалить слово"
+            >
+              🗑️
+            </button>
+          )}
+        </>
       )}
 
       {editingWordId === word.id && (

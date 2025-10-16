@@ -548,6 +548,64 @@ class WordsAjaxHandler {
         }
         wp_die();
     }
+
+    /**
+     * AJAX-метод для создания слова
+     */
+    public static function handle_create_word() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        $dictionary_id = intval($_POST['dictionary_id']);
+        $word_data_raw = $_POST['word_data'] ?? '';
+        $word_data = json_decode(stripslashes($word_data_raw), true);
+        $category_ids_raw = $_POST['category_ids'] ?? '';
+        $category_ids = $category_ids_raw ? json_decode(stripslashes($category_ids_raw), true) : [];
+
+        if (!$dictionary_id || empty($word_data) || !is_array($word_data)) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $word_id = WordsService::create_word_in_dictionary($dictionary_id, $word_data, $category_ids);
+
+        if ($word_id) {
+            wp_send_json_success(['word_id' => $word_id, 'message' => 'Слово создано успешно']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при создании слова']);
+        }
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для удаления слова
+     */
+    public static function handle_delete_word() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        $word_id = intval($_POST['word_id']);
+
+        if (!$word_id) {
+            wp_send_json_error(['message' => 'Не передан ID слова']);
+            wp_die();
+        }
+
+        $result = WordsService::delete_word_from_dictionary($word_id);
+
+        if ($result) {
+            wp_send_json_success(['message' => 'Слово удалено успешно']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при удалении слова']);
+        }
+        wp_die();
+    }
 }
 
 // Привязка метода AJAX-обработчика
@@ -580,6 +638,10 @@ add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_catego
 add_action('wp_ajax_get_categories', ['WordsAjaxHandler', 'handle_get_categories']);
 add_action('wp_ajax_update_category', ['WordsAjaxHandler', 'handle_update_category']);
 add_action('wp_ajax_delete_category', ['WordsAjaxHandler', 'handle_delete_category']);
+
+// AJAX обработчики для управления словами
+add_action('wp_ajax_create_word', ['WordsAjaxHandler', 'handle_create_word']);
+add_action('wp_ajax_delete_word', ['WordsAjaxHandler', 'handle_delete_word']);
 
 
 

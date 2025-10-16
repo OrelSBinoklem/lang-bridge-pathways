@@ -234,4 +234,26 @@ class WordsService {
 
         return $updated !== false;
     }
+
+    /**
+     * Создать новое слово в словаре.
+     *
+     * @param int $dictionary_id
+     * @param array $word_data — данные слова
+     * @param array $category_ids — массив ID категорий
+     * @return int|false ID созданного слова или false
+     */
+    public static function create_word_in_dictionary($dictionary_id, $word_data, $category_ids = []) {
+        return create_word($dictionary_id, $word_data, $category_ids);
+    }
+
+    /**
+     * Удалить слово из словаря.
+     *
+     * @param int $word_id
+     * @return bool
+     */
+    public static function delete_word_from_dictionary($word_id) {
+        return delete_word($word_id);
+    }
 }

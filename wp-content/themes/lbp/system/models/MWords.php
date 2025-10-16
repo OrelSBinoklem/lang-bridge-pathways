@@ -173,6 +173,126 @@ function reset_category_progress($user_id, $category_id) {
 }
 
 /**
+ * Создать новое слово
+ * @param int $dictionary_id ID словаря
+ * @param array $word_data Данные слова
+ * @param array $category_ids Массив ID категорий
+ * @return int|false ID созданного слова или false при ошибке
+ */
+function create_word($dictionary_id, $word_data, $category_ids = []) {
+    global $wpdb;
+    
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    // Получаем максимальный order для словаря
+    $max_order = $wpdb->get_var($wpdb->prepare("
+        SELECT MAX(`order`) FROM $words_table WHERE dictionary_id = %d
+    ", $dictionary_id));
+    
+    $order = $max_order ? intval($max_order) + 1 : 1;
+    
+    // Получаем язык словаря
+    $dictionary = $wpdb->get_row($wpdb->prepare("
+        SELECT learn_lang FROM {$wpdb->prefix}dictionaries WHERE id = %d
+    ", $dictionary_id), ARRAY_A);
+    
+    if (!$dictionary) {
+        return false;
+    }
+    
+    // Обрабатываем данные для корректной вставки
+    $level = !empty($word_data['level']) ? intval($word_data['level']) : null;
+    $maxLevel = !empty($word_data['maxLevel']) ? intval($word_data['maxLevel']) : 1;
+    
+    // Валидация уровня (должен быть от 1 до 6)
+    if ($level !== null && ($level < 1 || $level > 6)) {
+        $level = null;
+    }
+    if ($maxLevel < 1 || $maxLevel > 6) {
+        $maxLevel = 1;
+    }
+    
+    // Создаем слово
+    $result = $wpdb->insert(
+        $words_table,
+        [
+            'dictionary_id' => $dictionary_id,
+            'word' => $word_data['word'],
+            'learn_lang' => $dictionary['learn_lang'],
+            'is_phrase' => isset($word_data['is_phrase']) ? intval($word_data['is_phrase']) : 0,
+            'translation_1' => $word_data['translation_1'],
+            'translation_2' => !empty($word_data['translation_2']) ? $word_data['translation_2'] : null,
+            'translation_3' => !empty($word_data['translation_3']) ? $word_data['translation_3'] : null,
+            'difficult_translation' => !empty($word_data['difficult_translation']) ? $word_data['difficult_translation'] : null,
+            'sound_url' => !empty($word_data['sound_url']) ? $word_data['sound_url'] : null,
+            'level' => $level,
+            'maxLevel' => $maxLevel,
+            'type' => !empty($word_data['type']) ? $word_data['type'] : null,
+            'gender' => !empty($word_data['gender']) ? $word_data['gender'] : null,
+            'order' => $order
+        ]
+    );
+    
+    if (!$result) {
+        return false;
+    }
+    
+    $word_id = $wpdb->insert_id;
+    
+    // Добавляем связи с категориями
+    if (!empty($category_ids)) {
+        foreach ($category_ids as $category_id) {
+            $wpdb->insert(
+                $word_category_table,
+                [
+                    'word_id' => $word_id,
+                    'category_id' => $category_id
+                ]
+            );
+        }
+    }
+    
+    return $word_id;
+}
+
+/**
+ * Удалить слово
+ * @param int $word_id ID слова
+ * @return bool Результат операции
+ */
+function delete_word($word_id) {
+    global $wpdb;
+    
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    
+    // Удаляем связи с категориями
+    $wpdb->delete(
+        $word_category_table,
+        ['word_id' => $word_id],
+        ['%d']
+    );
+    
+    // Удаляем пользовательские данные
+    $wpdb->delete(
+        $user_dict_words_table,
+        ['dict_word_id' => $word_id],
+        ['%d']
+    );
+    
+    // Удаляем само слово
+    $result = $wpdb->delete(
+        $words_table,
+        ['id' => $word_id],
+        ['%d']
+    );
+    
+    return $result !== false;
+}
+
+/**
  * Обновить прогресс пользователя по слову
  * @param int $user_id ID пользователя
  * @param int $word_id ID слова
@@ -446,4 +566,3 @@ function reset_training_category_data($user_id, $category_id) {
     
     return true;
 }
-
