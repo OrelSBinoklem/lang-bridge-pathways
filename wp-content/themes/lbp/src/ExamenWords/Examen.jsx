@@ -2,6 +2,8 @@ import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
 import HelpModal from "../components/HelpModal";
+import { getCustomCategoryComponent } from "../custom/config/customComponents";
+import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
 
 // Тестовые данные для отладки (закомментируйте следующую строку в production)
 import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
@@ -21,6 +23,11 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
   const [showHelp, setShowHelp] = useState(false); // Показать справку
 
+  // Логируем ID для настройки кастомных компонентов
+  useEffect(() => {
+    console.log('📊 Examen - dictionaryId:', dictionaryId, 'categoryId:', categoryId);
+  }, [dictionaryId, categoryId]);
+
   // Обновляем текущее время каждую секунду для таймеров
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,50 +40,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     setEditingWordId((prevId) => (prevId === id ? null : id));
   };
 
-  // Рассчитать оставшееся время отката
-  const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0) => {
-    if (!lastShown) return null;
-    
-    const lastShownTime = new Date(lastShown).getTime();
-    const now = Date.now();
-    const elapsed = now - lastShownTime;
-    
-    // Откат зависит от того, сколько баллов было ДО получения нового:
-    // 0 баллов → 1 балл: 30 минут
-    // 1 балл → 2 балла: 20 часов
-    // Восстановление после ошибки: 30 минут
-    let cooldownDuration;
-    
-    if (correctAttempts === 0) {
-      // Если 0 баллов, отката нет
-      return null;
-    } else if (correctAttempts === 1) {
-      // Если сейчас 1 балл
-      if (modeEducation === 0) {
-        // Ответили правильно с первого раза → откат 20 часов
-        cooldownDuration = 20 * 60 * 60 * 1000; // 20 часов
-      } else {
-        // В режиме обучения ответили правильно → откат 30 минут
-        cooldownDuration = 30 * 60 * 1000; // 30 минут
-      }
-    } else if (correctAttempts >= 2) {
-      // Если сейчас 2+ балла, слово выучено, отката нет
-      return null;
-    }
-    
-    const remaining = cooldownDuration - elapsed;
-    
-    if (remaining <= 0) return null;
-    
-    return remaining;
-  };
-
-  // Форматировать время в часы:минуты
-  const formatTime = (milliseconds) => {
-    const hours = Math.floor(milliseconds / (60 * 60 * 1000));
-    const minutes = Math.floor((milliseconds % (60 * 60 * 1000)) / (60 * 1000));
-    return `${hours}:${String(minutes).padStart(2, '0')}`;
-  };
+  // Форматировать время (используем функцию из helpers)
+  const formatTime = formatTimeHelper;
 
   // Проверить, изучено ли слово (correct_attempts >= 2 ИЛИ correct_attempts_revert >= 2)
   const isWordLearned = (wordId) => {
@@ -89,39 +54,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 
   // Получить статус изучения для умного отображения
   const getWordDisplayStatus = (wordId) => {
-    const userData = userWordsData[wordId];
-    
-    // Если нет записи в БД, показываем слово, скрываем перевод
-    if (!userData) {
-      return {
-        showWord: false,
-        showTranslation: false,
-        fullyLearned: false,
-        hasAttempts: false,
-        cooldownDirect: null,
-        cooldownRevert: null
-      };
-    }
-    
-    // Проверяем откаты
-    const cooldownDirect = getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
-    const cooldownRevert = getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
-    
-    // Проверяем количество правильных ответов
-    const directLearned = userData.correct_attempts >= 2;
-    const revertLearned = userData.correct_attempts_revert >= 2;
-    const hasAnyAttempts = userData.attempts > 0 || userData.attempts_revert > 0;
-    
-    return {
-      showWord: directLearned, // Показываем слово ТОЛЬКО если >= 2 балла
-      showTranslation: revertLearned, // Показываем перевод ТОЛЬКО если >= 2 балла
-      fullyLearned: directLearned && revertLearned, // Полностью изучено только если оба >= 2
-      hasAttempts: hasAnyAttempts,
-      cooldownDirect: cooldownDirect,
-      cooldownRevert: cooldownRevert,
-      modeEducation: userData.mode_education,
-      modeEducationRevert: userData.mode_education_revert
-    };
+    return getWordDisplayStatusExamen(userWordsData[wordId], currentTime);
   };
 
   // Получить слова для тренировки (те, которые еще не изучены полностью и откат закончен)
@@ -171,8 +104,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       // Если нет данных, начинаем с прямого перевода (показываем слово)
       mode = false;
     } else {
-      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
-      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
+      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
       
       if (directAvailable && revertAvailable) {
         mode = Math.random() < 0.5;
@@ -191,17 +124,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     setShowResult(false);
     setAttemptCount(0);
   };
-
-  // Нормализация строки для сравнения (убирает диакритические знаки)
-  const normalizeString = (str) => {
-    return str
-      .toLowerCase()
-      .trim()
-      .normalize('NFD') // Разделяет символы и диакритические знаки
-      .replace(/[\u0300-\u036f]/g, '') // Удаляет диакритические знаки
-      .replace(/\s+/g, ' '); // Нормализует пробелы
-  };
-
 
   // Обновить попытки слова на сервере
   const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
@@ -331,8 +253,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     if (!userData) {
       mode = false;
     } else {
-      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education);
-      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert);
+      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
       
       if (directAvailable && revertAvailable) {
         mode = Math.random() < 0.5;
@@ -418,85 +340,127 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         />
       )}
 
-      {!trainingMode && (
-        <ul className="words-education-list">
-          {(() => {
-            // Фильтруем слова по категории из dictionaryWords
-            const categoryWords = dictionaryWords.filter(word => {
-              if (categoryId === 0) return true;
-              const categoryIdNum = parseInt(categoryId);
-              if (Array.isArray(word.category_ids)) {
-                return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-              }
-              return false;
-            });
+      {!trainingMode && (() => {
+        // Фильтруем слова по категории из dictionaryWords
+        const categoryWords = dictionaryWords.filter(word => {
+          if (categoryId === 0) return true;
+          const categoryIdNum = parseInt(categoryId);
+          if (Array.isArray(word.category_ids)) {
+            return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+          }
+          return false;
+        });
 
-            const realWords = categoryWords.map((word) => {
-              const displayStatus = getWordDisplayStatus(word.id);
-              const userData = userWordsData[word.id];
-              
-              return (
-                <WordRow
-                  key={word.id}
-                  word={word}
-                  userData={userData}
-                  displayStatus={displayStatus}
-                  formatTime={formatTime}
-                  dictionaryId={dictionaryId}
-                  editingWordId={editingWordId}
-                  onToggleEdit={toggleEdit}
-                  onRefreshDictionaryWords={onRefreshDictionaryWords}
-                  mode="examen"
-                />
-              );
-            });
+        // Создаём объект для быстрого доступа по ID
+        const dictionaryWordsById = {};
+        dictionaryWords.forEach(word => {
+          dictionaryWordsById[word.id] = word;
+        });
 
-            // Тестовые строки для отладки (можно удалить в production)
-            console.log('window.myajax', window.myajax);
-            if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
-              const separator = (
-                <li key="test-separator" style={{ 
-                  margin: '20px 0', 
-                  padding: '10px', 
-                  background: '#f0f0f0', 
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  color: '#666',
-                  borderTop: '2px dashed #999',
-                  borderBottom: '2px dashed #999'
-                }}>
-                  ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ (ТОЛЬКО ДЛЯ АДМИНОВ) ⬇️
-                </li>
-              );
-              
-              const allTestWords = [...testWords, ...additionalTestWords];
-              const testRows = allTestWords.map((word) => {
-                const displayStatus = testDisplayStatuses[word.id];
-                const userData = testUserData[word.id];
-                
-                return (
-                  <WordRow
-                    key={`test-${word.id}`}
-                    word={word}
-                    userData={userData}
-                    displayStatus={displayStatus}
-                    formatTime={formatTime}
-                    dictionaryId={dictionaryId}
-                    editingWordId={editingWordId}
-                    onToggleEdit={toggleEdit}
-                    onRefreshDictionaryWords={onRefreshDictionaryWords}
-                    mode="examen"
-                  />
-                );
-              });
-              
-              return [...realWords, separator, ...testRows];
-            }
+        // Проверяем, есть ли кастомный компонент для категории
+        const CustomCategoryComponent = getCustomCategoryComponent(dictionaryId, categoryId);
+        
+        if (CustomCategoryComponent) {
+          // Получаем статусы для кастомного компонента (он может использовать displayStatuses для группировки)
+          const displayStatuses = {};
+          categoryWords.forEach(word => {
+            displayStatuses[word.id] = getWordDisplayStatus(word.id);
+          });
+          
+          // Рендерим кастомный компонент категории
+          return (
+            <CustomCategoryComponent
+              category={{ id: categoryId, category_name: 'Категория ' + categoryId }}
+              words={categoryWords}
+              dictionaryId={dictionaryId}
+              dictionaryWords={dictionaryWords}
+              dictionaryWordsById={dictionaryWordsById}
+              userWordsData={userWordsData}
+              displayStatuses={displayStatuses}
+              editingWordId={editingWordId}
+              onToggleEdit={toggleEdit}
+              onRefreshDictionaryWords={onRefreshDictionaryWords}
+              onRefreshUserData={onRefreshUserData}
+              formatTime={formatTime}
+              mode="examen"
+              currentTime={currentTime}
+            />
+          );
+        }
 
-            return realWords;
-          })()}
-        </ul>
-      )}
+        // Стандартный список слов
+        const realWords = categoryWords.map((word) => {
+          const displayStatus = getWordDisplayStatus(word.id);
+          const userData = userWordsData[word.id];
+          
+          return (
+            <WordRow
+              key={word.id}
+              word={word}
+              userData={userData}
+              displayStatus={displayStatus}
+              formatTime={formatTime}
+              dictionaryId={dictionaryId}
+              editingWordId={editingWordId}
+              onToggleEdit={toggleEdit}
+              onRefreshDictionaryWords={onRefreshDictionaryWords}
+              mode="examen"
+            />
+          );
+        });
+
+        // Тестовые строки для отладки (можно удалить в production)
+        console.log('window.myajax', window.myajax);
+        if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
+          const separator = (
+            <li key="test-separator" style={{ 
+              margin: '20px 0', 
+              padding: '10px', 
+              background: '#f0f0f0', 
+              textAlign: 'center',
+              fontWeight: 'bold',
+              color: '#666',
+              borderTop: '2px dashed #999',
+              borderBottom: '2px dashed #999'
+            }}>
+              ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ (ТОЛЬКО ДЛЯ АДМИНОВ) ⬇️
+            </li>
+          );
+          
+          const allTestWords = [...testWords, ...additionalTestWords];
+          const testRows = allTestWords.map((word) => {
+            const displayStatus = testDisplayStatuses[word.id];
+            const userData = testUserData[word.id];
+            
+            return (
+              <WordRow
+                key={`test-${word.id}`}
+                word={word}
+                userData={userData}
+                displayStatus={displayStatus}
+                formatTime={formatTime}
+                dictionaryId={dictionaryId}
+                editingWordId={editingWordId}
+                onToggleEdit={toggleEdit}
+                onRefreshDictionaryWords={onRefreshDictionaryWords}
+                mode="examen"
+              />
+            );
+          });
+          
+          return (
+            <ul className="words-education-list">
+              {[...realWords, separator, ...testRows]}
+            </ul>
+          );
+        }
+
+        return (
+          <ul className="words-education-list">
+            {realWords}
+          </ul>
+        );
+      })()}
 		</div>
 	);
 };
