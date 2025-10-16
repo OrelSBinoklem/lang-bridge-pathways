@@ -1,6 +1,8 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
+import { getCustomCategoryComponent } from "../custom/config/customComponents";
+import { normalizeString, getWordDisplayStatusEducation } from "../custom/utils/helpers";
 
 const { useEffect, useState } = wp.element;
 
@@ -19,6 +21,10 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
   const fetchWords = async () => {
     try {
       setLoading(true);
+      
+      // Логируем ID для настройки кастомных компонентов
+      console.log('📊 Education - dictionaryId:', dictionaryId, 'categoryId:', categoryId);
+      
       const formData = new FormData();
       formData.append("action", "get_words_by_category");
       formData.append("category_id", categoryId);
@@ -62,35 +68,7 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
 
   // Получить статус изучения для умного отображения
   const getWordDisplayStatus = (wordId) => {
-    const userData = userWordsData[wordId];
-    
-    // Если нет записи в БД, показываем все (слово не в тренировке)
-    if (!userData) {
-      return {
-        showWord: true,
-        showTranslation: true,
-        fullyLearned: false
-      };
-    }
-    
-    // Если режим обучения отключен, показываем все
-    if (userData.easy_education === 0) {
-      return {
-        showWord: true,
-        showTranslation: true,
-        fullyLearned: false // Не показываем индикатор "изучено" когда режим отключен
-      };
-    }
-    
-    // Если режим обучения включен, проверяем флаги
-    const directLearned = userData.easy_correct === 1;
-    const revertLearned = userData.easy_correct_revert === 1;
-    
-    return {
-      showWord: directLearned, // Показываем слово только если изучен прямой перевод
-      showTranslation: revertLearned, // Показываем перевод только если изучен обратный перевод
-      fullyLearned: directLearned && revertLearned // Полностью изучено только если оба перевода
-    };
+    return getWordDisplayStatusEducation(userWordsData[wordId]);
   };
 
   // Получить слова для тренировки (easy_education = 1)
@@ -150,17 +128,6 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     setUserAnswer('');
     setShowResult(false);
   };
-
-  // Нормализация строки для сравнения (убирает диакритические знаки)
-  const normalizeString = (str) => {
-    return str
-      .toLowerCase()
-      .trim()
-      .normalize('NFD') // Разделяет символы и диакритические знаки
-      .replace(/[\u0300-\u036f]/g, '') // Удаляет диакритические знаки
-      .replace(/\s+/g, ' '); // Нормализует пробелы
-  };
-
 
   // Обновить прогресс слова на сервере
   const updateWordProgress = async (wordId, isRevertMode) => {
@@ -363,20 +330,56 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
 
       {loading && <p>Загрузка слов...</p>}
       {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
-      {!loading && !error && !trainingMode && (
-        <ul className="words-education-list">
-          {(() => {
-            // Фильтруем слова по категории из dictionaryWords
-            const categoryWords = dictionaryWords.filter(word => {
-              if (categoryId === 0) return true;
-              const categoryIdNum = parseInt(categoryId);
-              if (Array.isArray(word.category_ids)) {
-                return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-              }
-              return false;
-            });
+      {!loading && !error && !trainingMode && (() => {
+        // Фильтруем слова по категории из dictionaryWords
+        const categoryWords = dictionaryWords.filter(word => {
+          if (categoryId === 0) return true;
+          const categoryIdNum = parseInt(categoryId);
+          if (Array.isArray(word.category_ids)) {
+            return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+          }
+          return false;
+        });
 
-            return categoryWords.map((word) => {
+        // Создаём объект для быстрого доступа по ID
+        const dictionaryWordsById = {};
+        dictionaryWords.forEach(word => {
+          dictionaryWordsById[word.id] = word;
+        });
+
+        // Проверяем, есть ли кастомный компонент для категории
+        const CustomCategoryComponent = getCustomCategoryComponent(dictionaryId, categoryId);
+        
+        if (CustomCategoryComponent) {
+          // Получаем статусы для кастомного компонента (он может использовать displayStatuses для группировки)
+          const displayStatuses = {};
+          categoryWords.forEach(word => {
+            displayStatuses[word.id] = getWordDisplayStatus(word.id);
+          });
+          
+          // Рендерим кастомный компонент категории
+          return (
+            <CustomCategoryComponent
+              category={{ id: categoryId, category_name: 'Категория ' + categoryId }}
+              words={categoryWords}
+              dictionaryId={dictionaryId}
+              dictionaryWords={dictionaryWords}
+              dictionaryWordsById={dictionaryWordsById}
+              userWordsData={userWordsData}
+              displayStatuses={displayStatuses}
+              editingWordId={editingWordId}
+              onToggleEdit={toggleEdit}
+              onRefreshDictionaryWords={onRefreshDictionaryWords}
+              onRefreshUserData={onRefreshUserData}
+              mode="education"
+            />
+          );
+        }
+
+        // Стандартный список слов
+        return (
+          <ul className="words-education-list">
+            {categoryWords.map((word) => {
               const displayStatus = getWordDisplayStatus(word.id);
               const userData = userWordsData[word.id];
               
@@ -393,10 +396,10 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
                   mode="education"
                 />
               );
-            });
-          })()}
-        </ul>
-      )}
+            })}
+          </ul>
+        );
+      })()}
     </div>
   );
 };

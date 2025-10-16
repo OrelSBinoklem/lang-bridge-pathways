@@ -1,17 +1,31 @@
 import React from 'react';
 import WordEditor from '../WordEditor';
 
+/**
+ * Компонент для отображения одного слова в списке
+ * 
+ * @param {object} word - Объект слова: {id, word, translation_1, translation_2, translation_3, learn_lang, category_ids, ...}
+ * @param {object} userData - Данные пользователя по слову: {correct_attempts, correct_attempts_revert, mode_education, mode_education_revert, last_shown, last_shown_revert, easy_education, easy_correct, easy_correct_revert, ...}
+ * @param {object} displayStatus - Статус отображения: {showWord, showTranslation, fullyLearned, hasAttempts, cooldownDirect, cooldownRevert}
+ * @param {function} formatTime - Функция форматирования времени откатов (только для mode='examen'): (milliseconds) => string (например "19:30")
+ * @param {number} dictionaryId - ID словаря
+ * @param {number} editingWordId - ID редактируемого слова (null если ничего не редактируется)
+ * @param {function} onToggleEdit - Колбэк переключения редактирования: (wordId) => void
+ * @param {function} onRefreshDictionaryWords - Колбэк обновления списка слов после редактирования: () => void
+ * @param {boolean} showEditButton - Показывать кнопку редактирования ✏️ (только для админов)
+ * @param {string} mode - Режим: 'examen' (с откатами и таймерами) или 'education' (без откатов)
+ */
 const WordRow = ({
   word,
   userData,
   displayStatus,
-  formatTime = null, // Для режима экзамена (с откатами)
+  formatTime = null,
   dictionaryId,
   editingWordId,
   onToggleEdit,
   onRefreshDictionaryWords,
   showEditButton = true,
-  mode = 'examen' // 'examen' или 'education'
+  mode = 'examen'
 }) => {
   const isExamenMode = mode === 'examen' && formatTime;
   
@@ -111,7 +125,7 @@ const WordRow = ({
             word.translation_2
           ) : (
             <span className="words-hidden-text">
-              {word.translation_2.split('').map((char, index) => 
+              {word.translation_2.split('').map((char, index) =>
                 char === ' ' ? ' ' : '█ '
               ).join('')}
             </span>
@@ -126,7 +140,7 @@ const WordRow = ({
             word.translation_3
           ) : (
             <span className="words-hidden-text">
-              {word.translation_3.split('').map((char, index) => 
+              {word.translation_3.split('').map((char, index) =>
                 char === ' ' ? ' ' : '█ '
               ).join('')}
             </span>
