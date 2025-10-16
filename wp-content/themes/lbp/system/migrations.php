@@ -52,6 +52,7 @@ function create_dictionaries_categories_table() {
             dictionary_id mediumint(9) NOT NULL,
             name varchar(255) NOT NULL,
             parent_id mediumint(9),
+            `order` mediumint(9) NOT NULL DEFAULT 0,
             PRIMARY KEY (id),
             FOREIGN KEY (dictionary_id) REFERENCES {$wpdb->prefix}dictionaries(id) ON DELETE CASCADE,
             FOREIGN KEY (parent_id) REFERENCES $table_name(id) ON DELETE CASCADE
@@ -346,3 +347,21 @@ function add_training_mode_fields_to_user_dict_words_table() {
 }
 
 add_action('after_setup_theme', 'add_training_mode_fields_to_user_dict_words_table');
+
+/** Добавляем поле order в таблицу категорий словарей
+ * @return void
+ */
+function add_order_field_to_categories_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'd_categories';
+
+    // Проверяем, существует ли уже поле order
+    $columns = $wpdb->get_col("DESCRIBE $table_name");
+    
+    if (!in_array('order', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN `order` mediumint(9) NOT NULL DEFAULT 0 AFTER parent_id");
+        error_log('Added order field to d_categories table');
+    }
+}
+
+add_action('after_setup_theme', 'add_order_field_to_categories_table');

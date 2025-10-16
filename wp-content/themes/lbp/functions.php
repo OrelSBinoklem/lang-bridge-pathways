@@ -2,7 +2,9 @@
 require "system/migrations.php";
 require "system/dictionaries_to_db.php";
 require "system/models/MWords.php";
+require "system/models/MCategories.php";
 require "system/services/SWords.php";
+require "system/services/SCategories.php";
 
 //
 
@@ -403,6 +405,149 @@ class WordsAjaxHandler {
         }
         wp_die();
     }
+
+    /**
+     * AJAX-метод для создания категории
+     */
+    public static function handle_create_category() {
+        // Проверяем права доступа
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+        
+        // Проверяем nonce для безопасности
+        if (!wp_verify_nonce($_POST['nonce'], 'category_management_nonce')) {
+            wp_send_json_error(['message' => 'Ошибка безопасности']);
+            wp_die();
+        }
+        
+        $dictionary_id = intval($_POST['dictionary_id']);
+        $name = sanitize_text_field($_POST['name']);
+        $parent_id = !empty($_POST['parent_id']) ? intval($_POST['parent_id']) : null;
+        $order = intval($_POST['order']);
+        
+        // Валидация через сервис
+        $errors = CategoriesService::validate_category_data([
+            'name' => $name,
+            'parent_id' => $parent_id,
+            'order' => $order
+        ]);
+        
+        if (!empty($errors)) {
+            wp_send_json_error(['message' => implode(', ', $errors)]);
+            wp_die();
+        }
+        
+        // Создаем категорию
+        $category_id = CategoriesService::create_category($dictionary_id, $name, $parent_id, $order);
+        
+        if ($category_id) {
+            wp_send_json_success([
+                'id' => $category_id,
+                'message' => 'Категория создана успешно'
+            ]);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при создании категории']);
+        }
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для получения категорий
+     */
+    public static function handle_get_categories() {
+        $dictionary_id = intval($_POST['dictionary_id']);
+        
+        $tree = CategoriesService::get_category_tree($dictionary_id);
+        
+        wp_send_json_success($tree);
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для обновления категории
+     */
+    public static function handle_update_category() {
+        // Проверяем права доступа
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+        
+        // Проверяем nonce для безопасности
+        if (!wp_verify_nonce($_POST['nonce'], 'category_management_nonce')) {
+            wp_send_json_error(['message' => 'Ошибка безопасности']);
+            wp_die();
+        }
+        
+        $category_id = intval($_POST['category_id']);
+        $name = sanitize_text_field($_POST['name']);
+        $parent_id = !empty($_POST['parent_id']) ? intval($_POST['parent_id']) : null;
+        $order = intval($_POST['order']);
+        
+        // Валидация через сервис
+        $errors = CategoriesService::validate_category_data([
+            'name' => $name,
+            'parent_id' => $parent_id,
+            'order' => $order
+        ]);
+        
+        if (!empty($errors)) {
+            wp_send_json_error(['message' => implode(', ', $errors)]);
+            wp_die();
+        }
+        
+        // Проверяем, что категория существует
+        $category = CategoriesService::get_category_by_id($category_id);
+        if (!$category) {
+            wp_send_json_error(['message' => 'Категория не найдена']);
+            wp_die();
+        }
+        
+        // Обновляем категорию
+        $result = CategoriesService::update_category($category_id, [
+            'name' => $name,
+            'parent_id' => $parent_id,
+            'order' => $order
+        ]);
+        
+        if ($result) {
+            wp_send_json_success(['message' => 'Категория обновлена успешно']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при обновлении категории']);
+        }
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для удаления категории
+     */
+    public static function handle_delete_category() {
+        // Проверяем права доступа
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+        
+        // Проверяем nonce для безопасности
+        if (!wp_verify_nonce($_POST['nonce'], 'category_management_nonce')) {
+            wp_send_json_error(['message' => 'Ошибка безопасности']);
+            wp_die();
+        }
+        
+        $category_id = intval($_POST['category_id']);
+        
+        // Удаляем категорию
+        $result = CategoriesService::delete_category($category_id);
+        
+        if ($result) {
+            wp_send_json_success(['message' => 'Категория удалена успешно']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при удалении категории']);
+        }
+        wp_die();
+    }
 }
 
 // Привязка метода AJAX-обработчика
@@ -430,6 +575,12 @@ add_action('wp_ajax_update_word_attempts', ['WordsAjaxHandler', 'handle_update_w
 add_action('wp_ajax_reset_training_word', ['WordsAjaxHandler', 'handle_reset_training_word']);
 add_action('wp_ajax_reset_training_category', ['WordsAjaxHandler', 'handle_reset_training_category']);
 
+// AJAX обработчики для управления категориями
+add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_category']);
+add_action('wp_ajax_get_categories', ['WordsAjaxHandler', 'handle_get_categories']);
+add_action('wp_ajax_update_category', ['WordsAjaxHandler', 'handle_update_category']);
+add_action('wp_ajax_delete_category', ['WordsAjaxHandler', 'handle_delete_category']);
+
 
 
 
@@ -443,7 +594,8 @@ function myajax_data(){
         'url' => admin_url( 'admin-ajax.php' ),
         'is_admin' => current_user_can('manage_options'),
         'user_id' => get_current_user_id(),
-        'is_logged_in' => is_user_logged_in()
+        'is_logged_in' => is_user_logged_in(),
+        'nonce' => wp_create_nonce('category_management_nonce')
     ];
     ?>
     <script id="myajax_data">

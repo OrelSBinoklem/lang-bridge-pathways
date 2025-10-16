@@ -6,6 +6,7 @@ import EducationWords from "./EducationWords";
 import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
 import CategoryTree from "./EducationWords/CategoryTree";
+import DictionaryCategoryManagement from "./custom/components/DictionaryCategoryManagement";
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
@@ -19,6 +20,7 @@ if(document.getElementById('react-app-dictionary')) {
 		const [loadingDictionaryWords, setLoadingDictionaryWords] = useState(false);
 		const [categories, setCategories] = useState([]);
 		const [loadingCategories, setLoadingCategories] = useState(false);
+		const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 
 		const onChangeModeEducation = (mode) => {
 			setModeEducation(mode);
@@ -91,6 +93,34 @@ if(document.getElementById('react-app-dictionary')) {
 				}
 			} catch (error) {
 				console.error('Ошибка при обновлении слов словаря:', error);
+			}
+		}
+
+		// Функция для обновления категорий после изменений
+		const refreshCategories = async () => {
+			try {
+				const formData = new FormData();
+				formData.append("action", "get_category_tree");
+				formData.append("dictionary_id", dictionaryId);
+
+				const response = await axios.post(window.myajax.url, formData);
+
+				if (response.data.success) {
+					let processedCategories = response.data.data;
+					if (!processedCategories.some(item => Array.isArray(item.children) && item.children.length > 0)) {
+						processedCategories = [{
+							"id": 0,
+							"name": "Категории",
+							"parent_id": null,
+							children: processedCategories
+						}];
+					}
+					setCategories(processedCategories);
+				} else {
+					console.error('Ошибка обновления категорий:', response.data.message);
+				}
+			} catch (error) {
+				console.error('Ошибка при обновлении категорий:', error);
 			}
 		}
 
@@ -170,6 +200,24 @@ if(document.getElementById('react-app-dictionary')) {
 					<div className="mode-buttons-container">
 						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
 						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Экзамен</button>
+						{window.myajax && window.myajax.is_admin && (
+							<button 
+								onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
+								className={'mode-button admin'}
+								style={{ backgroundColor: '#6c757d', color: 'white' }}
+							>
+								{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
+							</button>
+						)}
+					</div>
+				)}
+				
+				{showCategoryManagement && (
+					<div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
+						<DictionaryCategoryManagement 
+							dictionaryId={dictionaryId}
+							onCategoriesChange={refreshCategories}
+						/>
 					</div>
 				)}
 				{mode !== null&&
