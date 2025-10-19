@@ -13,7 +13,7 @@
     $skyColor = $_COOKIE['skyColor']??'51,51,51';
     $isBright = ($_COOKIE['isBright']??'true') == 'true';
 ?>
-<header class="site-header" style="background: rgb(<?=$skyColor?>);">
+<header class="site-header <?=$isBright ? '__bright' : '__dark'?>" style="background: rgb(<?=$skyColor?>);">
 
     <div class="site-header-content">
 
@@ -32,7 +32,9 @@
         </div>
 
         <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
-            <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e('Menu', 'mytheme'); ?></button>
+            <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+                <span class="menu-icon">☰</span> Menu
+            </button>
             <?php
             wp_nav_menu(array(
                 'theme_location' => 'menu-1',
@@ -40,6 +42,9 @@
             ));
             ?>
         </nav>
+
+        <!-- React Header Container -->
+        <div id="react-header-root" class="react-header-container"></div>
 
     </div>
 

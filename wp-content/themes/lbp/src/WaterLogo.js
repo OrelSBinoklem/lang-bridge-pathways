@@ -93,7 +93,7 @@ function init() {
 	controlsFolder.add(params, 'speed', 0.1, 10, 0.1).name('Speed');
 	controlsFolder.add(params, 'waveHeight', 1, 500, 1).name('Wave Height').onChange(updateWaveHeight);
 	controlsFolder.add(params, 'waveSpeed', 0.1, 5, 0.1).name('Wave Speed');
-	controlsFolder.open();
+	controlsFolder.close();
 	
 	animate();
 }
@@ -241,8 +241,13 @@ function animate() {
 	const skyElement = document.querySelector('.site-header');
 	skyElement.style.backgroundColor = skyColor.rgb;
 	
+	// Обновляем класс темы на хедере
+	const isBrightMode = isBright(angle);
+	skyElement.classList.toggle('__bright', isBrightMode);
+	skyElement.classList.toggle('__dark', !isBrightMode);
+	
 	// Если слишком ярко днём делаем меню чёрным
-	document.querySelector('.site-navigation').classList.toggle('__dark', isBright(angle));
+	document.querySelector('.site-navigation').classList.toggle('__dark', isBrightMode);
 	
 	document.querySelector('.gradient.left').style.background = `linear-gradient(to left, ${skyColor.rgba0}, ${skyColor.rgba1})`;
 	document.querySelector('.gradient.right').style.background = `linear-gradient(to right, ${skyColor.rgba0}, ${skyColor.rgba1})`;

@@ -176,6 +176,16 @@ body {
     display: flex;
     align-items: center;
     color: #fff;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.react-header-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 50px;
 }
 
 .custom-logo-link {
@@ -191,72 +201,161 @@ body {
 .site-navigation {
     display: flex;
     align-items: center;
+    position: relative;
 }
 
-.site-navigation.__dark a {
+/* Светлая тема (яркий фон) - тёмный текст */
+.site-header.__bright .site-navigation a {
     color: #000;
 }
 
+.site-header.__bright .menu-toggle {
+    background: rgba(0, 0, 0, 0.1);
+    color: #000;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.site-header.__bright .menu-toggle:hover {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.4);
+}
+
+.site-header.__bright .site-navigation ul {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.site-header.__bright .site-navigation a {
+    color: #fff;
+}
+
+/* Тёмная тема (тёмный фон) - светлый текст */
+.site-header.__dark .site-navigation a {
+    color: #fff;
+}
+
+.site-header.__dark .menu-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.site-header.__dark .menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.site-header.__dark .site-navigation ul {
+    background: linear-gradient(135deg, #434343 0%, #000000 100%);
+}
+
 .menu-toggle {
-    display: none;
-    background: #fff;
-    color: #333;
-    border: none;
-    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 20px;
     cursor: pointer;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.menu-toggle .menu-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-toggle:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.98);
 }
 
 .site-navigation ul {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: none;
+    flex-direction: column;
+    width: auto;
+    min-width: 250px;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 1000;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.site-navigation ul.open {
     display: flex;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .site-navigation li {
-    margin-right: 20px;
+    margin: 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.site-navigation li:last-child {
+    border-bottom: none;
 }
 
 .site-navigation a {
     color: #fff;
     text-decoration: none;
+    padding: 15px 25px;
+    display: block;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.site-navigation a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
 }
 
 .site-navigation a:hover {
-    text-decoration: underline;
+    background: rgba(255, 255, 255, 0.15);
+    padding-left: 30px;
+    text-decoration: none;
+}
+
+.site-navigation a:hover::before {
+    transform: scaleY(1);
 }
 
 /* Адаптивные стили */
 @media (max-width: 768px) {
-    .menu-toggle {
-        display: block;
-    }
-
-    .site-navigation ul {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        background: #333;
-        position: absolute;
-        top: 130px;
-        left: 0;
-        z-index: 1000;
-    }
-
-    .site-navigation .menu.open ul {
-        display: flex;
-    }
-
-    .site-navigation li {
-        margin: 0;
-        text-align: center;
-        border-bottom: 1px solid #444;
-    }
-
-    .site-navigation a {
-        padding: 15px;
-        display: block;
-    }
+    /* Дополнительные мобильные стили при необходимости */
 }
 
 .super-logo {
@@ -865,6 +964,73 @@ h2 .small {
     background: linear-gradient(135deg, #34ce57, #28a745);
     box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
     border-color: #28a745;
+}
+
+/* Кнопка управления категориями для админов */
+.mode-button.admin {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.mode-button.admin:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, #5a6268, #343a40);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+    border-color: #6c757d;
+}
+
+/* Адаптивные стили для светлой темы (днём) */
+.site-header.__bright .mode-button.admin {
+    background: linear-gradient(135deg, #343a40, #212529);
+    color: white;
+    border: 2px solid #495057;
+}
+
+.site-header.__bright .mode-button.admin:hover {
+    background: linear-gradient(135deg, #23272b, #1d2124);
+    box-shadow: 0 8px 25px rgba(33, 37, 41, 0.5);
+    border-color: #343a40;
+}
+
+/* Адаптивные стили для тёмной темы (ночью) */
+.site-header.__dark .mode-button.admin {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: 2px solid #adb5bd;
+}
+
+.site-header.__dark .mode-button.admin:hover {
+    background: linear-gradient(135deg, #5a6268, #343a40);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.5);
+    border-color: #6c757d;
+}
+
+/* Кнопки редактирования и удаления слов */
+.edit-button,
+.delete-button {
+    margin-left: 5px;
+    padding: 2px 6px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+.edit-button:hover,
+.delete-button:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+}
+
+.delete-button {
+    opacity: 0.6;
+}
+
+.delete-button:hover {
+    opacity: 1;
 }
 
 /* Эффект пульсации для активной кнопки */

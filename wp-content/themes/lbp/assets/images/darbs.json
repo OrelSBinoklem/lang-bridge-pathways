@@ -1,0 +1,1225 @@
+{
+"1": [
+"būt"
+],
+"2": [
+"dot",
+"pārdot",
+"piedot"
+],
+"3": [
+"doties",
+"izdoties"
+],
+"4": [
+"iet"
+],
+"5": [
+"nebūt"
+],
+"6": [
+"dabūt"
+],
+"7": [
+"darboties",
+"atbrīvoties",
+"baiļoties",
+"ciemoties",
+"dusmoties",
+"gatavoties",
+"ilgoties",
+"ķildoties",
+"lepoties",
+"lūkoties",
+"nodarboties",
+"pamatoties",
+"pārvietoties",
+"rīkoties",
+"tuvoties",
+"veidoties",
+"vienoties",
+"viesoties"
+],
+"8": [
+"draudzēties",
+"interesēties",
+"kautrēties",
+"kavēties",
+"pulcēties",
+"raizēties",
+"reģistrēties",
+"rūpēties",
+"trenēties"
+],
+"9": [
+"dzīvot",
+"algot",
+"apgalvot",
+"apkopot",
+"aplūkot",
+"apvienot",
+"atbrīvot",
+"atjaunot",
+"atkārtot",
+"atspoguļot",
+"attēlot",
+"atvieglot",
+"balsot",
+"barot",
+"bēguļot",
+"ceļot",
+"dejot",
+"elpot",
+"garšot",
+"gatavot",
+"grēkot",
+"greznot",
+"gudrot",
+"iekārtot",
+"ierīkot",
+"ierobežot",
+"ievainot",
+"ievērot",
+"ievietot",
+"īstenot",
+"izglītot",
+"izmantot",
+"izvietot",
+"jokot",
+"kalpot",
+"karot",
+"kārot",
+"kārtot",
+"klaiņot",
+"klepot",
+"klibot",
+"krāsot",
+"labot",
+"lidot",
+"lietot",
+"melot",
+"novecot",
+"novietot",
+"nožēlot",
+"ogot",
+"pamatot",
+"pārdzīvot",
+"piemērot",
+"pievienot",
+"pilnvarot",
+"plānot",
+"putot",
+"raksturot",
+"ražot",
+"rīkot",
+"sapņot",
+"saskaņot",
+"sekot",
+"sērot",
+"skaidrot",
+"skalot",
+"slimot",
+"slinkot",
+"smaržot",
+"šūpot",
+"taisnot",
+"tirgot",
+"trakot",
+"trokšņot",
+"tukšot",
+"vainot",
+"veidot",
+"vērot",
+"vienot",
+"ziedot",
+"ziņot"
+],
+"10": [
+"pētīt",
+"izbrīnīt",
+"kristīt",
+"sarežģīt",
+"šķīstīt",
+"veltīt",
+"vēstīt"
+],
+"11": [
+"priecāties",
+"iedomāties",
+"iestāties",
+"karāties",
+"mētāties",
+"ņirgāties",
+"sarunāties",
+"stāties",
+"uzstāties"
+],
+"12": [
+"runāt",
+"apstrādāt",
+"aptaujāt",
+"bojāt",
+"cienāt",
+"domāt",
+"dzenāt",
+"gādāt",
+"glabāt",
+"godāt",
+"jautāt",
+"klaigāt",
+"košļāt",
+"lamāt",
+"laulāt",
+"lēkāt",
+"maksāt",
+"mazgāt",
+"mētāt",
+"nēsāt",
+"nogādāt",
+"piedāvāt",
+"piegādāt",
+"pļāpāt",
+"pogāt",
+"sargāt",
+"staigāt",
+"strādāt",
+"tiesāt",
+"vadāt",
+"vaicāt"
+],
+"13": [
+"zīmēt",
+"akcentēt",
+"analizēt",
+"apmeklēt",
+"apzīmēt",
+"ārstēt",
+"audzēt",
+"bremzēt",
+"būvēt",
+"definēt",
+"deklarēt",
+"demonstrēt",
+"dēvēt",
+"dominēt",
+"dzemdēt",
+"dziedēt",
+"eksistēt",
+"fiksēt",
+"finansēt",
+"garantēt",
+"identificēt",
+"ietekmēt",
+"informēt",
+"integrēt",
+"interesēt",
+"kaitēt",
+"kāsēt",
+"kavēt",
+"klauvēt",
+"klusēt",
+"komentēt",
+"kompensēt",
+"konkurēt",
+"konsolidēt",
+"konstatēt",
+"kontrolēt",
+"ķemmēt",
+"laimēt",
+"likvidēt",
+"līmēt",
+"meklēt",
+"modificēt",
+"motivēt",
+"nozīmēt",
+"organizēt",
+"pīpēt",
+"precizēt",
+"prognozēt",
+"publicēt",
+"ravēt",
+"reaģēt",
+"realizēt",
+"reglamentēt",
+"regulēt",
+"reģistrēt",
+"saldēt",
+"sautēt",
+"sekmēt",
+"slavēt",
+"smēķēt",
+"spēlēt",
+"spītēt",
+"startēt",
+"stimulēt",
+"studēt",
+"tērēt",
+"traucēt",
+"vēlēt",
+"vērtēt",
+"zaudēt",
+"ziepēt",
+"žāvēt"
+],
+"14": [
+"aicināt",
+"atgādināt",
+"attiecināt",
+"audzināt",
+"brīdināt",
+"darināt",
+"dāvināt",
+"dibināt",
+"ēdināt",
+"elpināt",
+"gludināt",
+"iepazīstināt",
+"ierosinat",
+"iznīcināt",
+"izsludināt",
+"kaitināt",
+"kārdināt",
+"kurināt",
+"kustināt",
+"liecināt",
+"mazināt",
+"mēģināt",
+"mierināt",
+"modināt",
+"mudināt",
+"nodarbināt",
+"nodrošināt",
+"nogalināt",
+"paaugstināt",
+"pagarināt",
+"palielināt",
+"papildināt",
+"paplašināt",
+"pārliecināt",
+"putināt",
+"radināt",
+"rēķināt",
+"rosināt",
+"salīdzināt",
+"secināt",
+"stiprināt",
+"sveicināt",
+"turpināt",
+"veicināt"
+],
+"15": [
+"atsacīties"
+],
+"16": [
+"dziedāt"
+],
+"17": [
+"gaidīt",
+"adīt",
+"atbalstīt",
+"attīstīt",
+"baidīt",
+"balstīt",
+"baudīt",
+"cienīt",
+"dalīt",
+"darīt",
+"dauzīt",
+"glaudīt",
+"grozīt",
+"grūstīt",
+"guldīt",
+"ieguldīt",
+"iesaistīt",
+"ieskaitīt",
+"izbrīnīt",
+"izcīnīt",
+"izplatīt",
+"izraisīt",
+"izvirzīt",
+"kasīt",
+"klausīt",
+"kratīt",
+"laistīt",
+"lāpīt",
+"lasīt",
+"lielīt",
+"mācīt",
+"mainīt",
+"manīt",
+"mānīt",
+"noraidīt",
+"ostīt",
+"parakstīt",
+"pārbaudīt",
+"pārkaisīt",
+"pārskatīt",
+"pasūtīt",
+"piepildīt",
+"pildīt",
+"prasīt",
+"radīt",
+"rādīt",
+"rakstīt",
+"raustīt",
+"saistīt",
+"sālīt",
+"sastādīt",
+"sildīt",
+"skaitīt",
+"skūpstīt",
+"smaidīt",
+"sodīt",
+"solīt",
+"stādīt",
+"stāstīt",
+"sūtīt",
+"šķaudīt",
+"taisīt",
+"taupīt",
+"taustīt",
+"tīrīt",
+"vadīt",
+"valdīt",
+"vārīt",
+"virzīt",
+"zvanīt"
+],
+"18": [
+"gribēt",
+"aizstāvēt",
+"apstrīdēt",
+"atbildēt",
+"čukstēt",
+"draudēt",
+"drīkstēt",
+"dusēt",
+"dzirdēt",
+"izrietēt",
+"kūpēt",
+"līdzēt",
+"mīlēt",
+"minēt",
+"palīdzēt",
+"pārstāvēt",
+"pārsūdzēt",
+"pārvarēt",
+"paturēt",
+"pukstēt",
+"raudāt",
+"sāpēt",
+"sastāvēt",
+"skanēt",
+"slīdēt",
+"smīnēt",
+"smirdēt",
+"stāvēt",
+"sūdzēt",
+"svinēt",
+"šļupstēt",
+"ticēt",
+"trīcēt",
+"turēt",
+"uzvarēt",
+"varēt",
+"ziedēt"
+],
+"19": [
+"gulēt"
+],
+"20": [
+"mācēt"
+],
+"21": [
+"mācīties",
+"attīstīties",
+"baidīties",
+"balstīties",
+"bļaustīties",
+"brīnīties",
+"cīnīties",
+"dalīties",
+"gadīties",
+"iesaistīties",
+"izplatīties",
+"izrādīties",
+"klausīties",
+"kļūdīties",
+"mainīties",
+"parādīties",
+"piedalīties",
+"saistīties",
+"skatīties",
+"šaubīties"
+],
+"22": [
+"peldēties",
+"apprecēties",
+"atcerēties",
+"precēties",
+"vēlēties"
+],
+"23": [
+"pētīt",
+"mērīt",
+"pelnīt"
+],
+"24": [
+"raudzīt",
+"ieraudzīt",
+"ieslodzīt"
+],
+"25": [
+"raudzīties"
+],
+"26": [
+"redzēt",
+"cerēt",
+"ziedēt",
+"derēt",
+"drebēt",
+"paredzēt",
+"peldēt",
+"piederēt",
+"pieredzēt",
+"precēt",
+"vēlēt"
+],
+"27": [
+"sacīt",
+"locīt",
+"mocīt",
+"slaucīt"
+],
+"28": [
+"sēdēt"
+],
+"29": [
+"tecēt"
+],
+"30": [
+"turēties",
+"atturēties",
+"gribēties",
+"izturēties",
+"kustēties",
+"sūdzēties",
+"uzturēties"
+],
+"31": [
+"turpināties",
+"apzināties",
+"norisināties",
+"pārliecināties",
+"palielināties",
+"rēķināties",
+"samazināties",
+"sazināties",
+"vingrināties"
+],
+"32": [
+"vajadzēt"
+],
+"33": [
+"veltīt",
+"vēstīt"
+],
+"34": [
+"zināt"
+],
+"35": [
+"art"
+],
+"36": [
+"atrast",
+"pierast",
+"rast"
+],
+"37": [
+"augt"
+],
+"38": [
+"aut"
+],
+"39": [
+"berzt",
+"belzt",
+"blenzt",
+"gvelzt"
+],
+"40": [
+"berzties"
+],
+"41": [
+"bīties"
+],
+"42": [
+"brēkt",
+"ķērkt",
+"lēkt",
+"mērkt",
+"rēkt",
+"sēkt"
+],
+"43": [
+"brist"
+],
+"44": [
+"brukt",
+"jukt",
+"mukt",
+"plukt",
+"rukt",
+"sprukt",
+"šļukt",
+"uzbrukt"
+],
+"45": [
+"celt",
+"atcelt",
+"dzelt",
+"iecelt",
+"pelt",
+"smelt",
+"šķelt",
+"velt",
+"zelt",
+"zvelt"
+],
+"46": [
+"celties",
+"izcelties",
+"pārcelties",
+"velties"
+],
+"47": [
+"cept",
+"degt",
+"ķept",
+"bēgt"
+],
+"48": [
+"cepties"
+],
+"49": [
+"cirst"
+],
+"50": [
+"durt",
+"atšķirt",
+"burt",
+"irt",
+"kurt",
+"piešķirt",
+"skart",
+"šķirt"
+],
+"51": [
+"dzert",
+"aptvert",
+"ietvert",
+"ķert",
+"spert",
+"tvert",
+"uztvert"
+],
+"52": [
+"dzert",
+"aptvert",
+"ietvert",
+"ķert",
+"spert",
+"tvert",
+"uztvert"
+],
+"53": [
+"dzīt"
+],
+"54": [
+"dzīties"
+],
+"55": [
+"elst",
+"melst"
+],
+"56": [
+"glābt",
+"grābt",
+"grebt",
+"ģērbt",
+"knābt",
+"kniebt",
+"riebt",
+"strēbt",
+"šķiebt",
+"urbt",
+"viebt"
+],
+"57": [
+"glābties",
+"ģērbties",
+"riebties",
+"šķiebties",
+"urbties",
+"viebties"
+],
+"58": [
+"gūt",
+"apgūt",
+"grūt",
+"iegūt",
+"kļūt",
+"pagūt",
+"pūt",
+"žūt"
+],
+"59": [
+"iepazīties",
+"atzīties"
+],
+"60": [
+"jaukt",
+"braukt",
+"dīkt",
+"dūkt",
+"ieteikt",
+"saukt",
+"kaukt",
+"krākt",
+"liekt",
+"mākt",
+"maukt",
+"pārtraukt",
+"plūkt",
+"raukt",
+"rūkt",
+"satraukt",
+"sūkt",
+"sveikt",
+"šalkt",
+"šļākt",
+"šļūkt",
+"šņākt",
+"šņaukt",
+"teikt",
+"traukt",
+"triekt",
+"veikt",
+"vākt"
+],
+"61": [
+"jaukties",
+"atteikties",
+"izteikties",
+"liekties",
+"mākties",
+"pateikties",
+"pieteikties",
+"saukties",
+"sliekties",
+"spraukties",
+"sūkties",
+"šļākties",
+"tiekties",
+"traukties",
+"uztraukties",
+"vākties"
+],
+"62": [
+"just",
+"sašust",
+"sust"
+],
+"63": [
+"justies"
+],
+"64": [
+"kalst",
+"vīst"
+],
+"65": [
+"kāpt",
+"čiept",
+"kampt",
+"kopt",
+"krāpt",
+"stiept",
+"svilpt",
+"triept"
+],
+"66": [
+"kārt",
+"bārt"
+],
+"67": [
+"klupt",
+"drupt",
+"lipt"
+],
+"68": [
+"krāt",
+"aizstāt",
+"atklāt",
+"atstāt",
+"jāt",
+"klāt",
+"māt",
+"rāt",
+"slāt",
+"stāt"
+],
+"69": [
+"krist",
+"mist",
+"piekrist",
+"piemist"
+],
+"70": [
+"kristies"
+],
+"71": [
+"kult",
+"šķilt",
+"vilt"
+],
+"72": [
+"ķerties"
+],
+"73": [
+"laist",
+"atlaist",
+"aust",
+"glaust",
+"grūst",
+"kost",
+"ost",
+"paust",
+"skaust",
+"snaust",
+"spiest",
+"spraust",
+"spriest",
+"sviest",
+"šķiest",
+"ziest",
+"zīst"
+],
+"74": [
+"laisties",
+"gausties",
+"glausties",
+"grūsties",
+"izpausties",
+"sēsties",
+"spiesties",
+"ziesties"
+],
+"75": [
+"lauzt",
+"bāzt",
+"brāzt",
+"drāzt",
+"gāzt",
+"grauzt",
+"griezt",
+"jozt",
+"vāzt"
+],
+"76": [
+"lauzties",
+"atgriezties",
+"bāzties",
+"brāzties",
+"drāzties",
+"griezties"
+],
+"77": [
+"lemt",
+"vemt"
+],
+"78": [
+"liet",
+"riet",
+"smiet"
+],
+"79": [
+"līst"
+],
+"80": [
+"līt",
+"dzīt"
+],
+"81": [
+"lūgt",
+"beigt",
+"diegt",
+"iesniegt",
+"izsniegt",
+"jūgt",
+"kliegt",
+"liegt",
+"miegt",
+"ņirgt",
+"pārsniegt",
+"pārsteigt",
+"sniegt",
+"spiegt",
+"spurgt",
+"steigt",
+"zviegt",
+"žmiegt",
+"žņaugt"
+],
+"82": [
+"lūgties",
+"beigties",
+"steigties"
+],
+"83": [
+"lūzt",
+"birzt",
+"milzt"
+],
+"84": [
+"ļaut",
+"aut",
+"bļaut",
+"graut",
+"iekļaut",
+"kaut",
+"kļaut",
+"kraut",
+"maut",
+"pieļaut",
+"pļaut",
+"raut",
+"skaut",
+"spļaut",
+"šaut",
+"žaut"
+],
+"85": [
+"ļauties",
+"atļauties",
+"rauties"
+],
+"86": [
+"malt",
+"kalt"
+],
+"87": [
+"mest"
+],
+"88": [
+"mesties"
+],
+"89": [
+"migt",
+"aizmigt",
+"snigt",
+"stigt"
+],
+"90": [
+"mosties",
+"sēsties"
+],
+"91": [
+"nākt"
+],
+"92": [
+"nākties",
+"pienākties"
+],
+"93": [
+"nest"
+],
+"94": [
+"nīst",
+"atbilst",
+"bilst",
+"blīst",
+"briest",
+"iebilst",
+"klīst",
+"plūst",
+"sprūst",
+"svīst",
+"šķīst"
+],
+"95": [
+"ņemt"
+],
+"96": [
+"patikt"
+],
+"97": [
+"pazīt",
+"atzīt",
+"iepazīt"
+],
+"98": [
+"pārvērsties",
+"plēsties",
+"vērsties"
+],
+"99": [
+"pirkt",
+"cirpt"
+],
+"100": [
+"pīt",
+"mīt",
+"šķīt",
+"tīt",
+"trīt"
+],
+"101": [
+"plest",
+"pārvērst"
+],
+"102": [
+"plēst",
+"dzēst",
+"lēst",
+"tēst",
+"vērst"
+],
+"103": [
+"plesties",
+"censties"
+],
+"104": [
+"plīst",
+"aizmirst",
+"aust",
+"izmist",
+"kaist",
+"karst",
+"mulst",
+"tumst"
+],
+"105": [
+"plīties"
+],
+"106": [
+"post",
+"ieviest",
+"kāst",
+"raust"
+],
+"107": [
+"posties",
+"rausties"
+],
+"108": [
+"prast",
+"saprast"
+],
+"109": [
+"pūst",
+"ciest",
+"jaust"
+],
+"110": [
+"pūsties",
+"atpūsties",
+"ciesties",
+"skaisties"
+],
+"111": [
+"rakt",
+"plakt",
+"smakt"
+],
+"112": [
+"rasties",
+"atrasties",
+"ierasties"
+],
+"113": [
+"rīt",
+"vīt"
+],
+"114": [
+"sākt"
+],
+"115": [
+"sākties"
+],
+"116": [
+"salt",
+"atslābt",
+"birt",
+"dīgt",
+"dilt",
+"dzimt",
+"grimt",
+"gurt",
+"ģībt",
+"īgt",
+"ietilpt",
+"ilgt",
+"irt",
+"kvēpt",
+"līkt",
+"ļimt",
+"mirkt",
+"mirt",
+"nīkt",
+"nirt",
+"nogurt",
+"pampt",
+"plaukt",
+"reibt",
+"rimt",
+"rūgt",
+"salabt",
+"sapīkt",
+"sarkt",
+"saslimt",
+"sastingt",
+"sīkt",
+"silt",
+"sirgt",
+"skābt",
+"skumt",
+"skurbt",
+"slābt",
+"slāpt",
+"slīgt",
+"slīkt",
+"sprāgt",
+"springt",
+"stingt",
+"strēgt",
+"stulbt",
+"svilt",
+"tilpt",
+"tirpt",
+"trūkt",
+"tūkt",
+"tvīkt",
+"vārgt",
+"žilbt"
+],
+"117": [
+"segt",
+"degt",
+"smelgt"
+],
+"118": [
+"segties",
+"dergties"
+],
+"119": [
+"sist"
+],
+"120": [
+"skriet",
+"siet",
+"sliet"
+],
+"121": [
+"slēgt",
+"jēgt",
+"mēgt"
+],
+"122": [
+"slēgties",
+"noslēgties"
+],
+"123": [
+"slēpt",
+"tērpt",
+"vērpt"
+],
+"124": [
+"slēpties",
+"atkāpties"
+],
+"125": [
+"smieties"
+],
+"126": [
+"spēt",
+"dēt",
+"paspēt",
+"pārspēt",
+"sēt"
+],
+"127": [
+"stumt",
+"jumt"
+],
+"128": [
+"svērt",
+"bērt",
+"pērt",
+"vērt"
+],
+"129": [
+"svērt",
+"bērt",
+"pērt",
+"vērt"
+],
+"130": [
+"svērties",
+"pērties",
+"vērties"
+],
+"131": [
+"šķērst",
+"uzšķērst"
+],
+"132": [
+"šķirties",
+"atšķirties",
+"pieskarties",
+"saskarties"
+],
+"133": [
+"šķist"
+],
+"134": [
+"šūt",
+"skūt"
+],
+"135": [
+"tikt",
+"iztikt",
+"likt",
+"notikt",
+"palikt",
+"pietikt",
+"satikt"
+],
+"136": [
+"tikties",
+"izlikties",
+"likties"
+],
+"137": [
+"trenkt",
+"lenkt"
+],
+"138": [
+"uzņemties"
+],
+"139": [
+"vest",
+"ēst"
+],
+"140": [
+"vilkt"
+],
+"141": [
+"zagt",
+"sastapt",
+"tapt"
+],
+"142": [
+"zust",
+"pazust"
+]
+}
