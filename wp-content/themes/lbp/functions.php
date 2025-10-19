@@ -24,6 +24,9 @@ if( 'disable_gutenberg' ){
     } );
 }
 
+// Скрыть админ-бар на фронтенде
+add_filter('show_admin_bar', '__return_false');
+
 
 
 function mytheme_setup() {
@@ -118,6 +121,52 @@ function my_theme_enqueue_styles() {
         ['wp-element'],
         time() //For production use wp_get_theme()->get('Version')
     );
+
+    // Подключаем Bootstrap для обеих страниц (нужен для form-control)
+    if (is_page_template('page-interactive-cheat-sheet.php') || is_page_template('page-grammar-tables.php')) {
+        wp_enqueue_style(
+            'bootstrap-css',
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+            [],
+            '5.3.3'
+        );
+        
+        wp_enqueue_script(
+            'bootstrap-js',
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+            [],
+            '5.3.3',
+            true
+        );
+    }
+
+    // Подключение стилей для интерактивной шпаргалки только на нужной странице
+    if (is_page_template('page-interactive-cheat-sheet.php')) {
+        wp_enqueue_style(
+            'interactive-cheat-sheet-style',
+            get_stylesheet_directory_uri() . '/src/InteractiveCheatSheet/styles/interactive-cheat-sheet.css',
+            ['bootstrap-css'], // Зависимость от Bootstrap
+            time() // For production use wp_get_theme()->get('Version')
+        );
+        
+        wp_enqueue_script(
+            'interactive-cheat-sheet-script',
+            get_stylesheet_directory_uri() . '/src/InteractiveCheatSheet/interactive-cheat-sheet.js',
+            [], // Зависимости
+            time(), // For production use wp_get_theme()->get('Version')
+            true // В footer
+        );
+    }
+
+    // Подключение стилей для галереи грамматических таблиц только на нужной странице
+    if (is_page_template('page-grammar-tables.php')) {
+        wp_enqueue_style(
+            'grammar-tables-gallery-style',
+            get_stylesheet_directory_uri() . '/src/GrammarTablesGallery/styles/grammar-tables-gallery.css',
+            ['bootstrap-css'], // Зависимость от Bootstrap
+            time() // For production use wp_get_theme()->get('Version')
+        );
+    }
 
 }
 

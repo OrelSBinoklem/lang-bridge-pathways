@@ -163,7 +163,6 @@ const WordRow = ({
           {onDeleteWord && (
             <button
               className="delete-button"
-              style={{ marginLeft: "5px", backgroundColor: "#dc3545", color: "white", padding: "2px 6px", border: "none", borderRadius: "3px", cursor: "pointer" }}
               onClick={() => {
                 if (confirm(`Удалить слово "${word.word}"?`)) {
                   onDeleteWord(word.id);

@@ -1,0 +1,75 @@
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+h2 {
+  margin-top: 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+h3 {
+  color: #34495e;
+  margin-top: 20px;
+}
+.example {
+  background: #f8f9fa;
+  border-left: 4px solid #3498db;
+  padding: 12px 15px;
+  margin: 10px 0;
+}
+.latvian {
+  font-weight: 600;
+  color: #e74c3c;
+}
+.translation {
+  color: #27ae60;
+  font-style: italic;
+}
+.note {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+.note strong {
+  color: #856404;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+table th {
+  background: #3498db;
+  color: white;
+}
+ul {
+  margin: 10px 0;
+  padding-left: 25px;
+}
+.highlight {
+  background: #ffffcc;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.extra-case {
+  background: #f5f5f5;
+}
+.highlight-blue {
+  color: #007bff;
+  font-weight: bold;
+}
+.highlight-pink {
+  color: #e83e8c;
+  font-weight: bold;
+}

@@ -5,6 +5,20 @@ require('./WaterLogo');
 require('./ExamenWords.jsx');
 require('./Dictionary.jsx');
 
+// Interactive Cheat Sheet
+import InteractiveCheatSheet from './InteractiveCheatSheet/InteractiveCheatSheet.jsx';
+
+if(document.getElementById('interactive-cheat-sheet-root')) {
+	render(<InteractiveCheatSheet />, document.getElementById('interactive-cheat-sheet-root'));
+}
+
+// Grammar Tables Gallery
+import GrammarTablesGallery from './GrammarTablesGallery/GrammarTablesGallery.jsx';
+
+if(document.getElementById('grammar-tables-gallery-root')) {
+	render(<GrammarTablesGallery />, document.getElementById('grammar-tables-gallery-root'));
+}
+
 //https://www.youtube.com/watch?v=EaC7x6QCjjQ
 
 if(document.getElementById(`react-app`)) {

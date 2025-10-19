@@ -1,0 +1,571 @@
+/* Interactive Cheat Sheet Styles */
+
+.interactive-cheat-sheet {
+    --header-height: 52px;
+}
+
+.interactive-cheat-sheet * {
+    box-sizing: border-box;
+}
+
+/* Стили для хедера в портале (основной header.php) */
+.cheat-sheet-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Светлая тема (яркий фон) */
+.site-header.__bright .cheat-sheet-header-controls .number-control label {
+    color: #000;
+}
+
+.site-header.__bright .cheat-sheet-header-controls .number-control input {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border-color: rgba(0, 0, 0, 0.3);
+}
+
+.site-header.__bright .cheat-sheet-header-controls .btn-control {
+    color: #000;
+    border-color: rgba(0, 0, 0, 0.5);
+}
+
+.site-header.__bright .cheat-sheet-header-controls .btn-control:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.8);
+}
+
+.site-header.__bright .cheat-sheet-header-controls .btn-control:active {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Тёмная тема (тёмный фон) */
+.site-header.__dark .cheat-sheet-header-controls .number-control label {
+    color: #fff;
+}
+
+.site-header.__dark .cheat-sheet-header-controls .number-control input {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.site-header.__dark .cheat-sheet-header-controls .btn-control {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.site-header.__dark .cheat-sheet-header-controls .btn-control:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.site-header.__dark .cheat-sheet-header-controls .btn-control:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.cheat-sheet-header-controls .number-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cheat-sheet-header-controls .number-control label {
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 0;
+}
+
+.cheat-sheet-header-controls .number-control input {
+    width: 50px;
+    height: 32px;
+    text-align: center;
+    padding: 0 6px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 28px;
+}
+
+.cheat-sheet-header-controls .btn-control {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    background: transparent;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cheat-sheet-header-controls .btn-control:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.cheat-sheet-header-controls .btn-control:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Header */
+.interactive-cheat-sheet .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    height: var(--header-height);
+    background: #333;
+    color: white;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+.interactive-cheat-sheet .header-left,
+.interactive-cheat-sheet .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.interactive-cheat-sheet .header button {
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    color: white;
+    background: #555;
+    border: none;
+    border-radius: 4px;
+}
+
+.interactive-cheat-sheet .header button:hover,
+.interactive-cheat-sheet .header button.active {
+    background: #777;
+}
+
+.interactive-cheat-sheet .header-right input {
+    width: 60px;
+    padding: 4px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+.interactive-cheat-sheet .header-right input[readonly] {
+    background-color: #eaeaea;
+    color: #222222;
+}
+
+.interactive-cheat-sheet .header-right .number-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.interactive-cheat-sheet .header-right .number-control input {
+    width: 50px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.interactive-cheat-sheet .header-right button.small {
+    padding: 4px 10px;
+    font-size: 14px;
+}
+
+/* Wrapper */
+.interactive-cheat-sheet .wrapper {
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: var(--header-height);
+}
+
+/* Content removed - only table mode */
+
+/* Grid Table */
+.interactive-cheat-sheet .grid-table {
+    position: fixed;
+    top: calc(var(--header-height) + 10px);
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+}
+
+.interactive-cheat-sheet .grid-cell {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.interactive-cheat-sheet .cell-title {
+    font-size: 36px;
+}
+
+/* Image Cheat Sheet */
+.interactive-cheat-sheet .img-cheat-sheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: contain;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+
+.interactive-cheat-sheet .img-cheat-sheet.__rows-2 {
+    bottom: auto;
+    height: calc(200% + 13px);
+    z-index: 1;
+    background-color: #FFFFFF;
+    border: 1px solid #ddd;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+}
+
+.interactive-cheat-sheet .img-cheat-sheet.__rows-3 {
+    bottom: auto;
+    height: calc(300% + 23px);
+    z-index: 1;
+    background-color: #FFFFFF;
+    border: 1px solid #ddd;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+}
+
+.interactive-cheat-sheet .img-cheat-sheet.__cols-2 {
+    right: auto;
+    width: calc(200% + 13px);
+    z-index: 1;
+    background-color: #FFFFFF;
+    border: 1px solid #ddd;
+    top: -1px;
+    left: -1px;
+    bottom: -1px;
+}
+
+.interactive-cheat-sheet .img-cheat-sheet.__cols-3 {
+    right: auto;
+    width: calc(300% + 23px);
+    z-index: 1;
+    background-color: #FFFFFF;
+    border: 1px solid #ddd;
+    top: -1px;
+    left: -1px;
+    bottom: -1px;
+}
+
+/* Dropdown Menu */
+.interactive-cheat-sheet .dropdown-menu {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(10, auto);
+    gap: 5px;
+    background: #f5f5f5;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.interactive-cheat-sheet .__last-row .dropdown-menu {
+    top: auto;
+    bottom: 0;
+}
+
+.interactive-cheat-sheet .dropdown-menu.hidden {
+    display: none;
+}
+
+.interactive-cheat-sheet .menu-item {
+    padding: 6px;
+    background: #e9e9e9;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.interactive-cheat-sheet .menu-item:hover {
+    background: #d0e6ff;
+}
+
+.interactive-cheat-sheet .menu-item-delete {
+    background: #e9aaaa;
+}
+
+.interactive-cheat-sheet .menu-item-delete:hover {
+    background: #e9bbbb;
+}
+
+/* Burger Menu and Sidebar removed */
+
+/* Lightbox */
+#lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#lightbox-overlay img {
+    max-width: 95%;
+    max-height: 95%;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#lightbox-overlay .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Callouts removed - not needed for table mode */
+
+/* Mobile Adaptations */
+@media (max-width: 768px) {
+
+    .interactive-cheat-sheet .header-right {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: auto;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 1px;
+    }
+
+    .interactive-cheat-sheet .header-right .number-control {
+        flex-wrap: nowrap;
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+
+    .interactive-cheat-sheet .header-right label {
+        min-width: 110px;
+    }
+
+    .interactive-cheat-sheet .header button,
+    .interactive-cheat-sheet .header-right button.small {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .interactive-cheat-sheet .header-right input {
+        width: 50px;
+    }
+}
+
+@media (max-width: 1023px) {
+    .interactive-cheat-sheet .header-right .number-control label {
+        display: none;
+    }
+}
+
+/* Table mode visibility */
+.interactive-cheat-sheet.__table .tableControls {
+    display: flex !important;
+}
+
+/* Verb Search и Modal стили - дублируем для надёжности */
+
+/* Verb search wrapper */
+.verb-search-wrapper {
+    position: relative;
+    z-index: 10000;
+}
+
+.verb-search-container {
+    position: relative;
+}
+
+.verb-search-container input {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10001;
+}
+
+/* Светлая тема (яркий фон) */
+.site-header.__bright .cheat-sheet-header-controls .verb-search-container input {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000 !important;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.site-header.__bright .cheat-sheet-header-controls .verb-search-container input::placeholder {
+    color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Тёмная тема (тёмный фон) */
+.site-header.__dark .cheat-sheet-header-controls .verb-search-container input {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.site-header.__dark .cheat-sheet-header-controls .verb-search-container input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Verb suggestions dropdown */
+.verb-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.verb-suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.verb-suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+.verb-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.verb-suggestion-item.disabled {
+    cursor: default;
+    color: #999;
+    font-style: italic;
+}
+
+.verb-suggestion-item.disabled:hover {
+    background-color: transparent;
+}
+
+.verb-suggestion-item strong {
+    font-weight: bold;
+    color: #333;
+    font-size: 15px;
+}
+
+.verb-suggestion-item small {
+    color: #666;
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+/* Модальное окно для глаголов */
+.verb-image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 10px 10px 10px;
+    overflow-y: auto;
+}
+
+.verb-image-content {
+    position: relative;
+    max-width: 90%;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 2px solid #dee2e6;
+}
+
+.verb-image-content img {
+    max-width: 100%;
+    max-height: calc(90vh - 30px);
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+}
+
+.verb-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.verb-close-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.verb-info {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}

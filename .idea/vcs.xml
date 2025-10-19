@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wp-content/themes/lbp/src/section-gramar-all-tables" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wp-content/themes/lbp/src/section-interactive-cheat-sheet" vcs="Git" />
   </component>
 </project>

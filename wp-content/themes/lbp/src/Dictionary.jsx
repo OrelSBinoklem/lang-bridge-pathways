@@ -200,15 +200,14 @@ if(document.getElementById('react-app-dictionary')) {
 					<div className="mode-buttons-container">
 						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
 						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Экзамен</button>
-						{window.myajax && window.myajax.is_admin && (
-							<button 
-								onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
-								className={'mode-button admin'}
-								style={{ backgroundColor: '#6c757d', color: 'white' }}
-							>
-								{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
-							</button>
-						)}
+					{window.myajax && window.myajax.is_admin && (
+						<button 
+							onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
+							className={'mode-button admin'}
+						>
+							{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
+						</button>
+					)}
 					</div>
 				)}
 				
