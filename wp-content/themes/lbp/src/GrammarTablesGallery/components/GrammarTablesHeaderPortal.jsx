@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 const GrammarTablesHeaderPortal = ({
@@ -15,6 +15,22 @@ const GrammarTablesHeaderPortal = ({
     onCloseVerbSuggestions,
     onViewModeToggle
 }) => {
+    const searchRef = useRef(null);
+    
+    // Закрываем подсказки при клике вне компонента
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                if (showVerbSuggestions && onCloseVerbSuggestions) {
+                    onCloseVerbSuggestions();
+                }
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [showVerbSuggestions, onCloseVerbSuggestions]);
+    
     const levels = [
         { value: 'a1', label: 'A1', color: '#C82341' },
         { value: 'a2', label: 'A2', color: '#FC8423' },
@@ -31,7 +47,7 @@ const GrammarTablesHeaderPortal = ({
     const content = (
         <div className="grammar-tables-header-controls">
             {/* Поиск глагола */}
-            <div className="verb-search-wrapper">
+            <div className="verb-search-wrapper" ref={searchRef}>
                 <div className="verb-search-container">
                     <input 
                         type="text" 
