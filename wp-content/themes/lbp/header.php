@@ -29,15 +29,6 @@
                 the_custom_logo();
             }
             ?>
-            
-            <!-- Ссылка "Вернуться в словарь" -->
-            <?php if (is_page_template('page-grammar-tables.php')): ?>
-                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="refresh-link" title="Обновить словарь">
-                    🔄 Вернуться в словарь
-                </a>
-            <?php endif; ?>
-            
-            <!-- Ссылка для сброса словаря -->
             <?php 
             // Проверяем разные способы определения страницы словаря
             $is_dictionary_page = false;
@@ -63,11 +54,6 @@
             }
             ?>
             
-            <?php if ($is_dictionary_page): ?>
-                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="dictionary-refresh-link" title="Обновить словарь">
-                    🔄 Вернуться в словарь
-                </a>
-            <?php endif; ?>
         </div>
 
         <!-- Отдельный контейнер для ссылки словаря -->
