@@ -131,14 +131,12 @@ const VerbSearch = ({ onVerbSelect }) => {
         }
     };
 
-    const handleInputMouseDown = (e) => {
-        console.log('VerbSearch: handleInputMouseDown вызван!');
-        e.target.select();
-        console.log('VerbSearch: select() вызван');
+    const handleInputFocus = (e) => {
+        setTimeout(() => e.target.select(), 0);
     };
 
     console.log('VerbSearch: Рендерим компонент, searchTerm:', searchTerm);
-    console.log('VerbSearch: Привязываем onMouseDown:', !!handleInputMouseDown);
+    console.log('VerbSearch: Привязываем onFocus:', !!handleInputFocus);
     
     return (
         <div className="verb-search-wrapper" ref={searchRef}>
@@ -149,7 +147,7 @@ const VerbSearch = ({ onVerbSelect }) => {
                     placeholder="Поиск глагола..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    onMouseDown={handleInputMouseDown}
+                    onFocus={handleInputFocus}
                     style={{ width: '200px' }}
                     autoComplete="off"
                 />

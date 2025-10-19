@@ -48,6 +48,27 @@
 
     </div>
 
+<script>
+// Закрытие меню при клике вне его
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const primaryMenu = document.getElementById('primary-menu');
+    
+    if (menuToggle && primaryMenu) {
+        // Обработчик клика вне меню
+        document.addEventListener('click', function(event) {
+            if (!menuToggle.contains(event.target) && !primaryMenu.contains(event.target)) {
+                // Закрываем меню только если оно открыто
+                const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+                if (isOpen) {
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    primaryMenu.classList.remove('open');
+                }
+            }
+        });
+    }
+});
+</script>
 
 </header>
 </body>
