@@ -68,6 +68,17 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
       </div>
 
       <div className="field-row">
+        <label>Доп. варианты:</label>
+        <input 
+          name="translation_input_variable" 
+          value={formData.translation_input_variable || ''} 
+          onChange={handleChange}
+          placeholder="вариант1, вариант2, вариант3"
+          title="Дополнительные варианты перевода для проверки ответов (не отображаются пользователю)"
+        />
+      </div>
+
+      <div className="field-row">
         <label>Сложный перевод:</label>
         <input name="difficult_translation" value={formData.difficult_translation || ''} onChange={handleChange} />
       </div>

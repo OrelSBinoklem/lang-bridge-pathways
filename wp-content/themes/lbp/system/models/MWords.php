@@ -224,6 +224,7 @@ function create_word($dictionary_id, $word_data, $category_ids = []) {
             'translation_1' => $word_data['translation_1'],
             'translation_2' => !empty($word_data['translation_2']) ? $word_data['translation_2'] : null,
             'translation_3' => !empty($word_data['translation_3']) ? $word_data['translation_3'] : null,
+            'translation_input_variable' => !empty($word_data['translation_input_variable']) ? $word_data['translation_input_variable'] : null,
             'difficult_translation' => !empty($word_data['difficult_translation']) ? $word_data['difficult_translation'] : null,
             'sound_url' => !empty($word_data['sound_url']) ? $word_data['sound_url'] : null,
             'level' => $level,

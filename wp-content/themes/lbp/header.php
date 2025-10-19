@@ -57,7 +57,7 @@
         </div>
 
         <!-- Отдельный контейнер для ссылки словаря -->
-        <?php if ($is_dictionary_page): ?>
+        <?php if (is_page_template('page-dictionary.php')): ?>
             <div class="dictionary-refresh-container">
                 <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="dictionary-refresh-link" title="Обновить словарь">
                     🔄 Вернуться в словарь
