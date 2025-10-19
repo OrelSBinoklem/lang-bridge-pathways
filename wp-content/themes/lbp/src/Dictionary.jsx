@@ -10,6 +10,7 @@ import DictionaryCategoryManagement from "./custom/components/DictionaryCategory
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
+	console.log('Dictionary ID:', dictionaryId);
 	const Dictionary = () => {
 		const [mode, setMode] = useState(null);
 		const [modeEducation, setModeEducation] = useState(null);
@@ -21,6 +22,8 @@ if(document.getElementById('react-app-dictionary')) {
 		const [categories, setCategories] = useState([]);
 		const [loadingCategories, setLoadingCategories] = useState(false);
 		const [showCategoryManagement, setShowCategoryManagement] = useState(false);
+		const [dictionaryInfo, setDictionaryInfo] = useState(null);
+		const [loadingDictionaryInfo, setLoadingDictionaryInfo] = useState(false);
 
 		const onChangeModeEducation = (mode) => {
 			setModeEducation(mode);
@@ -52,6 +55,29 @@ if(document.getElementById('react-app-dictionary')) {
 				console.error('Ошибка при загрузке данных пользователя:', error);
 			} finally {
 				setLoadingUserData(false);
+			}
+		}
+
+		// Функция для загрузки информации о словаре
+		const fetchDictionaryInfo = async () => {
+			try {
+				setLoadingDictionaryInfo(true);
+				const formData = new FormData();
+				formData.append("action", "get_dictionary");
+				formData.append("dictionary_id", dictionaryId);
+
+				const response = await axios.post(window.myajax.url, formData);
+
+				if (response.data.success) {
+					console.log('Dictionary info loaded:', response.data.data);
+					setDictionaryInfo(response.data.data);
+				} else {
+					console.error('Ошибка загрузки информации о словаре:', response.data.message);
+				}
+			} catch (error) {
+				console.error('Ошибка при загрузке информации о словаре:', error);
+			} finally {
+				setLoadingDictionaryInfo(false);
 			}
 		}
 
@@ -172,6 +198,7 @@ if(document.getElementById('react-app-dictionary')) {
 
 		// Загружаем все данные при монтировании компонента
 		useEffect(() => {
+			fetchDictionaryInfo();
 			fetchDictionaryWords();
 			fetchCategories();
 			fetchUserWordsData();
@@ -196,6 +223,16 @@ if(document.getElementById('react-app-dictionary')) {
 
 		return (
 			<div>
+				{/* Заголовок словаря */}
+				{dictionaryInfo && (
+					<div className="dictionary-info">
+						<h1 className="dictionary-title">
+							{dictionaryInfo.name || 'Словарь'}
+							<span className="words-count"> ({dictionaryInfo.words} слов)</span>
+						</h1>
+					</div>
+				)}
+				
 				{mode === null && (
 					<div className="mode-buttons-container">
 						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
