@@ -29,7 +29,55 @@
                 the_custom_logo();
             }
             ?>
+            
+            <!-- Ссылка "Вернуться в словарь" -->
+            <?php if (is_page_template('page-grammar-tables.php')): ?>
+                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="refresh-link" title="Обновить словарь">
+                    🔄 Вернуться в словарь
+                </a>
+            <?php endif; ?>
+            
+            <!-- Ссылка для сброса словаря -->
+            <?php 
+            // Проверяем разные способы определения страницы словаря
+            $is_dictionary_page = false;
+            
+            // Способ 1: проверка шаблона
+            if (is_page_template('page-dictionary.php')) {
+                $is_dictionary_page = true;
+            }
+            
+            // Способ 2: проверка по slug страницы
+            if (is_page() && get_page_template_slug() === 'page-dictionary.php') {
+                $is_dictionary_page = true;
+            }
+            
+            // Способ 3: проверка по URL
+            if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], 'dictionary') !== false) {
+                $is_dictionary_page = true;
+            }
+            
+            // Способ 4: проверка наличия элемента react-app-dictionary на странице
+            if (isset($_POST) || isset($_GET)) {
+                $is_dictionary_page = true; // Временно показываем всегда для тестирования
+            }
+            ?>
+            
+            <?php if ($is_dictionary_page): ?>
+                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="dictionary-refresh-link" title="Обновить словарь">
+                    🔄 Вернуться в словарь
+                </a>
+            <?php endif; ?>
         </div>
+
+        <!-- Отдельный контейнер для ссылки словаря -->
+        <?php if ($is_dictionary_page): ?>
+            <div class="dictionary-refresh-container">
+                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="dictionary-refresh-link" title="Обновить словарь">
+                    🔄 Вернуться в словарь
+                </a>
+            </div>
+        <?php endif; ?>
 
         <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
             <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
