@@ -14,6 +14,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     translation_1: '',
     translation_2: '',
     translation_3: '',
+    translation_input_variable: '',
     difficult_translation: '',
     sound_url: '',
     level: '',
@@ -47,6 +48,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
           translation_1: '', 
           translation_2: '', 
           translation_3: '',
+          translation_input_variable: '',
           difficult_translation: '',
           sound_url: '',
           level: '',
@@ -142,6 +144,21 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
                   onChange={(e) => setNewWord({...newWord, translation_3: e.target.value})}
                   style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
                   placeholder="Ещё один вариант..."
+                />
+              </div>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px' }}>
+                  Доп. варианты (через запятую):
+                  <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal', marginLeft: '5px' }}>
+                    (не отображаются, но учитываются при проверке)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={newWord.translation_input_variable}
+                  onChange={(e) => setNewWord({...newWord, translation_input_variable: e.target.value})}
+                  style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                  placeholder="вариант1, вариант2, вариант3"
                 />
               </div>
               <div style={{ marginBottom: '10px' }}>

@@ -231,14 +231,33 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         currentWord.translation_2,
         currentWord.translation_3
       ].filter(t => t && t !== '0');
+      
+      // Добавляем дополнительные варианты из translation_input_variable
+      if (currentWord.translation_input_variable && currentWord.translation_input_variable.trim()) {
+        const additionalVariants = currentWord.translation_input_variable
+          .split(',')
+          .map(v => v.trim())
+          .filter(v => v.length > 0);
+        console.log('🔍 translation_input_variable:', currentWord.translation_input_variable);
+        console.log('🔍 Additional variants:', additionalVariants);
+        correctAnswers.push(...additionalVariants);
+      }
     }
 
+    console.log('📝 Current word object:', currentWord);
+    console.log('✅ All correct answers:', correctAnswers);
+    console.log('👤 User answer (raw):', userAnswer);
+
     const normalizedUserAnswer = normalizeString(userAnswer);
+    console.log('👤 User answer (normalized):', normalizedUserAnswer);
     
     correct = correctAnswers.some(answer => {
       const normalizedAnswer = normalizeString(answer);
+      console.log('🔄 Comparing:', `"${normalizedUserAnswer}"`, 'vs', `"${normalizedAnswer}"`);
       return normalizedAnswer === normalizedUserAnswer;
     });
+
+    console.log('🎯 Result:', correct);
 
     setIsCorrect(correct);
     setShowResult(true);

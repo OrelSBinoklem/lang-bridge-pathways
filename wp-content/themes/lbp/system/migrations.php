@@ -365,3 +365,21 @@ function add_order_field_to_categories_table() {
 }
 
 add_action('after_setup_theme', 'add_order_field_to_categories_table');
+
+/** Добавляем поле translation_input_variable в таблицу слов
+ * @return void
+ */
+function add_translation_input_variable_to_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'd_words';
+
+    // Проверяем, существует ли уже поле translation_input_variable
+    $columns = $wpdb->get_col("DESCRIBE $table_name");
+    
+    if (!in_array('translation_input_variable', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN translation_input_variable TEXT DEFAULT NULL AFTER translation_3");
+        error_log('Added translation_input_variable field to d_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_translation_input_variable_to_words_table');

@@ -34,7 +34,7 @@ export const customCategoryComponents = {
   // 2. Откройте консоль (F12)
   // 3. Посмотрите логи: "dictionaryId = X, categoryId = Y"
   
-  '6:121': SimpleExampleCategory,     // Простой пример с группировкой
+  //'6:121': SimpleExampleCategory,     // Простой пример с группировкой
   // '6:122': BaseTemplate,           // Базовый шаблон для копирования
   
   // Примеры регистрации:

@@ -78,7 +78,7 @@ const tablesData = {
         { id: 69, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0073.jpg', level: 'b2', alt: 'IMG_20250810_0073' },
         { id: 70, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0080_3.jpg', level: 'b2', alt: 'IMG_20250810_0080_3' },
         { id: 71, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0081.jpg', level: 'b2', alt: 'IMG_20250810_0081' },
-        { id: 72, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0083_2.jpg', level: 'b2', alt: 'IMG_20250810_0083_2' },
+        //{ id: 72, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0083_2.jpg', level: 'b2', alt: 'IMG_20250810_0083_2' },
         { id: 73, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0083_3.jpg', level: 'b2', alt: 'IMG_20250810_0083_3' },
         { id: 74, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0083_4.jpg', level: 'b2', alt: 'IMG_20250810_0083_4' },
         { id: 75, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0084.jpg', level: 'b2', alt: 'IMG_20250810_0084' },
