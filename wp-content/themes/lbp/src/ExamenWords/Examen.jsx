@@ -95,7 +95,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     const trainingWords = categoryWords.filter(word => {
       const displayStatus = getWordDisplayStatus(word.id);
       // Включаем в тренировку только слова без активного отката и не полностью изученные
-      return !displayStatus.fullyLearned && !displayStatus.cooldownDirect && !displayStatus.cooldownRevert;
+      return !displayStatus.fullyLearned && (!displayStatus.cooldownDirect || !displayStatus.cooldownRevert);
     });
 
     return trainingWords;
