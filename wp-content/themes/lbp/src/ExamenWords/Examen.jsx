@@ -151,11 +151,15 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   // Обновить попытки слова на сервере
   const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
     try {
+      const userData = userWordsData[currentWord?.id];
+      let me = isRevertMode ? userData?.mode_education_revert : userData?.mode_education;
+
 			const formData = new FormData();
       formData.append("action", "update_word_attempts");
       formData.append("word_id", wordId);
       formData.append("is_revert", isRevertMode ? 1 : 0);
       formData.append("is_correct", isCorrect ? 1 : 0);
+      formData.append("is_first_attempt", me ? 0 : 1); // Первая попытка если attemptCount = 0
 
 			const response = await axios.post(window.myajax.url, formData);
 
@@ -214,6 +218,27 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     }
   };
 
+  // Функция для генерации вариантов ответа с учётом скобок
+  const generateAnswerVariants = (text) => {
+    if (!text) return [];
+    
+    const variants = [];
+    
+    // Вариант 1: Текст БЕЗ содержимого скобок (основной вариант)
+    // Например: "ручка (дверная)" -> "ручка"
+    const textWithoutParentheses = text.replace(/\([^)]*\)/g, '').trim();
+    if (textWithoutParentheses) variants.push(textWithoutParentheses);
+    
+    // Вариант 2: Весь текст, но БЕЗ самих скобок (с содержимым)
+    // Например: "ручка (дверная)" -> "ручка дверная"
+    const fullTextWithoutBrackets = text.replace(/[()]/g, '').trim();
+    if (fullTextWithoutBrackets && fullTextWithoutBrackets !== textWithoutParentheses) {
+      variants.push(fullTextWithoutBrackets);
+    }
+    
+    return variants;
+  };
+
   // Обработчики для TrainingInterface
   const handleCheckAnswer = () => {
     if (!currentWord || !userAnswer.trim()) return;
@@ -245,13 +270,22 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     }
 
     console.log('📝 Current word object:', currentWord);
-    console.log('✅ All correct answers:', correctAnswers);
+    console.log('✅ All correct answers (raw):', correctAnswers);
+    
+    // Генерируем все возможные варианты для каждого правильного ответа
+    const allAcceptableVariants = [];
+    correctAnswers.forEach(answer => {
+      const variants = generateAnswerVariants(answer);
+      allAcceptableVariants.push(...variants);
+    });
+    
+    console.log('✅ All acceptable variants:', allAcceptableVariants);
     console.log('👤 User answer (raw):', userAnswer);
 
     const normalizedUserAnswer = normalizeString(userAnswer);
     console.log('👤 User answer (normalized):', normalizedUserAnswer);
     
-    correct = correctAnswers.some(answer => {
+    correct = allAcceptableVariants.some(answer => {
       const normalizedAnswer = normalizeString(answer);
       console.log('🔄 Comparing:', `"${normalizedUserAnswer}"`, 'vs', `"${normalizedAnswer}"`);
       return normalizedAnswer === normalizedUserAnswer;

@@ -148,12 +148,12 @@ export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, c
   let cooldownDuration;
   
   if (correctAttempts === 0) {
-    return null;
+    if (modeEducation === 0) {
+      cooldownDuration = 30 * 60 * 1000; // 30 минут
+    }
   } else if (correctAttempts === 1) {
     if (modeEducation === 0) {
       cooldownDuration = 20 * 60 * 60 * 1000; // 20 часов
-    } else {
-      cooldownDuration = 30 * 60 * 1000; // 30 минут
     }
   } else if (correctAttempts >= 2) {
     return null;

@@ -514,6 +514,127 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
     return true;
 }
 
+/**
+ * Сбросить прогресс экзамена для всех слов категории
+ * (Вызывается при входе в режим легкого изучения)
+ * Симулируем правильный ответ в режиме обучения (не с первой попытки)
+ * Это запускает откат: mode_education = 0, last_shown = NOW, attempts +1
+ */
+function reset_exam_progress_for_category($user_id, $category_id) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    error_log("📊 reset_exam_progress_for_category: user_id=$user_id, category_id=$category_id");
+    
+    // Получаем все слова из категории
+    $word_ids = $wpdb->get_col($wpdb->prepare("
+        SELECT w.id 
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id = %d
+    ", $category_id));
+    
+    error_log("📊 Найдено слов в категории: " . count($word_ids));
+    
+    if (empty($word_ids)) {
+        error_log("⚠️ Нет слов в категории $category_id");
+        return true; // Нет слов - не ошибка
+    }
+    
+    $current_time = current_time('mysql');
+    error_log("⏰ Текущее время: $current_time");
+    
+    // Симулируем правильный ответ в режиме обучения для всех слов
+    $updated_count = 0;
+    $created_count = 0;
+    
+    foreach ($word_ids as $word_id) {
+        $exists = $wpdb->get_row($wpdb->prepare("
+            SELECT * FROM $user_dict_words_table 
+            WHERE user_id = %d AND dict_word_id = %d
+        ", $user_id, $word_id), ARRAY_A);
+        
+        if ($exists) {
+            error_log("🔄 Обновление слова ID=$word_id");
+            // Симулируем правильный ответ в режиме обучения (не с первой попытки)
+            // Это выключает mode_education и запускает откат
+            $result = $wpdb->update(
+                $user_dict_words_table,
+                [
+                    // Прямой перевод
+                    'mode_education' => 0,              // Выключаем режим обучения
+                    'last_shown' => $current_time,      // Устанавливаем время показа
+                    
+                    // Обратный перевод
+                    'mode_education_revert' => 0,       // Выключаем режим обучения
+                    'last_shown_revert' => $current_time, // Устанавливаем время показа
+                    // НЕ увеличиваем attempts_revert - откат без учёта попытки --- потому что юзер просто подсмотрел слова  в режиме изучениия поэтому не считаем этот как за попытку ответа а просто сбрасываем время
+                ],
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id
+                ]
+            );
+            
+            if ($result !== false) {
+                $updated_count++;
+                error_log("✅ Слово ID=$word_id обновлено");
+            } else {
+                error_log("❌ Ошибка обновления слова ID=$word_id: " . $wpdb->last_error);
+            }
+        } else {
+            error_log("➕ Создание новой записи для слова ID=$word_id");
+            // Создаём новую запись с откатом (как после правильного ответа не с первой попытки)
+            $result = $wpdb->insert(
+                $user_dict_words_table,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id,
+                    'attempts' => 0,                    // Без попыток (откат без учёта)
+                    'attempts_revert' => 0,             // Без попыток (откат без учёта)
+                    'correct_attempts' => 1,            // 1 правильная попытка для запуска отката на 20 часов
+                    'correct_attempts_revert' => 1,     // 1 правильная попытка для запуска отката на 20 часов
+                    'last_shown' => $current_time,      // Время показа
+                    'last_shown_revert' => $current_time, // Время показа
+                    'mode_education' => 0,              // Выключен (откат активен)
+                    'mode_education_revert' => 0,       // Выключен (откат активен)
+                    'attempts_all' => 0,
+                    'correct_attempts_all' => 0,
+                    'easy_education' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0
+                ]
+            );
+            
+            if ($result !== false) {
+                $created_count++;
+                error_log("✅ Слово ID=$word_id создано");
+            } else {
+                error_log("❌ Ошибка создания записи для слова ID=$word_id: " . $wpdb->last_error);
+            }
+        }
+    }
+    
+    error_log("📊 Итого: обновлено=$updated_count, создано=$created_count");
+    
+    // Проверяем что получилось - выводим несколько записей для отладки
+    if (!empty($word_ids)) {
+        $first_word_id = $word_ids[0];
+        $check_data = $wpdb->get_row($wpdb->prepare("
+            SELECT mode_education, mode_education_revert, last_shown, last_shown_revert, 
+                   correct_attempts, correct_attempts_revert, attempts, attempts_revert
+            FROM $user_dict_words_table 
+            WHERE user_id = %d AND dict_word_id = %d
+        ", $user_id, $first_word_id), ARRAY_A);
+        
+        error_log("🔍 Проверка первого слова (ID=$first_word_id): " . print_r($check_data, true));
+    }
+    
+    return true;
+}
+
 function reset_training_category_data($user_id, $category_id) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';

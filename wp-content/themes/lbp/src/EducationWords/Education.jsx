@@ -45,9 +45,45 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
   };
 
+  // Сбросить прогресс экзамена для категории при входе в режим легкого изучения
+  const resetExamProgressForCategory = async () => {
+    console.log('🔄 Попытка сбросить прогресс экзамена для категории:', categoryId);
+    try {
+      const formData = new FormData();
+      formData.append("action", "reset_exam_progress_for_category");
+      formData.append("category_id", categoryId);
+
+      console.log('📤 Отправляем запрос на сброс прогресса экзамена...');
+      const response = await axios.post(window.myajax.url, formData);
+      console.log('📥 Ответ сервера:', response.data);
+
+      if (response.data.success) {
+        console.log('✅ Прогресс экзамена сброшен для категории:', categoryId);
+        
+        // Выводим данные для отладки
+        if (response.data.data.debug_data) {
+          console.log('📊 Обновлённые данные слов (первые 5):', response.data.data.debug_data);
+          console.table(response.data.data.debug_data);
+        }
+        
+        // Обновляем данные пользователя
+        if (onRefreshUserData) {
+          console.log('🔄 Обновляем данные пользователя...');
+          onRefreshUserData();
+        }
+      } else {
+        console.warn('⚠️ Не удалось сбросить прогресс экзамена:', response.data.message);
+      }
+    } catch (err) {
+      console.error('❌ Ошибка при сбросе прогресса экзамена:', err);
+    }
+  };
+
   // Загружаем категории при монтировании компонента
   useEffect(() => {
     fetchWords();
+    // Сбрасываем прогресс экзамена при входе в категорию в режиме обучения
+    resetExamProgressForCategory();
   }, [categoryId]);
 
   const toggleEdit = (id) => {
@@ -231,6 +267,27 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
   };
 
+  // Функция для генерации вариантов ответа с учётом скобок
+  const generateAnswerVariants = (text) => {
+    if (!text) return [];
+    
+    const variants = [];
+    
+    // Вариант 1: Текст БЕЗ содержимого скобок (основной вариант)
+    // Например: "ручка (дверная)" -> "ручка"
+    const textWithoutParentheses = text.replace(/\([^)]*\)/g, '').trim();
+    if (textWithoutParentheses) variants.push(textWithoutParentheses);
+    
+    // Вариант 2: Весь текст, но БЕЗ самих скобок (с содержимым)
+    // Например: "ручка (дверная)" -> "ручка дверная"
+    const fullTextWithoutBrackets = text.replace(/[()]/g, '').trim();
+    if (fullTextWithoutBrackets && fullTextWithoutBrackets !== textWithoutParentheses) {
+      variants.push(fullTextWithoutBrackets);
+    }
+    
+    return variants;
+  };
+
   // Обработчики для TrainingInterface
   const handleCheckAnswer = () => {
     if (!currentWord || !userAnswer.trim()) return;
@@ -262,13 +319,22 @@ const Education = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWor
     }
 
     console.log('📝 Current word object:', currentWord);
-    console.log('✅ All correct answers:', correctAnswers);
+    console.log('✅ All correct answers (raw):', correctAnswers);
+    
+    // Генерируем все возможные варианты для каждого правильного ответа
+    const allAcceptableVariants = [];
+    correctAnswers.forEach(answer => {
+      const variants = generateAnswerVariants(answer);
+      allAcceptableVariants.push(...variants);
+    });
+    
+    console.log('✅ All acceptable variants:', allAcceptableVariants);
     console.log('👤 User answer (raw):', userAnswer);
 
     const normalizedUserAnswer = normalizeString(userAnswer);
     console.log('👤 User answer (normalized):', normalizedUserAnswer);
     
-    correct = correctAnswers.some(answer => {
+    correct = allAcceptableVariants.some(answer => {
       const normalizedAnswer = normalizeString(answer);
       console.log('🔄 Comparing:', `"${normalizedUserAnswer}"`, 'vs', `"${normalizedAnswer}"`);
       return normalizedAnswer === normalizedUserAnswer;
