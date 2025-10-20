@@ -594,8 +594,8 @@ function reset_exam_progress_for_category($user_id, $category_id) {
                     'dict_word_id' => $word_id,
                     'attempts' => 0,                    // Без попыток (откат без учёта)
                     'attempts_revert' => 0,             // Без попыток (откат без учёта)
-                    'correct_attempts' => 1,            // 1 правильная попытка для запуска отката на 20 часов
-                    'correct_attempts_revert' => 1,     // 1 правильная попытка для запуска отката на 20 часов
+                    'correct_attempts' => 0,            // 1 правильная попытка для запуска отката на 20 часов
+                    'correct_attempts_revert' => 0,     // 1 правильная попытка для запуска отката на 20 часов
                     'last_shown' => $current_time,      // Время показа
                     'last_shown_revert' => $current_time, // Время показа
                     'mode_education' => 0,              // Выключен (откат активен)
