@@ -32,7 +32,7 @@ const WordRow = ({
   const isExamenMode = mode === 'examen' && formatTime;
   
   // Логирование для отладки
-  /*console.log('WordRow:', {
+  console.log('WordRow:', {
     wordId: word.id,
     wordText: word.word,
     mode,
@@ -40,7 +40,7 @@ const WordRow = ({
     hasFormatTime: !!formatTime,
     userData: userData,
     displayStatus: displayStatus
-  });*/
+  });
   
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
@@ -75,15 +75,15 @@ const WordRow = ({
     <li key={word.id}>
       {/* Слово */}
       <span className="words-education-list__word">
-        {isExamenMode && displayStatus.cooldownDirect ? (
+        {isExamenMode && displayStatus.cooldownRevert ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-            ⏱️ {formatTime(displayStatus.cooldownDirect)}
+            ⏱️ {formatTime(displayStatus.cooldownRevert)}
           </span>
         ) : displayStatus.showWord ? (
           word.word
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education === 1 ? (
+            {isExamenMode && userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -99,15 +99,15 @@ const WordRow = ({
       {/* Перевод 1 */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
-        {isExamenMode && displayStatus.cooldownRevert ? (
+        {isExamenMode && displayStatus.cooldownDirect ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-            ⏱️ {formatTime(displayStatus.cooldownRevert)}
+            ⏱️ {formatTime(displayStatus.cooldownDirect)}
           </span>
         ) : displayStatus.showTranslation ? (
           word.translation_1
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education_revert === 1 ? (
+            {isExamenMode && userData && userData.mode_education === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -121,7 +121,7 @@ const WordRow = ({
       </span>
       
       {/* Перевод 2 */}
-      {word.translation_2 && (!isExamenMode || !displayStatus.cooldownRevert) && (
+      {word.translation_2 && (!isExamenMode || !displayStatus.cooldownDirect) && (
         <span className="words-education-list__translation_2">
           , {displayStatus.showTranslation ? (
             word.translation_2
@@ -136,7 +136,7 @@ const WordRow = ({
       )}
       
       {/* Перевод 3 */}
-      {word.translation_3 && (!isExamenMode || !displayStatus.cooldownRevert) && (
+      {word.translation_3 && (!isExamenMode || !displayStatus.cooldownDirect) && (
         <span className="words-education-list__translation_3">
           , {displayStatus.showTranslation ? (
             word.translation_3

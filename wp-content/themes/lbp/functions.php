@@ -396,13 +396,14 @@ class WordsAjaxHandler {
         $word_id = intval($_POST['word_id'] ?? 0);
         $is_revert = intval($_POST['is_revert'] ?? 0); // 0 = прямой перевод, 1 = обратный
         $is_correct = intval($_POST['is_correct'] ?? 0); // 0 = неправильно, 1 = правильно
+        $is_first_attempt = intval($_POST['is_first_attempt'] ?? 0); // 0 = не первая попытка, 1 = первая попытка
 
         if (!$word_id) {
             wp_send_json_error(['message' => 'Не передан ID слова']);
             wp_die();
         }
 
-        $result = update_word_attempts($user_id, $word_id, $is_revert, $is_correct, 1);
+        $result = update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_first_attempt);
         if ($result) {
             wp_send_json_success(['message' => 'Попытка записана']);
         } else {
@@ -452,6 +453,70 @@ class WordsAjaxHandler {
         } else {
             wp_send_json_error(['message' => 'Ошибка при сбросе данных категории']);
         }
+        wp_die();
+    }
+
+    /**
+     * Сбросить прогресс экзамена для всех слов категории
+     * Вызывается при входе в режим легкого изучения (Education)
+     */
+    public static function handle_reset_exam_progress_for_category() {
+        global $wpdb;
+        
+        error_log('🔄 handle_reset_exam_progress_for_category вызван');
+        
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            error_log('❌ Пользователь не авторизован');
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            error_log('❌ Не передан ID категории');
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        error_log("🔄 Сброс прогресса экзамена: user_id=$user_id, category_id=$category_id");
+        
+        try {
+            $result = reset_exam_progress_for_category($user_id, $category_id);
+            
+            if ($result) {
+                error_log('✅ Прогресс экзамена успешно сброшен');
+                
+                // Получаем обновлённые данные пользователя для проверки
+                $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+                $words_table = $wpdb->prefix . 'd_words';
+                $word_category_table = $wpdb->prefix . 'd_word_category';
+                
+                $updated_data = $wpdb->get_results($wpdb->prepare("
+                    SELECT udw.dict_word_id, udw.mode_education, udw.mode_education_revert, 
+                           udw.last_shown, udw.last_shown_revert, udw.correct_attempts, udw.correct_attempts_revert
+                    FROM $user_dict_words_table AS udw
+                    INNER JOIN $word_category_table AS wc ON udw.dict_word_id = wc.word_id
+                    WHERE udw.user_id = %d AND wc.category_id = %d
+                    LIMIT 5
+                ", $user_id, $category_id), ARRAY_A);
+                
+                error_log('📊 Обновлённые данные (первые 5 слов): ' . print_r($updated_data, true));
+                
+                wp_send_json_success([
+                    'message' => 'Прогресс экзамена сброшен для категории',
+                    'debug_data' => $updated_data
+                ]);
+            } else {
+                error_log('❌ Ошибка при сбросе прогресса экзамена');
+                wp_send_json_error(['message' => 'Ошибка при сбросе прогресса экзамена']);
+            }
+        } catch (Exception $e) {
+            error_log('❌ Exception при сбросе прогресса: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            wp_send_json_error(['message' => 'Ошибка сервера: ' . $e->getMessage()]);
+        }
+        
         wp_die();
     }
 
@@ -681,6 +746,8 @@ add_action('wp_ajax_reset_category_from_training', ['WordsAjaxHandler', 'handle_
 add_action('wp_ajax_update_word_attempts', ['WordsAjaxHandler', 'handle_update_word_attempts']);
 add_action('wp_ajax_reset_training_word', ['WordsAjaxHandler', 'handle_reset_training_word']);
 add_action('wp_ajax_reset_training_category', ['WordsAjaxHandler', 'handle_reset_training_category']);
+add_action('wp_ajax_reset_exam_progress_for_category', ['WordsAjaxHandler', 'handle_reset_exam_progress_for_category']);
+add_action('wp_ajax_nopriv_reset_exam_progress_for_category', ['WordsAjaxHandler', 'handle_reset_exam_progress_for_category']);
 
 // AJAX обработчики для управления категориями
 add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_category']);

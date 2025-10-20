@@ -145,9 +145,9 @@ const WordField = ({
     <li key={word.id} style={containerStyle} className={vertical ? 'word-field-vertical' : ''}>
       {/* Слово */}
       <span className="words-education-list__word">
-        {isExamenMode && displayStatus.cooldownDirect ? (
+        {isExamenMode && displayStatus.cooldownRevert ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-            ⏱️ {formatTime(displayStatus.cooldownDirect)}
+            ⏱️ {formatTime(displayStatus.cooldownRevert)}
           </span>
         ) : (displayStatus.showWord || (showDirectField && !hideAvailableWord)) ? (
           // Если слово доступно ИЛИ (активен режим прямого перевода И не скрывать) - показываем слово
@@ -163,7 +163,7 @@ const WordField = ({
               style={getFieldStyle(highlightReverseCorrect, highlightReverseIncorrect)}
               className="word-field-inline-input"
             />
-            {isExamenMode && userData && userData.mode_education === 1 && (
+            {isExamenMode && userData && userData.mode_education_revert === 1 && (
               <span className="learning-mode-text learning-glow">
                 📚 Учу
               </span>
@@ -179,7 +179,7 @@ const WordField = ({
           <span>&nbsp;</span>
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education === 1 ? (
+            {isExamenMode && userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -195,9 +195,9 @@ const WordField = ({
       {/* Перевод 1 */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
-        {isExamenMode && displayStatus.cooldownRevert ? (
+        {isExamenMode && displayStatus.cooldownDirect ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
-            ⏱️ {formatTime(displayStatus.cooldownRevert)}
+            ⏱️ {formatTime(displayStatus.cooldownDirect)}
           </span>
         ) : (displayStatus.showTranslation || (showReverseField && !hideAvailableWord)) ? (
           // Если перевод доступен ИЛИ (активен режим обратного перевода И не скрывать) - показываем перевод
@@ -213,7 +213,7 @@ const WordField = ({
               style={getFieldStyle(highlightDirectCorrect, highlightDirectIncorrect)}
               className="word-field-inline-input"
             />
-            {isExamenMode && userData && userData.mode_education_revert === 1 && (
+            {isExamenMode && userData && userData.mode_education === 1 && (
               <span className="learning-mode-text learning-glow">
                 📚 Учу
               </span>
@@ -231,7 +231,7 @@ const WordField = ({
           <span>&nbsp;</span>
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education_revert === 1 ? (
+            {isExamenMode && userData && userData.mode_education === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -245,7 +245,7 @@ const WordField = ({
       </span>
       
       {/* Перевод 2 */}
-      {word.translation_2 && (!isExamenMode || !displayStatus.cooldownRevert) && !hideAvailableWord && (
+      {word.translation_2 && (!isExamenMode || !displayStatus.cooldownDirect) && !hideAvailableWord && (
         <span className="words-education-list__translation_2">
           , {displayStatus.showTranslation || showReverseField ? (
             word.translation_2
@@ -260,7 +260,7 @@ const WordField = ({
       )}
       
       {/* Перевод 3 */}
-      {word.translation_3 && (!isExamenMode || !displayStatus.cooldownRevert) && !hideAvailableWord && (
+      {word.translation_3 && (!isExamenMode || !displayStatus.cooldownDirect) && !hideAvailableWord && (
         <span className="words-education-list__translation_3">
           , {displayStatus.showTranslation || showReverseField ? (
             word.translation_3
