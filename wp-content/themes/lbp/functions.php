@@ -457,6 +457,69 @@ class WordsAjaxHandler {
     }
 
     /**
+     * Создать записи с mode_education = 1 только для новых слов (без БД записей)
+     */
+    public static function handle_create_easy_mode_for_new_words() {
+        error_log('🔵 handle_create_easy_mode_for_new_words вызван');
+        
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            error_log('❌ Пользователь не авторизован');
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+        
+        error_log('👤 user_id: ' . $user_id);
+        error_log('📦 $_POST: ' . print_r($_POST, true));
+
+        $word_ids = isset($_POST['word_ids']) ? json_decode(stripslashes($_POST['word_ids']), true) : [];
+        error_log('📋 Декодированные word_ids: ' . print_r($word_ids, true));
+        
+        if (empty($word_ids)) {
+            error_log('❌ word_ids пустой');
+            wp_send_json_error(['message' => 'Не переданы ID слов']);
+            wp_die();
+        }
+
+        error_log('✅ Вызываем create_easy_mode_for_new_words с ' . count($word_ids) . ' словами');
+        $result = create_easy_mode_for_new_words($user_id, $word_ids);
+        
+        if ($result) {
+            error_log('✅ Функция вернула true, отправляем success');
+            wp_send_json_success(['message' => 'Записи созданы для новых слов', 'count' => count($word_ids)]);
+        } else {
+            error_log('❌ Функция вернула false');
+            wp_send_json_error(['message' => 'Ошибка при создании записей']);
+        }
+        wp_die();
+    }
+
+    /**
+     * Установить для всех слов категории режим лёгкого обучения
+     */
+    public static function handle_set_category_to_easy_mode() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $result = set_category_to_easy_mode($user_id, $category_id);
+        if ($result) {
+            wp_send_json_success(['message' => 'Категория переведена в режим лёгкого обучения']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка при переводе категории в режим обучения']);
+        }
+        wp_die();
+    }
+
+    /**
      * Сбросить прогресс экзамена для всех слов категории
      * Вызывается при входе в режим легкого изучения (Education)
      */
@@ -748,6 +811,10 @@ add_action('wp_ajax_reset_training_word', ['WordsAjaxHandler', 'handle_reset_tra
 add_action('wp_ajax_reset_training_category', ['WordsAjaxHandler', 'handle_reset_training_category']);
 add_action('wp_ajax_reset_exam_progress_for_category', ['WordsAjaxHandler', 'handle_reset_exam_progress_for_category']);
 add_action('wp_ajax_nopriv_reset_exam_progress_for_category', ['WordsAjaxHandler', 'handle_reset_exam_progress_for_category']);
+add_action('wp_ajax_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handle_create_easy_mode_for_new_words']);
+add_action('wp_ajax_nopriv_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handle_create_easy_mode_for_new_words']);
+add_action('wp_ajax_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
+add_action('wp_ajax_nopriv_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
 
 // AJAX обработчики для управления категориями
 add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_category']);

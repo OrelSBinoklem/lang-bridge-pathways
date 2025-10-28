@@ -2,19 +2,14 @@ import env from "./env";
 import axios from "axios";
 
 const { render, useEffect, useState } = wp.element;
-import EducationWords from "./EducationWords";
 import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
-import CategoryTree from "./EducationWords/CategoryTree";
 import DictionaryCategoryManagement from "./custom/components/DictionaryCategoryManagement";
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
 	console.log('Dictionary ID:', dictionaryId);
 	const Dictionary = () => {
-		const [mode, setMode] = useState(null);
-		const [modeEducation, setModeEducation] = useState(null);
-		const [modeTraining, setModeTraining] = useState(null);
 		const [userWordsData, setUserWordsData] = useState({});
 		const [loadingUserData, setLoadingUserData] = useState(false);
 		const [dictionaryWords, setDictionaryWords] = useState([]);
@@ -24,13 +19,6 @@ if(document.getElementById('react-app-dictionary')) {
 		const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 		const [dictionaryInfo, setDictionaryInfo] = useState(null);
 		const [loadingDictionaryInfo, setLoadingDictionaryInfo] = useState(false);
-
-		const onChangeModeEducation = (mode) => {
-			setModeEducation(mode);
-		}
-		const onChangeModeTraining = (mode) => {
-			setModeTraining(mode);
-		}
 
 		// Функция для загрузки данных пользователя из user_dict_words
 		const fetchUserWordsData = async () => {
@@ -181,21 +169,6 @@ if(document.getElementById('react-app-dictionary')) {
 			}
 		}
 
-		const handlePopState = (event) => {
-			let { mode = null, modeEducation = null, modeTraining = null } = event.state || {};
-			setMode(mode);
-			setModeEducation(modeEducation);
-			setModeTraining(modeTraining);
-		};
-
-		useEffect(() => {
-			window.addEventListener('popstate', handlePopState);
-			// Очистка: удаляем обработчик и возвращаем историю в исходное состояние
-			return () => {
-				window.removeEventListener('popstate', handlePopState);
-			};
-		}, []);
-
 		// Загружаем все данные при монтировании компонента
 		useEffect(() => {
 			fetchDictionaryInfo();
@@ -203,23 +176,6 @@ if(document.getElementById('react-app-dictionary')) {
 			fetchCategories();
 			fetchUserWordsData();
 		}, [dictionaryId]);
-
-		useEffect(() => {
-			let state = window.history.state || {};
-			if (mode !== (state?.mode??null) || modeEducation !== (state?.modeEducation??null) || modeTraining !== (state?.modeTraining??null)) {
-				window.history.pushState({ mode, modeEducation, modeTraining }, '');
-			}
-		}, [mode, modeEducation, modeTraining]);
-
-		const onCloseCurrentWindow = () => {
-			if(modeTraining !== null) {
-				setModeTraining(null);
-			} else if(modeEducation !== null) {
-				setModeEducation(null);
-			} else {
-				setMode(null);
-			}
-		}
 
 		return (
 			<div>
@@ -230,80 +186,53 @@ if(document.getElementById('react-app-dictionary')) {
 							{dictionaryInfo.name || 'Словарь'}
 							<span className="words-count"> ({dictionaryInfo.words} слов)</span>
 						</h1>
-					</div>
-				)}
-				
-				{mode === null && (
-					<div className="mode-buttons-container">
-						<button onClick={() => setMode('education-words')} className={'mode-button'}>Изучение</button>
-						<button onClick={() => setMode('training-words')} className={'mode-button green'}>Экзамен</button>
-					{window.myajax && window.myajax.is_admin && (
-						<button 
-							onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
-							className={'mode-button admin'}
-						>
-							{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
-						</button>
-					)}
-					</div>
-				)}
-				
-				{showCategoryManagement && (
-					<div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
-						<DictionaryCategoryManagement 
-							dictionaryId={dictionaryId}
-							onCategoriesChange={refreshCategories}
-						/>
-					</div>
-				)}
-				{mode !== null&&
-					<div className={'words-education-window'}>
-						{
-							mode === 'education-words'&&
-							<EducationWords 
-								dictionaryId={dictionaryId} 
-								mode={modeEducation} 
-								onChangeMode={onChangeModeEducation}
-								userWordsData={userWordsData}
-								loadingUserData={loadingUserData}
-								onRefreshUserData={fetchUserWordsData}
-								dictionaryWords={dictionaryWords}
-								loadingDictionaryWords={loadingDictionaryWords}
-								onRefreshDictionaryWords={refreshDictionaryWords}
-								categories={categories}
-								loadingCategories={loadingCategories}
-							/>
-						}
-						{
-							mode === 'training-words'&&
-							<ExamenWords 
-								dictionaryId={dictionaryId} 
-								mode={modeTraining} 
-								onChangeMode={onChangeModeTraining}
-								userWordsData={userWordsData}
-								loadingUserData={loadingUserData}
-								onRefreshUserData={fetchUserWordsData}
-								dictionaryWords={dictionaryWords}
-								loadingDictionaryWords={loadingDictionaryWords}
-								onRefreshDictionaryWords={refreshDictionaryWords}
-								categories={categories}
-								loadingCategories={loadingCategories}
-							/>
-						}
-						<button onClick={onCloseCurrentWindow} type={"button"} className={'words-education-window__close'}>×</button>
-					</div>
-				}
+			</div>
+		)}
+		
+		{/* Показываем ExamenWords напрямую */}
+		<ExamenWords 
+			dictionaryId={dictionaryId}
+			userWordsData={userWordsData}
+			loadingUserData={loadingUserData}
+			onRefreshUserData={fetchUserWordsData}
+			dictionaryWords={dictionaryWords}
+			loadingDictionaryWords={loadingDictionaryWords}
+			onRefreshDictionaryWords={refreshDictionaryWords}
+			categories={categories}
+			loadingCategories={loadingCategories}
+		/>
+		
+		{/* Кнопка управления категориями (только для админов) */}
+		{window.myajax && window.myajax.is_admin && (
+			<div className="mode-buttons-container">
+				<button 
+					onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
+					className={'mode-button admin'}
+				>
+					{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
+				</button>
+			</div>
+		)}
+		
+		{showCategoryManagement && (
+			<div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
+				<DictionaryCategoryManagement 
+					dictionaryId={dictionaryId}
+					onCategoriesChange={refreshCategories}
+				/>
+			</div>
+		)}
 
-				<div style={{ visibility: mode === null ? "visible" : "hidden", position: mode === null ? "static" : "absolute", top: mode === null ? "auto" : "-9999px" }}>
-					<h2 className="words-matrix-title">Матрица слов (декорация)</h2>
-					<WordsMatrix 
-						dictionaryId={dictionaryId} 
-						userWordsData={userWordsData}
-						loadingUserData={loadingUserData}
-						dictionaryWords={dictionaryWords}
-						loadingDictionaryWords={loadingDictionaryWords}
-					/>
-				</div>
+			<div style={{ visibility: "hidden", position: "absolute", top: "-9999px" }}>
+				<h2 className="words-matrix-title">Матрица слов (декорация)</h2>
+				<WordsMatrix 
+					dictionaryId={dictionaryId} 
+					userWordsData={userWordsData}
+					loadingUserData={loadingUserData}
+					dictionaryWords={dictionaryWords}
+					loadingDictionaryWords={loadingDictionaryWords}
+				/>
+			</div>
 			</div>
 		);
 	};

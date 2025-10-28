@@ -99,10 +99,10 @@ Template Name: Lang
 
         <div class="useful-links <?=$lang !== 'LV'?'d-none':''?>">
             <h2>Полезные ссылки</h2>
-            <a href="https://maciunmacies.valoda.lv/16-un-vairak" target="_blank">Главный сайт где всё! (примеры экзаменов, озвучка заданий учебника Laipa, ссылки на интерактивные задания)</a>
-            <a href="https://www.viaa.gov.lv/lv/parbaudes-programma" target="_blank">Примеры экзаменов</a>
-            <a href="https://elaipa.lv/Home/A1" target="_blank">Elaipa (лучшие интерактивные задания с проверкой)</a>
-            <a href="https://www.gramatika.lv/" target="_blank">Gramatika (чей-то незаконченный сайт по грамматике)</a>
+            <a href="https://maciunmacies.valoda.lv/16-un-vairak" target="_blank" class="highlighted-link">Главный сайт где всё! (примеры экзаменов, озвучка заданий учебника Laipa, ссылки на интерактивные задания)</a>
+            <a href="https://www.viaa.gov.lv/lv/parbaudes-programma" target="_blank" class="highlighted-link">Примеры экзаменов</a>
+            <a href="https://elaipa.lv/Home/A1" target="_blank" class="highlighted-link">Elaipa (лучшие интерактивные задания с проверкой)</a>
+            <a href="https://www.gramatika.lv/" target="_blank" class="highlighted-link">Gramatika (чей-то незаконченный сайт по грамматике)</a>
             <a href="https://aic.lv/izglitiba-latvija/izglitibas-sistema/" target="_blank">Система образования в Латвии!!!</a>
             <a href="https://epupa.valoda.lv/" target="_blank">Словарь с примерами использования слов и склонениями!!!</a>
             <a href="https://forvo.com/languages/lv/" target="_blank">Словарь с озвучкой</a>
