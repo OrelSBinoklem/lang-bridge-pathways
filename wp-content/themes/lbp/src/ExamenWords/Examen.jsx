@@ -102,11 +102,100 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   };
 
   // Начать тренировку
-  const startTraining = () => {
+  const startTraining = async () => {
     // Проверяем авторизацию
     if (!window.myajax || !window.myajax.is_logged_in) {
       alert('Для тренировки необходимо войти в систему');
       return;
+    }
+    
+    // Проверяем есть ли слова в категории без записей в БД ИЛИ со сброшенными записями
+    const categoryWords = dictionaryWords.filter(word => {
+      if (categoryId === 0) return true;
+      const categoryIdNum = parseInt(categoryId);
+      if (Array.isArray(word.category_ids)) {
+        return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+      }
+      return false;
+    });
+    
+    // Слова без записей ИЛИ со сброшенными записями
+    console.log('🔍 Проверяем слова категории:', categoryWords.length);
+    
+    const wordsToInitialize = categoryWords.filter(word => {
+      const userData = userWordsData[word.id];
+      
+      if (!userData) {
+        // Нет записи в БД
+        console.log(`✅ Слово ID=${word.id} (${word.word}) - НЕТ ЗАПИСИ в БД`);
+        return true;
+      }
+      
+      // Проверяем, является ли запись "сброшенной":
+      // attempts = 0 И attempts_revert = 0 И correct_attempts = 0 И correct_attempts_revert = 0
+      // И last_shown = null/пустая строка/'0000-00-00 00:00:00' (только после полного сброса)
+      const isResetState = (
+        userData.mode_education === 0 &&
+        userData.mode_education_revert === 0 &&
+        userData.attempts === 0 && 
+        userData.attempts_revert === 0 && 
+        userData.correct_attempts === 0 && 
+        userData.correct_attempts_revert === 0 &&
+        (userData.last_shown === null || userData.last_shown === '' || userData.last_shown === '0000-00-00 00:00:00') &&
+        (userData.last_shown_revert === null || userData.last_shown_revert === '' || userData.last_shown_revert === '0000-00-00 00:00:00')
+      );
+      
+      console.log(`🔍 Слово ID=${word.id} (${word.word}):`, {
+        attempts: userData.attempts,
+        attempts_revert: userData.attempts_revert,
+        correct_attempts: userData.correct_attempts,
+        correct_attempts_revert: userData.correct_attempts_revert,
+        last_shown: userData.last_shown,
+        last_shown_revert: userData.last_shown_revert,
+        isResetState
+      });
+      
+      return isResetState;
+    });
+    
+    if (wordsToInitialize.length > 0) {
+      console.log(`🆕 Найдено ${wordsToInitialize.length} слов для инициализации (без записей или после сброса)`);
+      console.log('📋 Слова:', wordsToInitialize.map(w => `ID=${w.id}, word=${w.word}`));
+      
+      try {
+        const wordIds = wordsToInitialize.map(w => w.id);
+        console.log('📤 Отправляем word_ids:', wordIds);
+        
+        const formData = new FormData();
+        formData.append('action', 'create_easy_mode_for_new_words');
+        formData.append('word_ids', JSON.stringify(wordIds));
+        
+        console.log('📤 FormData action:', formData.get('action'));
+        console.log('📤 FormData word_ids:', formData.get('word_ids'));
+        
+        const response = await axios.post(window.myajax.url, formData);
+        
+        console.log('📥 Ответ сервера:', response.data);
+        
+        if (response.data.success) {
+          console.log('✅ Записи созданы/обновлены на сервере');
+          console.log('📊 Ответ сервера:', response.data);
+          
+          // Обновляем данные пользователя
+          if (onRefreshUserData) {
+            console.log('🔄 Запрашиваем свежие данные с сервера...');
+            await onRefreshUserData();
+            console.log('✅ Данные пользователя обновлены! Проверьте список слов - они должны показывать "📚 Учу"');
+          }
+        } else {
+          console.warn('⚠️ Ошибка создания записей:', response.data.message);
+        }
+      } catch (err) {
+        console.error('❌ Ошибка при создании записей:', err);
+        console.error('❌ Детали ошибки:', err.response?.data || err.message);
+      }
+    } else {
+      console.log('✅ Все слова категории уже инициализированы');
     }
     
     const trainingWords = getTrainingWords();
@@ -363,6 +452,41 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     setAttemptCount(0);
   };
 
+  // Лёгкая тренировка - установить mode_education = 1 для всех слов
+  const handleEasyTraining = async () => {
+    if (!categoryId || categoryId === 0) {
+      alert('Выберите категорию');
+      return;
+    }
+
+    if (!confirm('Перевести все слова категории в режим лёгкой тренировки? Откат будет 30 минут вместо 20 часов.')) {
+      return;
+    }
+
+    try {
+      console.log('🎓 Переводим категорию', categoryId, 'в режим лёгкой тренировки');
+      const formData = new FormData();
+      formData.append('action', 'set_category_to_easy_mode');
+      formData.append('category_id', categoryId);
+
+      const response = await axios.post(window.myajax.url, formData);
+      
+      if (response.data.success) {
+        console.log('✅ Категория переведена в режим лёгкой тренировки');
+        // Обновляем данные пользователя
+        if (onRefreshUserData) {
+          await onRefreshUserData();
+        }
+        alert('Все слова категории переведены в режим лёгкой тренировки!');
+      } else {
+        alert('Ошибка: ' + (response.data.message || 'Не удалось перевести категорию'));
+      }
+    } catch (err) {
+      console.error('❌ Ошибка:', err);
+      alert('Ошибка сети: ' + err.message);
+    }
+  };
+
 	return (
 		<div>
       {!trainingMode && (
@@ -372,6 +496,18 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
             className="training-start-button"
           >
             🎯 Начать тренировку
+          </button>
+          
+          <button
+            onClick={handleEasyTraining}
+            className="training-start-button"
+            style={{
+              backgroundColor: '#4CAF50',
+              marginLeft: '10px'
+            }}
+            title="Откат 30 минут вместо 20 часов для всех слов категории"
+          >
+            😊 Лёгкая тренировка
           </button>
           
           <div className="training-control-buttons">

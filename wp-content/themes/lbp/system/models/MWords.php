@@ -331,7 +331,7 @@ function update_word_progress($user_id, $word_id, $is_revert) {
             'dict_word_id' => $word_id,
             'attempts' => 0,
             'correct_attempts' => 0,
-            'last_shown' => current_time('mysql'),
+            'last_shown' => gmdate('Y-m-d H:i:s'), // UTC время
             'easy_education' => 1,
             'mode_education' => 0,
             'attempts_all' => 0,
@@ -410,7 +410,7 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
         WHERE user_id = %d AND dict_word_id = %d
     ", $user_id, $word_id), ARRAY_A);
     
-    $current_time = current_time('mysql');
+    $current_time = gmdate('Y-m-d H:i:s'); // UTC время
     
     if ($exists) {
         // Обновляем существующую запись
@@ -543,8 +543,8 @@ function reset_exam_progress_for_category($user_id, $category_id) {
         return true; // Нет слов - не ошибка
     }
     
-    $current_time = current_time('mysql');
-    error_log("⏰ Текущее время: $current_time");
+    $current_time = gmdate('Y-m-d H:i:s'); // UTC время
+    error_log("⏰ Текущее время (UTC): $current_time");
     
     // Симулируем правильный ответ в режиме обучения для всех слов
     $updated_count = 0;
@@ -584,36 +584,6 @@ function reset_exam_progress_for_category($user_id, $category_id) {
             } else {
                 error_log("❌ Ошибка обновления слова ID=$word_id: " . $wpdb->last_error);
             }
-        } else {
-            error_log("➕ Создание новой записи для слова ID=$word_id");
-            // Создаём новую запись с откатом (как после правильного ответа не с первой попытки)
-            $result = $wpdb->insert(
-                $user_dict_words_table,
-                [
-                    'user_id' => $user_id,
-                    'dict_word_id' => $word_id,
-                    'attempts' => 0,                    // Без попыток (откат без учёта)
-                    'attempts_revert' => 0,             // Без попыток (откат без учёта)
-                    'correct_attempts' => 0,            // 1 правильная попытка для запуска отката на 20 часов
-                    'correct_attempts_revert' => 0,     // 1 правильная попытка для запуска отката на 20 часов
-                    'last_shown' => $current_time,      // Время показа
-                    'last_shown_revert' => $current_time, // Время показа
-                    'mode_education' => 0,              // Выключен (откат активен)
-                    'mode_education_revert' => 0,       // Выключен (откат активен)
-                    'attempts_all' => 0,
-                    'correct_attempts_all' => 0,
-                    'easy_education' => 0,
-                    'easy_correct' => 0,
-                    'easy_correct_revert' => 0
-                ]
-            );
-            
-            if ($result !== false) {
-                $created_count++;
-                error_log("✅ Слово ID=$word_id создано");
-            } else {
-                error_log("❌ Ошибка создания записи для слова ID=$word_id: " . $wpdb->last_error);
-            }
         }
     }
     
@@ -641,6 +611,8 @@ function reset_training_category_data($user_id, $category_id) {
     $words_table = $wpdb->prefix . 'd_words';
     $word_category_table = $wpdb->prefix . 'd_word_category';
     
+    error_log("🔄 reset_training_category_data: user_id=$user_id, category_id=$category_id");
+    
     // Получаем все слова из категории
     $word_ids = $wpdb->get_col($wpdb->prepare("
         SELECT w.id 
@@ -650,41 +622,252 @@ function reset_training_category_data($user_id, $category_id) {
     ", $category_id));
     
     if (empty($word_ids)) {
+        error_log("⚠️ Категория пустая или не найдена");
         return false;
     }
     
-    // Обновляем все записи для слов категории, сохраняя attempts_all и correct_attempts_all
+    error_log("📋 Найдено слов в категории: " . count($word_ids));
+    
+    // Санитизируем ID слов
+    $word_ids = array_map('intval', $word_ids);
+    $word_ids_str = implode(',', $word_ids);
+    
+    // ОПТИМИЗАЦИЯ: Массовый UPDATE для всех существующих записей одним запросом
+    // Обновляем только те записи, которые существуют (сохраняя attempts_all и correct_attempts_all)
+    $result = $wpdb->query($wpdb->prepare("
+        UPDATE $user_dict_words_table 
+        SET attempts = 0,
+            attempts_revert = 0,
+            correct_attempts = 0,
+            correct_attempts_revert = 0,
+            last_shown = NULL,
+            last_shown_revert = NULL,
+            easy_education = 0,
+            easy_correct = 0,
+            easy_correct_revert = 0,
+            mode_education = 0,
+            mode_education_revert = 0
+        WHERE user_id = %d 
+        AND dict_word_id IN ($word_ids_str)
+    ", $user_id));
+    
+    if ($result !== false) {
+        error_log("✅ Массовый сброс: обновлено $result записей");
+    } else {
+        error_log("❌ Ошибка массового сброса: " . $wpdb->last_error);
+    }
+    
+    return true;
+}
+
+/**
+ * Установить для всех слов категории режим лёгкого обучения (mode_education = 1, mode_education_revert = 1)
+ * Создаёт записи для слов без БД данных
+ * 
+ * @param int $user_id ID пользователя
+ * @param int $category_id ID категории
+ * @return bool
+ */
+function set_category_to_easy_mode($user_id, $category_id) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+    
+    error_log("🎓 set_category_to_easy_mode: user_id=$user_id, category_id=$category_id");
+    
+    // Получаем все слова из категории
+    $word_ids = $wpdb->get_col($wpdb->prepare("
+        SELECT w.id 
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id = %d
+    ", $category_id));
+    
+    if (empty($word_ids)) {
+        error_log("⚠️ Нет слов в категории $category_id");
+        return false;
+    }
+    
+    error_log("📚 Найдено слов: " . count($word_ids));
+    
+    $updated_count = 0;
+    $created_count = 0;
+    
     foreach ($word_ids as $word_id) {
-        // Проверяем, существует ли запись
         $exists = $wpdb->get_var($wpdb->prepare("
             SELECT COUNT(*) FROM $user_dict_words_table 
             WHERE user_id = %d AND dict_word_id = %d
         ", $user_id, $word_id));
         
         if ($exists) {
-            // Обновляем существующую запись, сохраняя attempts_all и correct_attempts_all
-            $wpdb->update(
+            // Обновляем существующую запись
+            $result = $wpdb->update(
                 $user_dict_words_table,
                 [
-                    'attempts' => 0,
-                    'attempts_revert' => 0,
-                    'correct_attempts' => 0,
-                    'correct_attempts_revert' => 0,
-                    'last_shown' => NULL,
-                    'last_shown_revert' => NULL,
-                    'easy_education' => 0,
-                    'easy_correct' => 0,
-                    'easy_correct_revert' => 0,
-                    'mode_education' => 0,
-                    'mode_education_revert' => 0
+                    'mode_education' => 1,           // Включаем режим обучения
+                    'mode_education_revert' => 1,    // Включаем режим обучения для реверса
                 ],
                 [
                     'user_id' => $user_id,
                     'dict_word_id' => $word_id
                 ]
             );
+            
+            if ($result !== false) {
+                $updated_count++;
+            }
+        } else {
+            // Создаём новую запись с режимом обучения
+            $result = $wpdb->insert(
+                $user_dict_words_table,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id,
+                    'attempts' => 0,
+                    'attempts_revert' => 0,
+                    'correct_attempts' => 0,
+                    'correct_attempts_revert' => 0,
+                    'last_shown' => gmdate('Y-m-d H:i:s'), // UTC время
+                    'last_shown_revert' => gmdate('Y-m-d H:i:s'), // UTC время
+                    'mode_education' => 1,              // Режим обучения включен
+                    'mode_education_revert' => 1,       // Режим обучения включен
+                    'attempts_all' => 0,
+                    'correct_attempts_all' => 0,
+                    'easy_education' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0
+                ]
+            );
+            
+            if ($result !== false) {
+                $created_count++;
+            }
         }
     }
+    
+    error_log("✅ Завершено: обновлено=$updated_count, создано=$created_count");
+    
+    return true;
+}
+/**
+ * Создать/обновить записи с mode_education = 1 для слов без БД записей ИЛИ со сброшенными записями
+ * Сброшенная запись: attempts = 0 AND attempts_revert = 0 AND correct_attempts = 0 AND correct_attempts_revert = 0
+ * ОПТИМИЗИРОВАННАЯ ВЕРСИЯ: массовые INSERT и UPDATE запросы
+ * 
+ * @param int $user_id ID пользователя
+ * @param array $word_ids Массив ID слов
+ * @return bool
+ */
+function create_easy_mode_for_new_words($user_id, $word_ids) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $current_time = gmdate('Y-m-d H:i:s'); // UTC время
+    
+    error_log("🆕 create_easy_mode_for_new_words: user_id=$user_id, words=" . count($word_ids));
+    
+    if (empty($word_ids)) {
+        error_log("⚠️ Пустой массив word_ids");
+        return false;
+    }
+    
+    // Санитизируем ID слов
+    $word_ids = array_map('intval', $word_ids);
+    $word_ids_str = implode(',', $word_ids);
+    
+    // Шаг 1: Получаем все существующие записи одним запросом
+    $existing_records = $wpdb->get_results($wpdb->prepare("
+        SELECT dict_word_id, attempts, attempts_revert, correct_attempts, correct_attempts_revert, 
+               mode_education, mode_education_revert
+        FROM $user_dict_words_table 
+        WHERE user_id = %d AND dict_word_id IN ($word_ids_str)
+    ", $user_id), ARRAY_A);
+    
+    error_log("📊 Найдено существующих записей: " . count($existing_records));
+    
+    // Индексируем существующие записи по dict_word_id
+    $existing_map = [];
+    foreach ($existing_records as $record) {
+        $existing_map[$record['dict_word_id']] = $record;
+    }
+    
+    // Разделяем слова на: новые (нужен INSERT) и сброшенные (нужен UPDATE)
+    $new_word_ids = [];
+    $reset_word_ids = [];
+    
+    foreach ($word_ids as $word_id) {
+        if (!isset($existing_map[$word_id])) {
+            // Нет записи - нужно создать
+            $new_word_ids[] = $word_id;
+        } else {
+            // Запись есть - проверяем, сброшена ли она
+            $record = $existing_map[$word_id];
+            $isResetState = (
+                $record['attempts'] == 0 && 
+                $record['attempts_revert'] == 0 && 
+                $record['correct_attempts'] == 0 && 
+                $record['correct_attempts_revert'] == 0
+            );
+            
+            if ($isResetState) {
+                $reset_word_ids[] = $word_id;
+            } else {
+                error_log("⏭️ Слово ID=$word_id имеет реальную запись (не сброшенную), пропускаем");
+            }
+        }
+    }
+    
+    error_log("➕ Новых слов для создания: " . count($new_word_ids));
+    error_log("🔄 Сброшенных слов для обновления: " . count($reset_word_ids));
+    
+    // Шаг 2: Массовый INSERT для новых записей
+    if (!empty($new_word_ids)) {
+        $values = [];
+        foreach ($new_word_ids as $word_id) {
+            $values[] = $wpdb->prepare(
+                "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 0, 0, 0, 0, 0)",
+                $user_id,
+                $word_id,
+                $current_time,
+                $current_time
+            );
+        }
+        
+        $sql = "INSERT INTO $user_dict_words_table 
+                (user_id, dict_word_id, attempts, attempts_revert, correct_attempts, correct_attempts_revert, 
+                 last_shown, last_shown_revert, mode_education, mode_education_revert, 
+                 attempts_all, correct_attempts_all, easy_education, easy_correct, easy_correct_revert) 
+                VALUES " . implode(', ', $values);
+        
+        $result = $wpdb->query($sql);
+        
+        if ($result !== false) {
+            error_log("✅ Массовый INSERT: создано $result записей");
+        } else {
+            error_log("❌ Ошибка массового INSERT: " . $wpdb->last_error);
+        }
+    }
+    
+    // Шаг 3: Массовый UPDATE для сброшенных записей
+    if (!empty($reset_word_ids)) {
+        $reset_word_ids_str = implode(',', $reset_word_ids);
+        
+        $result = $wpdb->query($wpdb->prepare("
+            UPDATE $user_dict_words_table 
+            SET mode_education = 1, 
+                mode_education_revert = 1
+            WHERE user_id = %d 
+            AND dict_word_id IN ($reset_word_ids_str)
+        ", $user_id));
+        
+        if ($result !== false) {
+            error_log("✅ Массовый UPDATE: обновлено $result записей");
+        } else {
+            error_log("❌ Ошибка массового UPDATE: " . $wpdb->last_error);
+        }
+    }
+    
+    error_log("📊 Итого: создано=" . count($new_word_ids) . ", обновлено=" . count($reset_word_ids) . " записей");
     
     return true;
 }

@@ -19,13 +19,12 @@ const WordField = ({
   word,
   userData,
   displayStatus,
-  formatTime = null,
+  formatTime,
   dictionaryId,
   editingWordId,
   onToggleEdit,
   onRefreshDictionaryWords,
   showEditButton = true,
-  mode = 'examen',
   // Настройка направления и полей ввода
   direction = 'both', // 'direct', 'reverse', 'both'
   hideAvailableWord = false, // Скрывать слово, которое не надо отгадывать
@@ -39,7 +38,6 @@ const WordField = ({
   highlightReverseCorrect = false,
   highlightReverseIncorrect = false,
 }) => {
-  const isExamenMode = mode === 'examen' && formatTime;
   const [showDirectTooltip, setShowDirectTooltip] = useState(false);
   const [showReverseTooltip, setShowReverseTooltip] = useState(false);
   
@@ -79,52 +77,27 @@ const WordField = ({
   const renderProgressIndicator = () => {
     if (vertical) {
       // В вертикальном режиме показываем только галочки, без чёрточек
-      if (isExamenMode) {
-        return userData && displayStatus.hasAttempts ? (
-          <span className={`words-progress-indicator ${
-            displayStatus.fullyLearned ? 'fully-learned' : 
-            (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-          }`}>
-            {displayStatus.fullyLearned ? "✓" :
-             (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' : ''}&nbsp;&nbsp;
-          </span>
-        ) : '';
-      } else {
-        return userData && userData.easy_education === 1 ? (
-          <span className={`words-progress-indicator ${
-            displayStatus.fullyLearned ? 'fully-learned' : 
-            displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
-          }`}>
-            {displayStatus.fullyLearned ? "✓" :
-             displayStatus.showWord || displayStatus.showTranslation ? '✓' : ''}&nbsp;&nbsp;
-          </span>
-        ) : '';
-      }
+      return userData && displayStatus.hasAttempts ? (
+        <span className={`words-progress-indicator ${
+          displayStatus.fullyLearned ? 'fully-learned' : 
+          (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
+        }`}>
+          {displayStatus.fullyLearned ? "✓" :
+           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' : ''}&nbsp;&nbsp;
+        </span>
+      ) : '';
     } else {
       // Обычный режим с чёрточками
-      if (isExamenMode) {
-        return userData && displayStatus.hasAttempts ? (
-          <span className={`words-progress-indicator ${
-            displayStatus.fullyLearned ? 'fully-learned' : 
-            (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-          }`}>
-            {displayStatus.fullyLearned ? "✓" :
-             (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
-             <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-          </span>
-        ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
-      } else {
-        return userData && userData.easy_education === 1 ? (
-          <span className={`words-progress-indicator ${
-            displayStatus.fullyLearned ? 'fully-learned' : 
-            displayStatus.showWord || displayStatus.showTranslation ? 'partially-learned' : 'not-learned'
-          }`}>
-            {displayStatus.fullyLearned ? "✓" :
-             displayStatus.showWord || displayStatus.showTranslation ? '✓' :
-             <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-          </span>
-        ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
-      }
+      return userData && displayStatus.hasAttempts ? (
+        <span className={`words-progress-indicator ${
+          displayStatus.fullyLearned ? 'fully-learned' : 
+          (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
+        }`}>
+          {displayStatus.fullyLearned ? "✓" :
+           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
+           <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
+        </span>
+      ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
     }
   };
 
@@ -145,7 +118,7 @@ const WordField = ({
     <li key={word.id} style={containerStyle} className={vertical ? 'word-field-vertical' : ''}>
       {/* Слово */}
       <span className="words-education-list__word">
-        {isExamenMode && displayStatus.cooldownRevert ? (
+        {displayStatus.cooldownRevert ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
             ⏱️ {formatTime(displayStatus.cooldownRevert)}
           </span>
@@ -163,7 +136,7 @@ const WordField = ({
               style={getFieldStyle(highlightReverseCorrect, highlightReverseIncorrect)}
               className="word-field-inline-input"
             />
-            {isExamenMode && userData && userData.mode_education_revert === 1 && (
+            {userData && userData.mode_education_revert === 1 && (
               <span className="learning-mode-text learning-glow">
                 📚 Учу
               </span>
@@ -179,7 +152,7 @@ const WordField = ({
           <span>&nbsp;</span>
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education_revert === 1 ? (
+            {userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -195,7 +168,7 @@ const WordField = ({
       {/* Перевод 1 */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
-        {isExamenMode && displayStatus.cooldownDirect ? (
+        {displayStatus.cooldownDirect ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
             ⏱️ {formatTime(displayStatus.cooldownDirect)}
           </span>
@@ -213,7 +186,7 @@ const WordField = ({
               style={getFieldStyle(highlightDirectCorrect, highlightDirectIncorrect)}
               className="word-field-inline-input"
             />
-            {isExamenMode && userData && userData.mode_education === 1 && (
+            {userData && userData.mode_education === 1 && (
               <span className="learning-mode-text learning-glow">
                 📚 Учу
               </span>
@@ -231,7 +204,7 @@ const WordField = ({
           <span>&nbsp;</span>
         ) : (
           <span className="words-hidden-text">
-            {isExamenMode && userData && userData.mode_education === 1 ? (
+            {userData && userData.mode_education === 1 ? (
               <span className="learning-mode-text">
                 📚 Учу
               </span>
@@ -245,7 +218,7 @@ const WordField = ({
       </span>
       
       {/* Перевод 2 */}
-      {word.translation_2 && (!isExamenMode || !displayStatus.cooldownDirect) && !hideAvailableWord && (
+      {word.translation_2 && !displayStatus.cooldownDirect && !hideAvailableWord && (
         <span className="words-education-list__translation_2">
           , {displayStatus.showTranslation || showReverseField ? (
             word.translation_2
@@ -260,7 +233,7 @@ const WordField = ({
       )}
       
       {/* Перевод 3 */}
-      {word.translation_3 && (!isExamenMode || !displayStatus.cooldownDirect) && !hideAvailableWord && (
+      {word.translation_3 && !displayStatus.cooldownDirect && !hideAvailableWord && (
         <span className="words-education-list__translation_3">
           , {displayStatus.showTranslation || showReverseField ? (
             word.translation_3

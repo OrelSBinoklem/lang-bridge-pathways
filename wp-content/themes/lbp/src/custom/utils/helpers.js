@@ -140,9 +140,22 @@ export const formatTime = (milliseconds) => {
  * @returns {number|null} - Оставшееся время в миллисекундах или null
  */
 export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, currentTime = Date.now()) => {
-  if (!lastShown) return null;
+  // Проверяем на пустое значение или MySQL нулевую дату
+  if (!lastShown || lastShown === '' || lastShown === '0000-00-00 00:00:00') {
+    return null;
+  }
   
-  const lastShownTime = new Date(lastShown).getTime();
+  // Парсим дату как UTC: MySQL "2025-10-28 23:30:46" -> ISO "2025-10-28T23:30:46Z"
+  // Добавляем 'Z' в конец, чтобы JavaScript парсил как UTC
+  const lastShownISO = lastShown.replace(' ', 'T') + 'Z';
+  const lastShownDate = new Date(lastShownISO);
+  
+  if (isNaN(lastShownDate.getTime())) {
+    console.error('❌ Invalid lastShown date:', lastShown);
+    return null;
+  }
+  
+  const lastShownTime = lastShownDate.getTime();
   const elapsed = currentTime - lastShownTime;
   
   let cooldownDuration;
@@ -204,17 +217,48 @@ export const getWordDisplayStatusEducation = (userData) => {
  * @returns {object} - {showWord, showTranslation, fullyLearned, hasAttempts, cooldownDirect, cooldownRevert}
  */
 export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) => {
+  // Если нет записи вообще - показываем слово и перевод открыто (как в удалённом режиме обучения)
   if (!userData) {
     return {
-      showWord: false,
-      showTranslation: false,
+      showWord: true,            // Показываем слово
+      showTranslation: true,     // Показываем перевод
       fullyLearned: false,
       hasAttempts: false,
       cooldownDirect: null,
-      cooldownRevert: null
+      cooldownRevert: null,
+      modeEducation: 0,
+      modeEducationRevert: 0
     };
   }
   
+  // Проверяем, является ли запись "сброшенной" (после кнопки сброса)
+  // Сброшенная запись имеет все счётчики = 0 И last_shown = NULL/пустое/"0000-00-00 00:00:00"
+  const isResetState = (
+    userData.mode_education === 0 &&
+    userData.mode_education_revert === 0 &&
+    userData.attempts === 0 &&
+    userData.attempts_revert === 0 && 
+    userData.correct_attempts === 0 && 
+    userData.correct_attempts_revert === 0 &&
+    (!userData.last_shown || userData.last_shown === '' || userData.last_shown === '0000-00-00 00:00:00') &&
+    (!userData.last_shown_revert || userData.last_shown_revert === '' || userData.last_shown_revert === '0000-00-00 00:00:00')
+  );
+  
+  // Если запись сброшенная - показываем слово и перевод открыто (как в удалённом режиме обучения)
+  if (isResetState) {
+    return {
+      showWord: true,            // Показываем слово
+      showTranslation: true,     // Показываем перевод
+      fullyLearned: false,
+      hasAttempts: false,
+      cooldownDirect: null,
+      cooldownRevert: null,
+      modeEducation: userData.mode_education || 0,
+      modeEducationRevert: userData.mode_education_revert || 0
+    };
+  }
+  
+  // Обычная запись с реальными попытками
   const cooldownDirect = getCooldownTime(
     userData.last_shown, 
     userData.correct_attempts, 

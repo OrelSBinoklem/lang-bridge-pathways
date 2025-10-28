@@ -913,6 +913,19 @@ body {
     left: 100%;
 }
 
+/* Выделенные ссылки */
+.useful-links a.highlighted-link {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    font-weight: 500;
+}
+
+.useful-links a.highlighted-link:hover {
+    background-color: #ffc107;
+    color: #000;
+    border-color: #ffc107;
+}
+
 .useful-links a:last-child {
     margin-bottom: 0;
 }
