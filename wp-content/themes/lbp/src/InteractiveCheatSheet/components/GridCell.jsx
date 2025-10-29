@@ -17,7 +17,21 @@ const MENU_ITEMS = [
     { url: '12.png', label: 'Глаголы B1', rows: 2, cols: 0 }
 ];
 
-const GridCell = ({ index, isLastRow, imageData, isMenuOpen, onToggleMenu, onImageUpdate }) => {
+const GridCell = ({ index, isLastRow, imageData, isMenuOpen, onToggleMenu, onImageUpdate, onHintClick }) => {
+    const handleHintIconClick = (e, hintId) => {
+        e.stopPropagation(); // Предотвращаем открытие меню
+        if (onHintClick) {
+            onHintClick(hintId);
+        }
+    };
+
+    // Извлекаем hint-id из имени файла (например, "1.png" -> "1")
+    const getHintId = (url) => {
+        if (!url) return null;
+        // Убираем расширение и путь, оставляем только число
+        const match = url.match(/(\d+)\.(png|jpg|jpeg)/i);
+        return match ? match[1] : null;
+    };
     const handleMenuItemClick = (item, e) => {
         e.stopPropagation();
         onImageUpdate(index, {
@@ -58,7 +72,19 @@ const GridCell = ({ index, isLastRow, imageData, isMenuOpen, onToggleMenu, onIma
                     style={{
                         backgroundImage: `url('${getImagePath(imageData.url)}')`
                     }}
-                />
+                >
+                    {/* Иконка подсказки - показываем только если есть hint-id */}
+                    {getHintId(imageData.url) && (
+                        <span 
+                            className="hint-icon"
+                            data-hint-id={getHintId(imageData.url)}
+                            title={`Показать подсказку (ID: ${getHintId(imageData.url)})`}
+                            onClick={(e) => handleHintIconClick(e, getHintId(imageData.url))}
+                        >
+                            ?
+                        </span>
+                    )}
+                </div>
             )}
 
             <div className={`dropdown-menu ${isMenuOpen ? '' : 'hidden'}`}>

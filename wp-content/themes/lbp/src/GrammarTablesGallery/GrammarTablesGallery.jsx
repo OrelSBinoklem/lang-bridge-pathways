@@ -242,7 +242,65 @@ const GrammarTablesGallery = () => {
             
             {/* Индикатор страниц */}
             <div className="page-indicator">
+                <button 
+                    className="page-nav-btn page-nav-btn-prev" 
+                    onClick={() => {
+                        const container = document.querySelector('.galleries.horizontal-mode');
+                        if (!container) return;
+                        const currentScroll = container.scrollLeft;
+                        const visibleWidth = document.body.clientWidth - 13;
+                        const newScrollPosition = currentScroll - visibleWidth;
+                        container.scrollTo({ left: newScrollPosition });
+                        
+                        // Обновляем индикатор (та же логика что в updatePageIndicator)
+                        setTimeout(() => {
+                            const totalWidth = container.scrollWidth;
+                            const currentScroll = container.scrollLeft;
+                            const visibleWidth = document.body.clientWidth;
+                            
+                            const totalPages = Math.ceil((totalWidth + 12 - 26) / (visibleWidth - 13));
+                            const currentPage = Math.floor((currentScroll + 10) / (visibleWidth - 13)) + 1;
+                            
+                            const currentPageEl = document.getElementById('currentPage');
+                            const totalPagesEl = document.getElementById('totalPages');
+                            if (currentPageEl) currentPageEl.textContent = currentPage;
+                            if (totalPagesEl) totalPagesEl.textContent = totalPages;
+                        }, 10);
+                    }}
+                    aria-label="Предыдущая страница"
+                >
+                    ←
+                </button>
                 <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                <button 
+                    className="page-nav-btn page-nav-btn-next" 
+                    onClick={() => {
+                        const container = document.querySelector('.galleries.horizontal-mode');
+                        if (!container) return;
+                        const currentScroll = container.scrollLeft;
+                        const visibleWidth = document.body.clientWidth - 13;
+                        const newScrollPosition = currentScroll + visibleWidth;
+                        container.scrollTo({ left: newScrollPosition });
+                        
+                        // Обновляем индикатор (та же логика что в updatePageIndicator)
+                        setTimeout(() => {
+                            const totalWidth = container.scrollWidth;
+                            const currentScroll = container.scrollLeft;
+                            const visibleWidth = document.body.clientWidth;
+                            
+                            const totalPages = Math.ceil((totalWidth + 12 - 26) / (visibleWidth - 13));
+                            const currentPage = Math.floor((currentScroll + 10) / (visibleWidth - 13)) + 1;
+                            
+                            const currentPageEl = document.getElementById('currentPage');
+                            const totalPagesEl = document.getElementById('totalPages');
+                            if (currentPageEl) currentPageEl.textContent = currentPage;
+                            if (totalPagesEl) totalPagesEl.textContent = totalPages;
+                        }, 10);
+                    }}
+                    aria-label="Следующая страница"
+                >
+                    →
+                </button>
             </div>
 
             {/* Модальное окно для подсказок */}
