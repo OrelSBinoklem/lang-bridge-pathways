@@ -517,13 +517,12 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           >
             🎯 Начать тренировку
           </button>
-          
+
           <button
             onClick={handleEasyTraining}
             className="training-start-button"
             style={{
               backgroundColor: '#4CAF50',
-              marginLeft: '10px'
             }}
             title="Откат 30 минут вместо 20 часов для всех слов категории"
           >

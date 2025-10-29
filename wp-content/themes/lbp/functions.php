@@ -5,6 +5,7 @@ require "system/models/MWords.php";
 require "system/models/MCategories.php";
 require "system/services/SWords.php";
 require "system/services/SCategories.php";
+require "template-helpers.php";
 
 //
 

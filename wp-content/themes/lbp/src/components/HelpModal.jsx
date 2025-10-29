@@ -38,11 +38,11 @@ const HelpModal = ({ isOpen, onClose }) => {
           <section className="help-section">
             <h3>🎲 Индикаторы в списке</h3>
             <ul>
-              {/*<li><strong>Слово видно, перевод скрыт (█)</strong> — начните с прямого перевода</li>*/}
-              <li><strong>⏱️ Таймер</strong> — слово на откате, подождите</li>
+              <li><strong>(█ █ █) Слово ждёт вашей первой попытки разгадать иначе доучиваем и откат </strong></li>
+              <li><strong>⏱️ Таймер</strong> — слово на откате</li>
               <li><strong>📚 Учу</strong> — слово в режиме дообучения</li>
-              <li><strong className="words-progress-indicator partially-learned">✓</strong> — частично изучено (1 балл)</li>
-              <li><strong className="words-progress-indicator fully-learned">✓</strong> — полностью изучено (2 балла)</li>
+              <li><strong className="words-progress-indicator partially-learned">✓</strong> — изучен перевод в одну сторону</li>
+              <li><strong className="words-progress-indicator fully-learned">✓</strong> — полностью изучено в 2 стороны</li>
             </ul>
           </section>
 

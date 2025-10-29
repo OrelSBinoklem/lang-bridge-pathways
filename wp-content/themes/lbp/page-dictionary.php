@@ -20,11 +20,8 @@ Template Name: Dictionary
     <div class="site-content">
 
         <?php
-        function getLanguageLevel($value) {$levels = [1 => 'A1', 2 => 'A2', 3 => 'B1', 4 => 'B2', 5 => 'C1', 6 => 'C2'];
-            return $levels[$value] ?? 'Invalid level'; // Если значение не в диапазоне 1–6
-        }
-
-            $dictionary_id = get_field('id');
+        // Функция getLanguageLevel() уже объявлена в template-helpers.php
+        $dictionary_id = get_field('id');
         ?>
 
         <div id="react-app-dictionary" data-id="<?=$dictionary_id?>"></div><!-- #react-app-dictionary -->
