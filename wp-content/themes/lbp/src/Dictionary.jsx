@@ -1,7 +1,7 @@
 import env from "./env";
 import axios from "axios";
 
-const { render, useEffect, useState } = wp.element;
+const { render, useEffect, useState, useRef } = wp.element;
 import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
 import DictionaryCategoryManagement from "./custom/components/DictionaryCategoryManagement";
@@ -19,6 +19,49 @@ if(document.getElementById('react-app-dictionary')) {
 		const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 		const [dictionaryInfo, setDictionaryInfo] = useState(null);
 		const [loadingDictionaryInfo, setLoadingDictionaryInfo] = useState(false);
+		
+		const initialLoadDone = useRef(false); // Флаг первой загрузки
+
+		// Функция генерации фейковых категорий по 50 слов
+		const generateFakeCategories = (words) => {
+			const wordsPerCategory = 50;
+			const fakeCategories = [];
+			
+			// Создаём копию массива слов чтобы не мутировать оригинал
+			const wordsWithCategories = [...words];
+			
+			for (let i = 0; i < wordsWithCategories.length; i += wordsPerCategory) {
+				const startNum = i + 1;
+				const endNum = Math.min(i + wordsPerCategory, wordsWithCategories.length);
+				const categoryId = -(Math.floor(i / wordsPerCategory) + 1); // Отрицательные ID для фейковых категорий
+				
+				fakeCategories.push({
+					id: categoryId,
+					name: `${startNum}-${endNum}`,
+					parent_id: 0,
+					children: []
+				});
+				
+				// Добавляем category_id к словам
+				for (let j = i; j < endNum; j++) {
+					wordsWithCategories[j] = {
+						...wordsWithCategories[j],
+						category_id: categoryId
+					};
+				}
+			}
+			
+			// Обновляем состояние слов с присвоенными категориями
+			setDictionaryWords(wordsWithCategories);
+			
+			// Оборачиваем в корневую категорию
+			return [{
+				id: 0,
+				name: "Категории",
+				parent_id: null,
+				children: fakeCategories
+			}];
+		};
 
 		// Функция для загрузки данных пользователя из user_dict_words
 		const fetchUserWordsData = async () => {
@@ -121,20 +164,34 @@ if(document.getElementById('react-app-dictionary')) {
 
 				if (response.data.success) {
 					let processedCategories = response.data.data;
-					if (!processedCategories.some(item => Array.isArray(item.children) && item.children.length > 0)) {
-						processedCategories = [{
-							"id": 0,
-							"name": "Категории",
-							"parent_id": null,
-							children: processedCategories
-						}];
+					
+					// Если категорий нет - генерируем фейковые
+					if (!processedCategories || processedCategories.length === 0) {
+						console.log('⚠️ Категории не найдены при обновлении, генерируем автоматически');
+						processedCategories = generateFakeCategories(dictionaryWords);
+					} else {
+						// Обычная обработка
+						if (!processedCategories.some(item => Array.isArray(item.children) && item.children.length > 0)) {
+							processedCategories = [{
+								"id": 0,
+								"name": "Категории",
+								"parent_id": null,
+								children: processedCategories
+							}];
+						}
 					}
 					setCategories(processedCategories);
 				} else {
 					console.error('Ошибка обновления категорий:', response.data.message);
+					// Генерируем фейковые при ошибке
+					const fakeCategories = generateFakeCategories(dictionaryWords);
+					setCategories(fakeCategories);
 				}
 			} catch (error) {
 				console.error('Ошибка при обновлении категорий:', error);
+				// Генерируем фейковые при исключении
+				const fakeCategories = generateFakeCategories(dictionaryWords);
+				setCategories(fakeCategories);
 			}
 		}
 
@@ -150,32 +207,77 @@ if(document.getElementById('react-app-dictionary')) {
 
 				if (response.data.success) {
 					let processedCategories = response.data.data;
-					if (!processedCategories.some(item => Array.isArray(item.children) && item.children.length > 0)) {
-						processedCategories = [{
-							"id": 0,
-							"name": "Категории",
-							"parent_id": null,
-							children: processedCategories
-						}];
+					
+					// Если категорий нет или пустой массив - нужно сгенерировать фейковые
+					if (!processedCategories || processedCategories.length === 0) {
+						console.log('⚠️ Категории не найдены, нужно сгенерировать автоматически');
+						// Проверяем загружены ли слова
+						if (dictionaryWords.length === 0) {
+							console.log('⏳ Слова ещё не загружены, оставляем пустые категории (будут сгенерированы после загрузки слов)');
+							setCategories([]);
+						} else {
+							processedCategories = generateFakeCategories(dictionaryWords);
+							setCategories(processedCategories);
+						}
+					} else {
+						// Обычная обработка категорий
+						if (!processedCategories.some(item => Array.isArray(item.children) && item.children.length > 0)) {
+							processedCategories = [{
+								"id": 0,
+								"name": "Категории",
+								"parent_id": null,
+								children: processedCategories
+							}];
+						}
+						setCategories(processedCategories);
 					}
-					setCategories(processedCategories);
 				} else {
+					// Если ошибка от сервера - генерируем фейковые если слова загружены
 					console.error('Ошибка загрузки категорий:', response.data.message);
+					if (dictionaryWords.length > 0) {
+						console.log('⚠️ Генерируем фейковые категории из-за ошибки');
+						const fakeCategories = generateFakeCategories(dictionaryWords);
+						setCategories(fakeCategories);
+					} else {
+						console.log('⏳ Слова ещё не загружены, ждём');
+						setCategories([]);
+					}
 				}
 			} catch (error) {
 				console.error('Ошибка при загрузке категорий:', error);
+				// При любой ошибке - генерируем фейковые если слова загружены
+				if (dictionaryWords.length > 0) {
+					console.log('⚠️ Генерируем фейковые категории из-за исключения');
+					const fakeCategories = generateFakeCategories(dictionaryWords);
+					setCategories(fakeCategories);
+				} else {
+					console.log('⏳ Слова ещё не загружены, ждём');
+					setCategories([]);
+				}
 			} finally {
 				setLoadingCategories(false);
 			}
 		}
 
-		// Загружаем все данные при монтировании компонента
+		// Загружаем все данные при монтировании компонента (только один раз)
 		useEffect(() => {
-			fetchDictionaryInfo();
-			fetchDictionaryWords();
-			fetchCategories();
-			fetchUserWordsData();
-		}, [dictionaryId]);
+			if (!initialLoadDone.current) {
+				initialLoadDone.current = true;
+				fetchDictionaryInfo();
+				fetchDictionaryWords();
+				fetchCategories();
+				fetchUserWordsData();
+			}
+		}, []);
+
+		// Генерируем фейковые категории после загрузки слов, если категории пустые
+		useEffect(() => {
+			if (dictionaryWords.length > 0 && categories.length === 0 && !loadingCategories && !loadingDictionaryWords) {
+				console.log('✅ Слова загружены, категории пустые - генерируем фейковые категории');
+				const fakeCategories = generateFakeCategories(dictionaryWords);
+				setCategories(fakeCategories);
+			}
+		}, [dictionaryWords, categories, loadingCategories, loadingDictionaryWords]);
 
 		return (
 			<div>

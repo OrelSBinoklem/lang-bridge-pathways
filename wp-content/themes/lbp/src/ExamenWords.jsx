@@ -33,11 +33,12 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 						onCategoryClick={handleCategoryClick}
 						categories={categories}
 						loadingCategories={loadingCategories}
+						dictionaryWords={dictionaryWords}
 					/>
 				</>
 			)}
 
-		{showExamen && categoryId > 0 && (
+		{showExamen && categoryId !== 0 && (
 			<>
 				<Examen 
 					dictionary={dictionary} 
