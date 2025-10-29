@@ -219,6 +219,9 @@ body {
     display: block;
     width: 100%;
     height: auto;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Стили для меток уровней языка */
@@ -506,6 +509,12 @@ body:has(.galleries.horizontal-mode) .page-indicator {
     margin-bottom: 0;
     width: calc((100vw - 40px) / var(--cols) - 12px * (var(--cols) - 1) / var(--cols));
     flex: 0 0 auto;
+}
+
+.galleries.horizontal-mode .gallery .table-img img {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Стили для кнопок навигации */

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import tablesData, { allTables } from '../data/tablesData';
 
 const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHintClick }) => {
@@ -7,7 +7,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
     // Ранк уровней как в оригинале
     const LEVEL_RANK = { a1: 0, a2: 1, b1: 2, b2: 3 };
 
-    // Функция фильтрации таблиц
+    // Функция фильтрации таблиц по уровню
     const filterTables = (tables) => {
         if (!selectedLevel || !LEVEL_RANK.hasOwnProperty(selectedLevel)) {
             return tables;
@@ -17,25 +17,22 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         
         return tables.filter(img => {
             const imgLevel = img.level;
+            const isRangeLevel = imgLevel.indexOf('-') !== -1;
             
-            // Проверяем, есть ли диапазон в level (например, "a1-b1")
-            if (imgLevel.indexOf('-') !== -1) {
-                const parts = imgLevel.split('-');
-                const startLevel = parts[0].toLowerCase();
-                const endLevel = parts[1].toLowerCase();
+            if (isRangeLevel) {
+                // Уровень задан диапазоном (например, "a1-b1")
+                const [startLevel, endLevel] = imgLevel.split('-').map(level => level.toLowerCase());
+                const startRank = LEVEL_RANK[startLevel];
+                const endRank = LEVEL_RANK[endLevel];
                 
-                const startRank = LEVEL_RANK.hasOwnProperty(startLevel) ? LEVEL_RANK[startLevel] : -1;
-                const endRank = LEVEL_RANK.hasOwnProperty(endLevel) ? LEVEL_RANK[endLevel] : -1;
-                
-                // Показываем, если выбранный уровень попадает в интервал
-                if (startRank !== -1 && endRank !== -1 && currentRank >= startRank && currentRank <= endRank) {
-                    return true;
+                if (startRank !== undefined && endRank !== undefined) {
+                    return currentRank >= startRank && currentRank <= endRank;
                 }
             } else {
-                // Старая логика для одиночного уровня (показываем все <= выбранного)
-                const imgRank = LEVEL_RANK.hasOwnProperty(imgLevel.toLowerCase()) ? LEVEL_RANK[imgLevel.toLowerCase()] : -1;
-                if (imgRank !== -1 && imgRank <= currentRank) {
-                    return true;
+                // Одиночный уровень (показываем все <= выбранного)
+                const imgRank = LEVEL_RANK[imgLevel.toLowerCase()];
+                if (imgRank !== undefined) {
+                    return imgRank <= currentRank;
                 }
             }
             
@@ -62,32 +59,17 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         // Пересчитываем ширину в горизонтальном режиме
         if (viewMode === 'horizontal') {
             setTimeout(calculateGalleryWrapperWidths, 100);
+        } else {
+            // Сбрасываем ширину обёрток при переходе в вертикальный режим
+            const wrappers = document.querySelectorAll('.gallery-wrapper');
+            wrappers.forEach(wrapper => {
+                wrapper.style.width = '';
+            });
         }
     }, [cols, viewMode, filteredGroups]);
 
-    // Расчёт ширины обёрток галерей для горизонтального режима
-    const calculateGalleryWrapperWidths = () => {
-        if (viewMode !== 'horizontal') return;
-        
-        const wrappers = document.querySelectorAll('.galleries.horizontal-mode .gallery-wrapper');
-        wrappers.forEach(wrapper => {
-            const gallery = wrapper.querySelector('.gallery');
-            const visibleCards = Array.from(gallery.querySelectorAll('.table-img')).filter(card => {
-                return !card.classList.contains('d-none');
-            });
-            
-            const visibleWidth = document.body.clientWidth;
-            const galleryWidth = gallery.clientWidth;
-            
-            const totalPages = Math.ceil((galleryWidth + 12) / (visibleWidth - 13));
-            wrapper.style.width = ((visibleWidth - 13 - 13) + (totalPages - 1) * (visibleWidth - 13)) + 'px';
-        });
-        
-        updatePageIndicator();
-    };
-
     // Обновление индикатора страниц
-    const updatePageIndicator = () => {
+    const updatePageIndicator = useCallback(() => {
         if (viewMode !== 'horizontal') return;
         
         const container = document.querySelector('.galleries.horizontal-mode');
@@ -105,7 +87,37 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         
         if (currentPageEl) currentPageEl.textContent = currentPage;
         if (totalPagesEl) totalPagesEl.textContent = totalPages;
-    };
+    }, [viewMode]);
+
+    // Расчёт ширины обёрток галерей для горизонтального режима
+    const calculateGalleryWrapperWidths = useCallback(() => {
+        if (viewMode !== 'horizontal') return;
+        
+        const wrappers = document.querySelectorAll('.galleries.horizontal-mode .gallery-wrapper');
+        
+        // Сбрасываем ширину всех обёрток для корректного измерения
+        wrappers.forEach(wrapper => {
+            wrapper.style.width = '';
+        });
+        
+        // Даём браузеру время пересчитать layout после сброса ширины
+        requestAnimationFrame(() => {
+            wrappers.forEach(wrapper => {
+                const gallery = wrapper.querySelector('.gallery');
+                const visibleWidth = document.body.clientWidth;
+                const galleryWidth = gallery.clientWidth;
+
+                console.log('📏 visibleWidth:', visibleWidth, 'galleryWidth:', galleryWidth);
+
+                // Рассчитываем количество страниц и устанавливаем ширину
+                const totalPages = Math.ceil((galleryWidth + 12) / (visibleWidth - 13));
+                const calculatedWidth = (visibleWidth - 26) + (totalPages - 1) * (visibleWidth - 13);
+                wrapper.style.width = calculatedWidth + 'px';
+            });
+            
+            updatePageIndicator();
+        });
+    }, [viewMode, updatePageIndicator]);
 
     // Обработка скролла колесом для горизонтального режима
     useEffect(() => {
@@ -123,39 +135,65 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
             const container = e.currentTarget;
             const currentScroll = container.scrollLeft;
             const visibleWidth = document.body.clientWidth - 13;
-            
             const delta = e.deltaY || e.deltaX;
             
-            if (delta > 0) {
-                // Скролл вправо
-                container.scrollTo({
-                    left: currentScroll + visibleWidth
-                });
-            } else {
-                // Скролл влево
-                container.scrollTo({
-                    left: currentScroll - visibleWidth
-                });
-            }
+            // Скроллим на ширину экрана
+            const newScrollPosition = delta > 0 
+                ? currentScroll + visibleWidth  // Вправо
+                : currentScroll - visibleWidth; // Влево
+            
+            container.scrollTo({ left: newScrollPosition });
             
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
                 isScrolling = false;
                 updatePageIndicator();
-            }, 1);//не трогайте этот таймаут бот
+            }, 1); // не трогайте этот таймаут бот
         };
         
         const container = document.querySelector('.galleries');
-        if (container) {
-            container.addEventListener('wheel', handleWheelScroll, { passive: false });
-            container.addEventListener('scroll', updatePageIndicator);
+        if (!container) return;
+        
+        container.addEventListener('wheel', handleWheelScroll, { passive: false });
+        container.addEventListener('scroll', updatePageIndicator);
+        
+        return () => {
+            container.removeEventListener('wheel', handleWheelScroll);
+            container.removeEventListener('scroll', updatePageIndicator);
+        };
+    }, [viewMode, updatePageIndicator]);
+
+    // Обработка resize окна для горизонтального режима (debounce 100ms)
+    useEffect(() => {
+        if (viewMode !== 'horizontal') return;
+        
+        let resizeTimeout = null;
+        
+        const handleResize = () => {
+            console.log('🔄 Resize event triggered');
             
-            return () => {
-                container.removeEventListener('wheel', handleWheelScroll);
-                container.removeEventListener('scroll', updatePageIndicator);
-            };
-        }
-    }, [viewMode]);
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+            
+            // Пересчитываем через 100ms после последнего resize
+            resizeTimeout = setTimeout(() => {
+                console.log('✅ Recalculating gallery widths...');
+                calculateGalleryWrapperWidths();
+            }, 100);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        console.log('📐 Resize listener added');
+        
+        return () => {
+            console.log('🗑️ Resize listener removed');
+            window.removeEventListener('resize', handleResize);
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+        };
+    }, [viewMode, calculateGalleryWrapperWidths]);
 
     const handleImageClick = (image) => {
         onImageClick({
@@ -169,21 +207,18 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         onHintClick(imageId);
     };
 
+    // Получить CSS-класс для уровня (берём первую часть если диапазон)
     const getLevelClass = (level) => {
-        // Если уровень с диапазоном (a1-a2), берем первую часть
         const baseLevel = level.indexOf('-') !== -1 ? level.split('-')[0] : level;
-        switch (baseLevel) {
-            case 'a1': return 'a1';
-            case 'a2': return 'a2';
-            case 'b1': return 'b1';
-            case 'b2': return 'b2';
-            default: return 'a1';
-        }
+        const validLevels = ['a1', 'a2', 'b1', 'b2'];
+        return validLevels.includes(baseLevel) ? baseLevel : 'a1';
     };
 
+    // Получить отображаемую метку уровня
     const getLevelLabel = (level, description) => {
-        if (description) return description;
-        // Если уровень с диапазоном (a1-a2), берем первую часть
+        if (description) {
+            return description;
+        }
         const baseLevel = level.indexOf('-') !== -1 ? level.split('-')[0] : level;
         return baseLevel.toUpperCase();
     };
@@ -206,6 +241,8 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
                             <img 
                                 src={image.src} 
                                 alt={image.alt}
+                                width={image.width}
+                                height={image.height}
                                 loading="lazy" 
                                 decoding="async" 
                             />
