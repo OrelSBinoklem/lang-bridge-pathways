@@ -49,6 +49,22 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         });
     }, [selectedLevel]);
 
+    // Установка CSS переменной для реальной ширины viewport (без скроллбара)
+    useEffect(() => {
+        const updateViewportWidth = () => {
+            // Реальная ширина viewport без скроллбара
+            const realWidth = document.documentElement.clientWidth || window.innerWidth;
+            document.documentElement.style.setProperty('--real-vw', `${realWidth}px`);
+        };
+        
+        updateViewportWidth();
+        window.addEventListener('resize', updateViewportWidth);
+        
+        return () => {
+            window.removeEventListener('resize', updateViewportWidth);
+        };
+    }, []);
+
     // Применяем CSS переменную для колонок
     useEffect(() => {
         const galleries = document.querySelectorAll('.gallery');
@@ -95,24 +111,27 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         
         const wrappers = document.querySelectorAll('.galleries.horizontal-mode .gallery-wrapper');
         
-        // Сбрасываем ширину всех обёрток для корректного измерения
+        // Сначала сбрасываем ширину всех обёрток для корректного измерения
         wrappers.forEach(wrapper => {
             wrapper.style.width = '';
         });
         
-        // Даём браузеру время пересчитать layout после сброса ширины
+        // Даём браузеру время пересчитать layout
         requestAnimationFrame(() => {
+            // Теперь измеряем и устанавливаем новую ширину
             wrappers.forEach(wrapper => {
                 const gallery = wrapper.querySelector('.gallery');
+                const visibleCards = Array.from(gallery.querySelectorAll('.table-img')).filter(card => {
+                    return !card.classList.contains('d-none');
+                });
+                
                 const visibleWidth = document.body.clientWidth;
                 const galleryWidth = gallery.clientWidth;
 
                 console.log('📏 visibleWidth:', visibleWidth, 'galleryWidth:', galleryWidth);
 
-                // Рассчитываем количество страниц и устанавливаем ширину
                 const totalPages = Math.ceil((galleryWidth + 12) / (visibleWidth - 13));
-                const calculatedWidth = (visibleWidth - 26) + (totalPages - 1) * (visibleWidth - 13);
-                wrapper.style.width = calculatedWidth + 'px';
+                wrapper.style.width = ((visibleWidth - 13 - 13) + (totalPages - 1) * (visibleWidth - 13)) + 'px';
             });
             
             updatePageIndicator();
@@ -171,7 +190,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         
         const handleResize = () => {
             console.log('🔄 Resize event triggered');
-            
+
             if (resizeTimeout) {
                 clearTimeout(resizeTimeout);
             }

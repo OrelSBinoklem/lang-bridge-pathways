@@ -507,7 +507,8 @@ body:has(.galleries.horizontal-mode) .page-indicator {
 
 .galleries.horizontal-mode .gallery .table-img {
     margin-bottom: 0;
-    width: calc((100vw - 40px) / var(--cols) - 12px * (var(--cols) - 1) / var(--cols));
+    /* Используем --real-vw вместо 100vw для учета отсутствия скроллбара */
+    width: calc((var(--real-vw, 100vw) - 25px) / var(--cols) - 12px * (var(--cols) - 1) / var(--cols));
     flex: 0 0 auto;
 }
 
