@@ -36,6 +36,7 @@ const InteractiveCheatSheet = () => {
     const [imagesList, setImagesList] = useState(() => getCookie('super_tables') || {});
     const [currentPage, setCurrentPage] = useState(() => getCookie('page') || 1);
     const [verbModalData, setVerbModalData] = useState(null);
+    const [hintModalData, setHintModalData] = useState(null);
 
     // Сохраняем настройки в cookies при изменении
     useEffect(() => {
@@ -96,6 +97,18 @@ const InteractiveCheatSheet = () => {
     const handleCloseVerbModal = () => {
         console.log('InteractiveCheatSheet: Закрываем модальное окно');
         setVerbModalData(null);
+    };
+
+    // Обработчик клика на иконку подсказки
+    const handleHintClick = (hintId) => {
+        setHintModalData({
+            id: hintId,
+            hintPath: `/wp-content/themes/lbp/assets/hints/${hintId}.html`
+        });
+    };
+
+    const handleCloseHint = () => {
+        setHintModalData(null);
     };
 
     // Обработка колесика мыши и свайпов для переключения страниц
@@ -160,6 +173,7 @@ const InteractiveCheatSheet = () => {
                         page={currentPage}
                         imagesList={imagesList}
                         onImageUpdate={handleImageUpdate}
+                        onHintClick={handleHintClick}
                         mode={mode}
                     />
                 </div>
@@ -171,6 +185,22 @@ const InteractiveCheatSheet = () => {
                     verbData={verbModalData}
                     onClose={handleCloseVerbModal}
                 />
+            )}
+
+            {/* Модальное окно для подсказок */}
+            {hintModalData && (
+                <div className="hint-modal" onClick={handleCloseHint}>
+                    <div className="hint-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="hint-modal-close" onClick={handleCloseHint}>
+                            &times;
+                        </button>
+                        <iframe 
+                            src={hintModalData.hintPath} 
+                            title={`Подсказка ${hintModalData.id}`}
+                            style={{ minHeight: '80vh' }}
+                        />
+                    </div>
+                </div>
             )}
         </>
     );

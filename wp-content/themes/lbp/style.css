@@ -160,6 +160,12 @@ body {
     text-align: center;
 }
 
+/* Скрываем футер на страницах Interactive Cheat Sheet и Grammar Tables Gallery */
+body:has(#interactive-cheat-sheet-root) .site-footer,
+body:has(#grammar-tables-gallery-root) .site-footer {
+    display: none;
+}
+
 /* Основные стили */
 
 .site-header {

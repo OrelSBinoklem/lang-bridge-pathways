@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import GridCell from './GridCell';
 
-const CheatSheetGrid = ({ cols, rows, page, imagesList, onImageUpdate, mode }) => {
+const CheatSheetGrid = ({ cols, rows, page, imagesList, onImageUpdate, onHintClick, mode }) => {
     const gridRef = useRef(null);
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
 
@@ -25,6 +25,7 @@ const CheatSheetGrid = ({ cols, rows, page, imagesList, onImageUpdate, mode }) =
                 isMenuOpen={openMenuIndex === index}
                 onToggleMenu={() => setOpenMenuIndex(openMenuIndex === index ? null : index)}
                 onImageUpdate={onImageUpdate}
+                onHintClick={onHintClick}
             />
         );
     }
