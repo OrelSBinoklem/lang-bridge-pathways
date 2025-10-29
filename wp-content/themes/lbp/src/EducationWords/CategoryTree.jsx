@@ -1,49 +1,52 @@
 import axios from "axios";
 const { useEffect, useState } = wp.element;
 
-const CategoryTree = ({ dictionaryId, onCategoryClick }) => {
-  const [categories, setCategories] = useState([]); // Храним дерево категорий
-  const [loading, setLoading] = useState(true); // Состояние загрузки
+const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], categories: propCategories = [], loadingCategories: propLoading = false }) => {
+  const [categories, setCategories] = useState(propCategories); // Используем категории из пропов
+  const [loading, setLoading] = useState(propLoading); // Используем loading из пропов
   const [error, setError] = useState(null); // Состояние ошибки
 
-  // Функция для запроса данных с бэкенда
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("action", "get_category_tree");
-      formData.append("dictionary_id", dictionaryId);
-
-      const response = await axios.post(window.myajax.url, formData);
-
-      if (response.data.success) {
-        // Если список категорий одноуровневый
-        //console.log(response.data.data)
-        if(response.data.data.some(item => Array.isArray(item.children) && item.children.length > 0)) {
-          setCategories(response.data.data); // Устанавливаем дерево категорий
-        } else {
-          setCategories([{
-            "id": 0,
-            "name": "Категории",
-            "parent_id": null,
-            children: response.data.data
-          }]); // Устанавливаем дерево категорий и в корне делаем мокавую категорию response.data.data
-        }
-
-      } else {
-        throw new Error(response.data.message || "Ошибка получения категорий");
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  // Функция генерации фейковых категорий по 50 слов
+  const generateFakeCategories = (words) => {
+    console.log('🔧 CategoryTree: Генерация фейковых категорий для', words.length, 'слов');
+    const wordsPerCategory = 50;
+    const fakeCategories = [];
+    
+    // Примечание: category_id к словам должны быть присвоены в родительском компоненте Dictionary.jsx
+    // Здесь мы только создаём структуру категорий
+    
+    for (let i = 0; i < words.length; i += wordsPerCategory) {
+      const startNum = i + 1;
+      const endNum = Math.min(i + wordsPerCategory, words.length);
+      const categoryId = -(Math.floor(i / wordsPerCategory) + 1);
+      
+      fakeCategories.push({
+        id: categoryId,
+        name: `${startNum}-${endNum}`,
+        parent_id: 0,
+        children: []
+      });
     }
+    
+    return [{
+      id: 0,
+      name: "Категории",
+      parent_id: null,
+      children: fakeCategories
+    }];
   };
 
-  // Загружаем категории при монтировании компонента
+  // Синхронизируем локальное состояние с пропами
   useEffect(() => {
-    fetchCategories();
-  }, [dictionaryId]);
+    setCategories(propCategories);
+  }, [propCategories]);
+
+  useEffect(() => {
+    setLoading(propLoading);
+  }, [propLoading]);
+
+  // Примечание: генерация фейковых категорий происходит в Dictionary.jsx
+  // CategoryTree только отображает категории, переданные через пропы
 
   // Функция для рекурсивного рендера дерева категорий
   const renderCategoryTree = (tree, subCat = false) => {

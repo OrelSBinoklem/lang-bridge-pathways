@@ -441,13 +441,26 @@ class WordsAjaxHandler {
             wp_die();
         }
 
+        // Проверяем что передано: category_id или word_ids
         $category_id = intval($_POST['category_id'] ?? 0);
-        if (!$category_id) {
-            wp_send_json_error(['message' => 'Не передан ID категории']);
+        $word_ids_json = $_POST['word_ids'] ?? null;
+        
+        $word_ids = null;
+        if ($word_ids_json) {
+            // Если переданы word_ids (для фейковых категорий)
+            $word_ids = json_decode(stripslashes($word_ids_json), true);
+            if (!is_array($word_ids) || empty($word_ids)) {
+                wp_send_json_error(['message' => 'Некорректный список ID слов']);
+                wp_die();
+            }
+            $word_ids = array_map('intval', $word_ids);
+        } else if (!$category_id) {
+            // Если ничего не передано
+            wp_send_json_error(['message' => 'Не переданы ни ID категории, ни список слов']);
             wp_die();
         }
 
-        $result = reset_training_category_data($user_id, $category_id);
+        $result = reset_training_category_data($user_id, $category_id, $word_ids);
         if ($result) {
             wp_send_json_success(['message' => 'Данные категории сброшены']);
         } else {

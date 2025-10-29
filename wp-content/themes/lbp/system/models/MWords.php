@@ -605,7 +605,7 @@ function reset_exam_progress_for_category($user_id, $category_id) {
     return true;
 }
 
-function reset_training_category_data($user_id, $category_id) {
+function reset_training_category_data($user_id, $category_id = null, $word_ids = null) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
     $words_table = $wpdb->prefix . 'd_words';
@@ -613,20 +613,25 @@ function reset_training_category_data($user_id, $category_id) {
     
     error_log("🔄 reset_training_category_data: user_id=$user_id, category_id=$category_id");
     
-    // Получаем все слова из категории
-    $word_ids = $wpdb->get_col($wpdb->prepare("
-        SELECT w.id 
-        FROM $words_table AS w
-        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
-        WHERE wc.category_id = %d
-    ", $category_id));
-    
-    if (empty($word_ids)) {
-        error_log("⚠️ Категория пустая или не найдена");
-        return false;
+    // Если переданы word_ids напрямую (для фейковых категорий), используем их
+    if (!empty($word_ids)) {
+        error_log("📋 Используем переданные word_ids: " . count($word_ids));
+    } else {
+        // Получаем все слова из категории (для реальных категорий)
+        $word_ids = $wpdb->get_col($wpdb->prepare("
+            SELECT w.id 
+            FROM $words_table AS w
+            INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+            WHERE wc.category_id = %d
+        ", $category_id));
+        
+        if (empty($word_ids)) {
+            error_log("⚠️ Категория пустая или не найдена");
+            return false;
+        }
+        
+        error_log("📋 Найдено слов в категории: " . count($word_ids));
     }
-    
-    error_log("📋 Найдено слов в категории: " . count($word_ids));
     
     // Санитизируем ID слов
     $word_ids = array_map('intval', $word_ids);

@@ -86,7 +86,13 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       if (categoryId === 0) return true;
       const categoryIdNum = parseInt(categoryId);
       
-      if (Array.isArray(word.category_ids)) {
+      // Поддержка как массива category_ids, так и единичного category_id
+      // Сначала проверяем единичный category_id
+      if (word.category_id !== undefined) {
+        return parseInt(word.category_id) === categoryIdNum;
+      }
+      // Потом проверяем массив category_ids (только если category_id нет)
+      if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
         return word.category_ids.some(id => parseInt(id) === categoryIdNum);
       }
       return false;
@@ -113,7 +119,13 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     const categoryWords = dictionaryWords.filter(word => {
       if (categoryId === 0) return true;
       const categoryIdNum = parseInt(categoryId);
-      if (Array.isArray(word.category_ids)) {
+      // Поддержка как массива category_ids, так и единичного category_id
+      // Сначала проверяем единичный category_id
+      if (word.category_id !== undefined) {
+        return parseInt(word.category_id) === categoryIdNum;
+      }
+      // Потом проверяем массив category_ids (только если category_id нет)
+      if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
         return word.category_ids.some(id => parseInt(id) === categoryIdNum);
       }
       return false;
@@ -269,32 +281,40 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 
   // Сбросить категорию из тренировки (аналог Education.jsx)
   const resetCategoryFromTraining = async () => {
-    console.log('resetCategoryFromTraining вызвана, categoryId:', categoryId);
-    
     if (!confirm('Вы уверены, что хотите сбросить эту категорию из тренировки? Все слова будут отключены от тренировки.')) {
-      console.log('Пользователь отменил операцию');
       return;
     }
 
-    console.log('Отправляем AJAX запрос...');
     try {
+      // Получаем все слова текущей категории
+      const categoryWords = dictionaryWords.filter(word => {
+        if (categoryId === 0) return true;
+        const categoryIdNum = parseInt(categoryId);
+        
+        if (word.category_id !== undefined) {
+          return parseInt(word.category_id) === categoryIdNum;
+        }
+        if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
+          return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+        }
+        return false;
+      });
+
+      const wordIds = categoryWords.map(word => word.id);
+      
+      if (wordIds.length === 0) {
+        alert('В категории нет слов для сброса');
+        return;
+      }
+
       const formData = new FormData();
       formData.append("action", "reset_training_category");
-      formData.append("category_id", categoryId);
-
-      console.log('Данные для отправки:', {
-        action: "reset_training_category",
-        category_id: categoryId,
-        url: window.myajax?.url
-      });
+      formData.append("word_ids", JSON.stringify(wordIds));
 
       const response = await axios.post(window.myajax.url, formData);
 
-      console.log('Ответ сервера:', response.data);
-
       if (response.data.success) {
         alert('Данные категории сброшены! Все тренировочные данные обнулены.');
-        // Обновляем данные пользователя
         if (onRefreshUserData) {
           onRefreshUserData();
         }
@@ -557,7 +577,14 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         const categoryWords = dictionaryWords.filter(word => {
           if (categoryId === 0) return true;
           const categoryIdNum = parseInt(categoryId);
-          if (Array.isArray(word.category_ids)) {
+          
+          // Поддержка как массива category_ids, так и единичного category_id
+          // Сначала проверяем единичный category_id
+          if (word.category_id !== undefined) {
+            return parseInt(word.category_id) === categoryIdNum;
+          }
+          // Потом проверяем массив category_ids (только если category_id нет)
+          if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
             return word.category_ids.some(id => parseInt(id) === categoryIdNum);
           }
           return false;
