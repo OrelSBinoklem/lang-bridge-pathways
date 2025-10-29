@@ -474,7 +474,7 @@ body:has(.galleries.horizontal-mode) .page-indicator {
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
-    height: calc(100vh - 56px);
+    height: calc(100vh - 70px);
     gap: 0;
     padding: 0 12px;
 }

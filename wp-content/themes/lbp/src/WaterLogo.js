@@ -87,13 +87,13 @@ function init() {
 	window.addEventListener('resize', onWindowResize, false);
 	
 	// GUI setup
-	const gui = new GUI();
+	const gui = new GUI({ closed: true }); // Создаём GUI уже закрытым
 	const controlsFolder = gui.addFolder('Controls');
 	controlsFolder.add(params, 'developerMode').name('Developer Mode').onChange(toggleDeveloperMode);
 	controlsFolder.add(params, 'speed', 0.1, 10, 0.1).name('Speed');
 	controlsFolder.add(params, 'waveHeight', 1, 500, 1).name('Wave Height').onChange(updateWaveHeight);
 	controlsFolder.add(params, 'waveSpeed', 0.1, 5, 0.1).name('Wave Speed');
-	controlsFolder.close();
+	controlsFolder.open(); // Открываем папку Controls
 	
 	animate();
 }
