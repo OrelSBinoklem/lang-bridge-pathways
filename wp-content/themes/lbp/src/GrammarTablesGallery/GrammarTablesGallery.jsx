@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import GrammarTablesHeaderPortal from './components/GrammarTablesHeaderPortal';
+import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
@@ -201,6 +202,22 @@ const GrammarTablesGallery = () => {
         <>
             {/* Рендерим хедер через портал в основной header.php */}
             <GrammarTablesHeaderPortal
+                cols={cols}
+                selectedLevel={selectedLevel}
+                verbSearchTerm={verbSearchTerm}
+                verbSuggestions={verbSuggestions}
+                showVerbSuggestions={showVerbSuggestions}
+                viewMode={viewMode}
+                onColsChange={handleColsChange}
+                onLevelChange={handleLevelChange}
+                onVerbSearchChange={handleVerbSearchChange}
+                onVerbSuggestionClick={handleVerbSuggestionClick}
+                onCloseVerbSuggestions={() => setShowVerbSuggestions(false)}
+                onViewModeToggle={handleViewModeToggle}
+            />
+            
+            {/* Мобильное меню */}
+            <GrammarTablesMobileMenu
                 cols={cols}
                 selectedLevel={selectedLevel}
                 verbSearchTerm={verbSearchTerm}
