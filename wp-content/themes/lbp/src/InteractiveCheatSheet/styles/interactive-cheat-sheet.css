@@ -234,9 +234,13 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-size: contain;
-    background-position: center top;
-    background-repeat: no-repeat;
+}
+
+.interactive-cheat-sheet .img-cheat-sheet img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .interactive-cheat-sheet .img-cheat-sheet.__rows-2 {

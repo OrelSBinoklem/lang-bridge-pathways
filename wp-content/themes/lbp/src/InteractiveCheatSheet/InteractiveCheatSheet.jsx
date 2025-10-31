@@ -103,7 +103,7 @@ const InteractiveCheatSheet = () => {
     const handleHintClick = (hintId) => {
         setHintModalData({
             id: hintId,
-            hintPath: `/wp-content/themes/lbp/assets/hints/${hintId}.html`
+            hintPath: `/wp-content/themes/lbp/assets/hints-super-tables/${hintId}.html`
         });
     };
 
