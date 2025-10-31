@@ -67,12 +67,11 @@ const GridCell = ({ index, isLastRow, imageData, isMenuOpen, onToggleMenu, onIma
             <div className="cell-title">+</div>
             
             {imageData && (
-                <div
-                    className={`img-cheat-sheet __rows-${imageData.rows || 0} __cols-${imageData.cols || 0}`}
-                    style={{
-                        backgroundImage: `url('${getImagePath(imageData.url)}')`
-                    }}
-                >
+                <div className={`img-cheat-sheet __rows-${imageData.rows || 0} __cols-${imageData.cols || 0}`}>
+                    <img 
+                        src={getImagePath(imageData.url)} 
+                        alt={`Таблица ${index}`}
+                    />
                     {/* Иконка подсказки - показываем только если есть hint-id */}
                     {getHintId(imageData.url) && (
                         <span 
