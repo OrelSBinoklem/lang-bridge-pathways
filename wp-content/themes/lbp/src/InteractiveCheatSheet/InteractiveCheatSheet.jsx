@@ -2,6 +2,7 @@ console.log('InteractiveCheatSheet.jsx: Файл загружается!');
 
 import React, { useState, useEffect } from 'react';
 import CheatSheetHeaderPortal from './components/CheatSheetHeaderPortal';
+import CheatSheetMobileMenu from './components/CheatSheetMobileMenu';
 import CheatSheetGrid from './components/CheatSheetGrid';
 import VerbModal from '../shared/components/VerbModal';
 import './styles/interactive-cheat-sheet.css';
@@ -158,6 +159,15 @@ const InteractiveCheatSheet = () => {
         <>
             {/* Рендерим хедер через портал в основной header.php */}
             <CheatSheetHeaderPortal
+                cols={cols}
+                rows={rows}
+                onColsChange={adjustCols}
+                onRowsChange={adjustRows}
+                onVerbSelect={handleVerbSelect}
+            />
+            
+            {/* Мобильное меню */}
+            <CheatSheetMobileMenu
                 cols={cols}
                 rows={rows}
                 onColsChange={adjustCols}
