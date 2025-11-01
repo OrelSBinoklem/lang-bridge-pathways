@@ -672,6 +672,12 @@ body.dictionary-examen-active .dictionary-refresh-container {
     font-weight: bold;
 }
 
+@media screen and (max-width: 767px) {
+    .menu-dictionaries h2 {
+        display: block;
+    }
+}
+
 .menu-dictionaries .menu-item {
     position: relative;
     margin-bottom: 15px;
@@ -712,6 +718,12 @@ body.dictionary-examen-active .dictionary-refresh-container {
     font-size: 14px;
     font-weight: bold;
     text-decoration: underline;
+}
+
+@media screen and (max-width: 767px) {
+    .menu-dictionaries-cnt {
+        margin-left: 83px;
+    }
 }
 
 .menu-dictionaries-exist-sound {
@@ -993,6 +1005,10 @@ body.dictionary-examen-active .dictionary-refresh-container {
     .useful-links a {
         padding: 10px 12px;
         font-size: 14px;
+    }
+
+    .useful-links a:not(.highlighted-link) {
+        padding: 0 12px;
     }
 }
 
