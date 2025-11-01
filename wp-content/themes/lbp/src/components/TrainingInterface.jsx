@@ -85,12 +85,6 @@ const TrainingInterface = ({
         {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
       </h3>
       
-      {!!inEducationMode && (
-        <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
-          📚 Слово переведено в режим обучения!
-        </div>
-      )}
-      
       <div className="training-word-display">
         {currentMode ? currentWord.translation_1 : currentWord.word}
         
