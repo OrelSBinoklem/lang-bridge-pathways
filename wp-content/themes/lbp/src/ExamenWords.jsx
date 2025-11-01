@@ -60,6 +60,23 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 		};
 	}, []); // Пустой массив зависимостей, используем refs
 
+	// Обработка клика по заголовку - возврат к категориям
+	useEffect(() => {
+		const handleReturnToCategories = () => {
+			// Сбрасываем состояние тренировки
+			showExamenRef.current = false;
+			setShowExamen(false);
+			categoryIdRef.current = 0;
+			setCategoryId(0);
+		};
+
+		window.addEventListener('returnToCategories', handleReturnToCategories);
+		
+		return () => {
+			window.removeEventListener('returnToCategories', handleReturnToCategories);
+		};
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 	// Синхронизируем refs с state
 	useEffect(() => {
 		showExamenRef.current = showExamen;

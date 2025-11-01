@@ -56,14 +56,6 @@
             
         </div>
 
-        <!-- Отдельный контейнер для ссылки словаря (показывается только во время тренировки) -->
-        <?php if (is_page_template('page-dictionary.php')): ?>
-            <div class="dictionary-refresh-container">
-                <a href="<?php echo esc_url(add_query_arg('refresh', time())); ?>" class="dictionary-refresh-link" title="Вернуться к категориям">
-                    🔄 Вернуться в словарь
-                </a>
-            </div>
-        <?php endif; ?>
 
         <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
             <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
@@ -340,19 +332,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(addMobileLangButton, 200);
     setTimeout(addMobileLangButton, 500);
     setTimeout(addMobileLangButton, 1000);
-    
-    // Обработчик кнопки "Вернуться в словарь" - делает шаг назад в истории
-    const dictionaryRefreshLink = document.querySelector('.dictionary-refresh-link');
-    if (dictionaryRefreshLink) {
-        dictionaryRefreshLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Проверяем, можем ли вернуться назад в истории
-            // history.length > 1 означает, что есть история (текущая страница + хотя бы одна предыдущая)
-            if (window.history.length > 1 || window.history.state) {
-                window.history.back();
-            }
-        });
-    }
 });
 </script>
 
