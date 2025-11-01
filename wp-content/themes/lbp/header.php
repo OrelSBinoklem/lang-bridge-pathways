@@ -269,6 +269,78 @@ document.addEventListener('DOMContentLoaded', function() {
         currentLangCode.textContent = currentLang;
     }
     
+    // Добавляем мобильную кнопку языка в меню (только для обычных страниц, не для React-страниц)
+    function addMobileLangButton() {
+        console.log('Trying to add mobile lang button...');
+        
+        const primaryMenu = document.getElementById('primary-menu');
+        console.log('Primary menu found:', primaryMenu);
+        
+        if (!primaryMenu) {
+            console.log('Primary menu not found!');
+            return;
+        }
+        
+        const hasReactControls = document.getElementById('cheat-sheet-mobile-controls') || 
+                                document.getElementById('grammar-tables-mobile-controls');
+        
+        if (hasReactControls) {
+            console.log('React controls found, skipping');
+            return; // На React страницах не добавляем
+        }
+        
+        if (document.getElementById('default-mobile-lang-controls')) {
+            console.log('Mobile lang button already exists');
+            return; // Уже добавлено
+        }
+        
+        // Создаем элемент меню с кнопкой языка
+        const mobileLangItem = document.createElement('li');
+        mobileLangItem.className = 'menu-item-mobile-controls';
+        mobileLangItem.id = 'default-mobile-lang-controls';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mobile-controls-wrapper';
+        
+        const langButton = document.createElement('button');
+        langButton.className = 'mobile-lang-btn';
+        langButton.innerHTML = `🌐 <span class="current-lang-code-mobile">${currentLang}</span>`;
+        langButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (langModal) {
+                langModal.classList.add('active');
+            }
+        });
+        
+        wrapper.appendChild(langButton);
+        mobileLangItem.appendChild(wrapper);
+        primaryMenu.appendChild(mobileLangItem);
+        
+        console.log('✅ Mobile lang button added to menu!');
+        
+        // Показываем/скрываем в зависимости от ширины экрана
+        const checkWidth = () => {
+            const isMobile = window.innerWidth < 1200;
+            mobileLangItem.style.display = isMobile ? 'block' : 'none';
+            console.log('Width check:', window.innerWidth, 'isMobile:', isMobile, 'display:', mobileLangItem.style.display);
+        };
+        
+        checkWidth();
+        window.addEventListener('resize', checkWidth);
+    }
+    
+    // Пробуем добавить несколько раз с разными задержками
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addMobileLangButton);
+    } else {
+        addMobileLangButton();
+    }
+    
+    setTimeout(addMobileLangButton, 50);
+    setTimeout(addMobileLangButton, 200);
+    setTimeout(addMobileLangButton, 500);
+    setTimeout(addMobileLangButton, 1000);
+    
     // Обработчик кнопки "Вернуться в словарь" - делает шаг назад в истории
     const dictionaryRefreshLink = document.querySelector('.dictionary-refresh-link');
     if (dictionaryRefreshLink) {
