@@ -405,35 +405,6 @@ body:has(#grammar-tables-gallery-root) .site-footer {
     text-decoration: none;
 }
 
-/* Контейнер для ссылки словаря */
-.dictionary-refresh-container {
-    display: none;
-    vertical-align: middle;
-}
-
-/* Показываем ссылку только когда активна тренировка */
-body.dictionary-examen-active .dictionary-refresh-container {
-    display: inline-block !important;
-}
-
-/* Ссылка для сброса словаря */
-.dictionary-refresh-link {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    font-size: 14px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.dictionary-refresh-link:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.2);
-    text-decoration: none;
-}
-
 /* Информация о словаре в React */
 .dictionary-info {
     text-align: center;
@@ -445,13 +416,39 @@ body.dictionary-examen-active .dictionary-refresh-container {
     font-size: 18px;
     font-weight: 600;
     margin: 0;
-    color: #2c3e50;
+}
+
+.dictionary-info .dictionary-title a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: inline-block;
+}
+
+/* Стрелка назад - всегда видна */
+.dictionary-info .dictionary-title a::before {
+    content: '← ';
+    color: inherit;
+}
+
+.dictionary-info .dictionary-title a:hover {
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 0, 0, 0.3);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
 }
 
 .dictionary-info .words-count {
     font-size: 1rem;
-    color: #666;
+    color: inherit;
     font-weight: 400;
+}
+
+/* Серый цвет только когда заголовок является ссылкой (в режиме тренировки) */
+.dictionary-info .dictionary-title a .words-count {
+    color: #666;
 }
 
 #super-logo-bg {
@@ -838,6 +835,10 @@ body.dictionary-examen-active .dictionary-refresh-container {
     .category-three > li {
         margin-top: 35px;
         display: block;
+    }
+
+    .category-three > li:first-child {
+        margin-top: 0;
     }
 }
 

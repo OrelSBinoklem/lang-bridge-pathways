@@ -279,17 +279,59 @@ if(document.getElementById('react-app-dictionary')) {
 			}
 		}, [dictionaryWords, categories, loadingCategories, loadingDictionaryWords]);
 
-		return (
-			<div>
-				{/* Заголовок словаря */}
-				{dictionaryInfo && (
-					<div className="dictionary-info">
-						<h1 className="dictionary-title">
+	// Обработчик клика по заголовку - возврат к категориям
+	const handleTitleClick = (e) => {
+		e.preventDefault();
+		// Отправляем событие для сброса состояния тренировки
+		window.dispatchEvent(new CustomEvent('returnToCategories'));
+	};
+
+	// Проверяем активна ли тренировка (examen)
+	const [isExamenActive, setIsExamenActive] = useState(false);
+	
+	useEffect(() => {
+		const checkExamenStatus = () => {
+			setIsExamenActive(document.body.classList.contains('dictionary-examen-active'));
+		};
+		
+		// Проверяем сразу и потом следим за изменениями
+		checkExamenStatus();
+		
+		// Наблюдаем за изменениями класса на body
+		const observer = new MutationObserver(checkExamenStatus);
+		observer.observe(document.body, {
+			attributes: true,
+			attributeFilter: ['class']
+		});
+		
+		return () => observer.disconnect();
+	}, []);
+
+	return (
+		<div>
+			{/* Заголовок словаря */}
+			{dictionaryInfo && (
+				<div className="dictionary-info">
+					<h1 className="dictionary-title">
+					{isExamenActive ? (
+						<a 
+							href={`${window.location.pathname}?refresh=${Date.now()}`}
+							onClick={handleTitleClick}
+							title="Вернуться к категориям"
+							style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+						>
 							{dictionaryInfo.name || 'Словарь'}
 							<span className="words-count"> ({dictionaryInfo.words} слов)</span>
-						</h1>
-			</div>
-		)}
+						</a>
+					) : (
+							<>
+								{dictionaryInfo.name || 'Словарь'}
+								<span className="words-count"> ({dictionaryInfo.words} слов)</span>
+							</>
+						)}
+					</h1>
+		</div>
+	)}
 		
 		{/* Показываем ExamenWords напрямую */}
 		<ExamenWords 
