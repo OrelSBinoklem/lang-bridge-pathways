@@ -144,7 +144,7 @@
                     
                     if ($logo) {
                         ?>
-                        <div class="language-banner menu-langs-banner" data-lang="<?php echo esc_attr($lang_code); ?>">
+                        <div class="language-banner menu-langs-banner" data-lang="<?php echo esc_attr($lang_code); ?>" data-url="<?php echo esc_url($item->url); ?>">
                             <div class="language-banner-inner">
                                 <h2><span class="wrap-h2"><?php echo esc_html($item->title); ?><span class="small">(<?php echo esc_html($level_text); ?>)</span></span></h2>
                                 <div class="image-container cursor-effect-mask-container">
@@ -209,16 +209,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return cookies['selected_lang'] || 'LV';
     }
     
-    // Сохраняем язык в куки
-    function setLanguage(lang) {
+    // Сохраняем язык в куки и переходим на страницу словаря
+    function setLanguage(lang, url) {
         document.cookie = `selected_lang=${lang}; path=/; max-age=31536000`; // 1 год
         if (currentLangCode) {
             currentLangCode.textContent = lang;
         }
         // Закрываем модальное окно
         langModal?.classList.remove('active');
-        // Перезагружаем страницу или загружаем данные выбранного языка
-        window.location.reload();
+        // Переходим на страницу словаря если есть URL, иначе перезагружаем
+        if (url) {
+            window.location.href = url;
+        } else {
+            window.location.reload();
+        }
     }
     
     // Открываем модальное окно
@@ -250,7 +254,9 @@ document.addEventListener('DOMContentLoaded', function() {
         langBanners.forEach(banner => {
             banner.addEventListener('click', function() {
                 const lang = this.dataset.lang;
-                setLanguage(lang);
+                const url = this.dataset.url;
+                console.log('Language banner clicked:', lang, 'URL:', url);
+                setLanguage(lang, url);
             });
         });
     }
