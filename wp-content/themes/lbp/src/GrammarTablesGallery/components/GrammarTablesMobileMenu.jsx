@@ -1,0 +1,173 @@
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+const GrammarTablesMobileMenu = ({
+    cols,
+    selectedLevel,
+    verbSearchTerm,
+    verbSuggestions,
+    showVerbSuggestions,
+    viewMode,
+    onColsChange,
+    onLevelChange,
+    onVerbSearchChange,
+    onVerbSuggestionClick,
+    onCloseVerbSuggestions,
+    onViewModeToggle
+}) => {
+    const menuContainer = document.getElementById('primary-menu');
+    
+    if (!menuContainer) {
+        return null;
+    }
+
+    const levels = [
+        { value: 'a1', label: 'A1', color: '#C82341' },
+        { value: 'a2', label: 'A2', color: '#FC8423' },
+        { value: 'b1', label: 'B1', color: '#4A9F14' },
+        { value: 'b2', label: 'B2', color: '#018587' }
+    ];
+
+    const colsOptions = [1, 2, 3, 4];
+
+    // Проверяем, нужно ли показывать (только на мобильных)
+    useEffect(() => {
+        const checkWidth = () => {
+            const isMobile = window.innerWidth < 1200;
+            const mobileControls = document.getElementById('grammar-tables-mobile-controls');
+            if (mobileControls) {
+                mobileControls.style.display = isMobile ? 'block' : 'none';
+            }
+        };
+        
+        checkWidth();
+        window.addEventListener('resize', checkWidth);
+        
+        return () => window.removeEventListener('resize', checkWidth);
+    }, []);
+
+    const content = (
+        <li id="grammar-tables-mobile-controls" className="menu-item-mobile-controls" style={{ display: 'none' }}>
+            <div className="mobile-controls-wrapper">
+                
+                {/* Кнопка выбора языка */}
+                <button 
+                    className="mobile-lang-btn"
+                    onClick={() => {
+                        const langModal = document.getElementById('language-modal');
+                        if (langModal) {
+                            langModal.classList.add('active');
+                        }
+                    }}
+                >
+                    🌐 <span className="current-lang-code-mobile">
+                        {document.querySelector('.current-lang-code')?.textContent || 'LV'}
+                    </span>
+                </button>
+
+                {/* Поиск глагола */}
+                <div className="mobile-verb-search">
+                    <label>Поиск глагола:</label>
+                    <div className="verb-search-container-mobile">
+                        <input 
+                            type="text" 
+                            className="form-control form-control-sm" 
+                            placeholder="Поиск глагола..." 
+                            value={verbSearchTerm}
+                            onChange={(e) => onVerbSearchChange(e.target.value)}
+                            onFocus={(e) => {
+                                setTimeout(() => e.target.select(), 0);
+                            }}
+                        />
+                        {showVerbSuggestions && verbSuggestions.length > 0 && (
+                            <div className="verb-suggestions">
+                                {verbSuggestions.map((suggestion, index) => (
+                                    <div 
+                                        key={index}
+                                        className="verb-suggestion-item"
+                                        onClick={() => {
+                                            if (suggestion.verbArray) {
+                                                onVerbSuggestionClick(suggestion);
+                                                // Закрываем меню после выбора
+                                                const menuToggle = document.getElementById('menu-toggle');
+                                                if (menuToggle) {
+                                                    menuToggle.click();
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        {suggestion.verbArray ? (
+                                            <>
+                                                <strong>{suggestion.verbArray[0]}</strong>
+                                                <small> {suggestion.verbArray[1]} / {suggestion.verbArray[2]}</small>
+                                            </>
+                                        ) : (
+                                            suggestion.text
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Фильтры по уровням */}
+                <div className="mobile-level-filters">
+                    <label>Уровень:</label>
+                    <div className="level-filters-buttons">
+                        {levels.map(level => (
+                            <button
+                                key={level.value}
+                                className={`level-filter-btn ${selectedLevel === level.value ? 'active' : ''}`}
+                                style={{ 
+                                    color: selectedLevel === level.value ? '#fff' : level.color,
+                                    backgroundColor: selectedLevel === level.value ? level.color : 'transparent',
+                                    borderColor: level.color
+                                }}
+                                onClick={() => onLevelChange(level.value)}
+                            >
+                                {level.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Настройки колонок */}
+                <div className="mobile-cols-controls">
+                    <label>Колонки:</label>
+                    <div className="btn-group btn-group-sm">
+                        {colsOptions.map(col => (
+                            <button
+                                key={col}
+                                type="button"
+                                className={`btn btn-outline-light btn-sm ${cols === col ? 'active' : ''}`}
+                                onClick={() => onColsChange(col)}
+                            >
+                                {col}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                
+                {/* Кнопка режима просмотра */}
+                <div className="mobile-view-mode">
+                    <label>Режим:</label>
+                    <button 
+                        type="button" 
+                        className={`btn btn-outline-light btn-sm ${viewMode === 'horizontal' ? 'active' : ''}`}
+                        onClick={onViewModeToggle}
+                    >
+                        <span className="mode-icon" style={viewMode === 'horizontal' ? { transform: 'rotate(-90deg)' } : {}}>
+                            ▼
+                        </span> {viewMode === 'horizontal' ? 'Горизонтальный' : 'Вертикальный'}
+                    </button>
+                </div>
+            </div>
+        </li>
+    );
+
+    return createPortal(content, menuContainer);
+};
+
+export default GrammarTablesMobileMenu;
+
