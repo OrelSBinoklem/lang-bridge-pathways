@@ -257,4 +257,137 @@ class WordsService {
     public static function delete_word_from_dictionary($word_id) {
         return delete_word($word_id);
     }
+
+    /**
+     * Изменить порядок слов в категории
+     *
+     * @param int $category_id ID категории
+     * @param array $word_orders Массив объектов [{word_id: 123, order: 1}, ...]
+     * @return int|WP_Error Количество обновленных слов или WP_Error
+     */
+    public static function reorder_category_words($category_id, $word_orders) {
+        global $wpdb;
+        
+        $words_table = $wpdb->prefix . 'd_words';
+        $word_category_table = $wpdb->prefix . 'd_word_category';
+        
+        // Получаем все слова из категории для проверки
+        $category_word_ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT word_id FROM $word_category_table WHERE category_id = %d",
+            $category_id
+        ));
+        
+        if (empty($category_word_ids)) {
+            return new WP_Error('empty_category', 'Категория пуста или не найдена');
+        }
+        
+        $updated_count = 0;
+        
+        // Обновляем порядок для каждого слова
+        foreach ($word_orders as $item) {
+            $word_id = intval($item['word_id'] ?? 0);
+            $order = intval($item['order'] ?? 0);
+            
+            if (!$word_id || !in_array($word_id, $category_word_ids)) {
+                continue; // Пропускаем слова, не принадлежащие категории
+            }
+            
+            $result = $wpdb->update(
+                $words_table,
+                ['order' => $order],
+                ['id' => $word_id],
+                ['%d'],
+                ['%d']
+            );
+            
+            if ($result !== false) {
+                $updated_count++;
+            }
+        }
+        
+        return $updated_count;
+    }
+
+    /**
+     * Перемешать данные слов для защиты авторских прав
+     * 
+     * ВАЖНО: Эта операция необратима!
+     * 
+     * Перемешивает ДАННЫЕ записей случайным образом (ID остаются, но слова меняются местами)
+     * 
+     * @param int $dictionary_id ID словаря
+     * @return array|WP_Error Результат операции
+     */
+    public static function initialize_and_shuffle_dictionary_words($dictionary_id) {
+        global $wpdb;
+        
+        $words_table = $wpdb->prefix . 'd_words';
+        $word_category_table = $wpdb->prefix . 'd_word_category';
+        
+        // Получаем все категории словаря
+        $categories = $wpdb->get_col($wpdb->prepare(
+            "SELECT DISTINCT category_id FROM $word_category_table wc
+            INNER JOIN $words_table w ON wc.word_id = w.id
+            WHERE w.dictionary_id = %d",
+            $dictionary_id
+        ));
+        
+        if (empty($categories)) {
+            return new WP_Error('no_categories', 'Категории не найдены');
+        }
+        
+        $total_shuffled = 0;
+        
+        // Перемешиваем ДАННЫЕ записей внутри каждой категории
+        foreach ($categories as $category_id) {
+            // Получаем все записи слов категории
+            $words = $wpdb->get_results($wpdb->prepare(
+                "SELECT w.* FROM $words_table w
+                INNER JOIN $word_category_table wc ON w.id = wc.word_id
+                WHERE wc.category_id = %d AND w.dictionary_id = %d
+                ORDER BY w.id ASC",
+                $category_id,
+                $dictionary_id
+            ), ARRAY_A);
+            
+            if (count($words) < 2) {
+                continue; // Нечего перемешивать
+            }
+            
+            // Сохраняем ID
+            $ids = array_column($words, 'id');
+            
+            // Перемешиваем данные (кроме id)
+            $data_to_shuffle = [];
+            foreach ($words as $word) {
+                $data = $word;
+                unset($data['id']); // ID не трогаем
+                $data_to_shuffle[] = $data;
+            }
+            
+            // Случайное перемешивание
+            shuffle($data_to_shuffle);
+            
+            // Записываем перемешанные данные обратно в БД
+            foreach ($ids as $index => $id) {
+                $update_data = $data_to_shuffle[$index];
+                
+                $wpdb->update(
+                    $words_table,
+                    $update_data,
+                    ['id' => $id],
+                    null,
+                    ['%d']
+                );
+                $total_shuffled++;
+            }
+        }
+        
+        return [
+            'success' => true,
+            'categories_processed' => count($categories),
+            'words_shuffled' => $total_shuffled,
+            'message' => "Обработано категорий: " . count($categories) . ", перемешано " . $total_shuffled . " записей"
+        ];
+    }
 }

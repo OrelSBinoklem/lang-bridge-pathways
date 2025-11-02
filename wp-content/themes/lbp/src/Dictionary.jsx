@@ -5,6 +5,7 @@ const { render, useEffect, useState, useRef } = wp.element;
 import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
 import DictionaryCategoryManagement from "./custom/components/DictionaryCategoryManagement";
+import ShuffleDictionaryTool from "./components/ShuffleDictionaryTool";
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
@@ -346,7 +347,7 @@ if(document.getElementById('react-app-dictionary')) {
 			loadingCategories={loadingCategories}
 		/>
 		
-		{/* Кнопка управления категориями (только для админов) */}
+		{/* Кнопки для админов */}
 		{window.myajax && window.myajax.is_admin && (
 			<div className="mode-buttons-container">
 				<button 
@@ -355,6 +356,10 @@ if(document.getElementById('react-app-dictionary')) {
 				>
 					{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
 				</button>
+				<ShuffleDictionaryTool 
+					dictionaryId={dictionaryId}
+					onComplete={refreshDictionaryWords}
+				/>
 			</div>
 		)}
 		

@@ -797,6 +797,108 @@ class WordsAjaxHandler {
         }
         wp_die();
     }
+
+    /**
+     * AJAX-метод для изменения порядка слов в категории
+     */
+    public static function handle_reorder_category_words() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'У вас нет прав для изменения порядка слов.']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $word_orders_raw = $_POST['word_orders'] ?? '';
+        
+        // word_orders - это JSON массив объектов [{word_id: 123, order: 1}, ...]
+        $word_orders = json_decode(stripslashes($word_orders_raw), true);
+
+        if (!$category_id || empty($word_orders) || !is_array($word_orders)) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $result = WordsService::reorder_category_words($category_id, $word_orders);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success(['reordered' => true, 'updated_count' => $result]);
+        }
+
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для установки order и перемешивания слов словаря
+     * ВАЖНО: Необратимая операция!
+     */
+    public static function handle_shuffle_dictionary_words() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'У вас нет прав для этой операции.']);
+            wp_die();
+        }
+
+        $dictionary_id = intval($_POST['dictionary_id'] ?? 0);
+        $confirm = $_POST['confirm'] ?? '';
+
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Не передан ID словаря']);
+            wp_die();
+        }
+
+        if ($confirm !== 'YES_SHUFFLE_PERMANENTLY') {
+            wp_send_json_error(['message' => 'Подтверждение не получено. Операция отменена.']);
+            wp_die();
+        }
+
+        $result = WordsService::initialize_and_shuffle_dictionary_words($dictionary_id);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для инициализации order и перемешивания слов словаря
+     * ВАЖНО: Операция необратима!
+     */
+    public static function handle_initialize_and_shuffle_dictionary() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'У вас нет прав для этой операции.']);
+            wp_die();
+        }
+
+        $dictionary_id = intval($_POST['dictionary_id'] ?? 0);
+        $confirm = $_POST['confirm'] ?? '';
+
+        if (!$dictionary_id) {
+            wp_send_json_error(['message' => 'Не передан ID словаря']);
+            wp_die();
+        }
+
+        if ($confirm !== 'YES_SHUFFLE_PERMANENTLY') {
+            wp_send_json_error(['message' => 'Подтверждение не получено']);
+            wp_die();
+        }
+
+        $result = WordsService::initialize_and_shuffle_dictionary_words($dictionary_id);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+
+        wp_die();
+    }
 }
 
 // Привязка метода AJAX-обработчика
@@ -839,6 +941,8 @@ add_action('wp_ajax_delete_category', ['WordsAjaxHandler', 'handle_delete_catego
 // AJAX обработчики для управления словами
 add_action('wp_ajax_create_word', ['WordsAjaxHandler', 'handle_create_word']);
 add_action('wp_ajax_delete_word', ['WordsAjaxHandler', 'handle_delete_word']);
+add_action('wp_ajax_reorder_category_words', ['WordsAjaxHandler', 'handle_reorder_category_words']);
+add_action('wp_ajax_initialize_and_shuffle_dictionary', ['WordsAjaxHandler', 'handle_initialize_and_shuffle_dictionary']);
 
 
 

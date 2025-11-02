@@ -3,6 +3,7 @@ import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
 import WordManagement from "../components/WordManagement";
 import HelpModal from "../components/HelpModal";
+import CategoryWordReorder from "../components/CategoryWordReorder";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
 
@@ -23,6 +24,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [attemptCount, setAttemptCount] = useState(0); // Счетчик попыток для текущего слова
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
   const [showHelp, setShowHelp] = useState(false); // Показать справку
+  const [showReorder, setShowReorder] = useState(false); // Показать инструмент изменения порядка
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
@@ -538,6 +540,19 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
               ❓ Справка
             </button>
             
+            {window.myajax && window.myajax.is_admin && (
+              <button
+                onClick={() => {
+                  console.log('🔄 Кнопка "Порядок слов" нажата, categoryId:', categoryId);
+                  setShowReorder(true);
+                }}
+                className="training-reorder-button"
+                title="Изменить порядок слов в категории"
+              >
+                🔄 Порядок слов
+              </button>
+            )}
+            
             <button
               onClick={() => {
                 console.log('Кнопка сброса нажата!');
@@ -718,6 +733,49 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           </ul>
         );
       })()}
+      
+      {/* Модальное окно изменения порядка слов */}
+      {showReorder && (() => {
+        // Получаем слова текущей категории
+        const categoryWords = dictionaryWords.filter(word => {
+          if (categoryId === 0) return true;
+          const categoryIdNum = parseInt(categoryId);
+          
+          if (word.category_id !== undefined) {
+            return parseInt(word.category_id) === categoryIdNum;
+          }
+          if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
+            return word.category_ids.some(id => parseInt(id) === categoryIdNum);
+          }
+          return false;
+        });
+        
+        console.log('📊 CategoryWordReorder рендерится. Слов в категории:', categoryWords.length, 'categoryId:', categoryId);
+        console.log('Первые 3 слова:', categoryWords.slice(0, 3));
+        
+        return (
+          <CategoryWordReorder
+            categoryId={categoryId}
+            words={categoryWords}
+            onClose={() => {
+              console.log('❌ Закрытие модального окна');
+              setShowReorder(false);
+            }}
+            onReorderComplete={() => {
+              console.log('✅ Порядок изменен, обновляем данные');
+              setShowReorder(false);
+              if (onRefreshDictionaryWords) {
+                onRefreshDictionaryWords();
+              }
+            }}
+          />
+        );
+      })()}
+      
+      {/* Модальное окно справки */}
+      {showHelp && (
+        <HelpModal onClose={() => setShowHelp(false)} />
+      )}
 		</div>
 	);
 };
