@@ -1,8 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import tablesData, { allTables } from '../data/tablesData';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import tablesData from '../data/tablesData';
 
-const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHintClick }) => {
-    const [filteredGroups, setFilteredGroups] = useState({ group1: [], group2: [], group3: [] });
+const GrammarTablesGrid = ({
+    cols,
+    selectedLevel,
+    viewMode,
+    onImageClick,
+    onHintClick,
+    superTables = [],
+    superOrder = [],
+    onToggleSuperTable,
+    onMoveSuperTable,
+    activeIds = [],
+    showHidden = false
+}) => {
+    const [filteredGroups, setFilteredGroups] = useState({ group1: [], group2: [], group3: [], super: [] });
 
     // Ранк уровней как в оригинале
     const LEVEL_RANK = { a1: 0, a2: 1, b1: 2, b2: 3 };
@@ -42,12 +54,42 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
 
     // Фильтрация изображений по принципу диапазонов уровней для всех групп
     useEffect(() => {
+        const activeSet = new Set(activeIds);
+
+        const orderedSuper = superOrder
+            .map(id => {
+                const table = superTables.find(table => table.id === id);
+                if (!table) {
+                    return null;
+                }
+                return {
+                    ...table,
+                    isActive: activeSet.has(id)
+                };
+            })
+            .filter(Boolean);
+
+        const visibleSuper = showHidden
+            ? orderedSuper
+            : orderedSuper.filter(entry => entry.isActive);
+
+        if (selectedLevel === 'super') {
+            setFilteredGroups({
+                group1: [],
+                group2: [],
+                group3: [],
+                super: visibleSuper
+            });
+            return;
+        }
+
         setFilteredGroups({
             group1: filterTables(tablesData.group1),
             group2: filterTables(tablesData.group2),
-            group3: filterTables(tablesData.group3)
+            group3: filterTables(tablesData.group3),
+            super: []
         });
-    }, [selectedLevel]);
+    }, [selectedLevel, superOrder, superTables, activeIds, showHidden]);
 
     // Установка CSS переменной для реальной ширины viewport (без скроллбара)
     useEffect(() => {
@@ -103,7 +145,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         
         if (currentPageEl) currentPageEl.textContent = currentPage;
         if (totalPagesEl) totalPagesEl.textContent = totalPages;
-    }, [viewMode]);
+    }, [viewMode, selectedLevel]);
 
     // Расчёт ширины обёрток галерей для горизонтального режима
     const calculateGalleryWrapperWidths = useCallback(() => {
@@ -136,7 +178,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
             
             updatePageIndicator();
         });
-    }, [viewMode, updatePageIndicator]);
+    }, [viewMode, selectedLevel, updatePageIndicator]);
 
     // Обработка скролла колесом для горизонтального режима
     useEffect(() => {
@@ -180,7 +222,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
             container.removeEventListener('wheel', handleWheelScroll);
             container.removeEventListener('scroll', updatePageIndicator);
         };
-    }, [viewMode, updatePageIndicator]);
+    }, [viewMode, selectedLevel, updatePageIndicator]);
 
     // Обработка resize окна для горизонтального режима (debounce 100ms)
     useEffect(() => {
@@ -212,24 +254,12 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
                 clearTimeout(resizeTimeout);
             }
         };
-    }, [viewMode, calculateGalleryWrapperWidths]);
-
-    const handleImageClick = (image) => {
-        onImageClick({
-            ...image,
-            hintPath: `/wp-content/themes/lbp/assets/hints/${image.id}.html`
-        });
-    };
-
-    const handleHintIconClick = (e, imageId) => {
-        e.stopPropagation(); // Предотвращаем открытие основного модального окна
-        onHintClick(imageId);
-    };
+    }, [viewMode, selectedLevel, calculateGalleryWrapperWidths]);
 
     // Получить CSS-класс для уровня (берём первую часть если диапазон)
     const getLevelClass = (level) => {
         const baseLevel = level.indexOf('-') !== -1 ? level.split('-')[0] : level;
-        const validLevels = ['a1', 'a2', 'b1', 'b2'];
+        const validLevels = ['a1', 'a2', 'b1', 'b2', 'super'];
         return validLevels.includes(baseLevel) ? baseLevel : 'a1';
     };
 
@@ -242,41 +272,142 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
         return baseLevel.toUpperCase();
     };
 
-    // Рендер группы таблиц
-    const renderGalleryGroup = (tables, groupNumber) => {
+    const activeOrder = useMemo(() => {
+        if (!activeIds || activeIds.length === 0) {
+            return [];
+        }
+        const activeSet = new Set(activeIds);
+        return superOrder.filter(id => activeSet.has(id));
+    }, [superOrder, activeIds]);
+
+    const activeIndexMap = useMemo(() => {
+        const map = {};
+        activeOrder.forEach((id, index) => {
+            map[id] = index;
+        });
+        return map;
+    }, [activeOrder]);
+
+    const activeCount = activeOrder.length;
+
+    const renderHintIcon = (image) => {
+        const hintId = image.level === 'super'
+            ? (image.hintId || String(image.id).replace('super-', ''))
+            : image.id;
+
+        const hintPayload = image.level === 'super'
+            ? `super-${hintId}`
+            : image.id;
+
+        return (
+            <span 
+                className="hint-icon"
+                data-hint-id={hintId}
+                title={`Показать подсказку (ID: ${hintId})`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onHintClick(hintPayload);
+                }}
+            >
+                ?
+            </span>
+        );
+    };
+
+    const renderSuperControls = (image) => {
+        if (image.level !== 'super') return null;
+
+        const isActive = Boolean(image.isActive);
+        const activeIndex = isActive ? activeIndexMap[image.id] ?? -1 : -1;
+        const isFirst = activeIndex <= 0;
+        const isLast = activeIndex === activeCount - 1;
+
+        return (
+            <div className="super-controls">
+                {isActive && (
+                    <>
+                        <button
+                            type="button"
+                            className="super-control-btn move"
+                            title="Переместить выше"
+                            disabled={isFirst}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoveSuperTable?.(image.id, 'up');
+                            }}
+                        >
+                            ↑
+                        </button>
+                        <button
+                            type="button"
+                            className="super-control-btn move"
+                            title="Переместить ниже"
+                            disabled={isLast}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onMoveSuperTable?.(image.id, 'down');
+                            }}
+                        >
+                            ↓
+                        </button>
+                    </>
+                )}
+                <button
+                    type="button"
+                    className="super-control-btn toggle"
+                    title={isActive ? 'Скрыть из активных' : 'Добавить в активные'}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleSuperTable?.(image.id);
+                    }}
+                >
+                    {isActive ? '✕' : '＋'}
+                </button>
+            </div>
+        );
+    };
+
+    const renderGalleryGroup = (tables, groupKey) => {
         if (tables.length === 0) return null;
         
         return (
-            <div className="gallery-wrapper" key={`group-${groupNumber}`}>
+            <div className="gallery-wrapper" key={`group-${groupKey}`}>
                 <div className="gallery" data-cols={cols}>
                     {tables.map(image => (
                         <div 
                             key={image.id} 
-                            className="table-img" 
+                            className={`table-img ${image.level === 'super' ? (image.isActive ? '__super-active' : '__super-inactive') : ''}`}
                             data-id={image.id}
                             data-level={image.level}
-                            onClick={() => handleImageClick(image)}
+                            onClick={() => {
+                                const hintPath = image.level === 'super'
+                                    ? `/wp-content/themes/lbp/assets/hints-super-tables/${image.hintId || String(image.id).replace('super-', '')}.html`
+                                    : `/wp-content/themes/lbp/assets/hints/${image.id}.html`;
+                                onImageClick({
+                                    ...image,
+                                    hintPath
+                                });
+                            }}
                         >
                             <img 
                                 src={image.src} 
-                                alt={image.alt}
+                                alt={image.alt || image.title || `Таблица ${image.id}`}
                                 width={image.width}
                                 height={image.height}
                                 loading="lazy" 
                                 decoding="async" 
                             />
-                            <span className={`level-badge ${getLevelClass(image.level)}`}>
-                                {getLevelLabel(image.level, image.description)}
-                            </span>
-                            {/* Иконка подсказки */}
-                            <span 
-                                className="hint-icon"
-                                data-hint-id={image.id}
-                                title={`Показать подсказку (ID: ${image.id})`}
-                                onClick={(e) => handleHintIconClick(e, image.id)}
-                            >
-                                ?
-                            </span>
+                            {image.level === 'super' ? (
+                                <span className="level-badge super">
+                                    {image.title || 'SUPER'}
+                                </span>
+                            ) : (
+                                <span className={`level-badge ${getLevelClass(image.level)}`}>
+                                    {getLevelLabel(image.level, image.description)}
+                                </span>
+                            )}
+                            {renderHintIcon(image)}
+                            {renderSuperControls(image)}
                         </div>
                     ))}
                 </div>
@@ -290,6 +421,7 @@ const GrammarTablesGrid = ({ cols, selectedLevel, viewMode, onImageClick, onHint
                 {renderGalleryGroup(filteredGroups.group1, 1)}
                 {renderGalleryGroup(filteredGroups.group2, 2)}
                 {renderGalleryGroup(filteredGroups.group3, 3)}
+                {selectedLevel === 'super' ? renderGalleryGroup(filteredGroups.super, 'super') : null}
             </div>
         </footer>
     );

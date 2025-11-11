@@ -1497,6 +1497,35 @@ h2 .small {
     border-color: #007bff;
 }
 
+.toolbar-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ai-sort-btn {
+    padding: 8px 16px;
+    border: 2px solid #9c27b0;
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+}
+
+.ai-sort-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ab47bc, #9c27b0);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+}
+
+.ai-sort-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .shuffle-btn {
     padding: 8px 16px;
     border: 2px solid #ff9800;
@@ -1508,9 +1537,19 @@ h2 .small {
     transition: all 0.3s;
 }
 
-.shuffle-btn:hover {
+.shuffle-btn:hover:not(:disabled) {
     background: #ff9800;
     color: white;
+}
+
+.shuffle-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.mode-switch button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .word-reorder-error {

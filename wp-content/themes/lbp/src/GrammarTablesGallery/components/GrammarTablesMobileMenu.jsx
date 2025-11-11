@@ -13,7 +13,11 @@ const GrammarTablesMobileMenu = ({
     onVerbSearchChange,
     onVerbSuggestionClick,
     onCloseVerbSuggestions,
-    onViewModeToggle
+    onViewModeToggle,
+    onManageSuperTables,
+    superSelectionCount = 0,
+    showHiddenSuper = false,
+    onToggleShowHidden
 }) => {
     const menuContainer = document.getElementById('primary-menu');
     
@@ -25,7 +29,8 @@ const GrammarTablesMobileMenu = ({
         { value: 'a1', label: 'A1', color: '#C82341' },
         { value: 'a2', label: 'A2', color: '#FC8423' },
         { value: 'b1', label: 'B1', color: '#4A9F14' },
-        { value: 'b2', label: 'B2', color: '#018587' }
+        { value: 'b2', label: 'B2', color: '#018587' },
+        { value: 'super', label: 'SUPER', color: '#0050b3' }
     ];
 
     const colsOptions = [1, 2, 3, 4];
@@ -81,31 +86,40 @@ const GrammarTablesMobileMenu = ({
                         />
                         {showVerbSuggestions && verbSuggestions.length > 0 && (
                             <div className="verb-suggestions">
-                                {verbSuggestions.map((suggestion, index) => (
-                                    <div 
-                                        key={index}
-                                        className="verb-suggestion-item"
-                                        onClick={() => {
-                                            if (suggestion.verbArray) {
+                                {verbSuggestions.map((suggestion, index) => {
+                                    if (suggestion.text) {
+                                        return (
+                                            <div key={index} className="verb-suggestion-item disabled">
+                                                {suggestion.text}
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <div 
+                                            key={index}
+                                            className="verb-suggestion-item"
+                                            onClick={() => {
                                                 onVerbSuggestionClick(suggestion);
-                                                // Закрываем меню после выбора
                                                 const menuToggle = document.getElementById('menu-toggle');
                                                 if (menuToggle) {
                                                     menuToggle.click();
                                                 }
-                                            }
-                                        }}
-                                    >
-                                        {suggestion.verbArray ? (
-                                            <>
-                                                <strong>{suggestion.verbArray[0]}</strong>
-                                                <small> {suggestion.verbArray[1]} / {suggestion.verbArray[2]}</small>
-                                            </>
-                                        ) : (
-                                            suggestion.text
-                                        )}
-                                    </div>
-                                ))}
+                                            }}
+                                        >
+                                            <strong>{suggestion.lemma}</strong>
+                                            <small>
+                                                {suggestion.translationRu || '—'}
+                                                {suggestion.translationUk ? ` / ${suggestion.translationUk}` : ''}
+                                            </small>
+                                            {suggestion.className && (
+                                                <span className="verb-suggestion-class">
+                                                    Класс: {suggestion.className}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -160,6 +174,32 @@ const GrammarTablesMobileMenu = ({
                         <span className="mode-icon" style={viewMode === 'horizontal' ? { transform: 'rotate(-90deg)' } : {}}>
                             ▼
                         </span> {viewMode === 'horizontal' ? 'Горизонтальный' : 'Вертикальный'}
+                    </button>
+                </div>
+
+                <div className="mobile-super-controls">
+                    <label>Супер таблицы:</label>
+                    <button
+                        type="button"
+                        className="btn btn-outline-light btn-sm"
+                        onClick={() => {
+                            if (onManageSuperTables) {
+                                onManageSuperTables();
+                            }
+                        }}
+                    >
+                        📚 Super ({superSelectionCount})
+                    </button>
+                    <button
+                        type="button"
+                        className={`btn btn-outline-light btn-sm mt-2 ${showHiddenSuper ? 'active' : ''}`}
+                        onClick={() => {
+                            if (onToggleShowHidden) {
+                                onToggleShowHidden();
+                            }
+                        }}
+                    >
+                        {showHiddenSuper ? '👁 Видны скрытые' : '🙈 Скрыть скрытые'}
                     </button>
                 </div>
             </div>

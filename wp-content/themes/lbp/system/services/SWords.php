@@ -309,6 +309,118 @@ class WordsService {
     }
 
     /**
+     * Автоматическая сортировка слов через OpenAI GPT
+     * 
+     * @param int $category_id ID категории
+     * @param array $words Массив слов [{id, word, translation_1}, ...]
+     * @return array|WP_Error Отсортированный массив или ошибка
+     */
+    public static function sort_words_with_ai($category_id, $words) {
+        // Получаем API ключ из настроек (можно добавить в wp-config.php как define('OPENAI_API_KEY', 'sk-...'))
+        $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : get_option('openai_api_key');
+        
+        if (empty($api_key)) {
+            return new WP_Error('no_api_key', 'OpenAI API ключ не настроен');
+        }
+        
+        // Формируем список слов для GPT
+        $words_list = array_map(function($word) {
+            return $word['word'] . ' → ' . ($word['translation_1'] ?? '');
+        }, $words);
+        
+        $words_text = implode("\n", $words_list);
+        
+        // Промпт для GPT
+        $prompt = "Отсортируй следующие слова по смыслу и частотности встречаемости. Критерии сортировки:
+
+1. Базовые, самые частотные слова (I, you, to be) - в начало
+2. Общеупотребительные слова - в середину  
+3. Специфичные, редкие слова - в конец
+
+Группируй по смысловым категориям (местоимения, глаголы, существительные и т.д.), внутри категорий сортируй от частых к редким.
+
+Верни ТОЛЬКО слова в новом порядке, по одному на строку, в том же формате 'слово → перевод'. Не добавляй никаких комментариев, заголовков или пояснений.
+
+Слова:\n\n" . $words_text;
+        
+        // Запрос к OpenAI API
+        $response = wp_remote_post('https://api.openai.com/v1/chat/completions', [
+            'timeout' => 30,
+            'headers' => [
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            ],
+            'body' => json_encode([
+                'model' => 'gpt-4o',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Ты эксперт-лингвист, специализирующийся на сортировке слов по частотности и смыслу. Отвечай ТОЛЬКО списком слов в формате по одному на строку. Никаких дополнительных комментариев, нумерации или заголовков.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'temperature' => 0.3,
+            ])
+        ]);
+        
+        if (is_wp_error($response)) {
+            return new WP_Error('api_error', 'Ошибка запроса к OpenAI: ' . $response->get_error_message());
+        }
+        
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        
+        if (empty($body['choices'][0]['message']['content'])) {
+            return new WP_Error('empty_response', 'Пустой ответ от OpenAI');
+        }
+        
+        $sorted_text = trim($body['choices'][0]['message']['content']);
+        $sorted_lines = explode("\n", $sorted_text);
+        
+        // Парсим ответ и сопоставляем со словами
+        $sorted_words = [];
+        $remaining_words = $words;
+        
+        foreach ($sorted_lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            // Извлекаем слово из строки
+            if (preg_match('/^(.+?)\s*→/', $line, $matches)) {
+                $word_text = trim($matches[1]);
+                
+                // Ищем это слово в оригинальном массиве
+                foreach ($remaining_words as $key => $original_word) {
+                    if (strcasecmp($original_word['word'], $word_text) === 0) {
+                        $sorted_words[] = $original_word;
+                        unset($remaining_words[$key]);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Добавляем не найденные слова в конец
+        foreach ($remaining_words as $word) {
+            $sorted_words[] = $word;
+        }
+        
+        // Проверяем что все слова на месте
+        if (count($sorted_words) !== count($words)) {
+            return new WP_Error('word_count_mismatch', 'Количество слов не совпадает');
+        }
+        
+        return [
+            'success' => true,
+            'sorted_words' => $sorted_words,
+            'original_count' => count($words),
+            'sorted_count' => count($sorted_words),
+        ];
+    }
+
+    /**
      * Перемешать данные слов для защиты авторских прав
      * 
      * ВАЖНО: Эта операция необратима!

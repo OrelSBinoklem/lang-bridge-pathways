@@ -19,6 +19,7 @@ const CategoryWordReorder = ({
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [sortingWithAI, setSortingWithAI] = useState(false);
 
   // Инициализация списка слов (только один раз при монтировании)
   useEffect(() => {
@@ -215,6 +216,69 @@ const CategoryWordReorder = ({
     setTextInput(textList);
   };
 
+  // Функция для автоматической сортировки через AI
+  const handleAISort = async () => {
+    console.log('🤖 Запускаем AI сортировку');
+    setSortingWithAI(true);
+    setError(null);
+
+    try {
+      // Сначала перемешиваем слова случайным образом, чтобы GPT не мог схалтурить
+      const shuffled = [...orderedWords];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      
+      console.log('🎲 Перемешали слова перед отправкой в AI');
+      
+      // Подготавливаем данные для отправки
+      const wordsData = shuffled.map(word => ({
+        id: word.id,
+        word: word.word,
+        translation_1: word.translation_1 || ''
+      }));
+
+      console.log('📤 Отправляем перемешанные слова на AI сортировку:', wordsData.length);
+
+      const formData = new FormData();
+      formData.append('action', 'sort_words_with_ai');
+      formData.append('category_id', categoryId);
+      formData.append('words', JSON.stringify(wordsData));
+
+      const response = await axios.post(window.myajax.url, formData);
+
+      console.log('📥 Ответ от AI:', response.data);
+
+      if (response.data.success) {
+        const sortedWords = response.data.data.sorted_words;
+        
+        // Находим полные объекты слов по ID
+        const fullSortedWords = sortedWords.map(sortedWord => {
+          return orderedWords.find(w => w.id === sortedWord.id);
+        }).filter(Boolean);
+
+        console.log('✅ AI отсортировал слова:', fullSortedWords.length);
+        
+        setOrderedWords(fullSortedWords);
+        
+        // Обновляем текстовое поле
+        const textList = fullSortedWords.map(w => w.word).join('\n');
+        setTextInput(textList);
+
+        // Переключаемся на режим drag для визуального подтверждения
+        setMode('drag');
+      } else {
+        setError(response.data.data?.message || 'Ошибка AI сортировки');
+      }
+    } catch (err) {
+      console.error('❌ Ошибка AI сортировки:', err);
+      setError('Ошибка сети: ' + err.message);
+    } finally {
+      setSortingWithAI(false);
+    }
+  };
+
   return (
     <div className="word-reorder-modal">
       <div className="word-reorder-overlay" onClick={onClose}></div>
@@ -229,24 +293,38 @@ const CategoryWordReorder = ({
             <button 
               className={mode === 'drag' ? 'active' : ''}
               onClick={() => setMode('drag')}
+              disabled={sortingWithAI}
             >
               🖱️ Перетаскивание
             </button>
             <button 
               className={mode === 'text' ? 'active' : ''}
               onClick={() => setMode('text')}
+              disabled={sortingWithAI}
             >
               📝 Текстовый режим
             </button>
           </div>
           
-          <button 
-            className="shuffle-btn"
-            onClick={handleShuffle}
-            title="Перемешать случайным образом"
-          >
-            🎲 Перемешать
-          </button>
+          <div className="toolbar-actions">
+            <button 
+              className="ai-sort-btn"
+              onClick={handleAISort}
+              disabled={sortingWithAI}
+              title="Автоматическая сортировка по смыслу через AI"
+            >
+              {sortingWithAI ? '⏳ Сортирую...' : '🤖 Упорядочить ботом'}
+            </button>
+            
+            <button 
+              className="shuffle-btn"
+              onClick={handleShuffle}
+              disabled={sortingWithAI}
+              title="Перемешать случайным образом"
+            >
+              🎲 Перемешать
+            </button>
+          </div>
         </div>
 
         {error && (

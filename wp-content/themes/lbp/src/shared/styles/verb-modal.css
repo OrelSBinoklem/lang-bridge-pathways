@@ -18,33 +18,28 @@
 
 .verb-image-content {
     position: relative;
-    max-width: 90%;
+    max-width: min(1100px, 95vw);
     background: #f8f9fa;
-    padding: 10px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 2px solid #dee2e6;
-}
-
-.verb-image-content img {
-    max-width: 100%;
-    max-height: calc(90vh - 30px);
-    display: block;
-    margin: 0 auto;
-    border-radius: 8px;
+    padding: 24px 28px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .verb-close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 14px;
+    right: 14px;
     background: #dc3545;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    font-size: 24px;
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -59,11 +54,247 @@
     transform: scale(1.1);
 }
 
-.verb-info {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 5px;
-    font-size: 18px;
+.verb-modal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.verb-info-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    row-gap: 8px;
+}
+
+.verb-lemma-text {
+    font-size: 28px;
     font-weight: 700;
-    color: #333;
+    color: #1f2933;
+}
+
+.verb-class-chip {
+    background: #0d6efd;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    letter-spacing: 0.8px;
+}
+
+.verb-trans-label {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0d6efd;
+    letter-spacing: 0.5px;
+}
+
+.verb-trans-value {
+    font-weight: 800;
+    font-size: 22px;
+    color: #0b1526;
+}
+
+.verb-translation-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(13, 110, 253, 0.12);
+    border-radius: 14px;
+    padding: 8px 14px;
+    box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.15);
+}
+
+.verb-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.verb-modal-body.with-reference {
+    display: grid;
+    gap: 22px;
+}
+
+@media (min-width: 992px) {
+    .verb-modal-body.with-reference {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+    }
+}
+
+.verb-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1 1 auto;
+}
+
+.verb-table-wrapper.reference {
+    background: transparent;
+}
+
+.verb-table-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #0b1526;
+}
+
+.verb-reference-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 14px;
+    color: #425466;
+}
+
+.verb-reference-meta span {
+    background: rgba(13, 110, 253, 0.12);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #0d3a77;
+}
+
+.verb-reference-missing {
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(220, 53, 69, 0.08);
+    color: #b02a37;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.verb-table-match {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(13, 110, 253, 0.08);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #104c97;
+    width: fit-content;
+}
+
+.verb-forms-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.verb-forms-table thead th {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.92), rgba(50, 159, 255, 0.85));
+    color: #fff;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.verb-forms-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    font-size: 16px;
+    color: #1f2933;
+    background: rgba(248, 249, 250, 0.85);
+    vertical-align: middle;
+}
+
+.verb-forms-table tbody tr:nth-child(even) td {
+    background: rgba(241, 245, 249, 0.85);
+}
+
+.verb-form-pronoun {
+    font-weight: 700;
+    color: #0d6efd;
+    width: 28%;
+    white-space: nowrap;
+}
+
+.verb-form-value {
+    font-weight: 500;
+}
+
+.verb-forms-grid {
+    column-count: 3;
+    column-gap: 24px;
+}
+
+.verb-form-cell {
+    break-inside: avoid;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    background: rgba(15, 23, 42, 0.04);
+    border-radius: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.verb-form-cell:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.verb-form-index {
+    font-weight: 700;
+    color: #0d6efd;
+    min-width: 26px;
+}
+
+.verb-form-text {
+    color: #1f2933;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.verb-forms-empty {
+    text-align: center;
+    padding: 24px;
+    border-radius: 12px;
+    background: rgba(108, 117, 125, 0.1);
+    color: #495057;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .verb-image-content {
+        padding: 20px;
+    }
+
+    .verb-forms-table {
+        font-size: 15px;
+    }
+
+    .verb-forms-table thead th,
+    .verb-forms-table tbody td {
+        padding: 10px 12px;
+    }
+
+    .verb-forms-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .verb-forms-grid {
+        column-count: 1;
+    }
+
+    .verb-lemma {
+        font-size: 24px;
+    }
 }

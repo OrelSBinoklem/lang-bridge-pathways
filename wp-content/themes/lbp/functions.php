@@ -899,6 +899,38 @@ class WordsAjaxHandler {
 
         wp_die();
     }
+
+    /**
+     * AJAX-метод для автоматической сортировки слов через OpenAI GPT
+     */
+    public static function handle_sort_words_with_ai() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'У вас нет прав для этой операции.']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $words_raw = $_POST['words'] ?? '';
+        
+        // words - это JSON массив объектов [{id, word, translation}, ...]
+        $words = json_decode(stripslashes($words_raw), true);
+
+        if (!$category_id || empty($words) || !is_array($words)) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $result = WordsService::sort_words_with_ai($category_id, $words);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+
+        wp_die();
+    }
 }
 
 // Привязка метода AJAX-обработчика
@@ -943,6 +975,7 @@ add_action('wp_ajax_create_word', ['WordsAjaxHandler', 'handle_create_word']);
 add_action('wp_ajax_delete_word', ['WordsAjaxHandler', 'handle_delete_word']);
 add_action('wp_ajax_reorder_category_words', ['WordsAjaxHandler', 'handle_reorder_category_words']);
 add_action('wp_ajax_initialize_and_shuffle_dictionary', ['WordsAjaxHandler', 'handle_initialize_and_shuffle_dictionary']);
+add_action('wp_ajax_sort_words_with_ai', ['WordsAjaxHandler', 'handle_sort_words_with_ai']);
 
 
 

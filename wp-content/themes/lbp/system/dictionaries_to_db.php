@@ -34,7 +34,7 @@ function json_parser_page() {
 
         $dicts = [
             [
-                'src' => '/system/dictionaries/Russko-angliyskiy-britanskiy_slovar_3000_slov_Kirillicheskaya_transliteratsiya-result.json',
+                'src' => '/system/dictionaries/Lat_Rus_5000-result.json',
                 'lang' => 'RU',
                 'learn_lang' => 'EN',
                 'name' => 'Русско-Английский (Британский)',
@@ -123,9 +123,40 @@ function json_parser_page() {
                 'maxLevel' => 5,
                 'sound' => 1,
             ],
+			[
+                'src' => '/system/dictionaries/Lat_Rus_5000-result.json',
+                'lang' => 'RU',
+                'learn_lang' => 'LV',
+                'name' => 'Русско-Латышский Тематический',
+                'words' => 5000,
+                'level' => 1,
+                'maxLevel' => 4,
+                'sound' => 1,
+            ],
+			[
+                'src' => '/system/dictionaries/Angliiskii_razgovornik_i_kratkii_slovar_1500_slov_parsed-objects.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'Английский (Американский) разговорник и краткий словарь',
+                'words' => 1500,
+                'level' => 1,
+                'maxLevel' => 2,
+                'sound' => 1,
+            ],
+			[
+                'src' => '/system/dictionaries/9781839555282-tmp-fixed-result.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'Русско-Английский (Американский) Тематический',
+                'words' => 5000,
+                'level' => 1,
+                'maxLevel' => 4,
+                'sound' => 1,
+            ],
+			
         ];
 
-        foreach ([$dicts[8]] as $dict) {
+        foreach ([$dicts[9]] as $dict) {
             $json_file = get_template_directory() . $dict['src'];
             add_words_from_json($json_file, $dict['lang'], $dict['learn_lang'], $dict['name'], $dict['words'], $dict['level'], $dict['maxLevel'], $dict['sound']);
             echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
