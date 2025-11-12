@@ -4,6 +4,7 @@ import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
+import { superTables } from './data/tablesData';
 import './styles/grammar-tables-gallery.css';
 
 const normalizeLatvian = (text = '') => {
@@ -55,22 +56,7 @@ const getStorageJSON = (name, defaultValue) => {
     }
 };
 
-const SUPER_TABLES = [
-    { id: 'super-1', src: '/wp-content/themes/lbp/assets/images/super-tables/1.png', level: 'super', title: 'Склонение существительных', alt: 'Склонение существительных', hintId: '1', description: 'SUPER' },
-    { id: 'super-2', src: '/wp-content/themes/lbp/assets/images/super-tables/2.png', level: 'super', title: 'Предлоги', alt: 'Предлоги', hintId: '2', description: 'SUPER' },
-    { id: 'super-9', src: '/wp-content/themes/lbp/assets/images/super-tables/9.png', level: 'super', title: 'Предлоги (тип 2)', alt: 'Предлоги тип 2', hintId: '9', description: 'SUPER' },
-    { id: 'super-3', src: '/wp-content/themes/lbp/assets/images/super-tables/3.png', level: 'super', title: 'Спряжение глаголов (настоящее)', alt: 'Спряжение глаголов настоящее время', hintId: '3', description: 'SUPER' },
-    { id: 'super-4', src: '/wp-content/themes/lbp/assets/images/super-tables/4.png', level: 'super', title: 'Спряжение глаголов (прошедшее)', alt: 'Спряжение глаголов прошедшее время', hintId: '4', description: 'SUPER' },
-    { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'super', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'SUPER' },
-    { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'super', title: 'Числа', alt: 'Числа', hintId: '6', description: 'SUPER' },
-    { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'super', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'SUPER' },
-    { id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'super', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'SUPER' },
-    { id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'super', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'SUPER' },
-    { id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'super', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'SUPER' },
-    { id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'super', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'SUPER' },
-    { id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'super', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'SUPER' },
-    { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'super', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'SUPER' }
-];
+const SUPER_TABLES = superTables;
 
 const SUPER_STATE_KEY = 'grammar-super-state';
 const DEFAULT_SUPER_ORDER = SUPER_TABLES.map(table => table.id);
