@@ -4,7 +4,7 @@ import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
-import { superTables } from './data/tablesData';
+import { superTables, superGroups as PRESET_SUPER_GROUPS } from './data/tablesData';
 import './styles/grammar-tables-gallery.css';
 
 const normalizeLatvian = (text = '') => {
@@ -57,9 +57,188 @@ const getStorageJSON = (name, defaultValue) => {
 };
 
 const SUPER_TABLES = superTables;
+const DEFAULT_SUPER_GROUPS = Array.isArray(PRESET_SUPER_GROUPS) ? PRESET_SUPER_GROUPS : [];
 
 const SUPER_STATE_KEY = 'grammar-super-state';
 const DEFAULT_SUPER_ORDER = SUPER_TABLES.map(table => table.id);
+
+const appendMissingIds = (primary = [], reference = []) => {
+    const result = Array.isArray(primary) ? primary.slice() : [];
+    const seen = new Set(result);
+    reference.forEach((id) => {
+        if (!seen.has(id)) {
+            result.push(id);
+            seen.add(id);
+        }
+    });
+    return result;
+};
+
+const buildDefaultSuperGroups = () => {
+    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+    const seenGroupIds = new Set();
+    const usedTableIds = new Set();
+
+    const groups = DEFAULT_SUPER_GROUPS.map((group, index) => {
+        const rawId = group && group.id ? String(group.id).trim() : '';
+        let groupId = rawId || `super-group-${index + 1}`;
+        while (seenGroupIds.has(groupId)) {
+            groupId = `${groupId}-${index + 1}`;
+        }
+        seenGroupIds.add(groupId);
+
+        const title = group && group.title
+            ? String(group.title).trim() || `Группа ${index + 1}`
+            : `Группа ${index + 1}`;
+
+        const itemIds = Array.isArray(group?.itemIds)
+            ? group.itemIds
+                .map(id => String(id).trim())
+                .filter(id => validIds.has(id))
+            : [];
+
+        itemIds.forEach(id => usedTableIds.add(id));
+
+        return {
+            id: groupId,
+            title,
+            itemIds: Array.from(new Set(itemIds))
+        };
+    });
+
+    const remaining = SUPER_TABLES
+        .map(table => table.id)
+        .filter(id => !usedTableIds.has(id));
+
+    if (groups.length === 0) {
+        return [{
+            id: 'super-group-1',
+            title: 'Группа 1',
+            itemIds: remaining.length ? remaining.slice() : SUPER_TABLES.map(table => table.id)
+        }];
+    }
+
+    if (remaining.length) {
+        const firstGroup = groups[0];
+        const merged = appendMissingIds(firstGroup.itemIds, remaining);
+        groups[0] = {
+            ...firstGroup,
+            itemIds: merged
+        };
+    }
+
+    return groups;
+};
+
+const normalizeSuperGroups = (value) => {
+    const defaultGroups = buildDefaultSuperGroups();
+    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+
+    if (!Array.isArray(value) || value.length === 0) {
+        return defaultGroups;
+    }
+
+    const seenGroupIds = new Set();
+    const usedTableIds = new Set();
+
+    const normalized = value
+        .map((group, index) => {
+            if (!group || typeof group !== 'object') return null;
+
+            let groupId = group.id ? String(group.id).trim() : '';
+            if (!groupId) {
+                groupId = `super-group-${index + 1}`;
+            }
+            while (seenGroupIds.has(groupId)) {
+                groupId = `${groupId}-${index + 1}`;
+            }
+            seenGroupIds.add(groupId);
+
+            const title = group.title
+                ? String(group.title).trim() || `Группа ${index + 1}`
+                : `Группа ${index + 1}`;
+
+            const itemIds = Array.isArray(group.itemIds)
+                ? group.itemIds
+                    .map(id => String(id).trim())
+                    .filter(id => validIds.has(id))
+                : [];
+
+            itemIds.forEach(id => usedTableIds.add(id));
+
+            return {
+                id: groupId,
+                title,
+                itemIds: Array.from(new Set(itemIds))
+            };
+        })
+        .filter(Boolean);
+
+    if (normalized.length === 0) {
+        return defaultGroups;
+    }
+
+    const remaining = SUPER_TABLES
+        .map(table => table.id)
+        .filter(id => !usedTableIds.has(id));
+
+    if (remaining.length) {
+        const firstGroup = normalized[0];
+        normalized[0] = {
+            ...firstGroup,
+            itemIds: appendMissingIds(firstGroup.itemIds, remaining)
+        };
+    }
+
+    return normalized;
+};
+
+const buildDefaultSuperState = () => {
+    const groups = buildDefaultSuperGroups();
+    const orderFromGroups = groups.flatMap(group => group.itemIds);
+    const order = orderFromGroups.length ? orderFromGroups : DEFAULT_SUPER_ORDER.slice();
+
+    return {
+        order,
+        active: order.slice(),
+        showHidden: false,
+        groups
+    };
+};
+
+const normalizeStoredSuperState = (value) => {
+    const defaultState = buildDefaultSuperState();
+    if (!value || typeof value !== 'object') {
+        return defaultState;
+    }
+
+    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+    const rawOrder = Array.isArray(value.order)
+        ? value.order.map(id => String(id).trim()).filter(id => validIds.has(id))
+        : [];
+
+    const groups = normalizeSuperGroups(value.groups);
+    let order = groups.flatMap(group => group.itemIds);
+    if (!order.length) {
+        order = rawOrder.length
+            ? appendMissingIds(rawOrder, DEFAULT_SUPER_ORDER)
+            : defaultState.order.slice();
+    }
+
+    const rawActive = Array.isArray(value.active)
+        ? value.active.map(id => String(id).trim()).filter(id => validIds.has(id))
+        : [];
+
+    const activeSet = rawActive.length ? new Set(rawActive) : new Set(order);
+    const active = order.filter(id => activeSet.has(id));
+
+    return {
+        order,
+        active: active.length ? active : order.slice(),
+        showHidden: Boolean(value.showHidden),
+        groups
+    };
+};
 
 const GrammarTablesGallery = () => {
     const [cols, setCols] = useState(() => parseInt(getStorage('gallery-columns', '3'), 10) || 3);
@@ -76,41 +255,12 @@ const GrammarTablesGallery = () => {
     const [verbTranslations, setVerbTranslations] = useState([]);
     const [verbFormsLookup, setVerbFormsLookup] = useState({ byLemma: {}, byNormalized: {} });
     const [hintModalData, setHintModalData] = useState(null);
-    const [superState, setSuperState] = useState(() => {
-        const stored = getStorageJSON(SUPER_STATE_KEY, null);
-
-        if (stored && Array.isArray(stored.order) && stored.order.length) {
-            const validIds = SUPER_TABLES.map(table => table.id);
-            const validSet = new Set(validIds);
-
-            const order = stored.order.filter(id => validSet.has(id));
-
-            const activeFromStorage = Array.isArray(stored.active)
-                ? stored.active.filter(id => validSet.has(id))
-                : order.slice();
-
-            const normalizedOrder = order.length ? order : DEFAULT_SUPER_ORDER;
-            const extendedOrder = normalizedOrder.slice();
-            validIds.forEach(id => {
-                if (!extendedOrder.includes(id)) {
-                    extendedOrder.push(id);
-                }
-            });
-
-            const active = extendedOrder.filter(id => activeFromStorage.includes(id));
-
-            return {
-                order: extendedOrder,
-                active: active.length ? active : extendedOrder.slice(),
-                showHidden: Boolean(stored.showHidden)
-            };
-        }
-
-        return {
-            order: DEFAULT_SUPER_ORDER,
-            active: DEFAULT_SUPER_ORDER.slice(),
-            showHidden: false
-        };
+    const [superState, setSuperState] = useState(() => normalizeStoredSuperState(getStorageJSON(SUPER_STATE_KEY, null)));
+    const [currentSuperGroupId, setCurrentSuperGroupId] = useState(() => {
+        const groups = Array.isArray(superState.groups) && superState.groups.length
+            ? superState.groups
+            : buildDefaultSuperGroups();
+        return groups.length ? groups[0].id : null;
     });
     const [showSuperManager, setShowSuperManager] = useState(false);
 
@@ -129,6 +279,24 @@ const GrammarTablesGallery = () => {
     useEffect(() => {
         setStorageJSON(SUPER_STATE_KEY, superState);
     }, [superState]);
+
+    useEffect(() => {
+        const groups = Array.isArray(superState.groups) && superState.groups.length
+            ? superState.groups
+            : buildDefaultSuperGroups();
+
+        if (!groups.length) {
+            if (currentSuperGroupId !== null) {
+                setCurrentSuperGroupId(null);
+            }
+            return;
+        }
+
+        const exists = groups.some(group => group.id === currentSuperGroupId);
+        if (!exists) {
+            setCurrentSuperGroupId(groups[0].id);
+        }
+    }, [superState.groups, currentSuperGroupId]);
 
     // Загружаем данные глаголов
     useEffect(() => {
@@ -506,12 +674,76 @@ const GrammarTablesGallery = () => {
         setHintModalData(null);
     };
 
-    const superOrder = superState.order;
-    const activeSuperIds = superState.active;
+    const superGroups = Array.isArray(superState.groups) && superState.groups.length
+        ? superState.groups
+        : buildDefaultSuperGroups();
+
+    const superGroupMap = superGroups.reduce((acc, group) => {
+        acc[group.id] = group;
+        return acc;
+    }, {});
+
+    const groupedOrder = superGroups.flatMap(group => Array.isArray(group.itemIds) ? group.itemIds : []);
+    const superOrder = groupedOrder.length
+        ? appendMissingIds(groupedOrder, DEFAULT_SUPER_ORDER)
+        : appendMissingIds(superState.order, DEFAULT_SUPER_ORDER);
+
+    const rawActiveSuperIds = Array.isArray(superState.active) ? superState.active : [];
+    const filteredActiveSuperIds = rawActiveSuperIds.filter(id => superOrder.includes(id));
+    const activeSuperIds = filteredActiveSuperIds.length ? filteredActiveSuperIds : superOrder.slice();
     const showHiddenSuper = superState.showHidden;
+
+    const tableIdToGroupId = {};
+    superGroups.forEach(group => {
+        (group.itemIds || []).forEach(id => {
+            if (!tableIdToGroupId[id]) {
+                tableIdToGroupId[id] = group.id;
+            }
+        });
+    });
+
+    const activeSuperSet = new Set(activeSuperIds);
+    const globalActiveOrderIds = superOrder.filter(id => activeSuperSet.has(id));
+
+    const currentSuperGroup = currentSuperGroupId
+        ? superGroups.find(group => group.id === currentSuperGroupId)
+        : superGroups[0] || null;
+
+    const currentGroupOrder = currentSuperGroup
+        ? currentSuperGroup.itemIds
+        : superOrder;
+
+    const selectedSuperTables = currentGroupOrder
+        .map(id => SUPER_TABLES.find(table => table.id === id))
+        .filter(table => table && activeSuperSet.has(table.id));
+
+    const superGroupsDetailed = superGroups.map(group => {
+        const tables = (group.itemIds || [])
+            .map(id => {
+                const table = SUPER_TABLES.find(item => item.id === id);
+                if (!table) return null;
+                const isActive = activeSuperSet.has(id);
+                if (!showHiddenSuper && !isActive) {
+                    return null;
+                }
+                return {
+                    ...table,
+                    isActive,
+                    groupId: group.id
+                };
+            })
+            .filter(Boolean);
+
+        return {
+            id: group.id,
+            title: group.title,
+            tables
+        };
+    }).filter(group => group.tables.length > 0 || showHiddenSuper);
 
     const toggleSuperTable = (tableId) => {
         setSuperState(prev => {
+            const normalizedOrder = appendMissingIds(prev.order, DEFAULT_SUPER_ORDER);
             const activeSet = new Set(prev.active);
             if (activeSet.has(tableId)) {
                 activeSet.delete(tableId);
@@ -519,65 +751,108 @@ const GrammarTablesGallery = () => {
                 activeSet.add(tableId);
             }
 
-            const nextActive = prev.order.filter(id => activeSet.has(id));
+            const nextActive = normalizedOrder.filter(id => activeSet.has(id));
 
             return {
                 ...prev,
-                active: nextActive
+                order: normalizedOrder,
+                active: nextActive.length ? nextActive : normalizedOrder.slice()
             };
         });
     };
 
     const moveSuperTable = (tableId, direction) => {
         setSuperState(prev => {
-            const index = prev.order.indexOf(tableId);
-            if (index === -1) return prev;
-
             const activeSet = new Set(prev.active);
-            if (!activeSet.has(tableId)) return prev;
-
-            let targetIndex = index;
-            if (direction === 'up') {
-                for (let i = index - 1; i >= 0; i--) {
-                    if (activeSet.has(prev.order[i])) {
-                        targetIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                for (let i = index + 1; i < prev.order.length; i++) {
-                    if (activeSet.has(prev.order[i])) {
-                        targetIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            if (targetIndex === index) {
+            if (!activeSet.has(tableId)) {
                 return prev;
             }
 
-            const nextOrder = [...prev.order];
-            const temp = nextOrder[index];
-            nextOrder[index] = nextOrder[targetIndex];
-            nextOrder[targetIndex] = temp;
+            const groups = Array.isArray(prev.groups) && prev.groups.length
+                ? prev.groups.map(group => ({
+                    ...group,
+                    itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+                }))
+                : buildDefaultSuperGroups();
 
+            if (!groups.length) {
+                return prev;
+            }
+
+            let currentGroupIndex = groups.findIndex(group => group.itemIds.includes(tableId));
+            if (currentGroupIndex === -1) {
+                groups[0].itemIds = appendMissingIds(groups[0].itemIds, [tableId]);
+                currentGroupIndex = 0;
+            }
+
+            const currentGroup = {
+                ...groups[currentGroupIndex],
+                itemIds: (groups[currentGroupIndex].itemIds || []).slice()
+            };
+            const position = currentGroup.itemIds.indexOf(tableId);
+            if (position === -1) {
+                return prev;
+            }
+
+            if (direction === 'up') {
+                if (position > 0) {
+                    const swapId = currentGroup.itemIds[position - 1];
+                    currentGroup.itemIds[position - 1] = tableId;
+                    currentGroup.itemIds[position] = swapId;
+                } else if (currentGroupIndex > 0) {
+                    const previousGroup = {
+                        ...groups[currentGroupIndex - 1],
+                        itemIds: (groups[currentGroupIndex - 1].itemIds || []).slice()
+                    };
+                    currentGroup.itemIds.splice(position, 1);
+                    previousGroup.itemIds.push(tableId);
+                    groups[currentGroupIndex - 1] = previousGroup;
+                } else {
+                    return prev;
+                }
+            } else if (direction === 'down') {
+                if (position < currentGroup.itemIds.length - 1) {
+                    const swapId = currentGroup.itemIds[position + 1];
+                    currentGroup.itemIds[position + 1] = tableId;
+                    currentGroup.itemIds[position] = swapId;
+                } else if (currentGroupIndex < groups.length - 1) {
+                    const nextGroup = {
+                        ...groups[currentGroupIndex + 1],
+                        itemIds: (groups[currentGroupIndex + 1].itemIds || []).slice()
+                    };
+                    currentGroup.itemIds.splice(position, 1);
+                    nextGroup.itemIds.unshift(tableId);
+                    groups[currentGroupIndex + 1] = nextGroup;
+                } else {
+                    return prev;
+                }
+            } else {
+                return prev;
+            }
+
+            groups[currentGroupIndex] = currentGroup;
+
+            const nextOrder = groups.flatMap(group => group.itemIds);
             const nextActive = nextOrder.filter(id => activeSet.has(id));
 
             return {
                 ...prev,
                 order: nextOrder,
-                active: nextActive
+                active: nextActive.length ? nextActive : nextOrder.slice(),
+                groups
             };
         });
     };
 
     const resetSuperOrder = () => {
+        const defaultState = buildDefaultSuperState();
         setSuperState(prev => ({
-            order: DEFAULT_SUPER_ORDER,
-            active: DEFAULT_SUPER_ORDER.slice(),
-            showHidden: prev.showHidden
+            ...prev,
+            order: defaultState.order,
+            active: defaultState.active,
+            groups: defaultState.groups
         }));
+        setCurrentSuperGroupId(defaultState.groups.length ? defaultState.groups[0].id : null);
     };
 
     const toggleShowHidden = () => {
@@ -587,13 +862,188 @@ const GrammarTablesGallery = () => {
         }));
     };
 
-    const activeSuperSet = new Set(activeSuperIds);
+    const handleSuperGroupSelectChange = (groupId) => {
+        setCurrentSuperGroupId(groupId || null);
+    };
 
-    const selectedSuperTables = superOrder
-        .map(id => SUPER_TABLES.find(table => table.id === id))
-        .filter(table => table && activeSuperSet.has(table.id));
+    const addSuperGroup = () => {
+        let createdGroupId = null;
+        setSuperState(prev => {
+            const baseGroups = Array.isArray(prev.groups) && prev.groups.length
+                ? prev.groups.map(group => ({
+                    ...group,
+                    itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+                }))
+                : buildDefaultSuperGroups();
 
-    const activeOrderIds = selectedSuperTables.map(table => table.id);
+            const existingIds = new Set(baseGroups.map(group => group.id));
+            let index = baseGroups.length + 1;
+            let candidateId = `super-group-${index}`;
+            while (existingIds.has(candidateId)) {
+                candidateId = `super-group-${index}-${existingIds.size}`;
+            }
+
+            createdGroupId = candidateId;
+            const newGroup = {
+                id: candidateId,
+                title: `Группа ${index}`,
+                itemIds: []
+            };
+
+            return {
+                ...prev,
+                groups: [...baseGroups, newGroup]
+            };
+        });
+
+        if (createdGroupId) {
+            setCurrentSuperGroupId(createdGroupId);
+        }
+    };
+
+    const renameSuperGroup = (groupId, nextTitle) => {
+        const title = typeof nextTitle === 'string' ? nextTitle.trim() : '';
+        if (!groupId || !title) return;
+
+        setSuperState(prev => {
+            if (!Array.isArray(prev.groups)) {
+                return prev;
+            }
+
+            const nextGroups = prev.groups.map(group => {
+                if (group.id !== groupId) return group;
+                return {
+                    ...group,
+                    title
+                };
+            });
+
+            return {
+                ...prev,
+                groups: nextGroups
+            };
+        });
+    };
+
+    const promptRenameCurrentSuperGroup = () => {
+        if (!currentSuperGroupId) return;
+        const currentGroup = superGroupMap[currentSuperGroupId];
+        if (!currentGroup) return;
+
+        const nextTitle = isBrowser
+            ? window.prompt('Название группы', currentGroup.title || '')
+            : null;
+
+        if (nextTitle === null) return;
+        renameSuperGroup(currentSuperGroupId, nextTitle);
+    };
+
+    const removeSuperGroup = (groupId) => {
+        if (!groupId) return;
+        let fallbackGroupId = null;
+
+        setSuperState(prev => {
+            const baseGroups = Array.isArray(prev.groups) ? prev.groups.map(group => ({
+                ...group,
+                itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+            })) : [];
+
+            if (baseGroups.length <= 1) {
+                return prev;
+            }
+
+            const removeIndex = baseGroups.findIndex(group => group.id === groupId);
+            if (removeIndex === -1) {
+                return prev;
+            }
+
+            const removed = baseGroups.splice(removeIndex, 1)[0];
+            const targetIndex = removeIndex > 0 ? removeIndex - 1 : 0;
+            if (baseGroups[targetIndex]) {
+                baseGroups[targetIndex] = {
+                    ...baseGroups[targetIndex],
+                    itemIds: appendMissingIds(baseGroups[targetIndex].itemIds, removed.itemIds)
+                };
+                fallbackGroupId = baseGroups[targetIndex].id;
+            }
+
+            const nextOrder = baseGroups.flatMap(group => group.itemIds);
+            const activeSet = new Set(prev.active);
+            const nextActive = nextOrder.filter(id => activeSet.has(id));
+
+            return {
+                ...prev,
+                order: nextOrder,
+                active: nextActive.length ? nextActive : nextOrder.slice(),
+                groups: baseGroups
+            };
+        });
+
+        if (fallbackGroupId) {
+            setCurrentSuperGroupId(fallbackGroupId);
+        } else if (superGroups.length > 1) {
+            const nextGroup = superGroups.find(group => group.id !== groupId);
+            setCurrentSuperGroupId(nextGroup ? nextGroup.id : null);
+        }
+    };
+
+    const handleSuperTableGroupChange = (tableId, targetGroupId) => {
+        if (!tableId || !targetGroupId) return;
+        if (tableIdToGroupId[tableId] === targetGroupId) return;
+
+        setSuperState(prev => {
+            const baseGroups = Array.isArray(prev.groups) && prev.groups.length
+                ? prev.groups.map(group => ({
+                    ...group,
+                    itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+                }))
+                : buildDefaultSuperGroups();
+
+            const targetIndex = baseGroups.findIndex(group => group.id === targetGroupId);
+            if (targetIndex === -1) {
+                return prev;
+            }
+
+            let modified = false;
+            const updatedGroups = baseGroups.map(group => {
+                if (!Array.isArray(group.itemIds)) {
+                    return {
+                        ...group,
+                        itemIds: []
+                    };
+                }
+                if (!group.itemIds.includes(tableId)) {
+                    return group;
+                }
+                modified = true;
+                return {
+                    ...group,
+                    itemIds: group.itemIds.filter(id => id !== tableId)
+                };
+            });
+
+            const targetGroup = {
+                ...updatedGroups[targetIndex],
+                itemIds: appendMissingIds(updatedGroups[targetIndex].itemIds, [tableId])
+            };
+            updatedGroups[targetIndex] = targetGroup;
+
+            if (!modified && !targetGroup.itemIds.includes(tableId)) {
+                targetGroup.itemIds.push(tableId);
+            }
+
+            const nextOrder = updatedGroups.flatMap(group => group.itemIds);
+            const activeSet = new Set(prev.active);
+            const nextActive = nextOrder.filter(id => activeSet.has(id));
+
+            return {
+                ...prev,
+                order: nextOrder,
+                active: nextActive.length ? nextActive : nextOrder.slice(),
+                groups: updatedGroups
+            };
+        });
+    };
 
     const activeCount = activeSuperIds.length;
 
@@ -646,12 +1096,12 @@ const GrammarTablesGallery = () => {
                     viewMode={viewMode}
                     onImageClick={handleImageClick}
                     onHintClick={handleHintClick}
-                    superTables={SUPER_TABLES}
                     superOrder={superOrder}
                     onToggleSuperTable={toggleSuperTable}
                     onMoveSuperTable={moveSuperTable}
                     activeIds={activeSuperIds}
                     showHidden={showHiddenSuper}
+                    superGroups={superGroupsDetailed}
                 />
 
                 {modalData && (
@@ -742,7 +1192,51 @@ const GrammarTablesGallery = () => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="super-manager-header">
-                            <h3>Супер таблицы</h3>
+                            <div className="super-manager-header-left">
+                                <h3>Супер таблицы</h3>
+                                <div className="super-groups-controls">
+                                    <label htmlFor="super-group-select">Группа:</label>
+                                    <select
+                                        id="super-group-select"
+                                        value={currentSuperGroupId || ''}
+                                        onChange={(event) => handleSuperGroupSelectChange(event.target.value)}
+                                        className="form-select form-select-sm"
+                                    >
+                                        {superGroups.length === 0 ? (
+                                            <option value="">Нет групп</option>
+                                        ) : (
+                                            superGroups.map(group => (
+                                                <option key={group.id} value={group.id}>
+                                                    {group.title}
+                                                </option>
+                                            ))
+                                        )}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-light btn-sm"
+                                        onClick={addSuperGroup}
+                                    >
+                                        + Группа
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-light btn-sm"
+                                        onClick={promptRenameCurrentSuperGroup}
+                                        disabled={!currentSuperGroupId}
+                                    >
+                                        Переименовать
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-light btn-sm"
+                                        onClick={() => removeSuperGroup(currentSuperGroupId)}
+                                        disabled={!currentSuperGroupId || superGroups.length <= 1}
+                                    >
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
                             <button
                                 type="button"
                                 className="btn btn-outline-light btn-sm"
@@ -760,6 +1254,8 @@ const GrammarTablesGallery = () => {
                                         const table = SUPER_TABLES.find(item => item.id === tableId);
                                         if (!table) return null;
                                         const isSelected = activeSuperSet.has(table.id);
+                                        const groupId = tableIdToGroupId[table.id];
+                                        const groupTitle = groupId ? (superGroupMap[groupId]?.title || '') : '';
                                         return (
                                             <li key={table.id}>
                                                 <label>
@@ -770,6 +1266,9 @@ const GrammarTablesGallery = () => {
                                                     />
                                                     <span>{table.title}</span>
                                                 </label>
+                                                <span className="group-badge">
+                                                    {groupTitle || '—'}
+                                                </span>
                                             </li>
                                         );
                                     })}
@@ -783,13 +1282,31 @@ const GrammarTablesGallery = () => {
                                 ) : (
                                     <ul>
                                         {selectedSuperTables.map((table) => {
-                                            const activeIndex = activeOrderIds.indexOf(table.id);
-                                            const isFirstActive = activeIndex <= 0;
-                                            const isLastActive = activeIndex === activeOrderIds.length - 1;
+                                            const tableGroupId = superGroups.length
+                                                ? (tableIdToGroupId[table.id] || superGroups[0].id)
+                                                : '';
+                                            const globalIndex = globalActiveOrderIds.indexOf(table.id);
+                                            const isFirstActive = globalIndex <= 0;
+                                            const isLastActive = globalIndex === globalActiveOrderIds.length - 1;
 
                                             return (
                                                 <li key={table.id}>
                                                     <span className="title">{table.title}</span>
+                                                    {superGroups.length > 0 && (
+                                                        <div className="group-select">
+                                                            <select
+                                                                value={tableGroupId}
+                                                                onChange={(event) => handleSuperTableGroupChange(table.id, event.target.value)}
+                                                                className="form-select form-select-sm"
+                                                            >
+                                                                {superGroups.map(group => (
+                                                                    <option key={group.id} value={group.id}>
+                                                                        {group.title}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    )}
                                                     <div className="actions">
                                                         <button
                                                             type="button"

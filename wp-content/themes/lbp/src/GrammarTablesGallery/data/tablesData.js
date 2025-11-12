@@ -116,6 +116,24 @@ export const superTables = [
     { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'super', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'SUPER' }
 ];
 
+export const superGroups = [
+    {
+        id: 'super-group-1',
+        title: 'Базовая грамматика',
+        itemIds: ['super-1', 'super-2', 'super-9', 'super-5', 'super-6']
+    },
+    {
+        id: 'super-group-2',
+        title: 'Глаголы',
+        itemIds: ['super-3', 'super-4', 'super-10', 'super-11', 'super-12']
+    },
+    {
+        id: 'super-group-3',
+        title: 'Прилагательные',
+        itemIds: ['super-7', 'super-8', 'super-13', 'super-14']
+    }
+];
+
 // Объединенный массив всех таблиц
 export const allTables = [
     { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.jpg', level: 'a1', alt: 'IMG_20250810_0001', description: 'есть Š в первой деклинации', width: 1942, height: 948 },

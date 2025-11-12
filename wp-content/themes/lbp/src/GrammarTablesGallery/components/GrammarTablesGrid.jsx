@@ -7,12 +7,12 @@ const GrammarTablesGrid = ({
     viewMode,
     onImageClick,
     onHintClick,
-    superTables = [],
     superOrder = [],
     onToggleSuperTable,
     onMoveSuperTable,
     activeIds = [],
-    showHidden = false
+    showHidden = false,
+    superGroups = []
 }) => {
     const [filteredGroups, setFilteredGroups] = useState({ group1: [], group2: [], group3: [], super: [] });
 
@@ -56,29 +56,12 @@ const GrammarTablesGrid = ({
     useEffect(() => {
         const activeSet = new Set(activeIds);
 
-        const orderedSuper = superOrder
-            .map(id => {
-                const table = superTables.find(table => table.id === id);
-                if (!table) {
-                    return null;
-                }
-                return {
-                    ...table,
-                    isActive: activeSet.has(id)
-                };
-            })
-            .filter(Boolean);
-
-        const visibleSuper = showHidden
-            ? orderedSuper
-            : orderedSuper.filter(entry => entry.isActive);
-
         if (selectedLevel === 'super') {
             setFilteredGroups({
                 group1: [],
                 group2: [],
                 group3: [],
-                super: visibleSuper
+                super: Array.isArray(superGroups) ? superGroups : []
             });
             return;
         }
@@ -89,7 +72,7 @@ const GrammarTablesGrid = ({
             group3: filterTables(tablesData.group3),
             super: []
         });
-    }, [selectedLevel, superOrder, superTables, activeIds, showHidden]);
+    }, [selectedLevel, superOrder, activeIds, showHidden, superGroups]);
 
     // Установка CSS переменной для реальной ширины viewport (без скроллбара)
     useEffect(() => {
@@ -367,11 +350,22 @@ const GrammarTablesGrid = ({
         );
     };
 
-    const renderGalleryGroup = (tables, groupKey) => {
+    const renderGalleryGroup = (group, groupKey) => {
+        const tables = Array.isArray(group)
+            ? group
+            : Array.isArray(group?.tables)
+                ? group.tables
+                : [];
         if (tables.length === 0) return null;
+        const title = !Array.isArray(group) ? group.title : '';
         
         return (
             <div className="gallery-wrapper" key={`group-${groupKey}`}>
+                {title ? (
+                    <div className="gallery-group-title">
+                        {title}
+                    </div>
+                ) : null}
                 <div className="gallery" data-cols={cols}>
                     {tables.map(image => (
                         <div 
@@ -421,7 +415,9 @@ const GrammarTablesGrid = ({
                 {renderGalleryGroup(filteredGroups.group1, 1)}
                 {renderGalleryGroup(filteredGroups.group2, 2)}
                 {renderGalleryGroup(filteredGroups.group3, 3)}
-                {selectedLevel === 'super' ? renderGalleryGroup(filteredGroups.super, 'super') : null}
+                {selectedLevel === 'super' && Array.isArray(filteredGroups.super)
+                    ? filteredGroups.super.map(group => renderGalleryGroup(group, group.id || group))
+                    : null}
             </div>
         </footer>
     );

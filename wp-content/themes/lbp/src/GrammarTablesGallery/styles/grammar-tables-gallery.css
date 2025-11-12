@@ -539,10 +539,52 @@ body {
 
 .super-manager-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
+}
+
+.super-manager-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.super-manager-header-left h3 {
+    margin: 0;
+}
+
+.super-groups-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.super-groups-controls label {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.super-groups-controls .form-select {
+    min-width: 180px;
+    max-width: 220px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.super-groups-controls .form-select:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+}
+
+.super-groups-controls .form-select-sm,
+.super-list.selected .form-select-sm {
+    padding: 4px 8px;
+    font-size: 13px;
+    height: auto;
 }
 
 .super-manager-columns {
@@ -588,6 +630,16 @@ body {
     cursor: pointer;
 }
 
+.super-list.available .group-badge {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    line-height: 1.4;
+    min-width: 80px;
+    text-align: right;
+}
+
 .super-list.available input[type="checkbox"] {
     width: 16px;
     height: 16px;
@@ -598,9 +650,32 @@ body {
     font-weight: 600;
 }
 
+.super-list.selected .group-select {
+    min-width: 160px;
+}
+
+.super-list.selected .group-select .form-select {
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.super-list.selected .group-select .form-select:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+}
+
 .super-list.selected .actions {
     display: flex;
     gap: 6px;
+}
+
+.gallery-group-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .super-manager-footer {
