@@ -4,7 +4,7 @@ import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
-import { superTables, superGroups as PRESET_SUPER_GROUPS } from './data/tablesData';
+import { managerTables as superTables, superGroups as PRESET_SUPER_GROUPS } from './data/tablesData';
 import './styles/grammar-tables-gallery.css';
 
 const normalizeLatvian = (text = '') => {
@@ -1400,6 +1400,9 @@ const GrammarTablesGallery = () => {
                                                         const globalIndex = superOrder.indexOf(table.id);
                                                         const canMoveUp = globalIndex > 0;
                                                         const canMoveDown = globalIndex !== -1 && globalIndex < superOrder.length - 1;
+                                                        const subtitle = table.description
+                                                            ? table.description
+                                                            : (!table.isSuperEntry && table.level ? table.level.toUpperCase() : '');
 
                                                         return (
                                                             <li
@@ -1407,62 +1410,54 @@ const GrammarTablesGallery = () => {
                                                                 className={`super-group-table ${table.isActive ? '__active' : '__inactive'}`}
                                                                 onClick={(event) => event.stopPropagation()}
                                                             >
-                                                                <div className="table-main">
-                                                                    <span className="title">{table.title}</span>
-                                                                    {table.description || table.level ? (
-                                                                        <span className="subtitle">
-                                                                            {table.description || table.level.toUpperCase()}
-                                                                        </span>
-                                                                    ) : null}
-                                                                </div>
-                                                                <div className="table-controls">
-                                                                    <label className="status-toggle">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={table.isActive}
-                                                                            onChange={() => toggleSuperTable(table.id)}
-                                                                        />
-                                                                        <span>{table.isActive ? 'В наборе' : 'Скрыта'}</span>
-                                                                    </label>
-                                                                    <select
-                                                                        className="form-select form-select-sm table-group-select"
-                                                                        value={tableIdToGroupId[table.id] || group.id}
-                                                                        onChange={(event) => handleSuperTableGroupChange(table.id, event.target.value)}
-                                                                    >
-                                                                        {superGroups.map(option => (
-                                                                            <option key={option.id} value={option.id}>
-                                                                                {option.title}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
-                                                                    <div className="move-buttons">
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-light btn-sm"
-                                                                            onClick={() => moveSuperTable(table.id, 'up')}
-                                                                            disabled={!canMoveUp}
-                                                                            title="Выше"
-                                                                        >
-                                                                            ↑
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-light btn-sm"
-                                                                            onClick={() => moveSuperTable(table.id, 'down')}
-                                                                            disabled={!canMoveDown}
-                                                                            title="Ниже"
-                                                                        >
-                                                                            ↓
-                                                                        </button>
-                                                                    </div>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-outline-light btn-sm"
-                                                                        onClick={() => toggleSuperTable(table.id)}
-                                                                    >
-                                                                        {table.isActive ? 'Скрыть' : 'Показать'}
-                                                                    </button>
-                                                                </div>
+                                <label className="status-toggle">
+                                    <input
+                                        type="checkbox"
+                                        checked={table.isActive}
+                                        onChange={() => toggleSuperTable(table.id)}
+                                    />
+                                </label>
+                                <div className="table-main">
+                                    <span className="title">{table.title}</span>
+                                    {subtitle ? (
+                                        <span className="subtitle">
+                                            {subtitle}
+                                        </span>
+                                    ) : null}
+                                </div>
+                                <div className="table-controls">
+                                    <select
+                                        className="form-select form-select-sm table-group-select"
+                                        value={tableIdToGroupId[table.id] || group.id}
+                                        onChange={(event) => handleSuperTableGroupChange(table.id, event.target.value)}
+                                    >
+                                        {superGroups.map(option => (
+                                            <option key={option.id} value={option.id}>
+                                                {option.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="move-buttons">
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-light btn-sm"
+                                            onClick={() => moveSuperTable(table.id, 'up')}
+                                            disabled={!canMoveUp}
+                                            title="Выше"
+                                        >
+                                            ↑
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-light btn-sm"
+                                            onClick={() => moveSuperTable(table.id, 'down')}
+                                            disabled={!canMoveDown}
+                                            title="Ниже"
+                                        >
+                                            ↓
+                                        </button>
+                                    </div>
+                                </div>
                                                             </li>
                                                         );
                                                     })}

@@ -298,7 +298,7 @@ const GrammarTablesGrid = ({
     };
 
     const renderSuperControls = (image) => {
-        if (image.level !== 'super') return null;
+        if (!image.isSuperEntry) return null;
 
         const isActive = Boolean(image.isActive);
         const activeIndex = isActive ? activeIndexMap[image.id] ?? -1 : -1;

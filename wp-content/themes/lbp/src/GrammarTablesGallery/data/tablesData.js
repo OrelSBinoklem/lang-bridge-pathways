@@ -116,7 +116,25 @@ export const superTables = [
     { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'super', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'SUPER' }
 ];
 
-export const superGroups = [
+const baseGroupDefinitions = [
+    {
+        id: 'base-group-1',
+        title: 'Группа A1–A2',
+        itemIds: tablesData.group1.map(table => String(table.id))
+    },
+    {
+        id: 'base-group-2',
+        title: 'Группа B1',
+        itemIds: tablesData.group2.map(table => String(table.id))
+    },
+    {
+        id: 'base-group-3',
+        title: 'Группа B2',
+        itemIds: tablesData.group3.map(table => String(table.id))
+    }
+];
+
+const coreSuperGroups = [
     {
         id: 'super-group-1',
         title: 'Базовая грамматика',
@@ -133,6 +151,29 @@ export const superGroups = [
         itemIds: ['super-7', 'super-8', 'super-13', 'super-14']
     }
 ];
+
+export const superGroups = [...coreSuperGroups, ...baseGroupDefinitions];
+
+const normalizedSuperTables = superTables.map(table => ({
+    ...table,
+    id: String(table.id),
+    title: table.title || table.description || `Таблица ${table.id}`,
+    description: table.description && table.description !== 'SUPER' ? table.description : '',
+    isSuperEntry: true
+}));
+
+const normalizedBaseTables = tablesData.group1
+    .concat(tablesData.group2)
+    .concat(tablesData.group3)
+    .map(table => ({
+        ...table,
+        id: String(table.id),
+        title: table.description || table.alt || `Таблица ${table.id}`,
+        description: table.description || (table.level ? table.level.toUpperCase() : 'A1'),
+        isSuperEntry: true
+    }));
+
+export const managerTables = [...normalizedSuperTables, ...normalizedBaseTables];
 
 // Объединенный массив всех таблиц
 export const allTables = [
