@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import GrammarTablesHeaderPortal from './components/GrammarTablesHeaderPortal';
 import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
@@ -58,6 +58,15 @@ const getStorageJSON = (name, defaultValue) => {
 
 const SUPER_TABLES = superTables;
 const DEFAULT_SUPER_GROUPS = Array.isArray(PRESET_SUPER_GROUPS) ? PRESET_SUPER_GROUPS : [];
+const SUPER_TABLES_MAP = SUPER_TABLES.reduce((acc, table) => {
+    acc[table.id] = table;
+    return acc;
+}, {});
+const SORTED_SUPER_TABLES = [...SUPER_TABLES].sort((a, b) => {
+    const titleA = (a.title || '').toString();
+    const titleB = (b.title || '').toString();
+    return titleA.localeCompare(titleB, 'ru', { sensitivity: 'base' });
+});
 
 const SUPER_STATE_KEY = 'grammar-super-state';
 const DEFAULT_SUPER_ORDER = SUPER_TABLES.map(table => table.id);
@@ -678,11 +687,6 @@ const GrammarTablesGallery = () => {
         ? superState.groups
         : buildDefaultSuperGroups();
 
-    const superGroupMap = superGroups.reduce((acc, group) => {
-        acc[group.id] = group;
-        return acc;
-    }, {});
-
     const groupedOrder = superGroups.flatMap(group => Array.isArray(group.itemIds) ? group.itemIds : []);
     const superOrder = groupedOrder.length
         ? appendMissingIds(groupedOrder, DEFAULT_SUPER_ORDER)
@@ -693,29 +697,44 @@ const GrammarTablesGallery = () => {
     const activeSuperIds = filteredActiveSuperIds.length ? filteredActiveSuperIds : superOrder.slice();
     const showHiddenSuper = superState.showHidden;
 
-    const tableIdToGroupId = {};
-    superGroups.forEach(group => {
-        (group.itemIds || []).forEach(id => {
-            if (!tableIdToGroupId[id]) {
-                tableIdToGroupId[id] = group.id;
-            }
+    const tableIdToGroupId = useMemo(() => {
+        const map = {};
+        superGroups.forEach(group => {
+            (group.itemIds || []).forEach(id => {
+                if (!map[id]) {
+                    map[id] = group.id;
+                }
+            });
         });
-    });
+        return map;
+    }, [superGroups]);
 
-    const activeSuperSet = new Set(activeSuperIds);
-    const globalActiveOrderIds = superOrder.filter(id => activeSuperSet.has(id));
+    const activeSuperSet = useMemo(() => new Set(activeSuperIds), [activeSuperIds]);
 
-    const currentSuperGroup = currentSuperGroupId
-        ? superGroups.find(group => group.id === currentSuperGroupId)
-        : superGroups[0] || null;
+    const managerGroups = useMemo(() => {
+        return superGroups.map((group, groupIndex) => {
+            const tables = (group.itemIds || [])
+                .map(id => {
+                    const base = SUPER_TABLES_MAP[id];
+                    if (!base) return null;
+                    return {
+                        ...base,
+                        isActive: activeSuperSet.has(id),
+                        groupId: group.id
+                    };
+                })
+                .filter(Boolean);
 
-    const currentGroupOrder = currentSuperGroup
-        ? currentSuperGroup.itemIds
-        : superOrder;
+            const availableOptions = SORTED_SUPER_TABLES.filter(table => tableIdToGroupId[table.id] !== group.id);
 
-    const selectedSuperTables = currentGroupOrder
-        .map(id => SUPER_TABLES.find(table => table.id === id))
-        .filter(table => table && activeSuperSet.has(table.id));
+            return {
+                ...group,
+                index: groupIndex,
+                tables,
+                availableOptions
+            };
+        });
+    }, [superGroups, activeSuperSet, tableIdToGroupId]);
 
     const superGroupsDetailed = superGroups.map(group => {
         const tables = (group.itemIds || [])
@@ -759,14 +778,17 @@ const GrammarTablesGallery = () => {
                 active: nextActive.length ? nextActive : normalizedOrder.slice()
             };
         });
+
+        const owningGroupId = tableIdToGroupId[tableId];
+        if (owningGroupId) {
+            setCurrentSuperGroupId(owningGroupId);
+        }
     };
 
     const moveSuperTable = (tableId, direction) => {
+        let destinationGroupId = null;
         setSuperState(prev => {
             const activeSet = new Set(prev.active);
-            if (!activeSet.has(tableId)) {
-                return prev;
-            }
 
             const groups = Array.isArray(prev.groups) && prev.groups.length
                 ? prev.groups.map(group => ({
@@ -799,6 +821,7 @@ const GrammarTablesGallery = () => {
                     const swapId = currentGroup.itemIds[position - 1];
                     currentGroup.itemIds[position - 1] = tableId;
                     currentGroup.itemIds[position] = swapId;
+                    destinationGroupId = currentGroup.id;
                 } else if (currentGroupIndex > 0) {
                     const previousGroup = {
                         ...groups[currentGroupIndex - 1],
@@ -807,6 +830,7 @@ const GrammarTablesGallery = () => {
                     currentGroup.itemIds.splice(position, 1);
                     previousGroup.itemIds.push(tableId);
                     groups[currentGroupIndex - 1] = previousGroup;
+                    destinationGroupId = previousGroup.id;
                 } else {
                     return prev;
                 }
@@ -815,6 +839,7 @@ const GrammarTablesGallery = () => {
                     const swapId = currentGroup.itemIds[position + 1];
                     currentGroup.itemIds[position + 1] = tableId;
                     currentGroup.itemIds[position] = swapId;
+                    destinationGroupId = currentGroup.id;
                 } else if (currentGroupIndex < groups.length - 1) {
                     const nextGroup = {
                         ...groups[currentGroupIndex + 1],
@@ -823,6 +848,7 @@ const GrammarTablesGallery = () => {
                     currentGroup.itemIds.splice(position, 1);
                     nextGroup.itemIds.unshift(tableId);
                     groups[currentGroupIndex + 1] = nextGroup;
+                    destinationGroupId = nextGroup.id;
                 } else {
                     return prev;
                 }
@@ -831,6 +857,9 @@ const GrammarTablesGallery = () => {
             }
 
             groups[currentGroupIndex] = currentGroup;
+            if (!destinationGroupId) {
+                destinationGroupId = currentGroup.id;
+            }
 
             const nextOrder = groups.flatMap(group => group.itemIds);
             const nextActive = nextOrder.filter(id => activeSet.has(id));
@@ -842,6 +871,10 @@ const GrammarTablesGallery = () => {
                 groups
             };
         });
+
+        if (destinationGroupId) {
+            setCurrentSuperGroupId(destinationGroupId);
+        }
     };
 
     const resetSuperOrder = () => {
@@ -862,14 +895,10 @@ const GrammarTablesGallery = () => {
         }));
     };
 
-    const handleSuperGroupSelectChange = (groupId) => {
-        setCurrentSuperGroupId(groupId || null);
-    };
-
     const addSuperGroup = () => {
         let createdGroupId = null;
         setSuperState(prev => {
-            const baseGroups = Array.isArray(prev.groups) && prev.groups.length
+            const baseGroups = Array.isArray(prev.groups)
                 ? prev.groups.map(group => ({
                     ...group,
                     itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
@@ -890,9 +919,11 @@ const GrammarTablesGallery = () => {
                 itemIds: []
             };
 
+            const nextGroups = [newGroup, ...baseGroups];
+
             return {
                 ...prev,
-                groups: [...baseGroups, newGroup]
+                groups: nextGroups
             };
         });
 
@@ -901,17 +932,44 @@ const GrammarTablesGallery = () => {
         }
     };
 
-    const renameSuperGroup = (groupId, nextTitle) => {
-        const title = typeof nextTitle === 'string' ? nextTitle.trim() : '';
-        if (!groupId || !title) return;
+    const handleSuperGroupTitleChange = (groupId, nextValue) => {
+        setSuperState(prev => {
+            if (!Array.isArray(prev.groups)) {
+                return prev;
+            }
+
+            let changed = false;
+            const nextGroups = prev.groups.map(group => {
+                if (group.id !== groupId) return group;
+                changed = true;
+                return {
+                    ...group,
+                    title: nextValue
+                };
+            });
+
+            if (!changed) {
+                return prev;
+            }
+
+            return {
+                ...prev,
+                groups: nextGroups
+            };
+        });
+    };
+
+    const handleSuperGroupTitleBlur = (groupId, rawValue, fallbackIndex) => {
+        const trimmed = typeof rawValue === 'string' ? rawValue.trim() : '';
 
         setSuperState(prev => {
             if (!Array.isArray(prev.groups)) {
                 return prev;
             }
 
-            const nextGroups = prev.groups.map(group => {
+            const nextGroups = prev.groups.map((group, idx) => {
                 if (group.id !== groupId) return group;
+                const title = trimmed || `Группа ${(fallbackIndex ?? idx) + 1}`;
                 return {
                     ...group,
                     title
@@ -925,22 +983,51 @@ const GrammarTablesGallery = () => {
         });
     };
 
-    const promptRenameCurrentSuperGroup = () => {
-        if (!currentSuperGroupId) return;
-        const currentGroup = superGroupMap[currentSuperGroupId];
-        if (!currentGroup) return;
+    const handleSuperGroupCardSelect = (groupId) => {
+        if (!groupId) return;
+        setCurrentSuperGroupId(groupId);
+    };
 
-        const nextTitle = isBrowser
-            ? window.prompt('Название группы', currentGroup.title || '')
-            : null;
+    const moveSuperGroup = (groupId, direction) => {
+        if (!groupId || (direction !== 'up' && direction !== 'down')) return;
 
-        if (nextTitle === null) return;
-        renameSuperGroup(currentSuperGroupId, nextTitle);
+        setSuperState(prev => {
+            const baseGroups = Array.isArray(prev.groups)
+                ? prev.groups.map(group => ({
+                    ...group,
+                    itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+                }))
+                : [];
+
+            const index = baseGroups.findIndex(group => group.id === groupId);
+            if (index === -1) return prev;
+
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= baseGroups.length) return prev;
+
+            const nextGroups = baseGroups.slice();
+            const temp = nextGroups[index];
+            nextGroups[index] = nextGroups[targetIndex];
+            nextGroups[targetIndex] = temp;
+
+            const nextOrder = nextGroups.flatMap(group => group.itemIds);
+            const activeSet = new Set(prev.active);
+            const nextActive = nextOrder.filter(id => activeSet.has(id));
+
+            return {
+                ...prev,
+                groups: nextGroups,
+                order: nextOrder,
+                active: nextActive.length ? nextActive : nextOrder.slice()
+            };
+        });
+
+        setCurrentSuperGroupId(groupId);
     };
 
     const removeSuperGroup = (groupId) => {
         if (!groupId) return;
-        let fallbackGroupId = null;
+        let nextSelectedGroupId = currentSuperGroupId;
 
         setSuperState(prev => {
             const baseGroups = Array.isArray(prev.groups) ? prev.groups.map(group => ({
@@ -949,23 +1036,36 @@ const GrammarTablesGallery = () => {
             })) : [];
 
             if (baseGroups.length <= 1) {
+                nextSelectedGroupId = baseGroups[0]?.id ?? groupId;
                 return prev;
             }
 
             const removeIndex = baseGroups.findIndex(group => group.id === groupId);
             if (removeIndex === -1) {
+                nextSelectedGroupId = baseGroups[0]?.id ?? currentSuperGroupId;
                 return prev;
             }
 
             const removed = baseGroups.splice(removeIndex, 1)[0];
-            const targetIndex = removeIndex > 0 ? removeIndex - 1 : 0;
-            if (baseGroups[targetIndex]) {
+            const targetIndex = baseGroups.length
+                ? Math.min(removeIndex > 0 ? removeIndex - 1 : 0, baseGroups.length - 1)
+                : -1;
+
+            if (targetIndex >= 0 && baseGroups[targetIndex]) {
                 baseGroups[targetIndex] = {
                     ...baseGroups[targetIndex],
                     itemIds: appendMissingIds(baseGroups[targetIndex].itemIds, removed.itemIds)
                 };
-                fallbackGroupId = baseGroups[targetIndex].id;
+            } else if (baseGroups.length) {
+                baseGroups[0] = {
+                    ...baseGroups[0],
+                    itemIds: appendMissingIds(baseGroups[0].itemIds, removed.itemIds)
+                };
             }
+
+            nextSelectedGroupId = targetIndex >= 0 && baseGroups[targetIndex]
+                ? baseGroups[targetIndex].id
+                : baseGroups[0]?.id ?? null;
 
             const nextOrder = baseGroups.flatMap(group => group.itemIds);
             const activeSet = new Set(prev.active);
@@ -979,12 +1079,7 @@ const GrammarTablesGallery = () => {
             };
         });
 
-        if (fallbackGroupId) {
-            setCurrentSuperGroupId(fallbackGroupId);
-        } else if (superGroups.length > 1) {
-            const nextGroup = superGroups.find(group => group.id !== groupId);
-            setCurrentSuperGroupId(nextGroup ? nextGroup.id : null);
-        }
+        setCurrentSuperGroupId(nextSelectedGroupId);
     };
 
     const handleSuperTableGroupChange = (tableId, targetGroupId) => {
@@ -1043,6 +1138,8 @@ const GrammarTablesGallery = () => {
                 groups: updatedGroups
             };
         });
+
+        setCurrentSuperGroupId(targetGroupId);
     };
 
     const activeCount = activeSuperIds.length;
@@ -1192,51 +1289,7 @@ const GrammarTablesGallery = () => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="super-manager-header">
-                            <div className="super-manager-header-left">
-                                <h3>Супер таблицы</h3>
-                                <div className="super-groups-controls">
-                                    <label htmlFor="super-group-select">Группа:</label>
-                                    <select
-                                        id="super-group-select"
-                                        value={currentSuperGroupId || ''}
-                                        onChange={(event) => handleSuperGroupSelectChange(event.target.value)}
-                                        className="form-select form-select-sm"
-                                    >
-                                        {superGroups.length === 0 ? (
-                                            <option value="">Нет групп</option>
-                                        ) : (
-                                            superGroups.map(group => (
-                                                <option key={group.id} value={group.id}>
-                                                    {group.title}
-                                                </option>
-                                            ))
-                                        )}
-                                    </select>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-light btn-sm"
-                                        onClick={addSuperGroup}
-                                    >
-                                        + Группа
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-light btn-sm"
-                                        onClick={promptRenameCurrentSuperGroup}
-                                        disabled={!currentSuperGroupId}
-                                    >
-                                        Переименовать
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-light btn-sm"
-                                        onClick={() => removeSuperGroup(currentSuperGroupId)}
-                                        disabled={!currentSuperGroupId || superGroups.length <= 1}
-                                    >
-                                        Удалить
-                                    </button>
-                                </div>
-                            </div>
+                            <h3>Супер таблицы</h3>
                             <button
                                 type="button"
                                 className="btn btn-outline-light btn-sm"
@@ -1246,101 +1299,179 @@ const GrammarTablesGallery = () => {
                             </button>
                         </div>
 
-                        <div className="super-manager-columns">
-                            <div className="super-list available">
-                                <h4>Доступные таблицы</h4>
-                                <ul>
-                                    {superOrder.map(tableId => {
-                                        const table = SUPER_TABLES.find(item => item.id === tableId);
-                                        if (!table) return null;
-                                        const isSelected = activeSuperSet.has(table.id);
-                                        const groupId = tableIdToGroupId[table.id];
-                                        const groupTitle = groupId ? (superGroupMap[groupId]?.title || '') : '';
-                                        return (
-                                            <li key={table.id}>
-                                                <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => toggleSuperTable(table.id)}
-                                                    />
-                                                    <span>{table.title}</span>
-                                                </label>
-                                                <span className="group-badge">
-                                                    {groupTitle || '—'}
-                                                </span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
+                        <div className="super-manager-toolbar">
+                            <button
+                                type="button"
+                                className="btn btn-outline-light btn-sm"
+                                onClick={addSuperGroup}
+                            >
+                                + Группа
+                            </button>
+                        </div>
 
-                            <div className="super-list selected">
-                                <h4>Порядок отображения</h4>
-                                {selectedSuperTables.length === 0 ? (
-                                    <p className="empty-placeholder">Выберите таблицы слева, чтобы добавить их.</p>
-                                ) : (
-                                    <ul>
-                                        {selectedSuperTables.map((table) => {
-                                            const tableGroupId = superGroups.length
-                                                ? (tableIdToGroupId[table.id] || superGroups[0].id)
-                                                : '';
-                                            const globalIndex = globalActiveOrderIds.indexOf(table.id);
-                                            const isFirstActive = globalIndex <= 0;
-                                            const isLastActive = globalIndex === globalActiveOrderIds.length - 1;
+                        <div className="super-groups-manager">
+                            {managerGroups.length === 0 ? (
+                                <p className="empty-placeholder">Группы ещё не созданы.</p>
+                            ) : (
+                                managerGroups.map(group => {
+                                    const availableOptions = Array.isArray(group.availableOptions) ? group.availableOptions : [];
+                                    const hasAvailableOptions = availableOptions.length > 0;
+                                    return (
+                                        <div
+                                            key={group.id}
+                                            className={`super-group-card ${currentSuperGroupId === group.id ? '__selected' : ''}`}
+                                            onClick={() => handleSuperGroupCardSelect(group.id)}
+                                        >
+                                            <div className="super-group-card-header">
+                                                <input
+                                                    type="text"
+                                                    className="group-name-input"
+                                                    value={group.title || ''}
+                                                    onChange={(event) => handleSuperGroupTitleChange(group.id, event.target.value)}
+                                                    onBlur={(event) => handleSuperGroupTitleBlur(group.id, event.target.value, group.index)}
+                                                />
+                                                <span className="group-count">{group.tables.length}</span>
+                                            <div className="group-header-actions">
+                                                <div className="group-move-buttons">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-light btn-sm"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            moveSuperGroup(group.id, 'up');
+                                                        }}
+                                                        disabled={group.index === 0}
+                                                    >
+                                                        ↑
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-light btn-sm"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            moveSuperGroup(group.id, 'down');
+                                                        }}
+                                                        disabled={group.index === managerGroups.length - 1}
+                                                    >
+                                                        ↓
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-light btn-sm"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        removeSuperGroup(group.id);
+                                                    }}
+                                                    disabled={superGroups.length <= 1}
+                                                >
+                                                    Удалить группу
+                                                </button>
+                                            </div>
+                                            </div>
 
-                                            return (
-                                                <li key={table.id}>
-                                                    <span className="title">{table.title}</span>
-                                                    {superGroups.length > 0 && (
-                                                        <div className="group-select">
-                                                            <select
-                                                                value={tableGroupId}
-                                                                onChange={(event) => handleSuperTableGroupChange(table.id, event.target.value)}
-                                                                className="form-select form-select-sm"
+                        <div className="group-add-control">
+                            <select
+                                className="form-select form-select-sm"
+                                defaultValue=""
+                                onClick={(event) => event.stopPropagation()}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    if (!value) return;
+                                    handleSuperTableGroupChange(value, group.id);
+                                    event.target.value = '';
+                                }}
+                                disabled={!hasAvailableOptions}
+                            >
+                                <option value="">{hasAvailableOptions ? 'Добавить таблицу…' : 'Все таблицы внутри'}</option>
+                                {availableOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                                            {group.tables.length === 0 ? (
+                                                <p className="empty-placeholder">В этой группе пока нет таблиц.</p>
+                                            ) : (
+                                                <ul className="super-group-table-list">
+                                                    {group.tables.map((table) => {
+                                                        const globalIndex = superOrder.indexOf(table.id);
+                                                        const canMoveUp = globalIndex > 0;
+                                                        const canMoveDown = globalIndex !== -1 && globalIndex < superOrder.length - 1;
+
+                                                        return (
+                                                            <li
+                                                                key={table.id}
+                                                                className={`super-group-table ${table.isActive ? '__active' : '__inactive'}`}
+                                                                onClick={(event) => event.stopPropagation()}
                                                             >
-                                                                {superGroups.map(group => (
-                                                                    <option key={group.id} value={group.id}>
-                                                                        {group.title}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                    )}
-                                                    <div className="actions">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-light btn-sm"
-                                                            onClick={() => moveSuperTable(table.id, 'up')}
-                                                            disabled={isFirstActive}
-                                                            title="Вверх"
-                                                        >
-                                                            ↑
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-light btn-sm"
-                                                            onClick={() => moveSuperTable(table.id, 'down')}
-                                                            disabled={isLastActive}
-                                                            title="Вниз"
-                                                        >
-                                                            ↓
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-light btn-sm"
-                                                            onClick={() => toggleSuperTable(table.id)}
-                                                            title="Убрать из активных"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                )}
-                            </div>
+                                                                <div className="table-main">
+                                                                    <span className="title">{table.title}</span>
+                                                                    {table.description || table.level ? (
+                                                                        <span className="subtitle">
+                                                                            {table.description || table.level.toUpperCase()}
+                                                                        </span>
+                                                                    ) : null}
+                                                                </div>
+                                                                <div className="table-controls">
+                                                                    <label className="status-toggle">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={table.isActive}
+                                                                            onChange={() => toggleSuperTable(table.id)}
+                                                                        />
+                                                                        <span>{table.isActive ? 'В наборе' : 'Скрыта'}</span>
+                                                                    </label>
+                                                                    <select
+                                                                        className="form-select form-select-sm table-group-select"
+                                                                        value={tableIdToGroupId[table.id] || group.id}
+                                                                        onChange={(event) => handleSuperTableGroupChange(table.id, event.target.value)}
+                                                                    >
+                                                                        {superGroups.map(option => (
+                                                                            <option key={option.id} value={option.id}>
+                                                                                {option.title}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <div className="move-buttons">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-outline-light btn-sm"
+                                                                            onClick={() => moveSuperTable(table.id, 'up')}
+                                                                            disabled={!canMoveUp}
+                                                                            title="Выше"
+                                                                        >
+                                                                            ↑
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-outline-light btn-sm"
+                                                                            onClick={() => moveSuperTable(table.id, 'down')}
+                                                                            disabled={!canMoveDown}
+                                                                            title="Ниже"
+                                                                        >
+                                                                            ↓
+                                                                        </button>
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-light btn-sm"
+                                                                        onClick={() => toggleSuperTable(table.id)}
+                                                                    >
+                                                                        {table.isActive ? 'Скрыть' : 'Показать'}
+                                                                    </button>
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
 
                         <div className="super-manager-footer">

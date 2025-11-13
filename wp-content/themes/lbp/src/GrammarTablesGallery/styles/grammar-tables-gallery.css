@@ -539,135 +539,187 @@ body {
 
 .super-manager-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
 }
 
-.super-manager-header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.super-manager-header-left h3 {
+.super-manager-header h3 {
     margin: 0;
 }
 
-.super-groups-controls {
+.super-manager-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.super-groups-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.super-group-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.super-group-card.__selected {
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.super-group-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.group-name-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.group-name-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+}
+
+.group-count {
+    font-size: 13px;
+    opacity: 0.75;
+    min-width: 26px;
+    text-align: right;
+}
+
+.group-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.group-move-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.group-move-buttons .btn {
+    padding: 4px 10px;
+}
+
+.group-add-control {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.super-groups-controls label {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.super-groups-controls .form-select {
-    min-width: 180px;
-    max-width: 220px;
+.group-add-control .form-select {
+    min-width: 220px;
     background: rgba(0, 0, 0, 0.35);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.super-groups-controls .form-select:focus {
+.group-add-control .form-select:focus {
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: none;
 }
 
-.super-groups-controls .form-select-sm,
-.super-list.selected .form-select-sm {
-    padding: 4px 8px;
-    font-size: 13px;
-    height: auto;
+.group-add-control .form-select:disabled {
+    opacity: 0.55;
 }
 
-.super-manager-columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-}
-
-.super-manager-columns h4 {
-    font-size: 16px;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.super-list ul {
+.super-group-table-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 300px;
-    overflow-y: auto;
 }
 
-.super-list li {
+.super-group-table {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 10px 12px;
+}
+
+.super-group-table.__inactive {
+    opacity: 0.65;
+}
+
+.super-group-table .table-main {
+    flex: 1 1 220px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.super-list.available li label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.super-list.available .group-badge {
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    line-height: 1.4;
-    min-width: 80px;
-    text-align: right;
-}
-
-.super-list.available input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-}
-
-.super-list.selected .title {
-    flex: 1;
+.super-group-table .table-main .title {
     font-weight: 600;
 }
 
-.super-list.selected .group-select {
-    min-width: 160px;
+.super-group-table .table-main .subtitle {
+    font-size: 13px;
+    opacity: 0.7;
 }
 
-.super-list.selected .group-select .form-select {
+.super-group-table .table-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.super-group-table .status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.super-group-table .table-group-select {
+    min-width: 160px;
     background: rgba(0, 0, 0, 0.35);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.super-list.selected .group-select .form-select:focus {
+.super-group-table .table-group-select:focus {
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: none;
 }
 
-.super-list.selected .actions {
+.super-group-table .move-buttons {
     display: flex;
-    gap: 6px;
+    gap: 4px;
+}
+
+.super-group-table .move-buttons .btn {
+    padding: 4px 10px;
 }
 
 .gallery-group-title {
