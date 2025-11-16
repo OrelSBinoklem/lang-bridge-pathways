@@ -8,6 +8,8 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
 let scene, camera, renderer, water, sun, moon, sunLight, moonLight, composer;
 let startTime = Date.now();
+let isAnimationActive = true;
+let lastFrameTime = 0;
 const params = {
 	speed: 1,
 	developerMode: false,
@@ -195,7 +197,20 @@ function isBright(angle) {
 	return false;
 }
 
-function animate() {
+function animate(timestamp) {
+	if (!isAnimationActive) return;
+
+	// Ограничение до ~60 FPS
+	if (!lastFrameTime) {
+		lastFrameTime = timestamp;
+	}
+	const delta = timestamp - lastFrameTime;
+	if (delta < 1000 / 60) {
+		requestAnimationFrame(animate);
+		return;
+	}
+	lastFrameTime = timestamp;
+
 	requestAnimationFrame(animate);
 	
 	const elapsed = (Date.now() - startTime) / 1000;
@@ -267,7 +282,18 @@ function setCookie(name, value, days) {
 	document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
 
-if(document.getElementById('super-logo-bg')) {
+if (document.getElementById('super-logo-bg')) {
 	init();
 	document.querySelector('#super-logo-bg canvas').style.opacity = 1;
+
+	// Останавливаем рендеринг на неактивной вкладке и возобновляем при возвращении
+	document.addEventListener('visibilitychange', () => {
+		if (document.hidden) {
+			isAnimationActive = false;
+		} else {
+			isAnimationActive = true;
+			lastFrameTime = 0;
+			requestAnimationFrame(animate);
+		}
+	});
 }

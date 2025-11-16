@@ -41,21 +41,6 @@ const GrammarTablesMobileMenu = ({
         <li id="grammar-tables-mobile-controls" className="menu-item-mobile-controls">
             <div className="mobile-controls-wrapper">
                 
-                {/* Кнопка выбора языка */}
-                <button 
-                    className="mobile-lang-btn"
-                    onClick={() => {
-                        const langModal = document.getElementById('language-modal');
-                        if (langModal) {
-                            langModal.classList.add('active');
-                        }
-                    }}
-                >
-                    🌐 <span className="current-lang-code-mobile">
-                        {document.querySelector('.current-lang-code')?.textContent || 'LV'}
-                    </span>
-                </button>
-
                 {/* Фильтры по уровням */}
                 <div className="mobile-level-filters">
                     <label>Уровень:</label>

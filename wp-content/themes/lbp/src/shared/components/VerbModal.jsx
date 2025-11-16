@@ -139,7 +139,7 @@ const VerbModal = ({ verbData, onClose }) => {
                 <div className={`verb-modal-body ${(hasReferenceTable || showReferencePlaceholder) && showGeneratedContent ? 'with-reference' : ''}`}>
                     {showGeneratedContent && (
                         <div className="verb-table-wrapper">
-                            <div className="verb-table-title">Pašreizējie dati (15 šūnas)</div>
+                            <div className="verb-table-title">Спряжения глагола (робот)</div>
                             {shouldShowGeneratedTable ? (
                                 <table className="verb-forms-table">
                                     <thead>
@@ -179,18 +179,9 @@ const VerbModal = ({ verbData, onClose }) => {
                     {hasReferenceTable && (
                         <div className="verb-table-wrapper reference">
                             <div className="verb-table-title">
-                                Etalona tabula{referenceTable?.tableNumber ? ` Nr. ${referenceTable.tableNumber}` : ''}
+                                Общая таблица соответствующая глаголу (справочник)
+                                {/*Etalona tabula{referenceTable?.tableNumber ? ` Nr. ${referenceTable.tableNumber}` : ''}*/}
                             </div>
-                            {(referenceSource?.infinitive || referenceSource?.voice) && (
-                                <div className="verb-reference-meta">
-                                    {referenceSource?.infinitive && (
-                                        <span>Infinitīvs: {referenceSource.infinitive}</span>
-                                    )}
-                                    {referenceSource?.voice && (
-                                        <span>{referenceSource.voice}</span>
-                                    )}
-                                </div>
-                            )}
                             <table className="verb-forms-table">
                                 <thead>
                                     <tr>

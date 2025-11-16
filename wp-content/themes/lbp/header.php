@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentLangCode.textContent = currentLang;
     }
     
-    // Добавляем мобильную кнопку языка в меню (только для обычных страниц, не для React-страниц)
+    // Добавляем мобильную кнопку языка в меню (для всех страниц)
     function addMobileLangButton() {
         console.log('Trying to add mobile lang button...');
         
@@ -272,14 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!primaryMenu) {
             console.log('Primary menu not found!');
             return;
-        }
-        
-        const hasReactControls = document.getElementById('cheat-sheet-mobile-controls') || 
-                                document.getElementById('grammar-tables-mobile-controls');
-        
-        if (hasReactControls) {
-            console.log('React controls found, skipping');
-            return; // На React страницах не добавляем
         }
         
         if (document.getElementById('default-mobile-lang-controls')) {
@@ -310,16 +302,6 @@ document.addEventListener('DOMContentLoaded', function() {
         primaryMenu.appendChild(mobileLangItem);
         
         console.log('✅ Mobile lang button added to menu!');
-        
-        // Показываем/скрываем в зависимости от ширины экрана
-        const checkWidth = () => {
-            const isMobile = window.innerWidth < 1200;
-            mobileLangItem.style.display = isMobile ? 'block' : 'none';
-            console.log('Width check:', window.innerWidth, 'isMobile:', isMobile, 'display:', mobileLangItem.style.display);
-        };
-        
-        checkWidth();
-        window.addEventListener('resize', checkWidth);
     }
     
     // Пробуем добавить несколько раз с разными задержками
