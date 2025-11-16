@@ -166,6 +166,12 @@ body:has(#grammar-tables-gallery-root) .site-footer {
     display: none;
 }
 
+/* На странице галереи грамматических таблиц скрываем общий скролл страницы */
+html:has(#grammar-tables-gallery-root),
+body:has(#grammar-tables-gallery-root) {
+    overflow-y: hidden;
+}
+
 /* Основные стили */
 
 .site-header {
