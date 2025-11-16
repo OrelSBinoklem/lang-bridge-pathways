@@ -68,11 +68,6 @@
             ));
             ?>
         </nav>
-        
-        <!-- Кнопка выбора языка -->
-        <button id="language-selector-btn" class="language-selector-btn" aria-label="Выбрать язык">
-            🌐 <span class="current-lang-code"><?php echo esc_html($_COOKIE['selected_lang'] ?? 'LV'); ?></span>
-        </button>
 
         <!-- React Header Container -->
         <div id="react-header-root" class="react-header-container"></div>

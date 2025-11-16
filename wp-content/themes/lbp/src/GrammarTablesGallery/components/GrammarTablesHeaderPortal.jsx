@@ -17,7 +17,9 @@ const GrammarTablesHeaderPortal = ({
     onManageSuperTables,
     superSelectionCount = 0,
     showHiddenSuper = false,
-    onToggleShowHidden
+    onToggleShowHidden,
+    superProfileId = '1',
+    onSuperProfileChange
 }) => {
     const searchRef = useRef(null);
     
@@ -51,7 +53,7 @@ const GrammarTablesHeaderPortal = ({
 
     const content = (
         <div className="grammar-tables-header-controls">
-            {/* Поиск глагола */}
+            {/* Только поиск глагола в хедере */}
             <div className="verb-search-wrapper" ref={searchRef}>
                 <div className="verb-search-container">
                     <input 
@@ -98,77 +100,6 @@ const GrammarTablesHeaderPortal = ({
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* Фильтры по уровням */}
-            <div className="level-filters-wrapper">
-                {levels.map(level => (
-                    <button
-                        key={level.value}
-                        className={`level-filter-btn ${selectedLevel === level.value ? 'active' : ''}`}
-                        data-level={level.value}
-                        style={{ 
-                            color: selectedLevel === level.value ? '#fff' : level.color,
-                            backgroundColor: selectedLevel === level.value ? level.color : 'transparent',
-                            borderColor: level.color
-                        }}
-                        onClick={() => onLevelChange(level.value)}
-                    >
-                        {level.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* Настройки колонок */}
-            <div className="cols-controls-wrapper">
-                <div className="btn-group btn-group-sm" role="group" aria-label="Колонки">
-                    {colsOptions.map(col => (
-                        <button
-                            key={col}
-                            type="button"
-                            className={`btn btn-outline-light btn-sm ${cols === col ? 'active' : ''}`}
-                            onClick={() => onColsChange(col)}
-                        >
-                            {col}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            
-            {/* Кнопка режима просмотра */}
-            <div className="view-mode-wrapper">
-                <button 
-                    type="button" 
-                    className={`btn btn-outline-light btn-sm ${viewMode === 'horizontal' ? 'active' : ''}`}
-                    onClick={onViewModeToggle}
-                    title="Переключить режим"
-                >
-                    <span className="mode-icon" style={viewMode === 'horizontal' ? { transform: 'rotate(-90deg)' } : {}}>
-                        ▼
-                    </span> Режим
-                </button>
-            </div>
-
-            <div className="super-manager-wrapper">
-                <button
-                    type="button"
-                    className="btn btn-outline-light btn-sm super-manage-btn"
-                    onClick={onManageSuperTables}
-                >
-                    📚 Super ({superSelectionCount})
-                </button>
-                <button
-                    type="button"
-                    className={`btn btn-outline-light btn-sm super-visibility-btn ${showHiddenSuper ? 'active' : ''}`}
-                    onClick={() => {
-                        if (onToggleShowHidden) {
-                            onToggleShowHidden();
-                        }
-                    }}
-                    title={showHiddenSuper ? 'Скрытые таблицы отображаются' : 'Показать скрытые таблицы'}
-                >
-                    {showHiddenSuper ? '👁 скрытые видны' : '🙈 скрытые скрыты'}
-                </button>
             </div>
         </div>
     );

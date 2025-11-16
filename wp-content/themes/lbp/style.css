@@ -317,15 +317,13 @@ body:has(#grammar-tables-gallery-root) .site-footer {
 }
 
 /* Выделение первых двух пунктов меню */
-#primary-menu li:nth-child(1),
-#primary-menu li:nth-child(2) {
+#primary-menu li:nth-child(1) {
     font-weight: bold;
     background: rgba(255, 255, 255, 0.1);
     border-left: 3px solid rgba(255, 255, 255, 0.5);
 }
 
-#primary-menu li:nth-child(1) a,
-#primary-menu li:nth-child(2) a {
+#primary-menu li:nth-child(1) a {
     font-weight: bold;
     color: #fff !important;
 }

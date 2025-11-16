@@ -68,8 +68,14 @@ const SORTED_SUPER_TABLES = [...SUPER_TABLES].sort((a, b) => {
     return titleA.localeCompare(titleB, 'ru', { sensitivity: 'base' });
 });
 
-const SUPER_STATE_KEY = 'grammar-super-state';
+const SUPER_STATE_KEY_PROFILE_1 = 'grammar-super-state';
+const SUPER_STATE_KEY_PROFILE_2 = 'grammar-super-state-2';
 const DEFAULT_SUPER_ORDER = SUPER_TABLES.map(table => table.id);
+
+const loadSuperStateForProfile = (profileId) => {
+    const key = profileId === '2' ? SUPER_STATE_KEY_PROFILE_2 : SUPER_STATE_KEY_PROFILE_1;
+    return normalizeStoredSuperState(getStorageJSON(key, null));
+};
 
 const appendMissingIds = (primary = [], reference = []) => {
     const result = Array.isArray(primary) ? primary.slice() : [];
@@ -264,7 +270,11 @@ const GrammarTablesGallery = () => {
     const [verbTranslations, setVerbTranslations] = useState([]);
     const [verbFormsLookup, setVerbFormsLookup] = useState({ byLemma: {}, byNormalized: {} });
     const [hintModalData, setHintModalData] = useState(null);
-    const [superState, setSuperState] = useState(() => normalizeStoredSuperState(getStorageJSON(SUPER_STATE_KEY, null)));
+    const [superProfileId, setSuperProfileId] = useState(() => getStorage('grammar-super-profile', '1'));
+    const [superState, setSuperState] = useState(() => {
+        const initialProfile = getStorage('grammar-super-profile', '1');
+        return loadSuperStateForProfile(initialProfile);
+    });
     const [currentSuperGroupId, setCurrentSuperGroupId] = useState(() => {
         const groups = Array.isArray(superState.groups) && superState.groups.length
             ? superState.groups
@@ -286,8 +296,13 @@ const GrammarTablesGallery = () => {
     }, [viewMode]);
 
     useEffect(() => {
-        setStorageJSON(SUPER_STATE_KEY, superState);
-    }, [superState]);
+        setStorage('grammar-super-profile', superProfileId);
+    }, [superProfileId]);
+
+    useEffect(() => {
+        const key = superProfileId === '2' ? SUPER_STATE_KEY_PROFILE_2 : SUPER_STATE_KEY_PROFILE_1;
+        setStorageJSON(key, superState);
+    }, [superState, superProfileId]);
 
     useEffect(() => {
         const groups = Array.isArray(superState.groups) && superState.groups.length
@@ -484,6 +499,12 @@ const GrammarTablesGallery = () => {
 
     const handleViewModeToggle = () => {
         setViewMode(prev => prev === 'horizontal' ? 'vertical' : 'horizontal');
+    };
+    
+    const handleSuperProfileChange = (profileId) => {
+        if (profileId !== '1' && profileId !== '2') return;
+        setSuperProfileId(profileId);
+        setSuperState(loadSuperStateForProfile(profileId));
     };
 
     const handleImageClick = (imageData) => {
@@ -1164,6 +1185,8 @@ const GrammarTablesGallery = () => {
                 superSelectionCount={activeCount}
                 showHiddenSuper={showHiddenSuper}
                 onToggleShowHidden={toggleShowHidden}
+                superProfileId={superProfileId}
+                onSuperProfileChange={handleSuperProfileChange}
             />
             
             {/* Мобильное меню */}
@@ -1184,6 +1207,8 @@ const GrammarTablesGallery = () => {
                 superSelectionCount={activeCount}
                 showHiddenSuper={showHiddenSuper}
                 onToggleShowHidden={toggleShowHidden}
+                superProfileId={superProfileId}
+                onSuperProfileChange={handleSuperProfileChange}
             />
             
             <div className={`grammar-tables-gallery __view-${viewMode}`}>
