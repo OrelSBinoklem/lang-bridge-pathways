@@ -156,7 +156,7 @@ const GrammarTablesMobileMenu = ({
                             }
                         }}
                     >
-                        📚 Super ({superSelectionCount})
+                        📚 Редактировать набор ({superSelectionCount})
                     </button>
                     <button
                         type="button"
@@ -167,7 +167,7 @@ const GrammarTablesMobileMenu = ({
                             }
                         }}
                     >
-                        {showHiddenSuper ? '👁 Видны скрытые' : '🙈 Скрыть скрытые'}
+                        {showHiddenSuper ? '☑ Показать скрытые' : '☐ Показать скрытые'}
                     </button>
                 </div>
             </div>
