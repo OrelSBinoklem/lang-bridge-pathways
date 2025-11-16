@@ -208,6 +208,7 @@ body:has(#grammar-tables-gallery-root) .site-footer {
     display: flex;
     align-items: center;
     position: relative;
+    margin-left: auto;
 }
 
 /* Светлая тема (яркий фон) - тёмный текст */
@@ -3746,11 +3747,6 @@ h2 .small {
 
 /* На маленьких экранах скрываем текст "Menu" в кнопке */
 @media (max-width: 767px) {
-  /* Выравниваем кнопку меню вправо */
-  .site-navigation {
-    margin-left: auto;
-  }
-  
   .menu-toggle {
     justify-content: center;
     padding: 12px;

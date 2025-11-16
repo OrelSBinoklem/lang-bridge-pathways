@@ -57,6 +57,9 @@
         </div>
 
 
+        <!-- React Header Container -->
+        <div id="react-header-root" class="react-header-container"></div>
+
         <nav class="site-navigation <?=$isBright ? '__dark' : ''?>">
             <button id="menu-toggle" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
                 <span class="menu-icon">☰</span><span class="menu-text"> Menu</span>
@@ -68,9 +71,6 @@
             ));
             ?>
         </nav>
-
-        <!-- React Header Container -->
-        <div id="react-header-root" class="react-header-container"></div>
 
     </div>
 
