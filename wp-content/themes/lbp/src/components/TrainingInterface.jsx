@@ -43,6 +43,7 @@ const TrainingInterface = ({
   onCheckAnswer,
   onNextWord,
   onFinishTraining,
+  isUpdating = false,
   inEducationMode = false
 }) => {
   // Автоматически проигрываем слово при смене слова
@@ -119,10 +120,17 @@ const TrainingInterface = ({
       {!showResult ? (
         <button
           onClick={onCheckAnswer}
-          disabled={!userAnswer.trim()}
+          disabled={!userAnswer.trim() || isUpdating}
           className="training-button"
         >
-          Проверить
+          {isUpdating ? (
+            <>
+              <span className="training-button-spinner"></span>
+              Обновление...
+            </>
+          ) : (
+            'Проверить'
+          )}
         </button>
       ) : (
         <div>

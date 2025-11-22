@@ -28,10 +28,11 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [showReorder, setShowReorder] = useState(false); // Показать инструмент изменения порядка
   const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций
   const [showBulkActions, setShowBulkActions] = useState(false); // Показать режим массовых операций
+  const [isUpdating, setIsUpdating] = useState(false); // Идёт обновление данных на сервере
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
-    console.log('📊 Examen - dictionaryId:', dictionaryId, 'categoryId:', categoryId);
+    // ID для настройки кастомных компонентов
   }, [dictionaryId, categoryId]);
 
   // Сбрасываем выбранные слова и режим выбора при смене категории
@@ -143,14 +144,11 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     });
     
     // Слова без записей ИЛИ со сброшенными записями
-    console.log('🔍 Проверяем слова категории:', categoryWords.length);
-    
     const wordsToInitialize = categoryWords.filter(word => {
       const userData = userWordsData[word.id];
       
       if (!userData) {
         // Нет записи в БД
-        console.log(`✅ Слово ID=${word.id} (${word.word}) - НЕТ ЗАПИСИ в БД`);
         return true;
       }
       
@@ -168,57 +166,29 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         (userData.last_shown_revert === null || userData.last_shown_revert === '' || userData.last_shown_revert === '0000-00-00 00:00:00')
       );
       
-      console.log(`🔍 Слово ID=${word.id} (${word.word}):`, {
-        attempts: userData.attempts,
-        attempts_revert: userData.attempts_revert,
-        correct_attempts: userData.correct_attempts,
-        correct_attempts_revert: userData.correct_attempts_revert,
-        last_shown: userData.last_shown,
-        last_shown_revert: userData.last_shown_revert,
-        isResetState
-      });
-      
       return isResetState;
     });
     
     if (wordsToInitialize.length > 0) {
-      console.log(`🆕 Найдено ${wordsToInitialize.length} слов для инициализации (без записей или после сброса)`);
-      console.log('📋 Слова:', wordsToInitialize.map(w => `ID=${w.id}, word=${w.word}`));
-      
       try {
         const wordIds = wordsToInitialize.map(w => w.id);
-        console.log('📤 Отправляем word_ids:', wordIds);
         
         const formData = new FormData();
         formData.append('action', 'create_easy_mode_for_new_words');
         formData.append('word_ids', JSON.stringify(wordIds));
         
-        console.log('📤 FormData action:', formData.get('action'));
-        console.log('📤 FormData word_ids:', formData.get('word_ids'));
-        
         const response = await axios.post(window.myajax.url, formData);
         
-        console.log('📥 Ответ сервера:', response.data);
-        
         if (response.data.success) {
-          console.log('✅ Записи созданы/обновлены на сервере');
-          console.log('📊 Ответ сервера:', response.data);
-          
           // Обновляем данные пользователя
           if (onRefreshUserData) {
-            console.log('🔄 Запрашиваем свежие данные с сервера...');
             await onRefreshUserData();
-            console.log('✅ Данные пользователя обновлены! Проверьте список слов - они должны показывать "📚 Учу"');
           }
-        } else {
-          console.warn('⚠️ Ошибка создания записей:', response.data.message);
         }
       } catch (err) {
         console.error('❌ Ошибка при создании записей:', err);
         console.error('❌ Детали ошибки:', err.response?.data || err.message);
       }
-    } else {
-      console.log('✅ Все слова категории уже инициализированы');
     }
     
     const trainingWords = getTrainingWords();
@@ -241,7 +211,11 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     } else {
       const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
       const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
-      
+
+      console.log('directAvailable', directAvailable);
+      console.log('revertAvailable', revertAvailable);
+      console.log('userData', userData);
+
       if (directAvailable && revertAvailable) {
         mode = Math.random() < 0.5;
       } else if (directAvailable) {
@@ -276,10 +250,9 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 			const response = await axios.post(window.myajax.url, formData);
 
 			if (response.data.success) {
-        console.log('Попытка записана успешно');
-        // Обновляем локальные данные пользователя
+        // Обновляем локальные данные пользователя и ждём завершения
         if (onRefreshUserData) {
-          onRefreshUserData();
+          await onRefreshUserData();
         }
 			} else {
         console.error('Ошибка при записи попытки:', response.data.message);
@@ -360,8 +333,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   };
 
   // Обработчики для TrainingInterface
-  const handleCheckAnswer = () => {
-    if (!currentWord || !userAnswer.trim()) return;
+  const handleCheckAnswer = async () => {
+    if (!currentWord || !userAnswer.trim() || isUpdating) return;
 
     let correct = false;
     let correctAnswers = [];
@@ -383,14 +356,9 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           .split(',')
           .map(v => v.trim())
           .filter(v => v.length > 0);
-        console.log('🔍 translation_input_variable:', currentWord.translation_input_variable);
-        console.log('🔍 Additional variants:', additionalVariants);
         correctAnswers.push(...additionalVariants);
       }
     }
-
-    console.log('📝 Current word object:', currentWord);
-    console.log('✅ All correct answers (raw):', correctAnswers);
     
     // Генерируем все возможные варианты для каждого правильного ответа
     const allAcceptableVariants = [];
@@ -398,40 +366,47 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       const variants = generateAnswerVariants(answer);
       allAcceptableVariants.push(...variants);
     });
-    
-    console.log('✅ All acceptable variants:', allAcceptableVariants);
-    console.log('👤 User answer (raw):', userAnswer);
 
     const normalizedUserAnswer = normalizeString(userAnswer);
-    console.log('👤 User answer (normalized):', normalizedUserAnswer);
     
     correct = allAcceptableVariants.some(answer => {
       const normalizedAnswer = normalizeString(answer);
-      console.log('🔄 Comparing:', `"${normalizedUserAnswer}"`, 'vs', `"${normalizedAnswer}"`);
       return normalizedAnswer === normalizedUserAnswer;
     });
 
-    console.log('🎯 Result:', correct);
-
     setIsCorrect(correct);
-    setShowResult(true);
-
-    // Обновляем прогресс в базе данных
-    updateWordAttempts(currentWord.id, currentMode, correct);
     
-    // Увеличиваем счетчик попыток
-    setAttemptCount(prev => prev + 1);
+    // Блокируем кнопку и показываем лоадер
+    setIsUpdating(true);
 
-    // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
-    setTimeout(() => {
-      const nextButton = document.querySelector('[data-next-word]');
-      if (nextButton) {
-        nextButton.focus();
-      }
-    }, 100);
+    try {
+      // Обновляем прогресс в базе данных и ждём завершения
+      await updateWordAttempts(currentWord.id, currentMode, correct);
+      
+      // Увеличиваем счетчик попыток
+      setAttemptCount(prev => prev + 1);
+      
+      // Показываем результат только после успешного обновления
+      setShowResult(true);
+
+      // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
+      setTimeout(() => {
+        const nextButton = document.querySelector('[data-next-word]');
+        if (nextButton) {
+          nextButton.focus();
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Ошибка при обновлении данных:', error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleNextWord = () => {
+    // Сбрасываем состояние обновления при переходе к следующему слову
+    setIsUpdating(false);
+    
     const trainingWords = getTrainingWords();
     if (trainingWords.length === 0) {
       setTrainingMode(false);
@@ -495,7 +470,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     }
 
     try {
-      console.log('🎓 Переводим категорию', categoryId, 'в режим лёгкой тренировки');
       const formData = new FormData();
       formData.append('action', 'set_category_to_easy_mode');
       formData.append('category_id', categoryId);
@@ -503,7 +477,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       const response = await axios.post(window.myajax.url, formData);
       
       if (response.data.success) {
-        console.log('✅ Категория переведена в режим лёгкой тренировки');
         // Обновляем данные пользователя
         if (onRefreshUserData) {
           await onRefreshUserData();
@@ -552,7 +525,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
             {window.myajax && window.myajax.is_admin && (
               <button
                 onClick={() => {
-                  console.log('🔄 Кнопка "Порядок слов" нажата, categoryId:', categoryId);
                   setShowReorder(true);
                 }}
                 className="training-reorder-button"
@@ -564,7 +536,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
             
             <button
               onClick={() => {
-                console.log('Кнопка сброса нажата!');
                 resetCategoryFromTraining();
               }}
               className="training-clear-button"
@@ -588,6 +559,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           onCheckAnswer={handleCheckAnswer}
           onNextWord={handleNextWord}
           onFinishTraining={handleFinishTraining}
+          isUpdating={isUpdating}
           inEducationMode={(() => {
             const userData = userWordsData[currentWord?.id];
             return currentMode ? userData?.mode_education_revert : userData?.mode_education;
@@ -757,7 +729,6 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         ) : null;
 
         // Тестовые строки для отладки (можно удалить в production)
-        console.log('window.myajax', window.myajax);
         if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
           const separator = (
             <li key="test-separator" style={{ 
@@ -833,19 +804,14 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           return false;
         });
         
-        console.log('📊 CategoryWordReorder рендерится. Слов в категории:', categoryWords.length, 'categoryId:', categoryId);
-        console.log('Первые 3 слова:', categoryWords.slice(0, 3));
-        
         return (
           <CategoryWordReorder
             categoryId={categoryId}
             words={categoryWords}
             onClose={() => {
-              console.log('❌ Закрытие модального окна');
               setShowReorder(false);
             }}
             onReorderComplete={() => {
-              console.log('✅ Порядок изменен, обновляем данные');
               setShowReorder(false);
               if (onRefreshDictionaryWords) {
                 onRefreshDictionaryWords();
