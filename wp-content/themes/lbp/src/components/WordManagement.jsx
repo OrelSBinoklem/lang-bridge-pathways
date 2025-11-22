@@ -7,8 +7,12 @@ import axios from 'axios';
  */
 const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBulkInsert, setShowBulkInsert] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
   const [error, setError] = useState('');
+  const [bulkText, setBulkText] = useState('');
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [newWord, setNewWord] = useState({
     word: '',
     translation_1: '',
@@ -24,6 +28,17 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     is_phrase: '0'
   });
 
+  const createWord = async (wordData) => {
+    const formData = new FormData();
+    formData.append('action', 'create_word');
+    formData.append('dictionary_id', dictionaryId);
+    formData.append('word_data', JSON.stringify(wordData));
+    formData.append('category_ids', JSON.stringify([categoryId]));
+
+    const response = await axios.post(window.myajax.url, formData);
+    return response.data;
+  };
+
   const handleCreateWord = async (e) => {
     e.preventDefault();
 
@@ -34,15 +49,9 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('action', 'create_word');
-      formData.append('dictionary_id', dictionaryId);
-      formData.append('word_data', JSON.stringify(newWord));
-      formData.append('category_ids', JSON.stringify([categoryId]));
-
-      const response = await axios.post(window.myajax.url, formData);
+      const result = await createWord(newWord);
       
-      if (response.data.success) {
+      if (result.success) {
         setNewWord({ 
           word: '', 
           translation_1: '', 
@@ -64,7 +73,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
           onWordsChanged();
         }
       } else {
-        setError(response.data.message || 'Ошибка создания слова');
+        setError(result.message || 'Ошибка создания слова');
       }
     } catch (err) {
       setError('Ошибка сети: ' + err.message);
@@ -73,24 +82,139 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     }
   };
 
+  const parseBulkText = (text) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const words = [];
+
+    for (const line of lines) {
+      // Поддерживаем запятую, табуляцию и точку с запятой как разделители
+      const parts = line.split(/[,\t;]/).map(part => part.trim()).filter(part => part);
+      
+      if (parts.length >= 2) {
+        words.push({
+          word: parts[0],
+          translation_1: parts[1],
+          translation_2: parts[2] || '',
+          translation_3: parts[3] || '',
+          translation_input_variable: '',
+          difficult_translation: '',
+          sound_url: '',
+          level: '',
+          maxLevel: '',
+          type: '',
+          gender: '',
+          is_phrase: '0'
+        });
+      }
+    }
+
+    return words;
+  };
+
+  const handleBulkInsert = async () => {
+    if (!bulkText.trim()) {
+      setError('Введите список слов');
+      return;
+    }
+
+    const words = parseBulkText(bulkText);
+    
+    if (words.length === 0) {
+      setError('Не удалось распарсить слова. Формат: слово,перевод1,перевод2,перевод3 (каждое слово с новой строки)');
+      return;
+    }
+
+    try {
+      setBulkLoading(true);
+      setError('');
+      setBulkProgress({ current: 0, total: words.length });
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < words.length; i++) {
+        setBulkProgress({ current: i + 1, total: words.length });
+        
+        try {
+          const result = await createWord(words[i]);
+          if (result.success) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.error(`Ошибка создания слова "${words[i].word}":`, result.message);
+          }
+        } catch (err) {
+          errorCount++;
+          console.error(`Ошибка создания слова "${words[i].word}":`, err.message);
+        }
+
+        // Небольшая задержка между запросами, чтобы не перегружать сервер
+        if (i < words.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      setBulkText('');
+      setShowBulkInsert(false);
+      
+      if (errorCount > 0) {
+        setError(`Создано: ${successCount}, ошибок: ${errorCount}`);
+      } else {
+        setError('');
+      }
+
+      // Обновляем список слов
+      if (onWordsChanged) {
+        onWordsChanged();
+      }
+    } catch (err) {
+      setError('Ошибка при массовой вставке: ' + err.message);
+    } finally {
+      setBulkLoading(false);
+      setBulkProgress({ current: 0, total: 0 });
+    }
+  };
+
   return (
     <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#e8f5e9', border: '2px solid #4CAF50', borderRadius: '5px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
         <h3 style={{ margin: 0, color: '#2e7d32' }}>⚙️ Управление словами (только для админов)</h3>
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#4CAF50', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          {showAddForm ? '✕ Отменить' : '+ Добавить слово'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={() => {
+              setShowBulkInsert(false);
+              setShowAddForm(!showAddForm);
+            }}
+            style={{ 
+              padding: '8px 16px', 
+              backgroundColor: '#4CAF50', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            {showAddForm ? '✕ Отменить' : '+ Добавить слово'}
+          </button>
+          <button 
+            onClick={() => {
+              setShowAddForm(false);
+              setShowBulkInsert(!showBulkInsert);
+            }}
+            style={{ 
+              padding: '8px 16px', 
+              backgroundColor: '#FF9800', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            {showBulkInsert ? '✕ Отменить' : '📋 Вставить список'}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -262,6 +386,73 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
             </button>
           </div>
         </form>
+      )}
+
+      {showBulkInsert && (
+        <div style={{ padding: '15px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Вставьте список слов (CSV формат):
+            </label>
+            <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
+              Формат: слово,перевод1,перевод2,перевод3 (каждое слово с новой строки)
+              <br />
+              Разделители: запятая, табуляция или точка с запятой
+            </div>
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder="suns,собака,пес&#10;kaķis,кот,кошка&#10;zirgs,лошадь"
+              style={{ 
+                width: '100%', 
+                minHeight: '200px', 
+                padding: '8px', 
+                border: '1px solid #ddd', 
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '14px'
+              }}
+              disabled={bulkLoading}
+            />
+          </div>
+
+          {bulkLoading && bulkProgress.total > 0 && (
+            <div style={{ marginBottom: '10px', padding: '8px', backgroundColor: '#e3f2fd', border: '1px solid #2196F3', borderRadius: '4px' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                Обработка: {bulkProgress.current} / {bulkProgress.total}
+              </div>
+              <div style={{ width: '100%', backgroundColor: '#ddd', borderRadius: '4px', height: '20px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    width: `${(bulkProgress.current / bulkProgress.total) * 100}%`, 
+                    backgroundColor: '#2196F3', 
+                    height: '100%',
+                    transition: 'width 0.3s'
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center' }}>
+            <button 
+              onClick={handleBulkInsert}
+              disabled={bulkLoading || !bulkText.trim()}
+              style={{ 
+                padding: '12px 30px', 
+                backgroundColor: bulkLoading ? '#ccc' : '#FF9800', 
+                color: 'white', 
+                border: 'none',
+                borderRadius: '4px',
+                cursor: bulkLoading ? 'not-allowed' : 'pointer',
+                fontWeight: 'bold',
+                fontSize: '16px'
+              }}
+            >
+              {bulkLoading ? `Обработка... (${bulkProgress.current}/${bulkProgress.total})` : '✓ Вставить слова'}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

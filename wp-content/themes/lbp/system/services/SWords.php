@@ -502,4 +502,230 @@ class WordsService {
             'message' => "Обработано категорий: " . count($categories) . ", перемешано " . $total_shuffled . " записей"
         ];
     }
+
+    /**
+     * Получить список всех словарей
+     *
+     * @return array Список словарей
+     */
+    public static function get_all_dictionaries() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dictionaries';
+
+        $query = "SELECT id, name, lang, learn_lang, words, level, maxLevel FROM $table ORDER BY name ASC";
+        $dictionaries = $wpdb->get_results($query, ARRAY_A);
+
+        return $dictionaries ?: [];
+    }
+
+    /**
+     * Переместить слова из одной категории в другую
+     *
+     * @param array $word_ids Массив ID слов
+     * @param int $source_category_id ID исходной категории
+     * @param int $target_category_id ID целевой категории
+     * @param int $target_dictionary_id ID целевого словаря (если отличается от исходного)
+     * @return array|WP_Error Результат операции
+     */
+    public static function move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id = null) {
+        global $wpdb;
+
+        $word_category_table = $wpdb->prefix . 'd_word_category';
+        $words_table = $wpdb->prefix . 'd_words';
+        $categories_table = $wpdb->prefix . 'd_categories';
+
+        // Проверяем существование целевой категории
+        $target_category = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, dictionary_id FROM $categories_table WHERE id = %d",
+            $target_category_id
+        ), ARRAY_A);
+
+        if (!$target_category) {
+            return new WP_Error('category_not_found', 'Целевая категория не найдена');
+        }
+
+        $target_dict_id = $target_dictionary_id ?: $target_category['dictionary_id'];
+
+        // Если слова перемещаются в другой словарь, нужно скопировать слова
+        $moved_count = 0;
+        $errors = [];
+
+        foreach ($word_ids as $word_id) {
+            $word_id = intval($word_id);
+
+            // Получаем информацию о слове
+            $word = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $words_table WHERE id = %d",
+                $word_id
+            ), ARRAY_A);
+
+            if (!$word) {
+                $errors[] = "Слово ID $word_id не найдено";
+                continue;
+            }
+
+            $source_dict_id = $word['dictionary_id'];
+
+            // Если словарь отличается, копируем слово
+            if ($source_dict_id != $target_dict_id) {
+                // Копируем слово в новый словарь
+                $new_word_data = $word;
+                unset($new_word_data['id']); // Убираем ID для создания новой записи
+                $new_word_data['dictionary_id'] = $target_dict_id;
+
+                $result = $wpdb->insert($words_table, $new_word_data);
+                if ($result === false) {
+                    $errors[] = "Ошибка копирования слова ID $word_id";
+                    continue;
+                }
+                $new_word_id = $wpdb->insert_id;
+
+                // Добавляем связь с целевой категорией
+                $wpdb->insert(
+                    $word_category_table,
+                    ['word_id' => $new_word_id, 'category_id' => $target_category_id],
+                    ['%d', '%d']
+                );
+
+                // Удаляем связь со старой категорией (если указана)
+                if ($source_category_id) {
+                    $wpdb->delete(
+                        $word_category_table,
+                        ['word_id' => $word_id, 'category_id' => $source_category_id],
+                        ['%d', '%d']
+                    );
+                }
+            } else {
+                // Слова в том же словаре - просто меняем категорию
+                // Удаляем старую связь
+                if ($source_category_id) {
+                    $wpdb->delete(
+                        $word_category_table,
+                        ['word_id' => $word_id, 'category_id' => $source_category_id],
+                        ['%d', '%d']
+                    );
+                }
+
+                // Проверяем, нет ли уже связи с целевой категорией
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $word_category_table WHERE word_id = %d AND category_id = %d",
+                    $word_id,
+                    $target_category_id
+                ));
+
+                if (!$exists) {
+                    // Добавляем новую связь
+                    $wpdb->insert(
+                        $word_category_table,
+                        ['word_id' => $word_id, 'category_id' => $target_category_id],
+                        ['%d', '%d']
+                    );
+                }
+            }
+
+            $moved_count++;
+        }
+
+        return [
+            'success' => true,
+            'moved_count' => $moved_count,
+            'errors' => $errors,
+            'message' => "Перемещено слов: $moved_count" . (!empty($errors) ? ". Ошибок: " . count($errors) : "")
+        ];
+    }
+
+    /**
+     * Скопировать слова в другую категорию (без удаления из исходной)
+     *
+     * @param array $word_ids Массив ID слов
+     * @param int $target_category_id ID целевой категории
+     * @param int $target_dictionary_id ID целевого словаря (если отличается от исходного)
+     * @return array|WP_Error Результат операции
+     */
+    public static function copy_words_to_category($word_ids, $target_category_id, $target_dictionary_id = null) {
+        global $wpdb;
+
+        $word_category_table = $wpdb->prefix . 'd_word_category';
+        $words_table = $wpdb->prefix . 'd_words';
+        $categories_table = $wpdb->prefix . 'd_categories';
+
+        // Проверяем существование целевой категории
+        $target_category = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, dictionary_id FROM $categories_table WHERE id = %d",
+            $target_category_id
+        ), ARRAY_A);
+
+        if (!$target_category) {
+            return new WP_Error('category_not_found', 'Целевая категория не найдена');
+        }
+
+        $target_dict_id = $target_dictionary_id ?: $target_category['dictionary_id'];
+
+        $copied_count = 0;
+        $errors = [];
+
+        foreach ($word_ids as $word_id) {
+            $word_id = intval($word_id);
+
+            // Получаем информацию о слове
+            $word = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $words_table WHERE id = %d",
+                $word_id
+            ), ARRAY_A);
+
+            if (!$word) {
+                $errors[] = "Слово ID $word_id не найдено";
+                continue;
+            }
+
+            $source_dict_id = $word['dictionary_id'];
+
+            // Если словарь отличается, копируем слово
+            if ($source_dict_id != $target_dict_id) {
+                // Копируем слово в новый словарь
+                $new_word_data = $word;
+                unset($new_word_data['id']); // Убираем ID для создания новой записи
+                $new_word_data['dictionary_id'] = $target_dict_id;
+
+                $result = $wpdb->insert($words_table, $new_word_data);
+                if ($result === false) {
+                    $errors[] = "Ошибка копирования слова ID $word_id";
+                    continue;
+                }
+                $new_word_id = $wpdb->insert_id;
+
+                // Добавляем связь с целевой категорией
+                $wpdb->insert(
+                    $word_category_table,
+                    ['word_id' => $new_word_id, 'category_id' => $target_category_id],
+                    ['%d', '%d']
+                );
+            } else {
+                // Слова в том же словаре - просто добавляем связь с новой категорией
+                // Проверяем, нет ли уже связи
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $word_category_table WHERE word_id = %d AND category_id = %d",
+                    $word_id,
+                    $target_category_id
+                ));
+
+                if (!$exists) {
+                    $wpdb->insert(
+                        $word_category_table,
+                        ['word_id' => $word_id, 'category_id' => $target_category_id],
+                        ['%d', '%d']
+                    );
+                }
+            }
+
+            $copied_count++;
+        }
+
+        return [
+            'success' => true,
+            'copied_count' => $copied_count,
+            'errors' => $errors,
+            'message' => "Скопировано слов: $copied_count" . (!empty($errors) ? ". Ошибок: " . count($errors) : "")
+        ];
+    }
 }

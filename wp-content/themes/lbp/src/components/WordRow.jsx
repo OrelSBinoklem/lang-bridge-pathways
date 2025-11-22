@@ -14,6 +14,9 @@ import WordEditor from '../WordEditor';
  * @param {function} onRefreshDictionaryWords - Колбэк обновления списка слов после редактирования: () => void
  * @param {function} onDeleteWord - Колбэк удаления слова: (wordId) => void
  * @param {boolean} showEditButton - Показывать кнопку редактирования ✏️ (только для админов)
+ * @param {boolean} showCheckbox - Показывать чекбокс для массового выбора
+ * @param {boolean} isSelected - Выбрано ли слово
+ * @param {function} onToggleSelect - Колбэк переключения выбора слова
  */
 const WordRow = ({
   word,
@@ -25,7 +28,10 @@ const WordRow = ({
   onToggleEdit,
   onRefreshDictionaryWords,
   onDeleteWord,
-  showEditButton = true
+  showEditButton = true,
+  showCheckbox = false,
+  isSelected = false,
+  onToggleSelect
 }) => {
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
@@ -142,6 +148,14 @@ const WordRow = ({
             >
               🗑️
             </button>
+          )}
+          {showCheckbox && (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={onToggleSelect}
+              style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, marginLeft: '10px' }}
+            />
           )}
         </>
       )}

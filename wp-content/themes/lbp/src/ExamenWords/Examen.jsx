@@ -4,6 +4,7 @@ import WordRow from "../components/WordRow";
 import WordManagement from "../components/WordManagement";
 import HelpModal from "../components/HelpModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
+import WordBulkActions from "../components/WordBulkActions";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
 
@@ -25,11 +26,19 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
   const [showHelp, setShowHelp] = useState(false); // Показать справку
   const [showReorder, setShowReorder] = useState(false); // Показать инструмент изменения порядка
+  const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций
+  const [showBulkActions, setShowBulkActions] = useState(false); // Показать режим массовых операций
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
     console.log('📊 Examen - dictionaryId:', dictionaryId, 'categoryId:', categoryId);
   }, [dictionaryId, categoryId]);
+
+  // Сбрасываем выбранные слова и режим выбора при смене категории
+  useEffect(() => {
+    setSelectedWordIds([]);
+    setShowBulkActions(false);
+  }, [categoryId]);
 
   // Обновляем текущее время каждую секунду для таймеров
   useEffect(() => {
@@ -604,6 +613,59 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           return false;
         });
 
+        // Блок массовых операций (только для админов и когда режим выбора активен)
+        const bulkActionsBlock = showBulkActions && window.myajax && window.myajax.is_admin && categoryId !== 0 && categoryWords.length > 0 ? (
+          <WordBulkActions
+            words={categoryWords}
+            categoryId={categoryId}
+            dictionaryId={dictionaryId}
+            selectedWordIds={selectedWordIds}
+            onSelectAll={() => {
+              if (selectedWordIds.length === categoryWords.length) {
+                setSelectedWordIds([]);
+              } else {
+                setSelectedWordIds(categoryWords.map(w => w.id));
+              }
+            }}
+            onClearSelection={() => {
+              setSelectedWordIds([]);
+              setShowBulkActions(false);
+            }}
+            onWordsChanged={() => {
+              setSelectedWordIds([]);
+              setShowBulkActions(false);
+              if (onRefreshDictionaryWords) {
+                onRefreshDictionaryWords();
+              }
+            }}
+          />
+        ) : null;
+
+        // Кнопка для активации режима массовых операций (внизу списка)
+        const bulkActionsToggleButton = !showBulkActions && window.myajax && window.myajax.is_admin && categoryId !== 0 && categoryWords.length > 0 ? (
+          <div style={{ 
+            marginTop: '20px', 
+            textAlign: 'center',
+            padding: '15px'
+          }}>
+            <button
+              onClick={() => setShowBulkActions(true)}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#0073aa',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              📦 Переместить/Скопировать слова
+            </button>
+          </div>
+        ) : null;
+
         // Создаём объект для быстрого доступа по ID
         const dictionaryWordsById = {};
         dictionaryWords.forEach(word => {
@@ -645,6 +707,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         const realWords = categoryWords.map((word) => {
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
+          const isSelected = selectedWordIds.includes(word.id);
+          const showCheckbox = showBulkActions && window.myajax && window.myajax.is_admin;
           
             return (
               <WordRow
@@ -659,6 +723,17 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
                 onRefreshDictionaryWords={onRefreshDictionaryWords}
                 onDeleteWord={handleDeleteWord}
                 mode="examen"
+                showCheckbox={showCheckbox}
+                isSelected={isSelected}
+                onToggleSelect={() => {
+                  setSelectedWordIds(prev => {
+                    if (prev.includes(word.id)) {
+                      return prev.filter(id => id !== word.id);
+                    } else {
+                      return [...prev, word.id];
+                    }
+                  });
+                }}
               />
             );
         });
@@ -721,16 +796,24 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           });
           
           return (
-            <ul className="words-education-list">
-              {[...realWords, wordManagementBlock, separator, ...testRows].filter(Boolean)}
-            </ul>
+            <>
+              {bulkActionsBlock}
+              <ul className="words-education-list">
+                {[...realWords, wordManagementBlock, separator, ...testRows].filter(Boolean)}
+              </ul>
+              {bulkActionsToggleButton}
+            </>
           );
         }
 
         return (
-          <ul className="words-education-list">
-            {realWords}
-          </ul>
+          <>
+            {bulkActionsBlock}
+            <ul className="words-education-list">
+              {realWords}
+            </ul>
+            {bulkActionsToggleButton}
+          </>
         );
       })()}
       

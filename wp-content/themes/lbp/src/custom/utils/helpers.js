@@ -12,8 +12,6 @@ export const normalizeString = (str) => {
   return str
     .toLowerCase()
     .trim()
-    .normalize('NFD') // Разделяет символы и диакритические знаки
-    .replace(/[\u0300-\u036f]/g, '') // Удаляет диакритические знаки
     .replace(/[.,!?;:]/g, '') // Удаляет пунктуацию
     .replace(/\s+/g, ' '); // Нормализует пробелы
 };

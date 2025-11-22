@@ -799,6 +799,82 @@ class WordsAjaxHandler {
     }
 
     /**
+     * AJAX-метод для получения списка всех словарей
+     */
+    public static function handle_get_all_dictionaries() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        $dictionaries = WordsService::get_all_dictionaries();
+        wp_send_json_success($dictionaries);
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для перемещения слов между категориями
+     */
+    public static function handle_move_words_to_category() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        $word_ids_raw = $_POST['word_ids'] ?? '';
+        $word_ids = $word_ids_raw ? json_decode(stripslashes($word_ids_raw), true) : [];
+        $source_category_id = intval($_POST['source_category_id'] ?? 0);
+        $target_category_id = intval($_POST['target_category_id'] ?? 0);
+        $target_dictionary_id = !empty($_POST['target_dictionary_id']) ? intval($_POST['target_dictionary_id']) : null;
+
+        if (empty($word_ids) || !is_array($word_ids) || !$target_category_id) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $result = WordsService::move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+        wp_die();
+    }
+
+    /**
+     * AJAX-метод для копирования слов в категорию
+     */
+    public static function handle_copy_words_to_category() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        $word_ids_raw = $_POST['word_ids'] ?? '';
+        $word_ids = $word_ids_raw ? json_decode(stripslashes($word_ids_raw), true) : [];
+        $target_category_id = intval($_POST['target_category_id'] ?? 0);
+        $target_dictionary_id = !empty($_POST['target_dictionary_id']) ? intval($_POST['target_dictionary_id']) : null;
+
+        if (empty($word_ids) || !is_array($word_ids) || !$target_category_id) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $result = WordsService::copy_words_to_category($word_ids, $target_category_id, $target_dictionary_id);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+        wp_die();
+    }
+
+    /**
      * AJAX-метод для изменения порядка слов в категории
      */
     public static function handle_reorder_category_words() {
@@ -976,6 +1052,9 @@ add_action('wp_ajax_delete_word', ['WordsAjaxHandler', 'handle_delete_word']);
 add_action('wp_ajax_reorder_category_words', ['WordsAjaxHandler', 'handle_reorder_category_words']);
 add_action('wp_ajax_initialize_and_shuffle_dictionary', ['WordsAjaxHandler', 'handle_initialize_and_shuffle_dictionary']);
 add_action('wp_ajax_sort_words_with_ai', ['WordsAjaxHandler', 'handle_sort_words_with_ai']);
+add_action('wp_ajax_get_all_dictionaries', ['WordsAjaxHandler', 'handle_get_all_dictionaries']);
+add_action('wp_ajax_move_words_to_category', ['WordsAjaxHandler', 'handle_move_words_to_category']);
+add_action('wp_ajax_copy_words_to_category', ['WordsAjaxHandler', 'handle_copy_words_to_category']);
 
 
 
