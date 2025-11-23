@@ -1,37 +1,10 @@
 import React from 'react';
 import CategoryLayout from '../layouts/CategoryLayout';
-import Word from '../components/Word';
 import useGroupCheck from '../hooks/useGroupCheck';
 import { WordProvider, useWordFunctions } from '../contexts/WordContext';
 import useGroupWords from '../hooks/useGroupWords';
 import { createGroupCheckHandlers } from '../utils/groupHandlers';
-
-/**
- * Компонент для отображения одного слова в группе
- */
-const WordInGroup = ({ wordText, groupCheck, groupWords, hideAvailableWord = false, vertical = false }) => {
-  const { getWordPropsByText, getWordIdByText } = useWordFunctions();
-  
-  // Автоматически регистрируем слово в группе
-  React.useEffect(() => {
-    if (groupWords) {
-      groupWords.addWord(wordText);
-    }
-  }, [wordText, groupWords]);
-  
-  const wordId = getWordIdByText(wordText) || 0;
-  const props = getWordPropsByText(wordText, {
-    type: 'field',
-    direction: 'direct',
-    hideAvailableWord: hideAvailableWord,  // Скрывать слово, которое не надо отгадывать
-    vertical: vertical,  // Вертикальное расположение
-    directValue: groupCheck.answers[wordId] || '',
-    onDirectChange: groupCheck.setAnswer,
-    highlightDirectCorrect: groupCheck.results[wordId] === true,
-    highlightDirectIncorrect: groupCheck.results[wordId] === false,
-  });
-  return props ? <Word {...props} /> : <div>Слово "{wordText}" не найдено</div>;
-};
+import WordInGroup from '../components/WordInGroup';
 
 /**
  * ПРИМЕР кастомной категории с красивыми группами

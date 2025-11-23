@@ -11,6 +11,7 @@ export {
 // Компоненты
 export { default as Word } from './components/Word';
 export { default as WordField } from './components/WordField';
+export { default as WordInGroup } from './components/WordInGroup';
 
 // Layouts
 export { default as CategoryLayout } from './layouts/CategoryLayout';

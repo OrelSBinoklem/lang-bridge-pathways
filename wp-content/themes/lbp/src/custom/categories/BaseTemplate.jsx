@@ -1,10 +1,10 @@
 import React from 'react';
 import CategoryLayout from '../layouts/CategoryLayout';
-import Word from '../components/Word';
 import useGroupCheck from '../hooks/useGroupCheck';
 import { WordProvider, useWordFunctions } from '../contexts/WordContext';
 import useGroupWords from '../hooks/useGroupWords';
 import { createGroupCheckHandlers } from '../utils/groupHandlers';
+import WordInGroup from '../components/WordInGroup';
 
 /**
  * БАЗОВЫЙ ШАБЛОН кастомной категории
@@ -56,34 +56,6 @@ const BaseTemplate = (props) => {
       }}
     </CategoryLayout>
   );
-};
-
-/**
- * Компонент для отображения одного слова в группе
- */
-const WordInGroup = ({ wordText, groupCheck, groupWords, hideAvailableWord = false, vertical = false }) => {
-  const { getWordPropsByText, getWordIdByText } = useWordFunctions();
-  
-  // Автоматическая регистрация слова в группе
-  React.useEffect(() => {
-    if (groupWords) {
-      groupWords.addWord(wordText);
-    }
-  }, [wordText, groupWords]);
-  
-  const wordId = getWordIdByText(wordText) || 0;
-  const props = getWordPropsByText(wordText, {
-    type: 'field',              // 'field' для полей ввода, 'row' для обычного отображения
-    direction: 'direct',        // 'direct' (lat→rus), 'reverse' (rus→lat), 'both'
-    hideAvailableWord: hideAvailableWord,   // true - скрыть слово, которое не надо отгадывать
-    vertical: vertical,         // true - вертикальное расположение
-    directValue: groupCheck.answers[wordId] || '',
-    onDirectChange: groupCheck.setAnswer,
-    highlightDirectCorrect: groupCheck.results[wordId] === true,
-    highlightDirectIncorrect: groupCheck.results[wordId] === false,
-  });
-  
-  return props ? <Word {...props} /> : <div>Слово "{wordText}" не найдено</div>;
 };
 
 export default BaseTemplate;
