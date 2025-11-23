@@ -34,8 +34,9 @@ export const customCategoryComponents = {
   // 2. Откройте консоль (F12)
   // 3. Посмотрите логи: "dictionaryId = X, categoryId = Y"
   
-  //'6:121': SimpleExampleCategory,     // Простой пример с группировкой
-  // '6:122': BaseTemplate,           // Базовый шаблон для копирования
+  //'20:1721': SimpleExampleCategory,     // Простой пример с группировкой
+  '20:1721': BaseTemplate,           // Базовый шаблон для копирования
+  //'20:1721': VerbConjugationTable,    // Таблица спряжений глаголов
   
   // Примеры регистрации:
   // '1:5': SimpleExampleCategory,    // Словарь ID=1, Категория ID=5
