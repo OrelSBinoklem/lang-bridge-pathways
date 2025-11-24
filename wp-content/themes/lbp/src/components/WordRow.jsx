@@ -1,5 +1,6 @@
 import React from 'react';
 import WordEditor from '../WordEditor';
+import { useAdminMode } from '../custom/contexts/AdminModeContext';
 
 /**
  * Компонент для отображения одного слова в списке
@@ -33,6 +34,8 @@ const WordRow = ({
   isSelected = false,
   onToggleSelect
 }) => {
+  const { isAdminModeActive } = useAdminMode();
+  
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
     return userData && displayStatus.hasAttempts ? (
@@ -126,7 +129,7 @@ const WordRow = ({
         </span>
       )}
 
-      {showEditButton && window.myajax && window.myajax.is_admin && (
+      {showEditButton && isAdminModeActive && (
         <>
           <button
             className="edit-button"

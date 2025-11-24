@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import WordBulkMoveModal from './WordBulkMoveModal';
+import { useAdminMode } from '../custom/contexts/AdminModeContext';
 
 const { useState: wpUseState, useEffect: wpUseEffect } = wp.element;
 
@@ -24,15 +25,11 @@ const WordBulkActions = ({
   onClearSelection,
   onWordsChanged 
 }) => {
+  const { isAdminModeActive } = useAdminMode();
   const [showMoveModal, setShowMoveModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    setIsAdmin(window.myajax && window.myajax.is_admin);
-  }, []);
-
-  // Показываем только для админов
-  if (!isAdmin) {
+  // Показываем только для админов в режиме админа
+  if (!isAdminModeActive) {
     return null;
   }
 

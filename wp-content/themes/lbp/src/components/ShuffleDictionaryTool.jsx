@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAdminMode } from '../custom/contexts/AdminModeContext';
 const { useState } = wp.element;
 
 /**
@@ -60,8 +61,9 @@ const ShuffleDictionaryTool = ({ dictionaryId, onComplete }) => {
     }
   };
 
-  // Показываем кнопку только для админов
-  if (!window.myajax || !window.myajax.is_admin) {
+  // Показываем кнопку только для админов в режиме админа
+  const { isAdminModeActive } = useAdminMode();
+  if (!isAdminModeActive) {
     return null;
   }
 

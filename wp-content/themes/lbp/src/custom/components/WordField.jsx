@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WordEditor from '../../WordEditor';
+import { useAdminMode } from '../contexts/AdminModeContext';
 
 /**
  * Альтернативный компонент для отображения слова (копия WordRow)
@@ -38,6 +39,7 @@ const WordField = ({
   highlightReverseCorrect = false,
   highlightReverseIncorrect = false,
 }) => {
+  const { isAdminModeActive } = useAdminMode();
   const [showDirectTooltip, setShowDirectTooltip] = useState(false);
   const [showReverseTooltip, setShowReverseTooltip] = useState(false);
   
@@ -247,7 +249,7 @@ const WordField = ({
         </span>
       )}
 
-      {showEditButton && window.myajax && window.myajax.is_admin && (
+      {showEditButton && isAdminModeActive && (
         <button
           className="edit-button"
           style={{ marginLeft: "10px" }}

@@ -6,6 +6,7 @@ import ExamenWords from "./ExamenWords";
 import WordsMatrix from "./WordsMatrix";
 import DictionaryCategoryManagement from "./custom/components/DictionaryCategoryManagement";
 import ShuffleDictionaryTool from "./components/ShuffleDictionaryTool";
+import { AdminModeProvider, useAdminMode } from "./custom/contexts/AdminModeContext";
 
 if(document.getElementById('react-app-dictionary')) {
 	let dictionaryId = document.getElementById('react-app-dictionary').dataset.id;
@@ -348,20 +349,12 @@ if(document.getElementById('react-app-dictionary')) {
 		/>
 		
 		{/* Кнопки для админов */}
-		{window.myajax && window.myajax.is_admin && (
-			<div className="mode-buttons-container">
-				<button 
-					onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
-					className={'mode-button admin'}
-				>
-					{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
-				</button>
-				<ShuffleDictionaryTool 
-					dictionaryId={dictionaryId}
-					onComplete={refreshDictionaryWords}
-				/>
-			</div>
-		)}
+		<AdminButtons 
+			showCategoryManagement={showCategoryManagement}
+			setShowCategoryManagement={setShowCategoryManagement}
+			dictionaryId={dictionaryId}
+			refreshDictionaryWords={refreshDictionaryWords}
+		/>
 		
 		{showCategoryManagement && (
 			<div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
@@ -385,5 +378,60 @@ if(document.getElementById('react-app-dictionary')) {
 			</div>
 		);
 	};
-	render(<Dictionary />, document.getElementById(`react-app-dictionary`));
+	
+	// Компонент для кнопок админа
+	const AdminButtons = ({ showCategoryManagement, setShowCategoryManagement, dictionaryId, refreshDictionaryWords }) => {
+		const { isAdmin, isAdminModeEnabled, toggleAdminMode } = useAdminMode();
+		
+		if (!isAdmin) {
+			return null;
+		}
+		
+		return (
+			<div className="mode-buttons-container">
+				{/* Кнопка переключения режима админа */}
+				<button 
+					onClick={toggleAdminMode} 
+					className={`mode-button admin-mode-toggle ${isAdminModeEnabled ? 'active' : ''}`}
+					style={{
+						backgroundColor: isAdminModeEnabled ? '#28a745' : '#6c757d',
+						color: 'white',
+						border: 'none',
+						padding: '8px 16px',
+						borderRadius: '4px',
+						cursor: 'pointer',
+						fontSize: '14px',
+						fontWeight: 'bold',
+						marginRight: '10px'
+					}}
+					title={isAdminModeEnabled ? 'Режим админа включен' : 'Включить режим админа'}
+				>
+					{isAdminModeEnabled ? '🔓 Режим админа' : '🔒 Режим админа'}
+				</button>
+				
+				{/* Остальные кнопки показываем только в режиме админа */}
+				{isAdminModeEnabled && (
+					<>
+						<button 
+							onClick={() => setShowCategoryManagement(!showCategoryManagement)} 
+							className={'mode-button admin'}
+						>
+							{showCategoryManagement ? 'Скрыть управление' : 'Управление категориями'}
+						</button>
+						<ShuffleDictionaryTool 
+							dictionaryId={dictionaryId}
+							onComplete={refreshDictionaryWords}
+						/>
+					</>
+				)}
+			</div>
+		);
+	};
+	
+	render(
+		<AdminModeProvider>
+			<Dictionary />
+		</AdminModeProvider>, 
+		document.getElementById(`react-app-dictionary`)
+	);
 }

@@ -6,6 +6,7 @@ import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
+import { useAdminMode } from "../custom/contexts/AdminModeContext";
 
 // Тестовые данные для отладки (закомментируйте следующую строку в production)
 import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
@@ -14,6 +15,7 @@ const ENABLE_TEST_DATA = true; // Установите false, чтобы отк�
 const { useEffect, useState } = wp.element;
 
 const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
+  const { isAdminModeActive } = useAdminMode();
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
   const [currentWord, setCurrentWord] = useState(null); // Текущее слово для тренировки
@@ -521,7 +523,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
               ❓ Справка
             </button>
             
-            {window.myajax && window.myajax.is_admin && (
+            {isAdminModeActive && (
               <button
                 onClick={() => {
                   setShowReorder(true);
@@ -629,7 +631,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
           const isSelected = selectedWordIds.includes(word.id);
-          const showCheckbox = showBulkActions && window.myajax && window.myajax.is_admin;
+          const showCheckbox = showBulkActions && isAdminModeActive;
           
             return (
               <WordRow
@@ -663,7 +665,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         // в CategoryLayout для кастомных категорий и здесь для обычных
 
         // Тестовые строки для отладки (можно удалить в production)
-        if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
+        if (ENABLE_TEST_DATA && isAdminModeActive) {
           const separator = (
             <li key="test-separator" style={{ 
               margin: '20px 0', 
