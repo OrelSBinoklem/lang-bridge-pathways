@@ -18,8 +18,10 @@ const SimpleExampleCategory = (props) => {
   return (
     <CategoryLayout {...props}>
       {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText, getWordProps, getWord }) => {
-        const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText);
-        const group2Handlers = createGroupCheckHandlers(groupWords2, groupCheck2, checkGroupWords, getWordIdByText);
+        // isRevert: false = прямой перевод (lat→rus), true = обратный (rus→lat)
+        // В WordInGroup используется direction='direct', поэтому false
+        const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText, false);
+        const group2Handlers = createGroupCheckHandlers(groupWords2, groupCheck2, checkGroupWords, getWordIdByText, false);
         
         return (
           <WordProvider 
@@ -46,7 +48,7 @@ const SimpleExampleCategory = (props) => {
                   <div className="rainbow-word-card">
                     <div className="color-name">Красный</div>
                     {/* Можно передать wordText (текст слова) или wordId (ID слова) */}
-                    <WordInGroup wordText="cipars" groupCheck={groupCheck1} groupWords={groupWords1} vertical={true} />
+                    <WordInGroup wordText="cipars" groupCheck={groupCheck1} groupWords={groupWords1} vertical={true} hideAvailableWord={true} />
                     {/* Пример с wordId: <WordInGroup wordId={123} groupCheck={groupCheck1} groupWords={groupWords1} vertical={true} /> */}
                   </div>
                   <div className="rainbow-word-card">

@@ -20,7 +20,9 @@ const BaseTemplate = (props) => {
     <CategoryLayout {...props}>
       {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText, getWordProps, getWord }) => {
         // Обработчики для группы
-        const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText);
+        // isRevert: false = прямой перевод (lat→rus), true = обратный (rus→lat)
+        // В WordInGroup используется direction='direct', поэтому false
+        const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText, false);
         
         return (
           <WordProvider 

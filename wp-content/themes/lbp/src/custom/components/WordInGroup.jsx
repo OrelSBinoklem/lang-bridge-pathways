@@ -39,7 +39,10 @@ const WordInGroup = ({ wordText, wordId: wordIdProp, groupCheck, groupWords, hid
   
   // Если передан только wordText, находим ID
   if (wordText && !wordIdProp && getWordIdByText) {
-    finalWordId = getWordIdByText(wordText) || 0;
+    const foundId = getWordIdByText(wordText);
+    if (foundId) {
+      finalWordId = foundId;
+    }
   }
   
   // Если передан и wordId, и wordText, используем wordId (приоритет)
@@ -54,6 +57,11 @@ const WordInGroup = ({ wordText, wordId: wordIdProp, groupCheck, groupWords, hid
       groupWords.addWord(finalWordText);
     }
   }, [finalWordText, groupWords]);
+  
+  // Если не удалось определить wordId, не рендерим компонент
+  if (!finalWordId) {
+    return <div>Слово {wordIdProp ? `с ID ${wordIdProp}` : `"${wordText}"`} не найдено</div>;
+  }
   
   // Получаем пропсы для Word через контекст
   let props = null;
