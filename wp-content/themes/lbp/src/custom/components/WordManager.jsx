@@ -214,38 +214,65 @@ const WordManager = ({ dictionaryId, categories }) => {
             {loading ? (
               <p>Загрузка...</p>
             ) : words.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f0f0f0' }}>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>ID</th>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Слово</th>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 1</th>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 2</th>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 3</th>
-                    <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Действия</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {words.map(word => (
-                    <tr key={word.id}>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.id}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}><strong>{word.word}</strong></td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_1}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_2 || '—'}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_3 || '—'}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        <button 
-                          onClick={() => handleDeleteWord(word.id)}
-                          disabled={loading}
-                          style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', cursor: 'pointer' }}
-                        >
-                          Удалить
-                        </button>
-                      </td>
+              <>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f0f0f0' }}>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>ID</th>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Слово</th>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 1</th>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 2</th>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Перевод 3</th>
+                      <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Действия</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {words.map(word => (
+                      <tr key={word.id}>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.id}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}><strong>{word.word}</strong></td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_1}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_2 || '—'}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{word.translation_3 || '—'}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                          <button 
+                            onClick={() => handleDeleteWord(word.id)}
+                            disabled={loading}
+                            style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', cursor: 'pointer' }}
+                          >
+                            Удалить
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                
+                {/* Textarea с ID слов */}
+                <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', borderRadius: '5px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                    📋 ID слов (для копирования):
+                  </label>
+                  <textarea
+                    readOnly
+                    value={words.map(word => `${word.id} - ${word.word}`).join('\n')}
+                    style={{
+                      width: '100%',
+                      minHeight: '150px',
+                      padding: '10px',
+                      fontFamily: 'monospace',
+                      fontSize: '12px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      resize: 'vertical'
+                    }}
+                    onClick={(e) => e.target.select()}
+                  />
+                  <p style={{ marginTop: '10px', fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
+                    💡 Нажмите на поле, чтобы выделить все. Формат: ID - Слово
+                  </p>
+                </div>
+              </>
             ) : (
               <p>В этой категории нет слов. Добавьте первое слово!</p>
             )}

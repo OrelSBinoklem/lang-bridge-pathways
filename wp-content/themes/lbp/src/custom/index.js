@@ -34,4 +34,5 @@ export {
 
 // Примеры компонентов
 export { default as SimpleExampleCategory } from './categories/SimpleExampleCategory';
+export { default as VerbConjugationCategory } from './categories/VerbConjugationCategory';
 export { default as TestCategory } from './categories/TestCategory';

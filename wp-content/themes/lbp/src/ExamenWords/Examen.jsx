@@ -1,10 +1,9 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
-import WordManagement from "../components/WordManagement";
 import HelpModal from "../components/HelpModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
-import WordBulkActions from "../components/WordBulkActions";
+import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
 
@@ -585,58 +584,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           return false;
         });
 
-        // Блок массовых операций (только для админов и когда режим выбора активен)
-        const bulkActionsBlock = showBulkActions && window.myajax && window.myajax.is_admin && categoryId !== 0 && categoryWords.length > 0 ? (
-          <WordBulkActions
-            words={categoryWords}
-            categoryId={categoryId}
-            dictionaryId={dictionaryId}
-            selectedWordIds={selectedWordIds}
-            onSelectAll={() => {
-              if (selectedWordIds.length === categoryWords.length) {
-                setSelectedWordIds([]);
-              } else {
-                setSelectedWordIds(categoryWords.map(w => w.id));
-              }
-            }}
-            onClearSelection={() => {
-              setSelectedWordIds([]);
-              setShowBulkActions(false);
-            }}
-            onWordsChanged={() => {
-              setSelectedWordIds([]);
-              setShowBulkActions(false);
-              if (onRefreshDictionaryWords) {
-                onRefreshDictionaryWords();
-              }
-            }}
-          />
-        ) : null;
-
-        // Кнопка для активации режима массовых операций (внизу списка)
-        const bulkActionsToggleButton = !showBulkActions && window.myajax && window.myajax.is_admin && categoryId !== 0 && categoryWords.length > 0 ? (
-          <div style={{ 
-            marginTop: '20px', 
-            textAlign: 'center',
-            padding: '15px'
-          }}>
-            <button
-              onClick={() => setShowBulkActions(true)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#0073aa',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold'
-              }}
-            >
-              📦 Переместить/Скопировать слова
-            </button>
-          </div>
-        ) : null;
+        // Блок массовых операций теперь отображается через CategoryWordManagement
 
         // Создаём объект для быстрого доступа по ID
         const dictionaryWordsById = {};
@@ -658,6 +606,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           return (
             <CustomCategoryComponent
               category={{ id: categoryId, category_name: 'Категория ' + categoryId }}
+              categoryId={categoryId}
               words={categoryWords}
               dictionaryId={dictionaryId}
               dictionaryWords={dictionaryWords}
@@ -710,23 +659,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
             );
         });
 
-        // Блок управления словами (только для админов)
-        const wordManagementBlock = window.myajax && window.myajax.is_admin && categoryId !== 0 ? (
-          <li key="word-management" style={{ 
-            margin: '20px 0', 
-            padding: '15px', 
-            backgroundColor: '#e8f5e9', 
-            border: '2px solid #4CAF50', 
-            borderRadius: '5px',
-            listStyle: 'none'
-          }}>
-            <WordManagement 
-              dictionaryId={dictionaryId}
-              categoryId={categoryId}
-              onWordsChanged={onRefreshDictionaryWords}
-            />
-          </li>
-        ) : null;
+        // Блок управления словами теперь отображается через CategoryWordManagement
+        // в CategoryLayout для кастомных категорий и здесь для обычных
 
         // Тестовые строки для отладки (можно удалить в production)
         if (ENABLE_TEST_DATA && window.myajax && window.myajax.is_admin) {
@@ -768,22 +702,40 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           
           return (
             <>
-              {bulkActionsBlock}
               <ul className="words-education-list">
-                {[...realWords, wordManagementBlock, separator, ...testRows].filter(Boolean)}
+                {[...realWords, separator, ...testRows].filter(Boolean)}
               </ul>
-              {bulkActionsToggleButton}
+              {/* Управление словами - отображается во всех категориях */}
+              <CategoryWordManagement
+                dictionaryId={dictionaryId}
+                categoryId={categoryId}
+                categoryWords={categoryWords}
+                onWordsChanged={onRefreshDictionaryWords}
+                externalShowBulkActions={showBulkActions}
+                externalSelectedWordIds={selectedWordIds}
+                onBulkActionsToggle={setShowBulkActions}
+                onSelectedWordsChange={setSelectedWordIds}
+              />
             </>
           );
         }
 
         return (
           <>
-            {bulkActionsBlock}
             <ul className="words-education-list">
               {realWords}
             </ul>
-            {bulkActionsToggleButton}
+            {/* Управление словами - отображается во всех категориях */}
+            <CategoryWordManagement
+              dictionaryId={dictionaryId}
+              categoryId={categoryId}
+              categoryWords={categoryWords}
+              onWordsChanged={onRefreshDictionaryWords}
+              externalShowBulkActions={showBulkActions}
+              externalSelectedWordIds={selectedWordIds}
+              onBulkActionsToggle={setShowBulkActions}
+              onSelectedWordsChange={setSelectedWordIds}
+            />
           </>
         );
       })()}

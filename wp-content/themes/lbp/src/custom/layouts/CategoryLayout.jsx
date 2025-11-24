@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { checkTranslation, getWordDisplayStatusEducation, getWordDisplayStatusExamen, formatTime, getCooldownTime, groupWordsByStatus, getWordsStats } from '../utils/helpers';
+import CategoryWordManagement from '../components/CategoryWordManagement';
 
 /**
  * Универсальный layout для кастомных категорий
@@ -30,6 +31,7 @@ const CategoryLayout = ({
   mode,
   currentTime,
   children, // Render-функция
+  categoryId, // Прямая передача categoryId (опционально, для надежности)
 }) => {
   
   // ============================================================================
@@ -253,7 +255,22 @@ const CategoryLayout = ({
   // РЕНДЕР
   // ============================================================================
   
-  return children(renderProps);
+  // Определяем categoryId для управления словами
+  // Приоритет: прямой проп categoryId > category.id > 0
+  const categoryIdForManagement = categoryId || category?.id || (category && typeof category === 'object' && 'id' in category ? category.id : null) || 0;
+  
+  return (
+    <>
+      {children(renderProps)}
+      {/* Управление словами - отображается во всех категориях (и кастомных, и обычных) */}
+      <CategoryWordManagement
+        dictionaryId={dictionaryId}
+        categoryId={categoryIdForManagement}
+        categoryWords={words}
+        onWordsChanged={onRefreshDictionaryWords}
+      />
+    </>
+  );
 };
 
 export default CategoryLayout;
