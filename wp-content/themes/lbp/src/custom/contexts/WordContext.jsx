@@ -8,9 +8,9 @@ const WordContext = createContext(null);
 /**
  * Провайдер контекста
  */
-export const WordProvider = ({ children, getWordPropsByText, getWordIdByText }) => {
+export const WordProvider = ({ children, getWordPropsByText, getWordIdByText, getWordProps, getWord }) => {
   return (
-    <WordContext.Provider value={{ getWordPropsByText, getWordIdByText }}>
+    <WordContext.Provider value={{ getWordPropsByText, getWordIdByText, getWordProps, getWord }}>
       {children}
     </WordContext.Provider>
   );

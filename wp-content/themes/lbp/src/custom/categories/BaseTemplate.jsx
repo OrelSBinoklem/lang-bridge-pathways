@@ -18,12 +18,17 @@ const BaseTemplate = (props) => {
   
   return (
     <CategoryLayout {...props}>
-      {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText }) => {
+      {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText, getWordProps, getWord }) => {
         // Обработчики для группы
         const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText);
         
         return (
-          <WordProvider getWordPropsByText={getWordPropsByText} getWordIdByText={getWordIdByText}>
+          <WordProvider 
+            getWordPropsByText={getWordPropsByText} 
+            getWordIdByText={getWordIdByText}
+            getWordProps={getWordProps}
+            getWord={getWord}
+          >
             <div className="custom-category">
               {/* Заголовок */}
               <h2>{props.category.category_name}</h2>

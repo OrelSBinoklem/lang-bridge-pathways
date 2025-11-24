@@ -17,12 +17,17 @@ const SimpleExampleCategory = (props) => {
   
   return (
     <CategoryLayout {...props}>
-      {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText }) => {
+      {({ getWordPropsByText, stats, checkGroupWords, getWordIdByText, getWordProps, getWord }) => {
         const group1Handlers = createGroupCheckHandlers(groupWords1, groupCheck1, checkGroupWords, getWordIdByText);
         const group2Handlers = createGroupCheckHandlers(groupWords2, groupCheck2, checkGroupWords, getWordIdByText);
         
         return (
-          <WordProvider getWordPropsByText={getWordPropsByText} getWordIdByText={getWordIdByText}>
+          <WordProvider 
+            getWordPropsByText={getWordPropsByText} 
+            getWordIdByText={getWordIdByText}
+            getWordProps={getWordProps}
+            getWord={getWord}
+          >
             <div className="simple-custom-category">
               {/* Заголовок */}
               <div className="category-header">
@@ -40,7 +45,9 @@ const SimpleExampleCategory = (props) => {
                 <div className="words-container">
                   <div className="rainbow-word-card">
                     <div className="color-name">Красный</div>
+                    {/* Можно передать wordText (текст слова) или wordId (ID слова) */}
                     <WordInGroup wordText="cipars" groupCheck={groupCheck1} groupWords={groupWords1} vertical={true} />
+                    {/* Пример с wordId: <WordInGroup wordId={123} groupCheck={groupCheck1} groupWords={groupWords1} vertical={true} /> */}
                   </div>
                   <div className="rainbow-word-card">
                     <div className="color-name">Синий</div>
