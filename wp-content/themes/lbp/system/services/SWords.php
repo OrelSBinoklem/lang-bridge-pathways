@@ -141,10 +141,10 @@ class WordsService {
 
         // Получаем все категории словаря
         $query = $wpdb->prepare("
-        SELECT id, name, parent_id
+        SELECT id, name, parent_id, `order`
         FROM $categories_table
         WHERE dictionary_id = %d
-        ORDER BY id ASC
+        ORDER BY `order` ASC, id ASC
     ", $dictionary_id);
 
         $categories = $wpdb->get_results($query, ARRAY_A);
@@ -166,6 +166,16 @@ class WordsService {
                 $tree[] = $category;
             }
         }
+
+        // Сортируем по полю order (если оно есть), затем по id
+        usort($tree, function($a, $b) {
+            $orderA = isset($a['order']) ? intval($a['order']) : 0;
+            $orderB = isset($b['order']) ? intval($b['order']) : 0;
+            if ($orderA !== $orderB) {
+                return $orderA - $orderB;
+            }
+            return intval($a['id']) - intval($b['id']);
+        });
 
         return $tree;
     }

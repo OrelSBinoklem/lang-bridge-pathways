@@ -48,11 +48,27 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
   // Примечание: генерация фейковых категорий происходит в Dictionary.jsx
   // CategoryTree только отображает категории, переданные через пропы
 
+  // Функция для сортировки категорий по полю order
+  const sortCategoriesByOrder = (categories) => {
+    return [...categories].sort((a, b) => {
+      const orderA = a.order !== undefined ? parseInt(a.order) : 0;
+      const orderB = b.order !== undefined ? parseInt(b.order) : 0;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      // Если order одинаковый, сортируем по id
+      return parseInt(a.id) - parseInt(b.id);
+    });
+  };
+
   // Функция для рекурсивного рендера дерева категорий
   const renderCategoryTree = (tree, subCat = false) => {
+    // Сортируем категории по полю order перед рендерингом
+    const sortedTree = sortCategoriesByOrder(tree);
+    
     return (
       <ul className={subCat ? 'category-three-sub' : 'category-three'}>
-        {tree.map((category) => (
+        {sortedTree.map((category) => (
           <li
             onClick={() => subCat && onCategoryClick && onCategoryClick(category)}
             key={category.id}
