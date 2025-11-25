@@ -169,15 +169,177 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
   const flatCategories = getFlatCategories(categories);
   console.log('flatCategories for select:', flatCategories);
 
-  const renderCategoryTree = (categories, level = 0) => {
-    return categories.map((category) => (
-      <div key={category.id} style={{ marginLeft: level * 20 }}>
-        <div style={{ 
-          padding: '10px', 
-          border: '1px solid #ddd', 
-          margin: '5px 0',
-          backgroundColor: '#f9f9f9'
-        }}>
+  // Состояние для drag and drop
+  const [draggedCategoryId, setDraggedCategoryId] = useState(null);
+  const [draggedCategoryParentId, setDraggedCategoryParentId] = useState(null);
+  const [categoriesState, setCategoriesState] = useState(categories);
+
+  // Синхронизируем локальное состояние с пропами
+  useEffect(() => {
+    setCategoriesState(categories);
+  }, [categories]);
+
+  // Обработчики drag and drop
+  const handleDragStart = (e, category, parentId) => {
+    setDraggedCategoryId(category.id);
+    setDraggedCategoryParentId(parentId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.target);
+  };
+
+  const handleDragOver = (e, category, parentId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, targetCategory, parentId) => {
+    e.preventDefault();
+    
+    if (!draggedCategoryId || draggedCategoryId === targetCategory.id) {
+      setDraggedCategoryId(null);
+      setDraggedCategoryParentId(null);
+      return;
+    }
+
+    // Перетаскиваем только категории одного уровня (с одинаковым parent_id)
+    if (draggedCategoryParentId !== parentId) {
+      setDraggedCategoryId(null);
+      setDraggedCategoryParentId(null);
+      return;
+    }
+
+    // Получаем все категории текущего уровня
+    const getSiblings = (cats, parentId) => {
+      if (parentId === null || parentId === undefined) {
+        // Корневые категории
+        return cats.filter(cat => !cat.parent_id || cat.parent_id === null);
+      }
+      // Находим родительскую категорию и возвращаем её детей
+      const findCategory = (cats, id) => {
+        for (const cat of cats) {
+          if (cat.id === id) return cat;
+          if (cat.children) {
+            const found = findCategory(cat.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      const parent = findCategory(cats, parentId);
+      return parent?.children || [];
+    };
+
+    const siblings = getSiblings(categoriesState, parentId);
+    const sortedSiblings = [...siblings].sort((a, b) => {
+      const orderA = a.order !== undefined ? parseInt(a.order) : 0;
+      const orderB = b.order !== undefined ? parseInt(b.order) : 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return parseInt(a.id) - parseInt(b.id);
+    });
+
+    const draggedIndex = sortedSiblings.findIndex(c => c.id === draggedCategoryId);
+    const targetIndex = sortedSiblings.findIndex(c => c.id === targetCategory.id);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedCategoryId(null);
+      setDraggedCategoryParentId(null);
+      return;
+    }
+
+    // Перемещаем элемент
+    const newSiblings = [...sortedSiblings];
+    const [removed] = newSiblings.splice(draggedIndex, 1);
+    newSiblings.splice(targetIndex, 0, removed);
+
+    // Обновляем order для всех категорий
+    const categoryOrders = newSiblings.map((cat, index) => ({
+      category_id: cat.id,
+      order: index + 1
+    }));
+
+    // Сохраняем новый порядок на сервере
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('action', 'reorder_categories');
+      formData.append('dictionary_id', dictionaryId);
+      formData.append('parent_id', parentId || '');
+      formData.append('category_orders', JSON.stringify(categoryOrders));
+      formData.append('nonce', window.myajax.nonce);
+
+      const response = await axios.post(window.myajax.url, formData);
+
+      if (response.data.success) {
+        // Обновляем локальное состояние
+        const updateCategoryOrder = (cats, orders) => {
+          return cats.map(cat => {
+            const order = orders.find(o => o.category_id === cat.id);
+            const updatedCat = { ...cat, order: order ? order.order : cat.order };
+            if (cat.children && cat.children.length > 0) {
+              updatedCat.children = updateCategoryOrder(cat.children, orders);
+            }
+            return updatedCat;
+          });
+        };
+
+        // Обновляем локальное состояние с новыми order
+        const updatedCategories = updateCategoryOrder(categoriesState, categoryOrders);
+        setCategoriesState(updatedCategories);
+        
+        // Перезагружаем категории с сервера
+        await fetchCategories();
+        if (onCategoriesChange) {
+          onCategoriesChange();
+        }
+        setError('');
+      } else {
+        setError(response.data.message || 'Ошибка обновления порядка');
+      }
+    } catch (err) {
+      setError('Ошибка сети: ' + err.message);
+    } finally {
+      setLoading(false);
+      setDraggedCategoryId(null);
+      setDraggedCategoryParentId(null);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedCategoryId(null);
+    setDraggedCategoryParentId(null);
+  };
+
+  const renderCategoryTree = (categories, level = 0, parentId = null) => {
+    // Сортируем категории по order перед рендерингом
+    const sortedCategories = [...categories].sort((a, b) => {
+      const orderA = a.order !== undefined ? parseInt(a.order) : 0;
+      const orderB = b.order !== undefined ? parseInt(b.order) : 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return parseInt(a.id) - parseInt(b.id);
+    });
+
+    return sortedCategories.map((category) => {
+      const isDragging = draggedCategoryId === category.id;
+      const isDragOver = draggedCategoryId && draggedCategoryId !== category.id && draggedCategoryParentId === parentId;
+      
+      return (
+        <div key={category.id} style={{ marginLeft: level * 20 }}>
+          <div 
+            draggable={!editingCategory}
+            onDragStart={(e) => handleDragStart(e, category, parentId)}
+            onDragOver={(e) => handleDragOver(e, category, parentId)}
+            onDrop={(e) => handleDrop(e, category, parentId)}
+            onDragEnd={handleDragEnd}
+            style={{ 
+              padding: '10px', 
+              border: '1px solid #ddd', 
+              margin: '5px 0',
+              backgroundColor: isDragging ? '#e3f2fd' : isDragOver ? '#fff3e0' : '#f9f9f9',
+              cursor: editingCategory ? 'default' : 'move',
+              opacity: isDragging ? 0.5 : 1,
+              transition: 'all 0.2s ease'
+            }}
+          >
           {editingCategory && editingCategory.id === category.id ? (
             <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div>
@@ -226,17 +388,21 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
             </form>
           ) : (
             <div>
-              <strong>{category.name}</strong> (ID: {category.id}, Порядок: {category.order || 0})
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '18px', cursor: 'move' }} title="Перетащите для изменения порядка">☰</span>
+                <strong>{category.name}</strong> (ID: {category.id}, Порядок: {category.order || 0})
+              </div>
               <div style={{ marginTop: '5px' }}>
                 <button onClick={() => handleEdit(category)} disabled={loading}>Редактировать</button>
                 <button onClick={() => handleDelete(category.id)} disabled={loading} style={{ marginLeft: '10px', backgroundColor: '#dc3545', color: 'white' }}>Удалить</button>
               </div>
             </div>
           )}
+          </div>
+          {category.children && category.children.length > 0 && renderCategoryTree(category.children, level + 1, category.id)}
         </div>
-        {category.children && renderCategoryTree(category.children, level + 1)}
-      </div>
-    ));
+      );
+    });
   };
 
   return (
@@ -297,8 +463,8 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
         <h3>Существующие категории</h3>
         {loading && !categories.length ? (
           <p>Загрузка...</p>
-        ) : categories.length > 0 ? (
-          renderCategoryTree(categories)
+        ) : categoriesState.length > 0 ? (
+          renderCategoryTree(categoriesState)
         ) : (
           <p>Категории не найдены. Создайте первую категорию!</p>
         )}

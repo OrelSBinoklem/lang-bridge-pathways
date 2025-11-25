@@ -213,4 +213,59 @@ class CategoriesService {
             'child_count' => intval($child_count)
         ];
     }
+
+    /**
+     * Обновить порядок категорий одного уровня.
+     *
+     * @param int $dictionary_id ID словаря
+     * @param int|null $parent_id ID родительской категории (null для корневых)
+     * @param array $category_orders Массив [{category_id: 123, order: 1}, ...]
+     * @return int|WP_Error Количество обновленных категорий или ошибка
+     */
+    public static function reorder_categories($dictionary_id, $parent_id, $category_orders) {
+        global $wpdb;
+        
+        $categories_table = $wpdb->prefix . 'd_categories';
+        
+        // Проверяем, что все категории принадлежат словарю и имеют правильный parent_id
+        $parent_condition = $parent_id === null || $parent_id === '' 
+            ? 'parent_id IS NULL' 
+            : $wpdb->prepare('parent_id = %d', intval($parent_id));
+        
+        $valid_category_ids = $wpdb->get_col($wpdb->prepare("
+            SELECT id 
+            FROM $categories_table 
+            WHERE dictionary_id = %d AND $parent_condition
+        ", $dictionary_id));
+        
+        if (empty($valid_category_ids)) {
+            return new WP_Error('no_categories', 'Категории не найдены');
+        }
+        
+        $updated_count = 0;
+        
+        // Обновляем порядок для каждой категории
+        foreach ($category_orders as $item) {
+            $category_id = intval($item['category_id'] ?? 0);
+            $order = intval($item['order'] ?? 0);
+            
+            if (!$category_id || !in_array($category_id, $valid_category_ids)) {
+                continue; // Пропускаем категории, не принадлежащие этому уровню
+            }
+            
+            $result = $wpdb->update(
+                $categories_table,
+                ['order' => $order],
+                ['id' => $category_id],
+                ['%d'],
+                ['%d']
+            );
+            
+            if ($result !== false) {
+                $updated_count++;
+            }
+        }
+        
+        return $updated_count;
+    }
 }

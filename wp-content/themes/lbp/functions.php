@@ -907,6 +907,42 @@ class WordsAjaxHandler {
     }
 
     /**
+     * AJAX-метод для изменения порядка категорий одного уровня
+     */
+    public static function handle_reorder_categories() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'У вас нет прав для изменения порядка категорий.']);
+            wp_die();
+        }
+
+        $dictionary_id = intval($_POST['dictionary_id'] ?? 0);
+        $parent_id = $_POST['parent_id'] ?? '';
+        $category_orders_raw = $_POST['category_orders'] ?? '';
+        
+        // category_orders - это JSON массив объектов [{category_id: 123, order: 1}, ...]
+        $category_orders = json_decode(stripslashes($category_orders_raw), true);
+
+        if (!$dictionary_id || empty($category_orders) || !is_array($category_orders)) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        // Преобразуем parent_id: пустая строка -> null
+        $parent_id = $parent_id === '' ? null : intval($parent_id);
+
+        $result = CategoriesService::reorder_categories($dictionary_id, $parent_id, $category_orders);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success(['reordered' => true, 'updated_count' => $result]);
+        }
+
+        wp_die();
+    }
+
+    /**
      * AJAX-метод для установки order и перемешивания слов словаря
      * ВАЖНО: Необратимая операция!
      */
@@ -1050,6 +1086,7 @@ add_action('wp_ajax_delete_category', ['WordsAjaxHandler', 'handle_delete_catego
 add_action('wp_ajax_create_word', ['WordsAjaxHandler', 'handle_create_word']);
 add_action('wp_ajax_delete_word', ['WordsAjaxHandler', 'handle_delete_word']);
 add_action('wp_ajax_reorder_category_words', ['WordsAjaxHandler', 'handle_reorder_category_words']);
+add_action('wp_ajax_reorder_categories', ['WordsAjaxHandler', 'handle_reorder_categories']);
 add_action('wp_ajax_initialize_and_shuffle_dictionary', ['WordsAjaxHandler', 'handle_initialize_and_shuffle_dictionary']);
 add_action('wp_ajax_sort_words_with_ai', ['WordsAjaxHandler', 'handle_sort_words_with_ai']);
 add_action('wp_ajax_get_all_dictionaries', ['WordsAjaxHandler', 'handle_get_all_dictionaries']);
