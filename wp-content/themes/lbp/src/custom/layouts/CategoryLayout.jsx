@@ -67,6 +67,20 @@ const CategoryLayout = ({
         
         results[wordId] = isCorrect;
         
+        // Определяем is_first_attempt по той же логике, что и в Examen.jsx
+        // Логика: если mode_education === 1 (режим "Учу"), то is_first_attempt = 0
+        // Если mode_education === 0 (не в режиме "Учу"), то is_first_attempt = 1
+        const userData = userWordsData[wordId];
+        let me = isRevert ? userData?.mode_education_revert : userData?.mode_education;
+        let isFirstAttempt = me ? 0 : 1; // Первая попытка если не в режиме "Учу"
+        
+        console.log(`🔍 Определение is_first_attempt:`, { 
+          wordId, 
+          isRevert, 
+          mode_education: me,
+          isFirstAttempt 
+        });
+        
         // Обновляем прогресс в БД
         try {
           const formData = new FormData();
@@ -74,9 +88,9 @@ const CategoryLayout = ({
           formData.append("word_id", wordId);
           formData.append("is_revert", isRevert ? 1 : 0);
           formData.append("is_correct", isCorrect ? 1 : 0);
-          formData.append("is_first_attempt", 1);
+          formData.append("is_first_attempt", isFirstAttempt);
           
-          console.log('📤 Отправка в БД...', { wordId, isCorrect, isRevert });
+          console.log('📤 Отправка в БД...', { wordId, isCorrect, isRevert, isFirstAttempt });
           const response = await axios.post(window.myajax.url, formData);
           console.log('📥 Ответ БД:', response.data);
           
@@ -247,6 +261,7 @@ const CategoryLayout = ({
     onToggleEdit,
     onRefreshDictionaryWords,
     onRefreshUserData,
+    formatTime,
     mode,
     currentTime,
   };

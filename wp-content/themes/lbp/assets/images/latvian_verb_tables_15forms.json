@@ -1,0 +1,4688 @@
+[
+  {
+    "table_number": 1,
+    "voice": "Darāmā kārta",
+    "infinitive": "būt",
+    "present_3sg": "ir",
+    "past_3sg": "bija",
+    "forms": {
+      "present": {
+        "1sg": "e̹smu",
+        "1pl": "e̹sam",
+        "2sg": "esi",
+        "2pl": "e̹sat",
+        "3sg": "ir",
+        "3pl": "ir"
+      },
+      "past": {
+        "1sg": "biju",
+        "1pl": "bijām",
+        "2sg": "biji",
+        "2pl": "bijāt",
+        "3sg": "bija",
+        "3pl": "bija"
+      },
+      "future": {
+        "1sg": "būšu",
+        "1pl": "būsim",
+        "2sg": "būsi",
+        "2pl": "būsiet",
+        "3sg": "būs",
+        "3pl": "būs"
+      }
+    }
+  },
+  {
+    "table_number": 2,
+    "voice": "Darāmā kārta",
+    "infinitive": "dot",
+    "present_3sg": "dod",
+    "past_3sg": "deva",
+    "forms": {
+      "present": {
+        "1sg": "dodu",
+        "1pl": "dodam",
+        "2sg": "dod",
+        "2pl": "dodat",
+        "3sg": "dod",
+        "3pl": "dod"
+      },
+      "past": {
+        "1sg": "devu",
+        "1pl": "devām",
+        "2sg": "devi",
+        "2pl": "devāt",
+        "3sg": "deva",
+        "3pl": "deva"
+      },
+      "future": {
+        "1sg": "došu",
+        "1pl": "dosim",
+        "2sg": "dosi",
+        "2pl": "dosiet",
+        "3sg": "dos",
+        "3pl": "dos"
+      }
+    }
+  },
+  {
+    "table_number": 3,
+    "voice": "Darāmā kārta",
+    "infinitive": "doties",
+    "present_3sg": "dodas",
+    "past_3sg": "devās",
+    "forms": {
+      "present": {
+        "1sg": "dodos",
+        "1pl": "dodamies",
+        "2sg": "dodies",
+        "2pl": "dodaties",
+        "3sg": "dodas",
+        "3pl": "dodas"
+      },
+      "past": {
+        "1sg": "devos",
+        "1pl": "devāmies",
+        "2sg": "devies",
+        "2pl": "devāties",
+        "3sg": "devās",
+        "3pl": "devās"
+      },
+      "future": {
+        "1sg": "došos",
+        "1pl": "dosimies",
+        "2sg": "dosies",
+        "2pl": "dosieties",
+        "3sg": "dosies",
+        "3pl": "dosies"
+      }
+    }
+  },
+  {
+    "table_number": 4,
+    "voice": "Darāmā kārta",
+    "infinitive": "iet",
+    "present_3sg": "iet",
+    "past_3sg": "gāja",
+    "forms": {
+      "present": {
+        "1sg": "eju",
+        "1pl": "ejam",
+        "2sg": "ej",
+        "2pl": "ejat",
+        "3sg": "iet",
+        "3pl": "iet"
+      },
+      "past": {
+        "1sg": "gāju",
+        "1pl": "gājām",
+        "2sg": "gāji",
+        "2pl": "gājāt",
+        "3sg": "gāja",
+        "3pl": "gāja"
+      },
+      "future": {
+        "1sg": "iešu",
+        "1pl": "iesim",
+        "2sg": "iesi",
+        "2pl": "iesiet",
+        "3sg": "ies",
+        "3pl": "ies"
+      }
+    }
+  },
+  {
+    "table_number": 5,
+    "voice": "Darāmā kārta",
+    "infinitive": "nebūt",
+    "present_3sg": "nav",
+    "past_3sg": "nebija",
+    "forms": {
+      "present": {
+        "1sg": "nee̹smu",
+        "1pl": "nee̹sam",
+        "2sg": "neesi",
+        "2pl": "nee̹sat",
+        "3sg": "nav",
+        "3pl": "nav"
+      },
+      "past": {
+        "1sg": "nebiju",
+        "1pl": "nebijām",
+        "2sg": "nebiji",
+        "2pl": "nebijāt",
+        "3sg": "nebija",
+        "3pl": "nebija"
+      },
+      "future": {
+        "1sg": "nebūšu",
+        "1pl": "nebūsim",
+        "2sg": "nebūsi",
+        "2pl": "nebūsiet",
+        "3sg": "nebūs",
+        "3pl": "nebūs"
+      }
+    }
+  },
+  {
+    "table_number": 6,
+    "voice": "Darāmā kārta",
+    "infinitive": "dabūt",
+    "present_3sg": "dabū",
+    "past_3sg": "dabūja",
+    "forms": {
+      "present": {
+        "1sg": "dabūju",
+        "1pl": "dabūjam",
+        "2sg": "dabū",
+        "2pl": "dabūjat",
+        "3sg": "dabū",
+        "3pl": "dabū"
+      },
+      "past": {
+        "1sg": "dabūju",
+        "1pl": "dabūjām",
+        "2sg": "dabūji",
+        "2pl": "dabūjāt",
+        "3sg": "dabūja",
+        "3pl": "dabūja"
+      },
+      "future": {
+        "1sg": "dabūšu",
+        "1pl": "dabūsim",
+        "2sg": "dabūsi",
+        "2pl": "dabūsiet",
+        "3sg": "dabūs",
+        "3pl": "dabūs"
+      }
+    }
+  },
+  {
+    "table_number": 7,
+    "voice": "Darāmā kārta",
+    "infinitive": "darboties",
+    "present_3sg": "darbojas",
+    "past_3sg": "darbojās",
+    "forms": {
+      "present": {
+        "1sg": "darbojos",
+        "1pl": "darbojamies",
+        "2sg": "darbojies",
+        "2pl": "darbojaties",
+        "3sg": "darbojas",
+        "3pl": "darbojas"
+      },
+      "past": {
+        "1sg": "darbojos",
+        "1pl": "darbojāmies",
+        "2sg": "darbojies",
+        "2pl": "darbojāties",
+        "3sg": "darbojās",
+        "3pl": "darbojās"
+      },
+      "future": {
+        "1sg": "darbošos",
+        "1pl": "darbosimies",
+        "2sg": "darbosies",
+        "2pl": "darbosieties",
+        "3sg": "darbosies",
+        "3pl": "darbosies"
+      }
+    }
+  },
+  {
+    "table_number": 8,
+    "voice": "Darāmā kārta",
+    "infinitive": "draudzēties",
+    "present_3sg": "draudzējas",
+    "past_3sg": "draudzējās",
+    "forms": {
+      "present": {
+        "1sg": "draudzējos",
+        "1pl": "draudzējamies",
+        "2sg": "draudzējies",
+        "2pl": "draudzējaties",
+        "3sg": "draudzējas",
+        "3pl": "draudzējas"
+      },
+      "past": {
+        "1sg": "draudzējos",
+        "1pl": "draudzējāmies",
+        "2sg": "draudzējies",
+        "2pl": "draudzējāties",
+        "3sg": "draudzējās",
+        "3pl": "draudzējās"
+      },
+      "future": {
+        "1sg": "draudzēšos",
+        "1pl": "draudzēsimies",
+        "2sg": "draudzēsies",
+        "2pl": "draudzēsieties",
+        "3sg": "draudzēsies",
+        "3pl": "draudzēsies"
+      }
+    }
+  },
+  {
+    "table_number": 9,
+    "voice": "Darāmā kārta",
+    "infinitive": "dzīvot",
+    "present_3sg": "dzīvo",
+    "past_3sg": "dzīvoja",
+    "forms": {
+      "present": {
+        "1sg": "dzīvoju",
+        "1pl": "dzīvojam",
+        "2sg": "dzīvo",
+        "2pl": "dzīvojat",
+        "3sg": "dzīvo",
+        "3pl": "dzīvo"
+      },
+      "past": {
+        "1sg": "dzīvoju",
+        "1pl": "dzīvojām",
+        "2sg": "dzīvoji",
+        "2pl": "dzīvojāt",
+        "3sg": "dzīvoja",
+        "3pl": "dzīvoja"
+      },
+      "future": {
+        "1sg": "dzīvošu",
+        "1pl": "dzīvosim",
+        "2sg": "dzīvosi",
+        "2pl": "dzīvosiet",
+        "3sg": "dzīvos",
+        "3pl": "dzīvos"
+      }
+    }
+  },
+  {
+    "table_number": 10,
+    "voice": "Darāmā kārta",
+    "infinitive": "pētīt",
+    "present_3sg": "pētī",
+    "past_3sg": "pētīja",
+    "forms": {
+      "present": {
+        "1sg": "pētīju",
+        "1pl": "pētījam",
+        "2sg": "pētī",
+        "2pl": "pētījat",
+        "3sg": "pētī",
+        "3pl": "pētī"
+      },
+      "past": {
+        "1sg": "pētīju",
+        "1pl": "pētījām",
+        "2sg": "pētīji",
+        "2pl": "pētījāt",
+        "3sg": "pētīja",
+        "3pl": "pētīja"
+      },
+      "future": {
+        "1sg": "pētīšu",
+        "1pl": "pētīsim",
+        "2sg": "pētīsi",
+        "2pl": "pētīsiet",
+        "3sg": "pētīs",
+        "3pl": "pētīs"
+      }
+    }
+  },
+  {
+    "table_number": 11,
+    "voice": "Darāmā kārta",
+    "infinitive": "priecāties",
+    "present_3sg": "priecājas",
+    "past_3sg": "priecājās",
+    "forms": {
+      "present": {
+        "1sg": "priecājos",
+        "1pl": "priecājamies",
+        "2sg": "priecājies",
+        "2pl": "priecājaties",
+        "3sg": "priecājas",
+        "3pl": "priecājas"
+      },
+      "past": {
+        "1sg": "priecājos",
+        "1pl": "priecājāmies",
+        "2sg": "priecājies",
+        "2pl": "priecājāties",
+        "3sg": "priecājās",
+        "3pl": "priecājās"
+      },
+      "future": {
+        "1sg": "priecāšos",
+        "1pl": "priecāsimies",
+        "2sg": "priecāsies",
+        "2pl": "priecāsieties",
+        "3sg": "priecāsies",
+        "3pl": "priecāsies"
+      }
+    }
+  },
+  {
+    "table_number": 12,
+    "voice": "Darāmā kārta",
+    "infinitive": "runāt",
+    "present_3sg": "runā",
+    "past_3sg": "runāja",
+    "forms": {
+      "present": {
+        "1sg": "runāju",
+        "1pl": "runājam",
+        "2sg": "runā",
+        "2pl": "runājat",
+        "3sg": "runā",
+        "3pl": "runā"
+      },
+      "past": {
+        "1sg": "runāju",
+        "1pl": "runājām",
+        "2sg": "runāji",
+        "2pl": "runājāt",
+        "3sg": "runāja",
+        "3pl": "runāja"
+      },
+      "future": {
+        "1sg": "runāšu",
+        "1pl": "runāsim",
+        "2sg": "runāsi",
+        "2pl": "runāsiet",
+        "3sg": "runās",
+        "3pl": "runās"
+      }
+    }
+  },
+  {
+    "table_number": 13,
+    "voice": "Darāmā kārta",
+    "infinitive": "zīmēt",
+    "present_3sg": "zīmē",
+    "past_3sg": "zīmēja",
+    "forms": {
+      "present": {
+        "1sg": "zīmēju",
+        "1pl": "zīmējam",
+        "2sg": "zīmē",
+        "2pl": "zīmējat",
+        "3sg": "zīmē",
+        "3pl": "zīmē"
+      },
+      "past": {
+        "1sg": "zīmēju",
+        "1pl": "zīmējām",
+        "2sg": "zīmēji",
+        "2pl": "zīmējāt",
+        "3sg": "zīmēja",
+        "3pl": "zīmēja"
+      },
+      "future": {
+        "1sg": "zīmēšu",
+        "1pl": "zīmēsim",
+        "2sg": "zīmēsi",
+        "2pl": "zīmēsiet",
+        "3sg": "zīmēs",
+        "3pl": "zīmēs"
+      }
+    }
+  },
+  {
+    "table_number": 14,
+    "voice": "Darāmā kārta",
+    "infinitive": "aicināt",
+    "present_3sg": "aicina",
+    "past_3sg": "aicināja",
+    "forms": {
+      "present": {
+        "1sg": "aicinu",
+        "1pl": "aicinām",
+        "2sg": "aicini",
+        "2pl": "aicināt",
+        "3sg": "aicina",
+        "3pl": "aicina"
+      },
+      "past": {
+        "1sg": "aicināju",
+        "1pl": "aicinājām",
+        "2sg": "aicināji",
+        "2pl": "aicinājāt",
+        "3sg": "aicināja",
+        "3pl": "aicināja"
+      },
+      "future": {
+        "1sg": "aicināšu",
+        "1pl": "aicināsim",
+        "2sg": "aicināsi",
+        "2pl": "aicināsiet",
+        "3sg": "aicinās",
+        "3pl": "aicinās"
+      }
+    }
+  },
+  {
+    "table_number": 15,
+    "voice": "Darāmā kārta",
+    "infinitive": "atsacīties",
+    "present_3sg": "atsakās",
+    "past_3sg": "atsacījās",
+    "forms": {
+      "present": {
+        "1sg": "atsakos",
+        "1pl": "atsakāmies",
+        "2sg": "atsakies",
+        "2pl": "atsakāties",
+        "3sg": "atsakās",
+        "3pl": "atsakās"
+      },
+      "past": {
+        "1sg": "atsacījos",
+        "1pl": "atsacījāmies",
+        "2sg": "atsacījies",
+        "2pl": "atsacījāties",
+        "3sg": "atsacījās",
+        "3pl": "atsacījās"
+      },
+      "future": {
+        "1sg": "atsacīšos",
+        "1pl": "atsacīsimies",
+        "2sg": "atsacīsies",
+        "2pl": "atsacīsieties",
+        "3sg": "atsacīsies",
+        "3pl": "atsacīsies"
+      }
+    }
+  },
+  {
+    "table_number": 16,
+    "voice": "Darāmā kārta",
+    "infinitive": "dziedāt",
+    "present_3sg": "dzied",
+    "past_3sg": "dziedāja",
+    "forms": {
+      "present": {
+        "1sg": "dziedu",
+        "1pl": "dziedam",
+        "2sg": "dziedi",
+        "2pl": "dziedat",
+        "3sg": "dzied",
+        "3pl": "dzied"
+      },
+      "past": {
+        "1sg": "dziedāju",
+        "1pl": "dziedājām",
+        "2sg": "dziedāji",
+        "2pl": "dziedājāt",
+        "3sg": "dziedāja",
+        "3pl": "dziedāja"
+      },
+      "future": {
+        "1sg": "dziedāšu",
+        "1pl": "dziedāsim",
+        "2sg": "dziedāsi",
+        "2pl": "dziedāsiet",
+        "3sg": "dziedās",
+        "3pl": "dziedās"
+      }
+    }
+  },
+  {
+    "table_number": 17,
+    "voice": "Darāmā kārta",
+    "infinitive": "gaidīt",
+    "present_3sg": "gaida",
+    "past_3sg": "gaidīja",
+    "forms": {
+      "present": {
+        "1sg": "gaidu",
+        "1pl": "gaidām",
+        "2sg": "gaidi",
+        "2pl": "gaidāt",
+        "3sg": "gaida",
+        "3pl": "gaida"
+      },
+      "past": {
+        "1sg": "gaidīju",
+        "1pl": "gaidījām",
+        "2sg": "gaidīji",
+        "2pl": "gaidījāt",
+        "3sg": "gaidīja",
+        "3pl": "gaidīja"
+      },
+      "future": {
+        "1sg": "gaidīšu",
+        "1pl": "gaidīsim",
+        "2sg": "gaidīsi",
+        "2pl": "gaidīsiet",
+        "3sg": "gaidīs",
+        "3pl": "gaidīs"
+      }
+    }
+  },
+  {
+    "table_number": 18,
+    "voice": "Darāmā kārta",
+    "infinitive": "gribēt",
+    "present_3sg": "grib",
+    "past_3sg": "gribēja",
+    "forms": {
+      "present": {
+        "1sg": "gribu",
+        "1pl": "gribam",
+        "2sg": "gribi",
+        "2pl": "gribat",
+        "3sg": "grib",
+        "3pl": "grib"
+      },
+      "past": {
+        "1sg": "gribēju",
+        "1pl": "gribējām",
+        "2sg": "gribēji",
+        "2pl": "gribējāt",
+        "3sg": "gribēja",
+        "3pl": "gribēja"
+      },
+      "future": {
+        "1sg": "gribēšu",
+        "1pl": "gribēsim",
+        "2sg": "gribēsi",
+        "2pl": "gribēsiet",
+        "3sg": "gribēs",
+        "3pl": "gribēs"
+      }
+    }
+  },
+  {
+    "table_number": 19,
+    "voice": "Darāmā kārta",
+    "infinitive": "gulēt",
+    "present_3sg": "guļ",
+    "past_3sg": "gulēja",
+    "forms": {
+      "present": {
+        "1sg": "guļu",
+        "1pl": "guļam",
+        "2sg": "guli",
+        "2pl": "guļat",
+        "3sg": "guļ",
+        "3pl": "guļ"
+      },
+      "past": {
+        "1sg": "gulēju",
+        "1pl": "gulējām",
+        "2sg": "gulēji",
+        "2pl": "gulējāt",
+        "3sg": "gulēja",
+        "3pl": "gulēja"
+      },
+      "future": {
+        "1sg": "gulēšu",
+        "1pl": "gulēsim",
+        "2sg": "gulēsi",
+        "2pl": "gulēsiet",
+        "3sg": "gulēs",
+        "3pl": "gulēs"
+      }
+    }
+  },
+  {
+    "table_number": 20,
+    "voice": "Darāmā kārta",
+    "infinitive": "mācēt",
+    "present_3sg": "māk",
+    "past_3sg": "mācēja",
+    "forms": {
+      "present": {
+        "1sg": "māku",
+        "1pl": "mākam",
+        "2sg": "māki",
+        "2pl": "mākat",
+        "3sg": "māk",
+        "3pl": "māk"
+      },
+      "past": {
+        "1sg": "mācēju",
+        "1pl": "mācējām",
+        "2sg": "mācēji",
+        "2pl": "mācējāt",
+        "3sg": "mācēja",
+        "3pl": "mācēja"
+      },
+      "future": {
+        "1sg": "mācēšu",
+        "1pl": "mācēsim",
+        "2sg": "mācēsi",
+        "2pl": "mācēsiet",
+        "3sg": "mācēs",
+        "3pl": "mācēs"
+      }
+    }
+  },
+  {
+    "table_number": 21,
+    "voice": "Darāmā kārta",
+    "infinitive": "mācīties",
+    "present_3sg": "mācās",
+    "past_3sg": "mācījās",
+    "forms": {
+      "present": {
+        "1sg": "mācos",
+        "1pl": "mācāmies",
+        "2sg": "mācies",
+        "2pl": "mācāties",
+        "3sg": "mācās",
+        "3pl": "mācās"
+      },
+      "past": {
+        "1sg": "mācījos",
+        "1pl": "mācījāmies",
+        "2sg": "mācījies",
+        "2pl": "mācījāties",
+        "3sg": "mācījās",
+        "3pl": "mācījās"
+      },
+      "future": {
+        "1sg": "mācīšos",
+        "1pl": "mācīsimies",
+        "2sg": "mācīsies",
+        "2pl": "mācīsieties",
+        "3sg": "mācīsies",
+        "3pl": "mācīsies"
+      }
+    }
+  },
+  {
+    "table_number": 22,
+    "voice": "Darāmā kārta",
+    "infinitive": "peldēties",
+    "present_3sg": "peldas",
+    "past_3sg": "peldējās",
+    "forms": {
+      "present": {
+        "1sg": "pe̹ldos",
+        "1pl": "pe̹ldamies",
+        "2sg": "peldies",
+        "2pl": "pe̹ldaties",
+        "3sg": "pe̹ldas",
+        "3pl": "pe̹ldas"
+      },
+      "past": {
+        "1sg": "peldējos",
+        "1pl": "peldējāmies",
+        "2sg": "peldējies",
+        "2pl": "peldējāties",
+        "3sg": "peldējās",
+        "3pl": "peldējās"
+      },
+      "future": {
+        "1sg": "peldēšos",
+        "1pl": "peldēsimies",
+        "2sg": "peldēsies",
+        "2pl": "peldēsieties",
+        "3sg": "peldēsies",
+        "3pl": "peldēsies"
+      }
+    }
+  },
+  {
+    "table_number": 23,
+    "voice": "Darāmā kārta",
+    "infinitive": "pētīt",
+    "present_3sg": "pēta",
+    "past_3sg": "pētīja",
+    "forms": {
+      "present": {
+        "1sg": "ptu",
+        "1pl": "ptām",
+        "2sg": "pēti",
+        "2pl": "ptāt",
+        "3sg": "pta",
+        "3pl": "pta"
+      },
+      "past": {
+        "1sg": "pētīju",
+        "1pl": "pētījām",
+        "2sg": "pētīji",
+        "2pl": "pētījāt",
+        "3sg": "pētīja",
+        "3pl": "pētīja"
+      },
+      "future": {
+        "1sg": "pētīšu",
+        "1pl": "pētīsim",
+        "2sg": "pētīsi",
+        "2pl": "pētīsiet",
+        "3sg": "pētīs",
+        "3pl": "pētīs"
+      }
+    }
+  },
+  {
+    "table_number": 24,
+    "voice": "Darāmā kārta",
+    "infinitive": "raudzīt",
+    "present_3sg": "rauga",
+    "past_3sg": "raudzīja",
+    "forms": {
+      "present": {
+        "1sg": "raugu",
+        "1pl": "raugām",
+        "2sg": "raugi",
+        "2pl": "raugāt",
+        "3sg": "rauga",
+        "3pl": "rauga"
+      },
+      "past": {
+        "1sg": "raudzīju",
+        "1pl": "raudzījām",
+        "2sg": "raudzīji",
+        "2pl": "raudzījāt",
+        "3sg": "raudzīja",
+        "3pl": "raudzīja"
+      },
+      "future": {
+        "1sg": "raudzīšu",
+        "1pl": "raudzīsim",
+        "2sg": "raudzīsi",
+        "2pl": "raudzīsiet",
+        "3sg": "raudzīs",
+        "3pl": "raudzīs"
+      }
+    }
+  },
+  {
+    "table_number": 25,
+    "voice": "Darāmā kārta",
+    "infinitive": "raudzīties",
+    "present_3sg": "raugās",
+    "past_3sg": "raudzījās",
+    "forms": {
+      "present": {
+        "1sg": "raugos",
+        "1pl": "raugāmies",
+        "2sg": "raugies",
+        "2pl": "raugāties",
+        "3sg": "raugās",
+        "3pl": "raugās"
+      },
+      "past": {
+        "1sg": "raudzījos",
+        "1pl": "raudzījāmies",
+        "2sg": "raudzījies",
+        "2pl": "raudzījāties",
+        "3sg": "raudzījās",
+        "3pl": "raudzījās"
+      },
+      "future": {
+        "1sg": "raudzīšos",
+        "1pl": "raudzīsimies",
+        "2sg": "raudzīsies",
+        "2pl": "raudzīsieties",
+        "3sg": "raudzīsies",
+        "3pl": "raudzīsies"
+      }
+    }
+  },
+  {
+    "table_number": 26,
+    "voice": "Darāmā kārta",
+    "infinitive": "redzēt",
+    "present_3sg": "redz",
+    "past_3sg": "redzēja",
+    "forms": {
+      "present": {
+        "1sg": "re̹dzu",
+        "1pl": "re̹dzam",
+        "2sg": "redzi",
+        "2pl": "re̹dzat",
+        "3sg": "re̹dz",
+        "3pl": "re̹dz"
+      },
+      "past": {
+        "1sg": "redzēju",
+        "1pl": "redzējām",
+        "2sg": "redzēji",
+        "2pl": "redzējāt",
+        "3sg": "redzēja",
+        "3pl": "redzēja"
+      },
+      "future": {
+        "1sg": "redzēšu",
+        "1pl": "redzēsim",
+        "2sg": "redzēsi",
+        "2pl": "redzēsiet",
+        "3sg": "redzēs",
+        "3pl": "redzēs"
+      }
+    }
+  },
+  {
+    "table_number": 27,
+    "voice": "Darāmā kārta",
+    "infinitive": "sacīt",
+    "present_3sg": "saka",
+    "past_3sg": "sacīja",
+    "forms": {
+      "present": {
+        "1sg": "saku",
+        "1pl": "sakām",
+        "2sg": "saki",
+        "2pl": "sakāt",
+        "3sg": "saka",
+        "3pl": "saka"
+      },
+      "past": {
+        "1sg": "sacīju",
+        "1pl": "sacījām",
+        "2sg": "sacīji",
+        "2pl": "sacījāt",
+        "3sg": "sacīja",
+        "3pl": "sacīja"
+      },
+      "future": {
+        "1sg": "sacīšu",
+        "1pl": "sacīsim",
+        "2sg": "sacīsi",
+        "2pl": "sacīsiet",
+        "3sg": "sacīs",
+        "3pl": "sacīs"
+      }
+    }
+  },
+  {
+    "table_number": 28,
+    "voice": "Darāmā kārta",
+    "infinitive": "sēdēt",
+    "present_3sg": "sēž",
+    "past_3sg": "sēdēja",
+    "forms": {
+      "present": {
+        "1sg": "sēžu",
+        "1pl": "sēžam",
+        "2sg": "sēdi",
+        "2pl": "sēžat",
+        "3sg": "sēž",
+        "3pl": "sēž"
+      },
+      "past": {
+        "1sg": "sēdēju",
+        "1pl": "sēdējām",
+        "2sg": "sēdēji",
+        "2pl": "sēdējāt",
+        "3sg": "sēdēja",
+        "3pl": "sēdēja"
+      },
+      "future": {
+        "1sg": "sēdēšu",
+        "1pl": "sēdēsim",
+        "2sg": "sēdēsi",
+        "2pl": "sēdēsiet",
+        "3sg": "sēdēs",
+        "3pl": "sēdēs"
+      }
+    }
+  },
+  {
+    "table_number": 29,
+    "voice": "Darāmā kārta",
+    "infinitive": "tecēt",
+    "present_3sg": "tek",
+    "past_3sg": "tecēja",
+    "forms": {
+      "present": {
+        "1sg": "te̹ku",
+        "1pl": "te̹kam",
+        "2sg": "teci",
+        "2pl": "te̹kat",
+        "3sg": "te̹k",
+        "3pl": "te̹k"
+      },
+      "past": {
+        "1sg": "tecēju",
+        "1pl": "tecējām",
+        "2sg": "tecēji",
+        "2pl": "tecējāt",
+        "3sg": "tecēja",
+        "3pl": "tecēja"
+      },
+      "future": {
+        "1sg": "tecēšu",
+        "1pl": "tecēsim",
+        "2sg": "tecēsi",
+        "2pl": "tecēsiet",
+        "3sg": "tecēs",
+        "3pl": "tecēs"
+      }
+    }
+  },
+  {
+    "table_number": 30,
+    "voice": "Darāmā kārta",
+    "infinitive": "turēties",
+    "present_3sg": "turas",
+    "past_3sg": "turējās",
+    "forms": {
+      "present": {
+        "1sg": "turos",
+        "1pl": "turamies",
+        "2sg": "turies",
+        "2pl": "turaties",
+        "3sg": "turas",
+        "3pl": "turas"
+      },
+      "past": {
+        "1sg": "turējos",
+        "1pl": "turējāmies",
+        "2sg": "turējies",
+        "2pl": "turējāties",
+        "3sg": "turējās",
+        "3pl": "turējās"
+      },
+      "future": {
+        "1sg": "turēšos",
+        "1pl": "turēsimies",
+        "2sg": "turēsies",
+        "2pl": "turēsieties",
+        "3sg": "turēsies",
+        "3pl": "turēsies"
+      }
+    }
+  },
+  {
+    "table_number": 31,
+    "voice": "Darāmā kārta",
+    "infinitive": "turpināties",
+    "present_3sg": "turpinās",
+    "past_3sg": "turpinājās",
+    "forms": {
+      "present": {
+        "1sg": "turpinos",
+        "1pl": "turpināmies",
+        "2sg": "turpinies",
+        "2pl": "turpināties",
+        "3sg": "turpinās",
+        "3pl": "turpinās"
+      },
+      "past": {
+        "1sg": "turpinājos",
+        "1pl": "turpinājāmies",
+        "2sg": "turpinājies",
+        "2pl": "turpinājāties",
+        "3sg": "turpinājās",
+        "3pl": "turpinājās"
+      },
+      "future": {
+        "1sg": "turpināšos",
+        "1pl": "turpināsimies",
+        "2sg": "turpināsies",
+        "2pl": "turpināsieties",
+        "3sg": "turpināsies",
+        "3pl": "turpināsies"
+      }
+    }
+  },
+  {
+    "table_number": 32,
+    "voice": "Darāmā kārta",
+    "infinitive": "vajadzēt",
+    "present_3sg": "vajag",
+    "past_3sg": "vajadzēja",
+    "forms": {
+      "present": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "vajag",
+        "3pl": "vajag"
+      },
+      "past": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "vajadzēja",
+        "3pl": "vajadzēja"
+      },
+      "future": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "vajadzēs",
+        "3pl": "vajadzēs"
+      }
+    }
+  },
+  {
+    "table_number": 33,
+    "voice": "Darāmā kārta",
+    "infinitive": "veltīt",
+    "present_3sg": "velta",
+    "past_3sg": "veltīja",
+    "forms": {
+      "present": {
+        "1sg": "ve̹ltu",
+        "1pl": "ve̹ltām",
+        "2sg": "velti",
+        "2pl": "ve̹ltāt",
+        "3sg": "ve̹lta",
+        "3pl": "ve̹lta"
+      },
+      "past": {
+        "1sg": "veltīju",
+        "1pl": "veltījām",
+        "2sg": "veltīji",
+        "2pl": "veltījāt",
+        "3sg": "veltīja",
+        "3pl": "veltīja"
+      },
+      "future": {
+        "1sg": "veltīšu",
+        "1pl": "veltīsim",
+        "2sg": "veltīsi",
+        "2pl": "veltīsiet",
+        "3sg": "veltīs",
+        "3pl": "veltīs"
+      }
+    }
+  },
+  {
+    "table_number": 34,
+    "voice": "Darāmā kārta",
+    "infinitive": "zināt",
+    "present_3sg": "zina",
+    "past_3sg": "zināja",
+    "forms": {
+      "present": {
+        "1sg": "zinu",
+        "1pl": "zinām",
+        "2sg": "zini",
+        "2pl": "zināt",
+        "3sg": "zina",
+        "3pl": "zina"
+      },
+      "past": {
+        "1sg": "zināju",
+        "1pl": "zinājām",
+        "2sg": "zināji",
+        "2pl": "zinājāt",
+        "3sg": "zināja",
+        "3pl": "zināja"
+      },
+      "future": {
+        "1sg": "zināšu",
+        "1pl": "zināsim",
+        "2sg": "zināsi",
+        "2pl": "zināsiet",
+        "3sg": "zinās",
+        "3pl": "zinās"
+      }
+    }
+  },
+  {
+    "table_number": 35,
+    "voice": "Darāmā kārta",
+    "infinitive": "art",
+    "present_3sg": "ar",
+    "past_3sg": "ara",
+    "forms": {
+      "present": {
+        "1sg": "aru",
+        "1pl": "aram",
+        "2sg": "ar",
+        "2pl": "arat",
+        "3sg": "ar",
+        "3pl": "ar"
+      },
+      "past": {
+        "1sg": "aru",
+        "1pl": "arām",
+        "2sg": "ari",
+        "2pl": "arāt",
+        "3sg": "ara",
+        "3pl": "ara"
+      },
+      "future": {
+        "1sg": "aršu",
+        "1pl": "arsim",
+        "2sg": "arsi",
+        "2pl": "arsiet",
+        "3sg": "ars",
+        "3pl": "ars"
+      }
+    }
+  },
+  {
+    "table_number": 36,
+    "voice": "Darāmā kārta",
+    "infinitive": "atrast",
+    "present_3sg": "atrod",
+    "past_3sg": "atrada",
+    "forms": {
+      "present": {
+        "1sg": "atrodu",
+        "1pl": "atrodam",
+        "2sg": "atrodi",
+        "2pl": "atrodat",
+        "3sg": "atrod",
+        "3pl": "atrod"
+      },
+      "past": {
+        "1sg": "atradu",
+        "1pl": "atradām",
+        "2sg": "atradi",
+        "2pl": "atradāt",
+        "3sg": "atrada",
+        "3pl": "atrada"
+      },
+      "future": {
+        "1sg": "atradīšu",
+        "1pl": "atradīsim",
+        "2sg": "atradīsi",
+        "2pl": "atradīsiet",
+        "3sg": "atradīs",
+        "3pl": "atradīs"
+      }
+    }
+  },
+  {
+    "table_number": 37,
+    "voice": "Darāmā kārta",
+    "infinitive": "augt",
+    "present_3sg": "aug",
+    "past_3sg": "auga",
+    "forms": {
+      "present": {
+        "1sg": "augu",
+        "1pl": "augam",
+        "2sg": "audz",
+        "2pl": "augat",
+        "3sg": "aug",
+        "3pl": "aug"
+      },
+      "past": {
+        "1sg": "augu",
+        "1pl": "augām",
+        "2sg": "augi",
+        "2pl": "augāt",
+        "3sg": "auga",
+        "3pl": "auga"
+      },
+      "future": {
+        "1sg": "augšu",
+        "1pl": "augsim",
+        "2sg": "augsi",
+        "2pl": "augsiet",
+        "3sg": "augs",
+        "3pl": "augs"
+      }
+    }
+  },
+  {
+    "table_number": 38,
+    "voice": "Darāmā kārta",
+    "infinitive": "aut",
+    "present_3sg": "aun",
+    "past_3sg": "āva",
+    "forms": {
+      "present": {
+        "1sg": "aunu",
+        "1pl": "aunam",
+        "2sg": "aun",
+        "2pl": "aunat",
+        "3sg": "aun",
+        "3pl": "aun"
+      },
+      "past": {
+        "1sg": "āvu",
+        "1pl": "āvām",
+        "2sg": "āvi",
+        "2pl": "āvāt",
+        "3sg": "āva",
+        "3pl": "āva"
+      },
+      "future": {
+        "1sg": "aušu",
+        "1pl": "ausim",
+        "2sg": "ausi",
+        "2pl": "ausiet",
+        "3sg": "aus",
+        "3pl": "aus"
+      }
+    }
+  },
+  {
+    "table_number": 39,
+    "voice": "Darāmā kārta",
+    "infinitive": "berzt",
+    "present_3sg": "berž",
+    "past_3sg": "berza",
+    "forms": {
+      "present": {
+        "1sg": "beržu",
+        "1pl": "beržam",
+        "2sg": "berz",
+        "2pl": "beržat",
+        "3sg": "berž",
+        "3pl": "berž"
+      },
+      "past": {
+        "1sg": "berzu",
+        "1pl": "berzām",
+        "2sg": "berzi",
+        "2pl": "berzāt",
+        "3sg": "berza",
+        "3pl": "berza"
+      },
+      "future": {
+        "1sg": "berzīšu",
+        "1pl": "berzīsim",
+        "2sg": "berzīsi",
+        "2pl": "berzīsiet",
+        "3sg": "berzīs",
+        "3pl": "berzīs"
+      }
+    }
+  },
+  {
+    "table_number": 40,
+    "voice": "Darāmā kārta",
+    "infinitive": "berzties",
+    "present_3sg": "beržas",
+    "past_3sg": "berzās",
+    "forms": {
+      "present": {
+        "1sg": "beržos",
+        "1pl": "beržamies",
+        "2sg": "berzies",
+        "2pl": "beržaties",
+        "3sg": "beržas",
+        "3pl": "beržas"
+      },
+      "past": {
+        "1sg": "berzos",
+        "1pl": "berzāmies",
+        "2sg": "berzies",
+        "2pl": "berzāties",
+        "3sg": "berzās",
+        "3pl": "berzās"
+      },
+      "future": {
+        "1sg": "berzīšos",
+        "1pl": "berzīsimies",
+        "2sg": "berzīsies",
+        "2pl": "berzīsieties",
+        "3sg": "berzīsies",
+        "3pl": "berzīsies"
+      }
+    }
+  },
+  {
+    "table_number": 41,
+    "voice": "Darāmā kārta",
+    "infinitive": "bīties",
+    "present_3sg": "bīstas",
+    "past_3sg": "bijās",
+    "forms": {
+      "present": {
+        "1sg": "bīstos",
+        "1pl": "bīstamies",
+        "2sg": "bīsties",
+        "2pl": "bīstaties",
+        "3sg": "bīstas",
+        "3pl": "bīstas"
+      },
+      "past": {
+        "1sg": "bijos",
+        "1pl": "bijāmies",
+        "2sg": "bijies",
+        "2pl": "bijāties",
+        "3sg": "bijās",
+        "3pl": "bijās"
+      },
+      "future": {
+        "1sg": "bīšos",
+        "1pl": "bīsimies",
+        "2sg": "bīsies",
+        "2pl": "bīsieties",
+        "3sg": "bīsies",
+        "3pl": "bīsies"
+      }
+    }
+  },
+  {
+    "table_number": 42,
+    "voice": "Darāmā kārta",
+    "infinitive": "brēkt",
+    "present_3sg": "brēc",
+    "past_3sg": "brēca",
+    "forms": {
+      "present": {
+        "1sg": "brcu",
+        "1pl": "brcam",
+        "2sg": "brēc",
+        "2pl": "brcat",
+        "3sg": "brc",
+        "3pl": "brc"
+      },
+      "past": {
+        "1sg": "brēcu",
+        "1pl": "brēcām",
+        "2sg": "brēci",
+        "2pl": "brēcāt",
+        "3sg": "brēca",
+        "3pl": "brēca"
+      },
+      "future": {
+        "1sg": "brēkšu",
+        "1pl": "brēksim",
+        "2sg": "brēksi",
+        "2pl": "brēksiet",
+        "3sg": "brēks",
+        "3pl": "brēks"
+      }
+    }
+  },
+  {
+    "table_number": 43,
+    "voice": "Darāmā kārta",
+    "infinitive": "brist",
+    "present_3sg": "brien",
+    "past_3sg": "brida",
+    "forms": {
+      "present": {
+        "1sg": "brienu",
+        "1pl": "brienam",
+        "2sg": "brien",
+        "2pl": "brienat",
+        "3sg": "brien",
+        "3pl": "brien"
+      },
+      "past": {
+        "1sg": "bridu",
+        "1pl": "bridām",
+        "2sg": "bridi",
+        "2pl": "bridāt",
+        "3sg": "brida",
+        "3pl": "brida"
+      },
+      "future": {
+        "1sg": "bridīšu",
+        "1pl": "bridīsim",
+        "2sg": "bridīsi",
+        "2pl": "bridīsiet",
+        "3sg": "bridīs",
+        "3pl": "bridīs"
+      }
+    }
+  },
+  {
+    "table_number": 44,
+    "voice": "Darāmā kārta",
+    "infinitive": "brukt",
+    "present_3sg": "brūk",
+    "past_3sg": "bruka",
+    "forms": {
+      "present": {
+        "1sg": "brūku",
+        "1pl": "brūkam",
+        "2sg": "brūc",
+        "2pl": "brūkat",
+        "3sg": "brūk",
+        "3pl": "brūk"
+      },
+      "past": {
+        "1sg": "bruku",
+        "1pl": "brukām",
+        "2sg": "bruki",
+        "2pl": "brukāt",
+        "3sg": "bruka",
+        "3pl": "bruka"
+      },
+      "future": {
+        "1sg": "brukšu",
+        "1pl": "bruksim",
+        "2sg": "bruksi",
+        "2pl": "bruksiet",
+        "3sg": "bruks",
+        "3pl": "bruks"
+      }
+    }
+  },
+  {
+    "table_number": 45,
+    "voice": "Darāmā kārta",
+    "infinitive": "celt",
+    "present_3sg": "ceļ",
+    "past_3sg": "cēla",
+    "forms": {
+      "present": {
+        "1sg": "ceļu",
+        "1pl": "ceļam",
+        "2sg": "cel",
+        "2pl": "ceļat",
+        "3sg": "ceļ",
+        "3pl": "ceļ"
+      },
+      "past": {
+        "1sg": "cēlu",
+        "1pl": "cēlām",
+        "2sg": "cēli",
+        "2pl": "cēlāt",
+        "3sg": "cēla",
+        "3pl": "cēla"
+      },
+      "future": {
+        "1sg": "celšu",
+        "1pl": "celsim",
+        "2sg": "celsi",
+        "2pl": "celsiet",
+        "3sg": "cels",
+        "3pl": "cels"
+      }
+    }
+  },
+  {
+    "table_number": 46,
+    "voice": "Darāmā kārta",
+    "infinitive": "celties",
+    "present_3sg": "ceļas",
+    "past_3sg": "cēlās",
+    "forms": {
+      "present": {
+        "1sg": "ceļos",
+        "1pl": "ceļamies",
+        "2sg": "celies",
+        "2pl": "ceļaties",
+        "3sg": "ceļas",
+        "3pl": "ceļas"
+      },
+      "past": {
+        "1sg": "cēlos",
+        "1pl": "cēlāmies",
+        "2sg": "cēlies",
+        "2pl": "cēlāties",
+        "3sg": "cēlās",
+        "3pl": "cēlās"
+      },
+      "future": {
+        "1sg": "celšos",
+        "1pl": "celsimies",
+        "2sg": "celsies",
+        "2pl": "celsieties",
+        "3sg": "celsies",
+        "3pl": "celsies"
+      }
+    }
+  },
+  {
+    "table_number": 47,
+    "voice": "Darāmā kārta",
+    "infinitive": "cept",
+    "present_3sg": "cep",
+    "past_3sg": "cepa",
+    "forms": {
+      "present": {
+        "1sg": "ce̹pu",
+        "1pl": "ce̹pam",
+        "2sg": "cep",
+        "2pl": "ce̹pat",
+        "3sg": "ce̹p",
+        "3pl": "ce̹p"
+      },
+      "past": {
+        "1sg": "cepu",
+        "1pl": "cepām",
+        "2sg": "cepi",
+        "2pl": "cepāt",
+        "3sg": "cepa",
+        "3pl": "cepa"
+      },
+      "future": {
+        "1sg": "cepšu",
+        "1pl": "cepsim",
+        "2sg": "cepsi",
+        "2pl": "cepsiet",
+        "3sg": "ceps",
+        "3pl": "ceps"
+      }
+    }
+  },
+  {
+    "table_number": 48,
+    "voice": "Darāmā kārta",
+    "infinitive": "cepties",
+    "present_3sg": "cepas",
+    "past_3sg": "cepās",
+    "forms": {
+      "present": {
+        "1sg": "ce̹pos",
+        "1pl": "ce̹pamies",
+        "2sg": "cepies",
+        "2pl": "ce̹paties",
+        "3sg": "ce̹pas",
+        "3pl": "ce̹pas"
+      },
+      "past": {
+        "1sg": "cepos",
+        "1pl": "cepāmies",
+        "2sg": "cepies",
+        "2pl": "cepāties",
+        "3sg": "cepās",
+        "3pl": "cepās"
+      },
+      "future": {
+        "1sg": "cepšos",
+        "1pl": "cepsimies",
+        "2sg": "cepsies",
+        "2pl": "cepsieties",
+        "3sg": "cepsies",
+        "3pl": "cepsies"
+      }
+    }
+  },
+  {
+    "table_number": 49,
+    "voice": "Darāmā kārta",
+    "infinitive": "cirst",
+    "present_3sg": "cērt",
+    "past_3sg": "cirta",
+    "forms": {
+      "present": {
+        "1sg": "crtu",
+        "1pl": "crtam",
+        "2sg": "cērt",
+        "2pl": "crtat",
+        "3sg": "crt",
+        "3pl": "crt"
+      },
+      "past": {
+        "1sg": "cirtu",
+        "1pl": "cirtām",
+        "2sg": "cirti",
+        "2pl": "cirtāt",
+        "3sg": "cirta",
+        "3pl": "cirta"
+      },
+      "future": {
+        "1sg": "cirtīšu",
+        "1pl": "cirtīsim",
+        "2sg": "cirtīsi",
+        "2pl": "cirtīsiet",
+        "3sg": "cirtīs",
+        "3pl": "cirtīs"
+      }
+    }
+  },
+  {
+    "table_number": 50,
+    "voice": "Darāmā kārta",
+    "infinitive": "durt",
+    "present_3sg": "dur",
+    "past_3sg": "dūra",
+    "forms": {
+      "present": {
+        "1sg": "duru",
+        "1pl": "duram",
+        "2sg": "dur",
+        "2pl": "durat",
+        "3sg": "dur",
+        "3pl": "dur"
+      },
+      "past": {
+        "1sg": "dūru",
+        "1pl": "dūrām",
+        "2sg": "dūri",
+        "2pl": "dūrāt",
+        "3sg": "dūra",
+        "3pl": "dūra"
+      },
+      "future": {
+        "1sg": "duršu",
+        "1pl": "dursim",
+        "2sg": "dursi",
+        "2pl": "dursiet",
+        "3sg": "durs",
+        "3pl": "durs"
+      }
+    }
+  },
+  {
+    "table_number": 51,
+    "voice": "Darāmā kārta",
+    "infinitive": "dzert",
+    "present_3sg": "dzer",
+    "past_3sg": "dzēra",
+    "forms": {
+      "present": {
+        "1sg": "dzeru",
+        "1pl": "dzeram",
+        "2sg": "dzer",
+        "2pl": "dzerat",
+        "3sg": "dzer",
+        "3pl": "dzer"
+      },
+      "past": {
+        "1sg": "dzēru",
+        "1pl": "dzērām",
+        "2sg": "dzēri",
+        "2pl": "dzērāt",
+        "3sg": "dzēra",
+        "3pl": "dzēra"
+      },
+      "future": {
+        "1sg": "dzeršu",
+        "1pl": "dzersim",
+        "2sg": "dzersi",
+        "2pl": "dzersiet",
+        "3sg": "dzers",
+        "3pl": "dzers"
+      }
+    }
+  },
+  {
+    "table_number": 52,
+    "voice": "Darāmā kārta",
+    "infinitive": "dzert",
+    "present_3sg": "dzer",
+    "past_3sg": "dzēra",
+    "forms": {
+      "present": {
+        "1sg": "dze̹ru",
+        "1pl": "dze̹ram",
+        "2sg": "dzer",
+        "2pl": "dze̹rat",
+        "3sg": "dze̹r",
+        "3pl": "dze̹r"
+      },
+      "past": {
+        "1sg": "dzēru",
+        "1pl": "dzērām",
+        "2sg": "dzēri",
+        "2pl": "dzērāt",
+        "3sg": "dzēra",
+        "3pl": "dzēra"
+      },
+      "future": {
+        "1sg": "dzeršu",
+        "1pl": "dzersim",
+        "2sg": "dzersi",
+        "2pl": "dzersiet",
+        "3sg": "dzers",
+        "3pl": "dzers"
+      }
+    }
+  },
+  {
+    "table_number": 53,
+    "voice": "Darāmā kārta",
+    "infinitive": "dzīt",
+    "present_3sg": "dzen",
+    "past_3sg": "dzina",
+    "forms": {
+      "present": {
+        "1sg": "dze̹nu",
+        "1pl": "dze̹nam",
+        "2sg": "dzen",
+        "2pl": "dze̹nat",
+        "3sg": "dze̹n",
+        "3pl": "dze̹n"
+      },
+      "past": {
+        "1sg": "dzinu",
+        "1pl": "dzinām",
+        "2sg": "dzini",
+        "2pl": "dzināt",
+        "3sg": "dzina",
+        "3pl": "dzina"
+      },
+      "future": {
+        "1sg": "dzīšu",
+        "1pl": "dzīsim",
+        "2sg": "dzīsi",
+        "2pl": "dzīsiet",
+        "3sg": "dzīs",
+        "3pl": "dzīs"
+      }
+    }
+  },
+  {
+    "table_number": 54,
+    "voice": "Darāmā kārta",
+    "infinitive": "dzīties",
+    "present_3sg": "dzenas",
+    "past_3sg": "dzinās",
+    "forms": {
+      "present": {
+        "1sg": "dze̹nos",
+        "1pl": "dze̹namies",
+        "2sg": "dzenies",
+        "2pl": "dze̹naties",
+        "3sg": "dze̹nas",
+        "3pl": "dze̹nas"
+      },
+      "past": {
+        "1sg": "dzinos",
+        "1pl": "dzināmies",
+        "2sg": "dzinies",
+        "2pl": "dzināties",
+        "3sg": "dzinās",
+        "3pl": "dzinās"
+      },
+      "future": {
+        "1sg": "dzīšos",
+        "1pl": "dzīsimies",
+        "2sg": "dzīsies",
+        "2pl": "dzīsieties",
+        "3sg": "dzīsies",
+        "3pl": "dzīsies"
+      }
+    }
+  },
+  {
+    "table_number": 55,
+    "voice": "Darāmā kārta",
+    "infinitive": "elst",
+    "present_3sg": "elš",
+    "past_3sg": "elsa",
+    "forms": {
+      "present": {
+        "1sg": "elšu",
+        "1pl": "elšam",
+        "2sg": "els",
+        "2pl": "elšat",
+        "3sg": "elš",
+        "3pl": "elš"
+      },
+      "past": {
+        "1sg": "elsu",
+        "1pl": "elsām",
+        "2sg": "elsi",
+        "2pl": "elsāt",
+        "3sg": "elsa",
+        "3pl": "elsa"
+      },
+      "future": {
+        "1sg": "elsīšu",
+        "1pl": "elsīsim",
+        "2sg": "elsīsi",
+        "2pl": "elsīsiet",
+        "3sg": "elsīs",
+        "3pl": "elsīs"
+      }
+    }
+  },
+  {
+    "table_number": 56,
+    "voice": "Darāmā kārta",
+    "infinitive": "glābt",
+    "present_3sg": "glābj",
+    "past_3sg": "glāba",
+    "forms": {
+      "present": {
+        "1sg": "glābju",
+        "1pl": "glābjam",
+        "2sg": "glāb",
+        "2pl": "glābjat",
+        "3sg": "glābj",
+        "3pl": "glābj"
+      },
+      "past": {
+        "1sg": "glābu",
+        "1pl": "glābām",
+        "2sg": "glābi",
+        "2pl": "glābāt",
+        "3sg": "glāba",
+        "3pl": "glāba"
+      },
+      "future": {
+        "1sg": "glābšu",
+        "1pl": "glābsim",
+        "2sg": "glābsi",
+        "2pl": "glābsiet",
+        "3sg": "glābs",
+        "3pl": "glābs"
+      }
+    }
+  },
+  {
+    "table_number": 57,
+    "voice": "Darāmā kārta",
+    "infinitive": "glābties",
+    "present_3sg": "glābjas",
+    "past_3sg": "glābās",
+    "forms": {
+      "present": {
+        "1sg": "glābjos",
+        "1pl": "glābjamies",
+        "2sg": "glābies",
+        "2pl": "glābjaties",
+        "3sg": "glābjas",
+        "3pl": "glābjas"
+      },
+      "past": {
+        "1sg": "glābos",
+        "1pl": "glābāmies",
+        "2sg": "glābies",
+        "2pl": "glābāties",
+        "3sg": "glābās",
+        "3pl": "glābās"
+      },
+      "future": {
+        "1sg": "glābšos",
+        "1pl": "glābsimies",
+        "2sg": "glābsies",
+        "2pl": "glābsieties",
+        "3sg": "glābsies",
+        "3pl": "glābsies"
+      }
+    }
+  },
+  {
+    "table_number": 58,
+    "voice": "Darāmā kārta",
+    "infinitive": "gūt",
+    "present_3sg": "gūst",
+    "past_3sg": "guva",
+    "forms": {
+      "present": {
+        "1sg": "gūstu",
+        "1pl": "gūstam",
+        "2sg": "gūsti",
+        "2pl": "gūstat",
+        "3sg": "gūst",
+        "3pl": "gūst"
+      },
+      "past": {
+        "1sg": "guvu",
+        "1pl": "guvām",
+        "2sg": "guvi",
+        "2pl": "guvāt",
+        "3sg": "guva",
+        "3pl": "guva"
+      },
+      "future": {
+        "1sg": "gūšu",
+        "1pl": "gūsim",
+        "2sg": "gūsi",
+        "2pl": "gūsiet",
+        "3sg": "gūs",
+        "3pl": "gūs"
+      }
+    }
+  },
+  {
+    "table_number": 59,
+    "voice": "Darāmā kārta",
+    "infinitive": "iepazīties",
+    "present_3sg": "iepazīstas",
+    "past_3sg": "iepazinās",
+    "forms": {
+      "present": {
+        "1sg": "iepazīstos",
+        "1pl": "iepazīstamies",
+        "2sg": "iepazīsties",
+        "2pl": "iepazīstaties",
+        "3sg": "iepazīstas",
+        "3pl": "iepazīstas"
+      },
+      "past": {
+        "1sg": "iepazinos",
+        "1pl": "iepazināmies",
+        "2sg": "iepazinies",
+        "2pl": "iepazināties",
+        "3sg": "iepazinās",
+        "3pl": "iepazinās"
+      },
+      "future": {
+        "1sg": "iepazīšos",
+        "1pl": "iepazīsimies",
+        "2sg": "iepazīsies",
+        "2pl": "iepazīsieties",
+        "3sg": "iepazīsies",
+        "3pl": "iepazīsies"
+      }
+    }
+  },
+  {
+    "table_number": 60,
+    "voice": "Darāmā kārta",
+    "infinitive": "jaukt",
+    "present_3sg": "jauc",
+    "past_3sg": "jauca",
+    "forms": {
+      "present": {
+        "1sg": "jaucu",
+        "1pl": "jaucam",
+        "2sg": "jauc",
+        "2pl": "jaucat",
+        "3sg": "jauc",
+        "3pl": "jauc"
+      },
+      "past": {
+        "1sg": "jaucu",
+        "1pl": "jaucām",
+        "2sg": "jauci",
+        "2pl": "jaucāt",
+        "3sg": "jauca",
+        "3pl": "jauca"
+      },
+      "future": {
+        "1sg": "jaukšu",
+        "1pl": "jauksim",
+        "2sg": "jauksi",
+        "2pl": "jauksiet",
+        "3sg": "jauks",
+        "3pl": "jauks"
+      }
+    }
+  },
+  {
+    "table_number": 61,
+    "voice": "Darāmā kārta",
+    "infinitive": "jaukties",
+    "present_3sg": "jaucas",
+    "past_3sg": "jaucās",
+    "forms": {
+      "present": {
+        "1sg": "jaucos",
+        "1pl": "jaucamies",
+        "2sg": "jaucies",
+        "2pl": "jaucaties",
+        "3sg": "jaucas",
+        "3pl": "jaucas"
+      },
+      "past": {
+        "1sg": "jaucos",
+        "1pl": "jaucāmies",
+        "2sg": "jaucies",
+        "2pl": "jaucāties",
+        "3sg": "jaucās",
+        "3pl": "jaucās"
+      },
+      "future": {
+        "1sg": "jaukšos",
+        "1pl": "jauksimies",
+        "2sg": "jauksies",
+        "2pl": "jauksieties",
+        "3sg": "jauksies",
+        "3pl": "jauksies"
+      }
+    }
+  },
+  {
+    "table_number": 62,
+    "voice": "Darāmā kārta",
+    "infinitive": "just",
+    "present_3sg": "jūt",
+    "past_3sg": "juta",
+    "forms": {
+      "present": {
+        "1sg": "jūtu",
+        "1pl": "jūtam",
+        "2sg": "jūti",
+        "2pl": "jūtat",
+        "3sg": "jūt",
+        "3pl": "jūt"
+      },
+      "past": {
+        "1sg": "jutu",
+        "1pl": "jutām",
+        "2sg": "juti",
+        "2pl": "jutāt",
+        "3sg": "juta",
+        "3pl": "juta"
+      },
+      "future": {
+        "1sg": "jutīšu",
+        "1pl": "jutīsim",
+        "2sg": "jutīsi",
+        "2pl": "jutīsiet",
+        "3sg": "jutīs",
+        "3pl": "jutīs"
+      }
+    }
+  },
+  {
+    "table_number": 63,
+    "voice": "Darāmā kārta",
+    "infinitive": "justies",
+    "present_3sg": "jūtas",
+    "past_3sg": "jutās",
+    "forms": {
+      "present": {
+        "1sg": "jūtos",
+        "1pl": "jūtamies",
+        "2sg": "jūties",
+        "2pl": "jūtaties",
+        "3sg": "jūtas",
+        "3pl": "jūtas"
+      },
+      "past": {
+        "1sg": "jutos",
+        "1pl": "jutāmies",
+        "2sg": "juties",
+        "2pl": "jutāties",
+        "3sg": "jutās",
+        "3pl": "jutās"
+      },
+      "future": {
+        "1sg": "jutīšos",
+        "1pl": "jutīsimies",
+        "2sg": "jutīsies",
+        "2pl": "jutīsieties",
+        "3sg": "jutīsies",
+        "3pl": "jutīsies"
+      }
+    }
+  },
+  {
+    "table_number": 64,
+    "voice": "Darāmā kārta",
+    "infinitive": "kalst",
+    "present_3sg": "kalst",
+    "past_3sg": "kalta",
+    "forms": {
+      "present": {
+        "1sg": "kalstu",
+        "1pl": "kalstam",
+        "2sg": "kalsti",
+        "2pl": "kalstat",
+        "3sg": "kalst",
+        "3pl": "kalst"
+      },
+      "past": {
+        "1sg": "kaltu",
+        "1pl": "kaltām",
+        "2sg": "kalti",
+        "2pl": "kaltāt",
+        "3sg": "kalta",
+        "3pl": "kalta"
+      },
+      "future": {
+        "1sg": "kaltīšu",
+        "1pl": "kaltīsim",
+        "2sg": "kaltīsi",
+        "2pl": "kaltīsiet",
+        "3sg": "kaltīs",
+        "3pl": "kaltīs"
+      }
+    }
+  },
+  {
+    "table_number": 65,
+    "voice": "Darāmā kārta",
+    "infinitive": "kāpt",
+    "present_3sg": "kāpj",
+    "past_3sg": "kāpa",
+    "forms": {
+      "present": {
+        "1sg": "kāpju",
+        "1pl": "kāpjam",
+        "2sg": "kāp",
+        "2pl": "kāpjat",
+        "3sg": "kāpj",
+        "3pl": "kāpj"
+      },
+      "past": {
+        "1sg": "kāpu",
+        "1pl": "kāpām",
+        "2sg": "kāpi",
+        "2pl": "kāpāt",
+        "3sg": "kāpa",
+        "3pl": "kāpa"
+      },
+      "future": {
+        "1sg": "kāpšu",
+        "1pl": "kāpsim",
+        "2sg": "kāpsi",
+        "2pl": "kāpsiet",
+        "3sg": "kāps",
+        "3pl": "kāps"
+      }
+    }
+  },
+  {
+    "table_number": 66,
+    "voice": "Darāmā kārta",
+    "infinitive": "kārt",
+    "present_3sg": "kar",
+    "past_3sg": "kāra",
+    "forms": {
+      "present": {
+        "1sg": "karu",
+        "1pl": "karam",
+        "2sg": "kar",
+        "2pl": "karat",
+        "3sg": "kar",
+        "3pl": "kar"
+      },
+      "past": {
+        "1sg": "kāru",
+        "1pl": "kārām",
+        "2sg": "kāri",
+        "2pl": "kārāt",
+        "3sg": "kāra",
+        "3pl": "kāra"
+      },
+      "future": {
+        "1sg": "kāršu",
+        "1pl": "kārsim",
+        "2sg": "kārsi",
+        "2pl": "kārsiet",
+        "3sg": "kārs",
+        "3pl": "kārs"
+      }
+    }
+  },
+  {
+    "table_number": 67,
+    "voice": "Darāmā kārta",
+    "infinitive": "klupt",
+    "present_3sg": "klūp",
+    "past_3sg": "klupa",
+    "forms": {
+      "present": {
+        "1sg": "klūpu",
+        "1pl": "klūpam",
+        "2sg": "klūpi",
+        "2pl": "klūpat",
+        "3sg": "klūp",
+        "3pl": "klūp"
+      },
+      "past": {
+        "1sg": "klupu",
+        "1pl": "klupām",
+        "2sg": "klupi",
+        "2pl": "klupāt",
+        "3sg": "klupa",
+        "3pl": "klupa"
+      },
+      "future": {
+        "1sg": "klupšu",
+        "1pl": "klupsim",
+        "2sg": "klupsi",
+        "2pl": "klupsiet",
+        "3sg": "klups",
+        "3pl": "klups"
+      }
+    }
+  },
+  {
+    "table_number": 68,
+    "voice": "Darāmā kārta",
+    "infinitive": "krāt",
+    "present_3sg": "krāj",
+    "past_3sg": "krāja",
+    "forms": {
+      "present": {
+        "1sg": "krāju",
+        "1pl": "krājam",
+        "2sg": "krāj",
+        "2pl": "krājat",
+        "3sg": "krāj",
+        "3pl": "krāj"
+      },
+      "past": {
+        "1sg": "krāju",
+        "1pl": "krājām",
+        "2sg": "krāji",
+        "2pl": "krājāt",
+        "3sg": "krāja",
+        "3pl": "krāja"
+      },
+      "future": {
+        "1sg": "krāšu",
+        "1pl": "krāsim",
+        "2sg": "krāsi",
+        "2pl": "krāsiet",
+        "3sg": "krās",
+        "3pl": "krās"
+      }
+    }
+  },
+  {
+    "table_number": 69,
+    "voice": "Darāmā kārta",
+    "infinitive": "krist",
+    "present_3sg": "krīt",
+    "past_3sg": "krita",
+    "forms": {
+      "present": {
+        "1sg": "krītu",
+        "1pl": "krītam",
+        "2sg": "krīti",
+        "2pl": "krītat",
+        "3sg": "krīt",
+        "3pl": "krīt"
+      },
+      "past": {
+        "1sg": "kritu",
+        "1pl": "kritām",
+        "2sg": "kriti",
+        "2pl": "kritāt",
+        "3sg": "krita",
+        "3pl": "krita"
+      },
+      "future": {
+        "1sg": "kritīšu",
+        "1pl": "kritīsim",
+        "2sg": "kritīsi",
+        "2pl": "kritīsiet",
+        "3sg": "kritīs",
+        "3pl": "kritīs"
+      }
+    }
+  },
+  {
+    "table_number": 70,
+    "voice": "Darāmā kārta",
+    "infinitive": "kristies",
+    "present_3sg": "krītas",
+    "past_3sg": "kritās",
+    "forms": {
+      "present": {
+        "1sg": "krītos",
+        "1pl": "krītamies",
+        "2sg": "krīties",
+        "2pl": "krītaties",
+        "3sg": "krītas",
+        "3pl": "krītas"
+      },
+      "past": {
+        "1sg": "kritos",
+        "1pl": "kritāmies",
+        "2sg": "krities",
+        "2pl": "kritāties",
+        "3sg": "kritās",
+        "3pl": "kritās"
+      },
+      "future": {
+        "1sg": "kritīšos",
+        "1pl": "kritīsimies",
+        "2sg": "kritīsies",
+        "2pl": "kritīsieties",
+        "3sg": "kritīsies",
+        "3pl": "kritīsies"
+      }
+    }
+  },
+  {
+    "table_number": 71,
+    "voice": "Darāmā kārta",
+    "infinitive": "kult",
+    "present_3sg": "kuļ",
+    "past_3sg": "kūla",
+    "forms": {
+      "present": {
+        "1sg": "kuļu",
+        "1pl": "kuļam",
+        "2sg": "kul",
+        "2pl": "kuļat",
+        "3sg": "kuļ",
+        "3pl": "kuļ"
+      },
+      "past": {
+        "1sg": "kūlu",
+        "1pl": "kūlām",
+        "2sg": "kūli",
+        "2pl": "kūlāt",
+        "3sg": "kūla",
+        "3pl": "kūla"
+      },
+      "future": {
+        "1sg": "kulšu",
+        "1pl": "kulsim",
+        "2sg": "kulsi",
+        "2pl": "kulsiet",
+        "3sg": "kuls",
+        "3pl": "kuls"
+      }
+    }
+  },
+  {
+    "table_number": 72,
+    "voice": "Darāmā kārta",
+    "infinitive": "ķerties",
+    "present_3sg": "ķeras",
+    "past_3sg": "ķērās",
+    "forms": {
+      "present": {
+        "1sg": "ķe̹ros",
+        "1pl": "ķe̹ramies",
+        "2sg": "ķeries",
+        "2pl": "ķe̹raties",
+        "3sg": "ķe̹ras",
+        "3pl": "ķe̹ras"
+      },
+      "past": {
+        "1sg": "ķēros",
+        "1pl": "ķērāmies",
+        "2sg": "ķēries",
+        "2pl": "ķērāties",
+        "3sg": "ķērās",
+        "3pl": "ķērās"
+      },
+      "future": {
+        "1sg": "ķeršos",
+        "1pl": "ķersimies",
+        "2sg": "ķersies",
+        "2pl": "ķersieties",
+        "3sg": "ķersies",
+        "3pl": "ķersies"
+      }
+    }
+  },
+  {
+    "table_number": 73,
+    "voice": "Darāmā kārta",
+    "infinitive": "laist",
+    "present_3sg": "laiž",
+    "past_3sg": "laida",
+    "forms": {
+      "present": {
+        "1sg": "laižu",
+        "1pl": "laižam",
+        "2sg": "laid",
+        "2pl": "laižat",
+        "3sg": "laiž",
+        "3pl": "laiž"
+      },
+      "past": {
+        "1sg": "laidu",
+        "1pl": "laidām",
+        "2sg": "laidi",
+        "2pl": "laidāt",
+        "3sg": "laida",
+        "3pl": "laida"
+      },
+      "future": {
+        "1sg": "laidīšu",
+        "1pl": "laidīsim",
+        "2sg": "laidīsi",
+        "2pl": "laidīsiet",
+        "3sg": "laidīs",
+        "3pl": "laidīs"
+      }
+    }
+  },
+  {
+    "table_number": 74,
+    "voice": "Darāmā kārta",
+    "infinitive": "laisties",
+    "present_3sg": "laižas",
+    "past_3sg": "laidās",
+    "forms": {
+      "present": {
+        "1sg": "laižos",
+        "1pl": "laižamies",
+        "2sg": "laidies",
+        "2pl": "laižaties",
+        "3sg": "laižas",
+        "3pl": "laižas"
+      },
+      "past": {
+        "1sg": "laidos",
+        "1pl": "laidāmies",
+        "2sg": "laidies",
+        "2pl": "laidāties",
+        "3sg": "laidās",
+        "3pl": "laidās"
+      },
+      "future": {
+        "1sg": "laidīšos",
+        "1pl": "laidīsimies",
+        "2sg": "laidīsies",
+        "2pl": "laidīsieties",
+        "3sg": "laidīsies",
+        "3pl": "laidīsies"
+      }
+    }
+  },
+  {
+    "table_number": 75,
+    "voice": "Darāmā kārta",
+    "infinitive": "lauzt",
+    "present_3sg": "lauž",
+    "past_3sg": "lauza",
+    "forms": {
+      "present": {
+        "1sg": "laužu",
+        "1pl": "laužam",
+        "2sg": "lauz",
+        "2pl": "laužat",
+        "3sg": "lauž",
+        "3pl": "lauž"
+      },
+      "past": {
+        "1sg": "lauzu",
+        "1pl": "lauzām",
+        "2sg": "lauzi",
+        "2pl": "lauzāt",
+        "3sg": "lauza",
+        "3pl": "lauza"
+      },
+      "future": {
+        "1sg": "lauzīšu",
+        "1pl": "lauzīsim",
+        "2sg": "lauzīsi",
+        "2pl": "lauzīsiet",
+        "3sg": "lauzīs",
+        "3pl": "lauzīs"
+      }
+    }
+  },
+  {
+    "table_number": 76,
+    "voice": "Darāmā kārta",
+    "infinitive": "lauzties",
+    "present_3sg": "laužas",
+    "past_3sg": "lauzās",
+    "forms": {
+      "present": {
+        "1sg": "laužos",
+        "1pl": "laužamies",
+        "2sg": "lauzies",
+        "2pl": "laužaties",
+        "3sg": "laužas",
+        "3pl": "laužas"
+      },
+      "past": {
+        "1sg": "lauzos",
+        "1pl": "lauzāmies",
+        "2sg": "lauzies",
+        "2pl": "lauzāties",
+        "3sg": "lauzās",
+        "3pl": "lauzās"
+      },
+      "future": {
+        "1sg": "lauzīšos",
+        "1pl": "lauzīsimies",
+        "2sg": "lauzīsies",
+        "2pl": "lauzīsieties",
+        "3sg": "lauzīsies",
+        "3pl": "lauzīsies"
+      }
+    }
+  },
+  {
+    "table_number": 77,
+    "voice": "Darāmā kārta",
+    "infinitive": "lemt",
+    "present_3sg": "lemj",
+    "past_3sg": "lēma",
+    "forms": {
+      "present": {
+        "1sg": "lemju",
+        "1pl": "lemjam",
+        "2sg": "lemj",
+        "2pl": "lemjat",
+        "3sg": "lemj",
+        "3pl": "lemj"
+      },
+      "past": {
+        "1sg": "lēmu",
+        "1pl": "lēmām",
+        "2sg": "lēmi",
+        "2pl": "lēmāt",
+        "3sg": "lēma",
+        "3pl": "lēma"
+      },
+      "future": {
+        "1sg": "lemšu",
+        "1pl": "lemsim",
+        "2sg": "lemsi",
+        "2pl": "lemsiet",
+        "3sg": "lems",
+        "3pl": "lems"
+      }
+    }
+  },
+  {
+    "table_number": 78,
+    "voice": "Darāmā kārta",
+    "infinitive": "liet",
+    "present_3sg": "lej",
+    "past_3sg": "lēja",
+    "forms": {
+      "present": {
+        "1sg": "leju",
+        "1pl": "lejam",
+        "2sg": "lej",
+        "2pl": "lejat",
+        "3sg": "lej",
+        "3pl": "lej"
+      },
+      "past": {
+        "1sg": "lēju",
+        "1pl": "lējām",
+        "2sg": "lēji",
+        "2pl": "lējāt",
+        "3sg": "lēja",
+        "3pl": "lēja"
+      },
+      "future": {
+        "1sg": "liešu",
+        "1pl": "liesim",
+        "2sg": "liesi",
+        "2pl": "liesiet",
+        "3sg": "lies",
+        "3pl": "lies"
+      }
+    }
+  },
+  {
+    "table_number": 79,
+    "voice": "Darāmā kārta",
+    "infinitive": "līst",
+    "present_3sg": "lien",
+    "past_3sg": "līda",
+    "forms": {
+      "present": {
+        "1sg": "lienu",
+        "1pl": "lienam",
+        "2sg": "lien",
+        "2pl": "lienat",
+        "3sg": "lien",
+        "3pl": "lien"
+      },
+      "past": {
+        "1sg": "līdu",
+        "1pl": "līdām",
+        "2sg": "līdi",
+        "2pl": "līdāt",
+        "3sg": "līda",
+        "3pl": "līda"
+      },
+      "future": {
+        "1sg": "līdīšu",
+        "1pl": "līdīsim",
+        "2sg": "līdīsi",
+        "2pl": "līdīsiet",
+        "3sg": "līdīs",
+        "3pl": "līdīs"
+      }
+    }
+  },
+  {
+    "table_number": 80,
+    "voice": "Darāmā kārta",
+    "infinitive": "līt",
+    "present_3sg": "līst",
+    "past_3sg": "lija",
+    "forms": {
+      "present": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "līst",
+        "3pl": "līst"
+      },
+      "past": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "lija",
+        "3pl": "lija"
+      },
+      "future": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "līs",
+        "3pl": "līs"
+      }
+    }
+  },
+  {
+    "table_number": 81,
+    "voice": "Darāmā kārta",
+    "infinitive": "lūgt",
+    "present_3sg": "lūdz",
+    "past_3sg": "lūdza",
+    "forms": {
+      "present": {
+        "1sg": "lūdzu",
+        "1pl": "lūdzam",
+        "2sg": "lūdz",
+        "2pl": "lūdzat",
+        "3sg": "lūdz",
+        "3pl": "lūdz"
+      },
+      "past": {
+        "1sg": "lūdzu",
+        "1pl": "lūdzām",
+        "2sg": "lūdzi",
+        "2pl": "lūdzāt",
+        "3sg": "lūdza",
+        "3pl": "lūdza"
+      },
+      "future": {
+        "1sg": "lūgšu",
+        "1pl": "lūgsim",
+        "2sg": "lūgsi",
+        "2pl": "lūgsiet",
+        "3sg": "lūgs",
+        "3pl": "lūgs"
+      }
+    }
+  },
+  {
+    "table_number": 82,
+    "voice": "Darāmā kārta",
+    "infinitive": "lūgties",
+    "present_3sg": "lūdzas",
+    "past_3sg": "lūdzās",
+    "forms": {
+      "present": {
+        "1sg": "lūdzos",
+        "1pl": "lūdzamies",
+        "2sg": "lūdzies",
+        "2pl": "lūdzaties",
+        "3sg": "lūdzas",
+        "3pl": "lūdzas"
+      },
+      "past": {
+        "1sg": "lūdzos",
+        "1pl": "lūdzāmies",
+        "2sg": "lūdzies",
+        "2pl": "lūdzāties",
+        "3sg": "lūdzās",
+        "3pl": "lūdzās"
+      },
+      "future": {
+        "1sg": "lūgšos",
+        "1pl": "lūgsimies",
+        "2sg": "lūgsies",
+        "2pl": "lūgsieties",
+        "3sg": "lūgsies",
+        "3pl": "lūgsies"
+      }
+    }
+  },
+  {
+    "table_number": 83,
+    "voice": "Darāmā kārta",
+    "infinitive": "lūzt",
+    "present_3sg": "lūst",
+    "past_3sg": "lūza",
+    "forms": {
+      "present": {
+        "1sg": "lūstu",
+        "1pl": "lūstam",
+        "2sg": "lūsti",
+        "2pl": "lūstat",
+        "3sg": "lūst",
+        "3pl": "lūst"
+      },
+      "past": {
+        "1sg": "lūzu",
+        "1pl": "lūzām",
+        "2sg": "lūzi",
+        "2pl": "lūzāt",
+        "3sg": "lūza",
+        "3pl": "lūza"
+      },
+      "future": {
+        "1sg": "lūzīšu",
+        "1pl": "lūzīsim",
+        "2sg": "lūzīsi",
+        "2pl": "lūzīsiet",
+        "3sg": "lūzīs",
+        "3pl": "lūzīs"
+      }
+    }
+  },
+  {
+    "table_number": 84,
+    "voice": "Darāmā kārta",
+    "infinitive": "ļaut",
+    "present_3sg": "ļauj",
+    "past_3sg": "ļāva",
+    "forms": {
+      "present": {
+        "1sg": "ļauju",
+        "1pl": "ļaujam",
+        "2sg": "ļauj",
+        "2pl": "ļaujat",
+        "3sg": "ļauj",
+        "3pl": "ļauj"
+      },
+      "past": {
+        "1sg": "ļāvu",
+        "1pl": "ļāvām",
+        "2sg": "ļāvi",
+        "2pl": "ļāvāt",
+        "3sg": "ļāva",
+        "3pl": "ļāva"
+      },
+      "future": {
+        "1sg": "ļaušu",
+        "1pl": "ļausim",
+        "2sg": "ļausi",
+        "2pl": "ļausiet",
+        "3sg": "ļaus",
+        "3pl": "ļaus"
+      }
+    }
+  },
+  {
+    "table_number": 85,
+    "voice": "Darāmā kārta",
+    "infinitive": "ļauties",
+    "present_3sg": "ļaujas",
+    "past_3sg": "ļāvās",
+    "forms": {
+      "present": {
+        "1sg": "ļaujos",
+        "1pl": "ļaujamies",
+        "2sg": "ļaujies",
+        "2pl": "ļaujaties",
+        "3sg": "ļaujas",
+        "3pl": "ļaujas"
+      },
+      "past": {
+        "1sg": "ļāvos",
+        "1pl": "ļāvāmies",
+        "2sg": "ļāvies",
+        "2pl": "ļāvāties",
+        "3sg": "ļāvās",
+        "3pl": "ļāvās"
+      },
+      "future": {
+        "1sg": "ļaušos",
+        "1pl": "ļausimies",
+        "2sg": "ļausies",
+        "2pl": "ļausieties",
+        "3sg": "ļausies",
+        "3pl": "ļausies"
+      }
+    }
+  },
+  {
+    "table_number": 86,
+    "voice": "Darāmā kārta",
+    "infinitive": "malt",
+    "present_3sg": "maļ",
+    "past_3sg": "mala",
+    "forms": {
+      "present": {
+        "1sg": "maļu",
+        "1pl": "maļam",
+        "2sg": "mal",
+        "2pl": "maļat",
+        "3sg": "maļ",
+        "3pl": "maļ"
+      },
+      "past": {
+        "1sg": "malu",
+        "1pl": "malām",
+        "2sg": "mali",
+        "2pl": "malāt",
+        "3sg": "mala",
+        "3pl": "mala"
+      },
+      "future": {
+        "1sg": "malšu",
+        "1pl": "malsim",
+        "2sg": "malsi",
+        "2pl": "malsiet",
+        "3sg": "mals",
+        "3pl": "mals"
+      }
+    }
+  },
+  {
+    "table_number": 87,
+    "voice": "Darāmā kārta",
+    "infinitive": "mest",
+    "present_3sg": "met",
+    "past_3sg": "meta",
+    "forms": {
+      "present": {
+        "1sg": "me̹tu",
+        "1pl": "me̹tam",
+        "2sg": "met",
+        "2pl": "me̹tat",
+        "3sg": "me̹t",
+        "3pl": "me̹t"
+      },
+      "past": {
+        "1sg": "metu",
+        "1pl": "metām",
+        "2sg": "meti",
+        "2pl": "metāt",
+        "3sg": "meta",
+        "3pl": "meta"
+      },
+      "future": {
+        "1sg": "metīšu",
+        "1pl": "metīsim",
+        "2sg": "metīsi",
+        "2pl": "metīsiet",
+        "3sg": "metīs",
+        "3pl": "metīs"
+      }
+    }
+  },
+  {
+    "table_number": 88,
+    "voice": "Darāmā kārta",
+    "infinitive": "mesties",
+    "present_3sg": "metas",
+    "past_3sg": "metās",
+    "forms": {
+      "present": {
+        "1sg": "me̹tos",
+        "1pl": "me̹tamies",
+        "2sg": "meties",
+        "2pl": "me̹taties",
+        "3sg": "me̹tas",
+        "3pl": "me̹tas"
+      },
+      "past": {
+        "1sg": "metos",
+        "1pl": "metāmies",
+        "2sg": "meties",
+        "2pl": "metāties",
+        "3sg": "metās",
+        "3pl": "metās"
+      },
+      "future": {
+        "1sg": "metīšos",
+        "1pl": "metīsimies",
+        "2sg": "metīsies",
+        "2pl": "metīsieties",
+        "3sg": "metīsies",
+        "3pl": "metīsies"
+      }
+    }
+  },
+  {
+    "table_number": 89,
+    "voice": "Darāmā kārta",
+    "infinitive": "migt",
+    "present_3sg": "mieg",
+    "past_3sg": "miga",
+    "forms": {
+      "present": {
+        "1sg": "miegu",
+        "1pl": "miegam",
+        "2sg": "miedz",
+        "2pl": "miegat",
+        "3sg": "mieg",
+        "3pl": "mieg"
+      },
+      "past": {
+        "1sg": "migu",
+        "1pl": "migām",
+        "2sg": "migi",
+        "2pl": "migāt",
+        "3sg": "miga",
+        "3pl": "miga"
+      },
+      "future": {
+        "1sg": "migšu",
+        "1pl": "migsim",
+        "2sg": "migsi",
+        "2pl": "migsiet",
+        "3sg": "migs",
+        "3pl": "migs"
+      }
+    }
+  },
+  {
+    "table_number": 90,
+    "voice": "Darāmā kārta",
+    "infinitive": "mosties",
+    "present_3sg": "mostas",
+    "past_3sg": "modās",
+    "forms": {
+      "present": {
+        "1sg": "mostos",
+        "1pl": "mostamies",
+        "2sg": "mosties",
+        "2pl": "mostaties",
+        "3sg": "mostas",
+        "3pl": "mostas"
+      },
+      "past": {
+        "1sg": "modos",
+        "1pl": "modāmies",
+        "2sg": "modies",
+        "2pl": "modāties",
+        "3sg": "modās",
+        "3pl": "modās"
+      },
+      "future": {
+        "1sg": "modīšos",
+        "1pl": "modīsimies",
+        "2sg": "modīsies",
+        "2pl": "modīsieties",
+        "3sg": "modīsies",
+        "3pl": "modīsies"
+      }
+    }
+  },
+  {
+    "table_number": 91,
+    "voice": "Darāmā kārta",
+    "infinitive": "nākt",
+    "present_3sg": "nāk",
+    "past_3sg": "nāca",
+    "forms": {
+      "present": {
+        "1sg": "nāku",
+        "1pl": "nākam",
+        "2sg": "nāc",
+        "2pl": "nākat",
+        "3sg": "nāk",
+        "3pl": "nāk"
+      },
+      "past": {
+        "1sg": "nācu",
+        "1pl": "nācām",
+        "2sg": "nāci",
+        "2pl": "nācāt",
+        "3sg": "nāca",
+        "3pl": "nāca"
+      },
+      "future": {
+        "1sg": "nākšu",
+        "1pl": "nāksim",
+        "2sg": "nāksi",
+        "2pl": "nāksiet",
+        "3sg": "nāks",
+        "3pl": "nāks"
+      }
+    }
+  },
+  {
+    "table_number": 92,
+    "voice": "Darāmā kārta",
+    "infinitive": "nākties",
+    "present_3sg": "nākas",
+    "past_3sg": "nācās",
+    "forms": {
+      "present": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "nākas",
+        "3pl": "nākas"
+      },
+      "past": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "nācās",
+        "3pl": "nācās"
+      },
+      "future": {
+        "1sg": "—",
+        "1pl": "—",
+        "2sg": "—",
+        "2pl": "—",
+        "3sg": "nāksies",
+        "3pl": "nāksies"
+      }
+    }
+  },
+  {
+    "table_number": 93,
+    "voice": "Darāmā kārta",
+    "infinitive": "nest",
+    "present_3sg": "nes",
+    "past_3sg": "nesa",
+    "forms": {
+      "present": {
+        "1sg": "ne̹su",
+        "1pl": "ne̹sam",
+        "2sg": "nes",
+        "2pl": "ne̹sat",
+        "3sg": "ne̹s",
+        "3pl": "ne̹s"
+      },
+      "past": {
+        "1sg": "nesu",
+        "1pl": "nesām",
+        "2sg": "nesi",
+        "2pl": "nesāt",
+        "3sg": "nesa",
+        "3pl": "nesa"
+      },
+      "future": {
+        "1sg": "nesīšu",
+        "1pl": "nesīsim",
+        "2sg": "nesīsi",
+        "2pl": "nesīsiet",
+        "3sg": "nesīs",
+        "3pl": "nesīs"
+      }
+    }
+  },
+  {
+    "table_number": 94,
+    "voice": "Darāmā kārta",
+    "infinitive": "nīst",
+    "present_3sg": "nīst",
+    "past_3sg": "nīda",
+    "forms": {
+      "present": {
+        "1sg": "nīstu",
+        "1pl": "nīstam",
+        "2sg": "nīsti",
+        "2pl": "nīstat",
+        "3sg": "nīst",
+        "3pl": "nīst"
+      },
+      "past": {
+        "1sg": "nīdu",
+        "1pl": "nīdām",
+        "2sg": "nīdi",
+        "2pl": "nīdāt",
+        "3sg": "nīda",
+        "3pl": "nīda"
+      },
+      "future": {
+        "1sg": "nīdīšu",
+        "1pl": "nīdīsim",
+        "2sg": "nīdīsi",
+        "2pl": "nīdīsiet",
+        "3sg": "nīdīs",
+        "3pl": "nīdīs"
+      }
+    }
+  },
+  {
+    "table_number": 95,
+    "voice": "Darāmā kārta",
+    "infinitive": "ņemt",
+    "present_3sg": "ņem",
+    "past_3sg": "ņēma",
+    "forms": {
+      "present": {
+        "1sg": "ņe̹mu",
+        "1pl": "ņe̹mam",
+        "2sg": "ņem",
+        "2pl": "ņe̹mat",
+        "3sg": "ņe̹m",
+        "3pl": "ņe̹m"
+      },
+      "past": {
+        "1sg": "ņēmu",
+        "1pl": "ņēmām",
+        "2sg": "ņēmi",
+        "2pl": "ņēmāt",
+        "3sg": "ņēma",
+        "3pl": "ņēma"
+      },
+      "future": {
+        "1sg": "ņemšu",
+        "1pl": "ņemsim",
+        "2sg": "ņemsi",
+        "2pl": "ņemsiet",
+        "3sg": "ņems",
+        "3pl": "ņems"
+      }
+    }
+  },
+  {
+    "table_number": 96,
+    "voice": "Darāmā kārta",
+    "infinitive": "patikt",
+    "present_3sg": "patīk",
+    "past_3sg": "patika",
+    "forms": {
+      "present": {
+        "1sg": "patīku",
+        "1pl": "patīkam",
+        "2sg": "patīc",
+        "2pl": "patīkat",
+        "3sg": "patīk",
+        "3pl": "patīk"
+      },
+      "past": {
+        "1sg": "patiku",
+        "1pl": "patikām",
+        "2sg": "patiki",
+        "2pl": "patikāt",
+        "3sg": "patika",
+        "3pl": "patika"
+      },
+      "future": {
+        "1sg": "patikšu",
+        "1pl": "patiksim",
+        "2sg": "patiksi",
+        "2pl": "patiksiet",
+        "3sg": "patiks",
+        "3pl": "patiks"
+      }
+    }
+  },
+  {
+    "table_number": 97,
+    "voice": "Darāmā kārta",
+    "infinitive": "pazīt",
+    "present_3sg": "pazīst",
+    "past_3sg": "pazina",
+    "forms": {
+      "present": {
+        "1sg": "pazīstu",
+        "1pl": "pazīstam",
+        "2sg": "pazīsti",
+        "2pl": "pazīstat",
+        "3sg": "pazīst",
+        "3pl": "pazīst"
+      },
+      "past": {
+        "1sg": "pazinu",
+        "1pl": "pazinām",
+        "2sg": "pazini",
+        "2pl": "pazināt",
+        "3sg": "pazina",
+        "3pl": "pazina"
+      },
+      "future": {
+        "1sg": "pazīšu",
+        "1pl": "pazīsim",
+        "2sg": "pazīsi",
+        "2pl": "pazīsiet",
+        "3sg": "pazīs",
+        "3pl": "pazīs"
+      }
+    }
+  },
+  {
+    "table_number": 98,
+    "voice": "Darāmā kārta",
+    "infinitive": "pārvērsties",
+    "present_3sg": "pārvēršas",
+    "past_3sg": "pārvērtās",
+    "forms": {
+      "present": {
+        "1sg": "pārvēršos",
+        "1pl": "pārvēršamies",
+        "2sg": "pārvērties",
+        "2pl": "pārvēršaties",
+        "3sg": "pārvēršas",
+        "3pl": "pārvēršas"
+      },
+      "past": {
+        "1sg": "pārvērtos",
+        "1pl": "pārvērtāmies",
+        "2sg": "pārvērties",
+        "2pl": "pārvērtāties",
+        "3sg": "pārvērtās",
+        "3pl": "pārvērtās"
+      },
+      "future": {
+        "1sg": "pārvērtīšos",
+        "1pl": "pārvērtīsimies",
+        "2sg": "pārvērtīsies",
+        "2pl": "pārvērtīsieties",
+        "3sg": "pārvērtīsies",
+        "3pl": "pārvērtīsies"
+      }
+    }
+  },
+  {
+    "table_number": 99,
+    "voice": "Darāmā kārta",
+    "infinitive": "pirkt",
+    "present_3sg": "pērk",
+    "past_3sg": "pirka",
+    "forms": {
+      "present": {
+        "1sg": "prku",
+        "1pl": "prkam",
+        "2sg": "pērc",
+        "2pl": "prkat",
+        "3sg": "prk",
+        "3pl": "prk"
+      },
+      "past": {
+        "1sg": "pirku",
+        "1pl": "pirkām",
+        "2sg": "pirki",
+        "2pl": "pirkāt",
+        "3sg": "pirka",
+        "3pl": "pirka"
+      },
+      "future": {
+        "1sg": "pirkšu",
+        "1pl": "pirksim",
+        "2sg": "pirksi",
+        "2pl": "pirksiet",
+        "3sg": "pirks",
+        "3pl": "pirks"
+      }
+    }
+  },
+  {
+    "table_number": 100,
+    "voice": "Darāmā kārta",
+    "infinitive": "pīt",
+    "present_3sg": "pin",
+    "past_3sg": "pina",
+    "forms": {
+      "present": {
+        "1sg": "pinu",
+        "1pl": "pinam",
+        "2sg": "pin",
+        "2pl": "pinat",
+        "3sg": "pin",
+        "3pl": "pin"
+      },
+      "past": {
+        "1sg": "pinu",
+        "1pl": "pinām",
+        "2sg": "pini",
+        "2pl": "pināt",
+        "3sg": "pina",
+        "3pl": "pina"
+      },
+      "future": {
+        "1sg": "pīšu",
+        "1pl": "pīsim",
+        "2sg": "pīsi",
+        "2pl": "pīsiet",
+        "3sg": "pīs",
+        "3pl": "pīs"
+      }
+    }
+  },
+  {
+    "table_number": 101,
+    "voice": "Darāmā kārta",
+    "infinitive": "plest",
+    "present_3sg": "pleš",
+    "past_3sg": "pleta",
+    "forms": {
+      "present": {
+        "1sg": "plešu",
+        "1pl": "plešam",
+        "2sg": "plet",
+        "2pl": "plešat",
+        "3sg": "pleš",
+        "3pl": "pleš"
+      },
+      "past": {
+        "1sg": "pletu",
+        "1pl": "pletām",
+        "2sg": "pleti",
+        "2pl": "pletāt",
+        "3sg": "pleta",
+        "3pl": "pleta"
+      },
+      "future": {
+        "1sg": "pletīšu",
+        "1pl": "pletīsim",
+        "2sg": "pletīsi",
+        "2pl": "pletīsiet",
+        "3sg": "pletīs",
+        "3pl": "pletīs"
+      }
+    }
+  },
+  {
+    "table_number": 102,
+    "voice": "Darāmā kārta",
+    "infinitive": "plēst",
+    "present_3sg": "plēš",
+    "past_3sg": "plēsa",
+    "forms": {
+      "present": {
+        "1sg": "plēšu",
+        "1pl": "plēšam",
+        "2sg": "plēs",
+        "2pl": "plēšat",
+        "3sg": "plēš",
+        "3pl": "plēš"
+      },
+      "past": {
+        "1sg": "plēsu",
+        "1pl": "plēsām",
+        "2sg": "plēsi",
+        "2pl": "plēsāt",
+        "3sg": "plēsa",
+        "3pl": "plēsa"
+      },
+      "future": {
+        "1sg": "plēsīšu",
+        "1pl": "plēsīsim",
+        "2sg": "plēsīsi",
+        "2pl": "plēsīsiet",
+        "3sg": "plēsīs",
+        "3pl": "plēsīs"
+      }
+    }
+  },
+  {
+    "table_number": 103,
+    "voice": "Darāmā kārta",
+    "infinitive": "plesties",
+    "present_3sg": "plešas",
+    "past_3sg": "pletās",
+    "forms": {
+      "present": {
+        "1sg": "plešos",
+        "1pl": "plešamies",
+        "2sg": "pleties",
+        "2pl": "plešaties",
+        "3sg": "plešas",
+        "3pl": "plešas"
+      },
+      "past": {
+        "1sg": "pletos",
+        "1pl": "pletāmies",
+        "2sg": "pleties",
+        "2pl": "pletāties",
+        "3sg": "pletās",
+        "3pl": "pletās"
+      },
+      "future": {
+        "1sg": "pletīšos",
+        "1pl": "pletīsimies",
+        "2sg": "pletīsies",
+        "2pl": "pletīsieties",
+        "3sg": "pletīsies",
+        "3pl": "pletīsies"
+      }
+    }
+  },
+  {
+    "table_number": 104,
+    "voice": "Darāmā kārta",
+    "infinitive": "plīst",
+    "present_3sg": "plīst",
+    "past_3sg": "plīsa",
+    "forms": {
+      "present": {
+        "1sg": "plīstu",
+        "1pl": "plīstam",
+        "2sg": "plīsti",
+        "2pl": "plīstat",
+        "3sg": "plīst",
+        "3pl": "plīst"
+      },
+      "past": {
+        "1sg": "plīsu",
+        "1pl": "plīsām",
+        "2sg": "plīsi",
+        "2pl": "plīsāt",
+        "3sg": "plīsa",
+        "3pl": "plīsa"
+      },
+      "future": {
+        "1sg": "plīsīšu",
+        "1pl": "plīsīsim",
+        "2sg": "plīsīsi",
+        "2pl": "plīsīsiet",
+        "3sg": "plīsīs",
+        "3pl": "plīsīs"
+      }
+    }
+  },
+  {
+    "table_number": 105,
+    "voice": "Darāmā kārta",
+    "infinitive": "plīties",
+    "present_3sg": "plijas",
+    "past_3sg": "plijās",
+    "forms": {
+      "present": {
+        "1sg": "plijos",
+        "1pl": "plijamies",
+        "2sg": "plijies",
+        "2pl": "plijaties",
+        "3sg": "plijas",
+        "3pl": "plijas"
+      },
+      "past": {
+        "1sg": "plijos",
+        "1pl": "plijāmies",
+        "2sg": "plijies",
+        "2pl": "plijāties",
+        "3sg": "plijās",
+        "3pl": "plijās"
+      },
+      "future": {
+        "1sg": "plīšos",
+        "1pl": "plīsimies",
+        "2sg": "plīsies",
+        "2pl": "plīsieties",
+        "3sg": "plīsies",
+        "3pl": "plīsies"
+      }
+    }
+  },
+  {
+    "table_number": 106,
+    "voice": "Darāmā kārta",
+    "infinitive": "post",
+    "present_3sg": "poš",
+    "past_3sg": "posa",
+    "forms": {
+      "present": {
+        "1sg": "pošu",
+        "1pl": "pošam",
+        "2sg": "pos",
+        "2pl": "pošat",
+        "3sg": "poš",
+        "3pl": "poš"
+      },
+      "past": {
+        "1sg": "posu",
+        "1pl": "posām",
+        "2sg": "posi",
+        "2pl": "posāt",
+        "3sg": "posa",
+        "3pl": "posa"
+      },
+      "future": {
+        "1sg": "posīšu",
+        "1pl": "posīsim",
+        "2sg": "posīsi",
+        "2pl": "posīsiet",
+        "3sg": "posīs",
+        "3pl": "posīs"
+      }
+    }
+  },
+  {
+    "table_number": 107,
+    "voice": "Darāmā kārta",
+    "infinitive": "posties",
+    "present_3sg": "pošas",
+    "past_3sg": "posās",
+    "forms": {
+      "present": {
+        "1sg": "pošos",
+        "1pl": "pošamies",
+        "2sg": "posies",
+        "2pl": "pošaties",
+        "3sg": "pošas",
+        "3pl": "pošas"
+      },
+      "past": {
+        "1sg": "posos",
+        "1pl": "posāmies",
+        "2sg": "posies",
+        "2pl": "posāties",
+        "3sg": "posās",
+        "3pl": "posās"
+      },
+      "future": {
+        "1sg": "posīšos",
+        "1pl": "posīsimies",
+        "2sg": "posīsies",
+        "2pl": "posīsieties",
+        "3sg": "posīsies",
+        "3pl": "posīsies"
+      }
+    }
+  },
+  {
+    "table_number": 108,
+    "voice": "Darāmā kārta",
+    "infinitive": "prast",
+    "present_3sg": "prot",
+    "past_3sg": "prata",
+    "forms": {
+      "present": {
+        "1sg": "protu",
+        "1pl": "protam",
+        "2sg": "proti",
+        "2pl": "protat",
+        "3sg": "prot",
+        "3pl": "prot"
+      },
+      "past": {
+        "1sg": "pratu",
+        "1pl": "pratām",
+        "2sg": "prati",
+        "2pl": "pratāt",
+        "3sg": "prata",
+        "3pl": "prata"
+      },
+      "future": {
+        "1sg": "pratīšu",
+        "1pl": "pratīsim",
+        "2sg": "pratīsi",
+        "2pl": "pratīsiet",
+        "3sg": "pratīs",
+        "3pl": "pratīs"
+      }
+    }
+  },
+  {
+    "table_number": 109,
+    "voice": "Darāmā kārta",
+    "infinitive": "pūst",
+    "present_3sg": "pūš",
+    "past_3sg": "pūta",
+    "forms": {
+      "present": {
+        "1sg": "pūšu",
+        "1pl": "pūšam",
+        "2sg": "pūt",
+        "2pl": "pūšat",
+        "3sg": "pūš",
+        "3pl": "pūš"
+      },
+      "past": {
+        "1sg": "pūtu",
+        "1pl": "pūtām",
+        "2sg": "pūti",
+        "2pl": "pūtāt",
+        "3sg": "pūta",
+        "3pl": "pūta"
+      },
+      "future": {
+        "1sg": "pūtīšu",
+        "1pl": "pūtīsim",
+        "2sg": "pūtīsi",
+        "2pl": "pūtīsiet",
+        "3sg": "pūtīs",
+        "3pl": "pūtīs"
+      }
+    }
+  },
+  {
+    "table_number": 110,
+    "voice": "Darāmā kārta",
+    "infinitive": "pūsties",
+    "present_3sg": "pūšas",
+    "past_3sg": "pūtās",
+    "forms": {
+      "present": {
+        "1sg": "pūšos",
+        "1pl": "pūšamies",
+        "2sg": "pūties",
+        "2pl": "pūšaties",
+        "3sg": "pūšas",
+        "3pl": "pūšas"
+      },
+      "past": {
+        "1sg": "pūtos",
+        "1pl": "pūtāmies",
+        "2sg": "pūties",
+        "2pl": "pūtāties",
+        "3sg": "pūtās",
+        "3pl": "pūtās"
+      },
+      "future": {
+        "1sg": "pūtīšos",
+        "1pl": "pūtīsimies",
+        "2sg": "pūtīsies",
+        "2pl": "pūtīsieties",
+        "3sg": "pūtīsies",
+        "3pl": "pūtīsies"
+      }
+    }
+  },
+  {
+    "table_number": 111,
+    "voice": "Darāmā kārta",
+    "infinitive": "rakt",
+    "present_3sg": "rok",
+    "past_3sg": "raka",
+    "forms": {
+      "present": {
+        "1sg": "roku",
+        "1pl": "rokam",
+        "2sg": "roc",
+        "2pl": "rokat",
+        "3sg": "rok",
+        "3pl": "rok"
+      },
+      "past": {
+        "1sg": "raku",
+        "1pl": "rakām",
+        "2sg": "raki",
+        "2pl": "rakāt",
+        "3sg": "raka",
+        "3pl": "raka"
+      },
+      "future": {
+        "1sg": "rakšu",
+        "1pl": "raksim",
+        "2sg": "raksi",
+        "2pl": "raksiet",
+        "3sg": "raks",
+        "3pl": "raks"
+      }
+    }
+  },
+  {
+    "table_number": 112,
+    "voice": "Darāmā kārta",
+    "infinitive": "rasties",
+    "present_3sg": "rodas",
+    "past_3sg": "radās",
+    "forms": {
+      "present": {
+        "1sg": "rodos",
+        "1pl": "rodamies",
+        "2sg": "rodies",
+        "2pl": "rodaties",
+        "3sg": "rodas",
+        "3pl": "rodas"
+      },
+      "past": {
+        "1sg": "rados",
+        "1pl": "radāmies",
+        "2sg": "radies",
+        "2pl": "radāties",
+        "3sg": "radās",
+        "3pl": "radās"
+      },
+      "future": {
+        "1sg": "radīšos",
+        "1pl": "radīsimies",
+        "2sg": "radīsies",
+        "2pl": "radīsieties",
+        "3sg": "radīsies",
+        "3pl": "radīsies"
+      }
+    }
+  },
+  {
+    "table_number": 113,
+    "voice": "Darāmā kārta",
+    "infinitive": "rīt",
+    "present_3sg": "rij",
+    "past_3sg": "rija",
+    "forms": {
+      "present": {
+        "1sg": "riju",
+        "1pl": "rijam",
+        "2sg": "rij",
+        "2pl": "rijat",
+        "3sg": "rij",
+        "3pl": "rij"
+      },
+      "past": {
+        "1sg": "riju",
+        "1pl": "rijām",
+        "2sg": "riji",
+        "2pl": "rijāt",
+        "3sg": "rija",
+        "3pl": "rija"
+      },
+      "future": {
+        "1sg": "rīšu",
+        "1pl": "rīsim",
+        "2sg": "rīsi",
+        "2pl": "rīsiet",
+        "3sg": "rīs",
+        "3pl": "rīs"
+      }
+    }
+  },
+  {
+    "table_number": 114,
+    "voice": "Darāmā kārta",
+    "infinitive": "sākt",
+    "present_3sg": "sāk",
+    "past_3sg": "sāka",
+    "forms": {
+      "present": {
+        "1sg": "sāku",
+        "1pl": "sākam",
+        "2sg": "sāc",
+        "2pl": "sākat",
+        "3sg": "sāk",
+        "3pl": "sāk"
+      },
+      "past": {
+        "1sg": "sāku",
+        "1pl": "sākām",
+        "2sg": "sāki",
+        "2pl": "sākāt",
+        "3sg": "sāka",
+        "3pl": "sāka"
+      },
+      "future": {
+        "1sg": "sākšu",
+        "1pl": "sāksim",
+        "2sg": "sāksi",
+        "2pl": "sāksiet",
+        "3sg": "sāks",
+        "3pl": "sāks"
+      }
+    }
+  },
+  {
+    "table_number": 115,
+    "voice": "Darāmā kārta",
+    "infinitive": "sākties",
+    "present_3sg": "sākas",
+    "past_3sg": "sākās",
+    "forms": {
+      "present": {
+        "1sg": "sākos",
+        "1pl": "sākamies",
+        "2sg": "sācies",
+        "2pl": "sākaties",
+        "3sg": "sākas",
+        "3pl": "sākas"
+      },
+      "past": {
+        "1sg": "sākos",
+        "1pl": "sākāmies",
+        "2sg": "sākies",
+        "2pl": "sākāties",
+        "3sg": "sākās",
+        "3pl": "sākās"
+      },
+      "future": {
+        "1sg": "sākšos",
+        "1pl": "sāksimies",
+        "2sg": "sāksies",
+        "2pl": "sāksieties",
+        "3sg": "sāksies",
+        "3pl": "sāksies"
+      }
+    }
+  },
+  {
+    "table_number": 116,
+    "voice": "Darāmā kārta",
+    "infinitive": "salt",
+    "present_3sg": "salst",
+    "past_3sg": "sala",
+    "forms": {
+      "present": {
+        "1sg": "salstu",
+        "1pl": "salstam",
+        "2sg": "salsti",
+        "2pl": "salstat",
+        "3sg": "salst",
+        "3pl": "salst"
+      },
+      "past": {
+        "1sg": "salu",
+        "1pl": "salām",
+        "2sg": "sali",
+        "2pl": "salāt",
+        "3sg": "sala",
+        "3pl": "sala"
+      },
+      "future": {
+        "1sg": "salšu",
+        "1pl": "salsim",
+        "2sg": "salsi",
+        "2pl": "salsiet",
+        "3sg": "sals",
+        "3pl": "sals"
+      }
+    }
+  },
+  {
+    "table_number": 117,
+    "voice": "Darāmā kārta",
+    "infinitive": "segt",
+    "present_3sg": "sedz",
+    "past_3sg": "sedza",
+    "forms": {
+      "present": {
+        "1sg": "se̹dzu",
+        "1pl": "se̹dzam",
+        "2sg": "sedz",
+        "2pl": "se̹dzat",
+        "3sg": "se̹dz",
+        "3pl": "se̹dz"
+      },
+      "past": {
+        "1sg": "sedzu",
+        "1pl": "sedzām",
+        "2sg": "sedzi",
+        "2pl": "sedzāt",
+        "3sg": "sedza",
+        "3pl": "sedza"
+      },
+      "future": {
+        "1sg": "segšu",
+        "1pl": "segsim",
+        "2sg": "segsi",
+        "2pl": "segsiet",
+        "3sg": "segs",
+        "3pl": "segs"
+      }
+    }
+  },
+  {
+    "table_number": 118,
+    "voice": "Darāmā kārta",
+    "infinitive": "segties",
+    "present_3sg": "sedzas",
+    "past_3sg": "sedzās",
+    "forms": {
+      "present": {
+        "1sg": "se̹dzos",
+        "1pl": "se̹dzamies",
+        "2sg": "sedzies",
+        "2pl": "se̹dzaties",
+        "3sg": "se̹dzas",
+        "3pl": "se̹dzas"
+      },
+      "past": {
+        "1sg": "sedzos",
+        "1pl": "sedzāmies",
+        "2sg": "sedzies",
+        "2pl": "sedzāties",
+        "3sg": "sedzās",
+        "3pl": "sedzās"
+      },
+      "future": {
+        "1sg": "segšos",
+        "1pl": "segsimies",
+        "2sg": "segsies",
+        "2pl": "segsieties",
+        "3sg": "segsies",
+        "3pl": "segsies"
+      }
+    }
+  },
+  {
+    "table_number": 119,
+    "voice": "Darāmā kārta",
+    "infinitive": "sist",
+    "present_3sg": "sit",
+    "past_3sg": "sita",
+    "forms": {
+      "present": {
+        "1sg": "situ",
+        "1pl": "sitam",
+        "2sg": "sit",
+        "2pl": "sitat",
+        "3sg": "sit",
+        "3pl": "sit"
+      },
+      "past": {
+        "1sg": "situ",
+        "1pl": "sitām",
+        "2sg": "siti",
+        "2pl": "sitāt",
+        "3sg": "sita",
+        "3pl": "sita"
+      },
+      "future": {
+        "1sg": "sitīšu",
+        "1pl": "sitīsim",
+        "2sg": "sitīsi",
+        "2pl": "sitīsiet",
+        "3sg": "sitīs",
+        "3pl": "sitīs"
+      }
+    }
+  },
+  {
+    "table_number": 120,
+    "voice": "Darāmā kārta",
+    "infinitive": "skriet",
+    "present_3sg": "skrien",
+    "past_3sg": "skrēja",
+    "forms": {
+      "present": {
+        "1sg": "skrienu",
+        "1pl": "skrienam",
+        "2sg": "skrien",
+        "2pl": "skrienat",
+        "3sg": "skrien",
+        "3pl": "skrien"
+      },
+      "past": {
+        "1sg": "skrēju",
+        "1pl": "skrējām",
+        "2sg": "skrēji",
+        "2pl": "skrējāt",
+        "3sg": "skrēja",
+        "3pl": "skrēja"
+      },
+      "future": {
+        "1sg": "skriešu",
+        "1pl": "skriesim",
+        "2sg": "skriesi",
+        "2pl": "skriesiet",
+        "3sg": "skries",
+        "3pl": "skries"
+      }
+    }
+  },
+  {
+    "table_number": 121,
+    "voice": "Darāmā kārta",
+    "infinitive": "slēgt",
+    "present_3sg": "slēdz",
+    "past_3sg": "slēdza",
+    "forms": {
+      "present": {
+        "1sg": "sldzu",
+        "1pl": "sldzam",
+        "2sg": "slēdz",
+        "2pl": "sldzat",
+        "3sg": "sldz",
+        "3pl": "sldz"
+      },
+      "past": {
+        "1sg": "slēdzu",
+        "1pl": "slēdzām",
+        "2sg": "slēdzi",
+        "2pl": "slēdzāt",
+        "3sg": "slēdza",
+        "3pl": "slēdza"
+      },
+      "future": {
+        "1sg": "slēgšu",
+        "1pl": "slēgsim",
+        "2sg": "slēgsi",
+        "2pl": "slēgsiet",
+        "3sg": "slēgs",
+        "3pl": "slēgs"
+      }
+    }
+  },
+  {
+    "table_number": 122,
+    "voice": "Darāmā kārta",
+    "infinitive": "slēgties",
+    "present_3sg": "slēdzas",
+    "past_3sg": "slēdzās",
+    "forms": {
+      "present": {
+        "1sg": "sldzos",
+        "1pl": "sldzamies",
+        "2sg": "slēdzies",
+        "2pl": "sldzaties",
+        "3sg": "sldzas",
+        "3pl": "sldzas"
+      },
+      "past": {
+        "1sg": "slēdzos",
+        "1pl": "slēdzāmies",
+        "2sg": "slēdzies",
+        "2pl": "slēdzāties",
+        "3sg": "slēdzās",
+        "3pl": "slēdzās"
+      },
+      "future": {
+        "1sg": "slēgšos",
+        "1pl": "slēgsimies",
+        "2sg": "slēgsies",
+        "2pl": "slēgsieties",
+        "3sg": "slēgsies",
+        "3pl": "slēgsies"
+      }
+    }
+  },
+  {
+    "table_number": 123,
+    "voice": "Darāmā kārta",
+    "infinitive": "slēpt",
+    "present_3sg": "slēpj",
+    "past_3sg": "slēpa",
+    "forms": {
+      "present": {
+        "1sg": "slēpju",
+        "1pl": "slēpjam",
+        "2sg": "slēp",
+        "2pl": "slēpjat",
+        "3sg": "slēpj",
+        "3pl": "slēpj"
+      },
+      "past": {
+        "1sg": "slēpu",
+        "1pl": "slēpām",
+        "2sg": "slēpi",
+        "2pl": "slēpāt",
+        "3sg": "slēpa",
+        "3pl": "slēpa"
+      },
+      "future": {
+        "1sg": "slēpšu",
+        "1pl": "slēpsim",
+        "2sg": "slēpsi",
+        "2pl": "slēpsiet",
+        "3sg": "slēps",
+        "3pl": "slēps"
+      }
+    }
+  },
+  {
+    "table_number": 124,
+    "voice": "Darāmā kārta",
+    "infinitive": "slēpties",
+    "present_3sg": "slēpjas",
+    "past_3sg": "slēpās",
+    "forms": {
+      "present": {
+        "1sg": "slēpjos",
+        "1pl": "slēpjamies",
+        "2sg": "slēpies",
+        "2pl": "slēpjaties",
+        "3sg": "slēpjas",
+        "3pl": "slēpjas"
+      },
+      "past": {
+        "1sg": "slēpos",
+        "1pl": "slēpāmies",
+        "2sg": "slēpies",
+        "2pl": "slēpāties",
+        "3sg": "slēpās",
+        "3pl": "slēpās"
+      },
+      "future": {
+        "1sg": "slēpšos",
+        "1pl": "slēpsimies",
+        "2sg": "slēpsies",
+        "2pl": "slēpsieties",
+        "3sg": "slēpsies",
+        "3pl": "slēpsies"
+      }
+    }
+  },
+  {
+    "table_number": 125,
+    "voice": "Darāmā kārta",
+    "infinitive": "smieties",
+    "present_3sg": "smejas",
+    "past_3sg": "smējās",
+    "forms": {
+      "present": {
+        "1sg": "smejos",
+        "1pl": "smejamies",
+        "2sg": "smejies",
+        "2pl": "smejaties",
+        "3sg": "smejas",
+        "3pl": "smejas"
+      },
+      "past": {
+        "1sg": "smējos",
+        "1pl": "smējāmies",
+        "2sg": "smējies",
+        "2pl": "smējāties",
+        "3sg": "smējās",
+        "3pl": "smējās"
+      },
+      "future": {
+        "1sg": "smiešos",
+        "1pl": "smiesimies",
+        "2sg": "smiesies",
+        "2pl": "smiesieties",
+        "3sg": "smiesies",
+        "3pl": "smiesies"
+      }
+    }
+  },
+  {
+    "table_number": 126,
+    "voice": "Darāmā kārta",
+    "infinitive": "spēt",
+    "present_3sg": "spēj",
+    "past_3sg": "spēja",
+    "forms": {
+      "present": {
+        "1sg": "spēju",
+        "1pl": "spējam",
+        "2sg": "spēj",
+        "2pl": "spējat",
+        "3sg": "spēj",
+        "3pl": "spēj"
+      },
+      "past": {
+        "1sg": "spēju",
+        "1pl": "spējām",
+        "2sg": "spēji",
+        "2pl": "spējāt",
+        "3sg": "spēja",
+        "3pl": "spēja"
+      },
+      "future": {
+        "1sg": "spēšu",
+        "1pl": "spēsim",
+        "2sg": "spēsi",
+        "2pl": "spēsiet",
+        "3sg": "spēs",
+        "3pl": "spēs"
+      }
+    }
+  },
+  {
+    "table_number": 127,
+    "voice": "Darāmā kārta",
+    "infinitive": "stumt",
+    "present_3sg": "stumj",
+    "past_3sg": "stūma",
+    "forms": {
+      "present": {
+        "1sg": "stumju",
+        "1pl": "stumjam",
+        "2sg": "stum",
+        "2pl": "stumjat",
+        "3sg": "stumj",
+        "3pl": "stumj"
+      },
+      "past": {
+        "1sg": "stūmu",
+        "1pl": "stūmām",
+        "2sg": "stūmi",
+        "2pl": "stūmāt",
+        "3sg": "stūma",
+        "3pl": "stūma"
+      },
+      "future": {
+        "1sg": "stumšu",
+        "1pl": "stumsim",
+        "2sg": "stumsi",
+        "2pl": "stumsiet",
+        "3sg": "stums",
+        "3pl": "stums"
+      }
+    }
+  },
+  {
+    "table_number": 128,
+    "voice": "Darāmā kārta",
+    "infinitive": "svērt",
+    "present_3sg": "sver",
+    "past_3sg": "svēra",
+    "forms": {
+      "present": {
+        "1sg": "sveru",
+        "1pl": "sveram",
+        "2sg": "sver",
+        "2pl": "sverat",
+        "3sg": "sver",
+        "3pl": "sver"
+      },
+      "past": {
+        "1sg": "svēru",
+        "1pl": "svērām",
+        "2sg": "svēri",
+        "2pl": "svērāt",
+        "3sg": "svēra",
+        "3pl": "svēra"
+      },
+      "future": {
+        "1sg": "svēršu",
+        "1pl": "svērsim",
+        "2sg": "svērsi",
+        "2pl": "svērsiet",
+        "3sg": "svērs",
+        "3pl": "svērs"
+      }
+    }
+  },
+  {
+    "table_number": 129,
+    "voice": "Darāmā kārta",
+    "infinitive": "svērt",
+    "present_3sg": "sver",
+    "past_3sg": "svēra",
+    "forms": {
+      "present": {
+        "1sg": "sve̹ru",
+        "1pl": "sve̹ram",
+        "2sg": "sver",
+        "2pl": "sve̹rat",
+        "3sg": "sve̹r",
+        "3pl": "sve̹r"
+      },
+      "past": {
+        "1sg": "svēru",
+        "1pl": "svērām",
+        "2sg": "svēri",
+        "2pl": "svērāt",
+        "3sg": "svēra",
+        "3pl": "svēra"
+      },
+      "future": {
+        "1sg": "svēršu",
+        "1pl": "svērsim",
+        "2sg": "svērsi",
+        "2pl": "svērsiet",
+        "3sg": "svērs",
+        "3pl": "svērs"
+      }
+    }
+  },
+  {
+    "table_number": 130,
+    "voice": "Darāmā kārta",
+    "infinitive": "svērties",
+    "present_3sg": "sveras",
+    "past_3sg": "svērās",
+    "forms": {
+      "present": {
+        "1sg": "sve̹ros",
+        "1pl": "sve̹ramies",
+        "2sg": "sveries",
+        "2pl": "sve̹raties",
+        "3sg": "sve̹ras",
+        "3pl": "sve̹ras"
+      },
+      "past": {
+        "1sg": "svēros",
+        "1pl": "svērāmies",
+        "2sg": "svēries",
+        "2pl": "svērāties",
+        "3sg": "svērās",
+        "3pl": "svērās"
+      },
+      "future": {
+        "1sg": "svēršos",
+        "1pl": "svērsimies",
+        "2sg": "svērsies",
+        "2pl": "svērsieties",
+        "3sg": "svērsies",
+        "3pl": "svērsies"
+      }
+    }
+  },
+  {
+    "table_number": 131,
+    "voice": "Darāmā kārta",
+    "infinitive": "šķērst",
+    "present_3sg": "šķērž",
+    "past_3sg": "šķērda",
+    "forms": {
+      "present": {
+        "1sg": "šķēržu",
+        "1pl": "šķēržam",
+        "2sg": "šķērd",
+        "2pl": "šķēržat",
+        "3sg": "šķērž",
+        "3pl": "šķērž"
+      },
+      "past": {
+        "1sg": "šķērdu",
+        "1pl": "šķērdām",
+        "2sg": "šķērdi",
+        "2pl": "šķērdāt",
+        "3sg": "šķērda",
+        "3pl": "šķērda"
+      },
+      "future": {
+        "1sg": "šķērdīšu",
+        "1pl": "šķērdīsim",
+        "2sg": "šķērdīsi",
+        "2pl": "šķērdīsiet",
+        "3sg": "šķērdīs",
+        "3pl": "šķērdīs"
+      }
+    }
+  },
+  {
+    "table_number": 132,
+    "voice": "Darāmā kārta",
+    "infinitive": "šķirties",
+    "present_3sg": "šķiras",
+    "past_3sg": "šķīrās",
+    "forms": {
+      "present": {
+        "1sg": "šķiros",
+        "1pl": "šķiramies",
+        "2sg": "šķiries",
+        "2pl": "šķiraties",
+        "3sg": "šķiras",
+        "3pl": "šķiras"
+      },
+      "past": {
+        "1sg": "šķīros",
+        "1pl": "šķīrāmies",
+        "2sg": "šķīries",
+        "2pl": "šķīrāties",
+        "3sg": "šķīrās",
+        "3pl": "šķīrās"
+      },
+      "future": {
+        "1sg": "šķiršos",
+        "1pl": "šķirsimies",
+        "2sg": "šķirsies",
+        "2pl": "šķirsieties",
+        "3sg": "šķirsies",
+        "3pl": "šķirsies"
+      }
+    }
+  },
+  {
+    "table_number": 133,
+    "voice": "Darāmā kārta",
+    "infinitive": "šķist",
+    "present_3sg": "šķiet",
+    "past_3sg": "šķita",
+    "forms": {
+      "present": {
+        "1sg": "šķietu",
+        "1pl": "šķietam",
+        "2sg": "šķieti",
+        "2pl": "šķietat",
+        "3sg": "šķiet",
+        "3pl": "šķiet"
+      },
+      "past": {
+        "1sg": "šķitu",
+        "1pl": "šķitām",
+        "2sg": "šķiti",
+        "2pl": "šķitāt",
+        "3sg": "šķita",
+        "3pl": "šķita"
+      },
+      "future": {
+        "1sg": "šķitīšu",
+        "1pl": "šķitīsim",
+        "2sg": "šķitīsi",
+        "2pl": "šķitīsiet",
+        "3sg": "šķitīs",
+        "3pl": "šķitīs"
+      }
+    }
+  },
+  {
+    "table_number": 134,
+    "voice": "Darāmā kārta",
+    "infinitive": "šūt",
+    "present_3sg": "šuj",
+    "past_3sg": "šuva",
+    "forms": {
+      "present": {
+        "1sg": "šuju",
+        "1pl": "šujam",
+        "2sg": "šuj",
+        "2pl": "šujat",
+        "3sg": "šuj",
+        "3pl": "šuj"
+      },
+      "past": {
+        "1sg": "šuvu",
+        "1pl": "šuvām",
+        "2sg": "šuvi",
+        "2pl": "šuvāt",
+        "3sg": "šuva",
+        "3pl": "šuva"
+      },
+      "future": {
+        "1sg": "šūšu",
+        "1pl": "šūsim",
+        "2sg": "šūsi",
+        "2pl": "šūsiet",
+        "3sg": "šūs",
+        "3pl": "šūs"
+      }
+    }
+  },
+  {
+    "table_number": 135,
+    "voice": "Darāmā kārta",
+    "infinitive": "tikt",
+    "present_3sg": "tiek",
+    "past_3sg": "tika",
+    "forms": {
+      "present": {
+        "1sg": "tieku",
+        "1pl": "tiekam",
+        "2sg": "tiec",
+        "2pl": "tiekat",
+        "3sg": "tiek",
+        "3pl": "tiek"
+      },
+      "past": {
+        "1sg": "tiku",
+        "1pl": "tikām",
+        "2sg": "tiki",
+        "2pl": "tikāt",
+        "3sg": "tika",
+        "3pl": "tika"
+      },
+      "future": {
+        "1sg": "tikšu",
+        "1pl": "tiksim",
+        "2sg": "tiksi",
+        "2pl": "tiksiet",
+        "3sg": "tiks",
+        "3pl": "tiks"
+      }
+    }
+  },
+  {
+    "table_number": 136,
+    "voice": "Darāmā kārta",
+    "infinitive": "tikties",
+    "present_3sg": "tiekas",
+    "past_3sg": "tikās",
+    "forms": {
+      "present": {
+        "1sg": "tiekos",
+        "1pl": "tiekamies",
+        "2sg": "tiecies",
+        "2pl": "tiekaties",
+        "3sg": "tiekas",
+        "3pl": "tiekas"
+      },
+      "past": {
+        "1sg": "tikos",
+        "1pl": "tikāmies",
+        "2sg": "tikies",
+        "2pl": "tikāties",
+        "3sg": "tikās",
+        "3pl": "tikās"
+      },
+      "future": {
+        "1sg": "tikšos",
+        "1pl": "tiksimies",
+        "2sg": "tiksies",
+        "2pl": "tiksieties",
+        "3sg": "tiksies",
+        "3pl": "tiksies"
+      }
+    }
+  },
+  {
+    "table_number": 137,
+    "voice": "Darāmā kārta",
+    "infinitive": "trenkt",
+    "present_3sg": "trenc",
+    "past_3sg": "trenca",
+    "forms": {
+      "present": {
+        "1sg": "tre̹ncu",
+        "1pl": "tre̹ncam",
+        "2sg": "trenc",
+        "2pl": "tre̹ncat",
+        "3sg": "tre̹nc",
+        "3pl": "tre̹nc"
+      },
+      "past": {
+        "1sg": "trencu",
+        "1pl": "trencām",
+        "2sg": "trenci",
+        "2pl": "trencāt",
+        "3sg": "trenca",
+        "3pl": "trenca"
+      },
+      "future": {
+        "1sg": "trenkšu",
+        "1pl": "trenksim",
+        "2sg": "trenksi",
+        "2pl": "trenksiet",
+        "3sg": "trenks",
+        "3pl": "trenks"
+      }
+    }
+  },
+  {
+    "table_number": 138,
+    "voice": "Darāmā kārta",
+    "infinitive": "uzņemties",
+    "present_3sg": "uzņemas",
+    "past_3sg": "uzņēmās",
+    "forms": {
+      "present": {
+        "1sg": "uzņe̹mos",
+        "1pl": "uzņe̹mamies",
+        "2sg": "uzņemies",
+        "2pl": "uzņe̹maties",
+        "3sg": "uzņe̹mas",
+        "3pl": "uzņe̹mas"
+      },
+      "past": {
+        "1sg": "uzņēmos",
+        "1pl": "uzņēmāmies",
+        "2sg": "uzņēmies",
+        "2pl": "uzņēmāties",
+        "3sg": "uzņēmās",
+        "3pl": "uzņēmās"
+      },
+      "future": {
+        "1sg": "uzņemšos",
+        "1pl": "uzņemsimies",
+        "2sg": "uzņemsies",
+        "2pl": "uzņemsieties",
+        "3sg": "uzņemsies",
+        "3pl": "uzņemsies"
+      }
+    }
+  },
+  {
+    "table_number": 139,
+    "voice": "Darāmā kārta",
+    "infinitive": "vest",
+    "present_3sg": "ved",
+    "past_3sg": "veda",
+    "forms": {
+      "present": {
+        "1sg": "ve̹du",
+        "1pl": "ve̹dam",
+        "2sg": "ved",
+        "2pl": "ve̹dat",
+        "3sg": "ve̹d",
+        "3pl": "ve̹d"
+      },
+      "past": {
+        "1sg": "vedu",
+        "1pl": "vedām",
+        "2sg": "vedi",
+        "2pl": "vedāt",
+        "3sg": "veda",
+        "3pl": "veda"
+      },
+      "future": {
+        "1sg": "vedīšu",
+        "1pl": "vedīsim",
+        "2sg": "vedīsi",
+        "2pl": "vedīsiet",
+        "3sg": "vedīs",
+        "3pl": "vedīs"
+      }
+    }
+  },
+  {
+    "table_number": 140,
+    "voice": "Darāmā kārta",
+    "infinitive": "vilkt",
+    "present_3sg": "velk",
+    "past_3sg": "vilka",
+    "forms": {
+      "present": {
+        "1sg": "ve̹lku",
+        "1pl": "ve̹lkam",
+        "2sg": "velc",
+        "2pl": "ve̹lkat",
+        "3sg": "ve̹lk",
+        "3pl": "ve̹lk"
+      },
+      "past": {
+        "1sg": "vilku",
+        "1pl": "vilkām",
+        "2sg": "vilki",
+        "2pl": "vilkāt",
+        "3sg": "vilka",
+        "3pl": "vilka"
+      },
+      "future": {
+        "1sg": "vilkšu",
+        "1pl": "vilksim",
+        "2sg": "vilksi",
+        "2pl": "vilksiet",
+        "3sg": "vilks",
+        "3pl": "vilks"
+      }
+    }
+  },
+  {
+    "table_number": 141,
+    "voice": "Darāmā kārta",
+    "infinitive": "zagt",
+    "present_3sg": "zog",
+    "past_3sg": "zaga",
+    "forms": {
+      "present": {
+        "1sg": "zogu",
+        "1pl": "zogam",
+        "2sg": "zodz",
+        "2pl": "zogat",
+        "3sg": "zog",
+        "3pl": "zog"
+      },
+      "past": {
+        "1sg": "zagu",
+        "1pl": "zagām",
+        "2sg": "zagi",
+        "2pl": "zagāt",
+        "3sg": "zaga",
+        "3pl": "zaga"
+      },
+      "future": {
+        "1sg": "zagšu",
+        "1pl": "zagsim",
+        "2sg": "zagsi",
+        "2pl": "zagsiet",
+        "3sg": "zags",
+        "3pl": "zags"
+      }
+    }
+  },
+  {
+    "table_number": 142,
+    "voice": "Darāmā kārta",
+    "infinitive": "zust",
+    "present_3sg": "zūd",
+    "past_3sg": "zuda",
+    "forms": {
+      "present": {
+        "1sg": "zūdu",
+        "1pl": "zūdam",
+        "2sg": "zūdi",
+        "2pl": "zūdat",
+        "3sg": "zūd",
+        "3pl": "zūd"
+      },
+      "past": {
+        "1sg": "zudu",
+        "1pl": "zudām",
+        "2sg": "zudi",
+        "2pl": "zudāt",
+        "3sg": "zuda",
+        "3pl": "zuda"
+      },
+      "future": {
+        "1sg": "zudīšu",
+        "1pl": "zudīsim",
+        "2sg": "zudīsi",
+        "2pl": "zudīsiet",
+        "3sg": "zudīs",
+        "3pl": "zudīs"
+      }
+    }
+  }
+]

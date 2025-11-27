@@ -3,12 +3,7 @@
 
 const tablesData = {
     group1: [
-        //{ id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.jpg', level: 'a1', alt: 'IMG_20250810_0001', description: 'есть Š в первой деклинации', width: 1942, height: 948 },
-        //{ id: 2, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001_2.jpg', level: 'a1-a1', alt: 'IMG_20250810_0001_2', width: 1942, height: 603 },
-        //{ id: 3, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001_3.jpg', level: 'a1-a1', alt: 'IMG_20250810_0001_3', width: 1942, height: 604 },
-        //{ id: 4, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001_4.jpg', level: 'a1-a1', alt: 'IMG_20250810_0001_4', width: 1942, height: 616 },
-        //{ id: 5, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002.jpg', level: 'a1-a1', alt: 'IMG_20250810_0002', width: 2013, height: 616 },
-        //{ id: 6, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_2.jpg', level: 'a1-a1', alt: 'IMG_20250810_0002_2', width: 2013, height: 604 },
+        { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.png', level: 'a1', alt: 'IMG_20250810_0001', width: 1942, height: 948 },
         //{ id: 7, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_3.jpg', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
         //{ id: 8, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_2.jpg', level: 'a2', alt: 'IMG_20250810_0010_2', width: 1935, height: 603 },
         //{ id: 9, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_3.jpg', level: 'a2', alt: 'IMG_20250810_0010_3', width: 1935, height: 960 },
@@ -99,11 +94,11 @@ const tablesData = {
 };
 
 export const superTables = [
-    { id: 'super-1', src: '/wp-content/themes/lbp/assets/images/super-tables/1.png', level: 'super', title: 'Склонение существительных', alt: 'Склонение существительных', hintId: '1', description: 'SUPER' },
+    //{ id: 'super-1', src: '/wp-content/themes/lbp/assets/images/super-tables/1.png', level: 'super', title: 'Склонение существительных', alt: 'Склонение существительных', hintId: '1', description: 'SUPER' },
     /*{ id: 'super-2', src: '/wp-content/themes/lbp/assets/images/super-tables/2.png', level: 'super', title: 'Предлоги', alt: 'Предлоги', hintId: '2', description: 'SUPER' },*/
-    { id: 'super-9', src: '/wp-content/themes/lbp/assets/images/super-tables/9.png', level: 'super', title: 'Предлоги (тип 2)', alt: 'Предлоги тип 2', hintId: '9', description: 'SUPER' },
-    { id: 'super-3', src: '/wp-content/themes/lbp/assets/images/super-tables/3.png', level: 'super', title: 'Спряжение глаголов (настоящее)', alt: 'Спряжение глаголов настоящее время', hintId: '3', description: 'SUPER' },
-    { id: 'super-4', src: '/wp-content/themes/lbp/assets/images/super-tables/4.png', level: 'super', title: 'Спряжение глаголов (прошедшее)', alt: 'Спряжение глаголов прошедшее время', hintId: '4', description: 'SUPER' },
+    //{ id: 'super-9', src: '/wp-content/themes/lbp/assets/images/super-tables/9.png', level: 'super', title: 'Предлоги (тип 2)', alt: 'Предлоги тип 2', hintId: '9', description: 'SUPER' },
+    //{ id: 'super-3', src: '/wp-content/themes/lbp/assets/images/super-tables/3.png', level: 'super', title: 'Спряжение глаголов (настоящее)', alt: 'Спряжение глаголов настоящее время', hintId: '3', description: 'SUPER' },
+    //{ id: 'super-4', src: '/wp-content/themes/lbp/assets/images/super-tables/4.png', level: 'super', title: 'Спряжение глаголов (прошедшее)', alt: 'Спряжение глаголов прошедшее время', hintId: '4', description: 'SUPER' },
     { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'super', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'SUPER' },
     { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'super', title: 'Числа', alt: 'Числа', hintId: '6', description: 'SUPER' },
     { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'super', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'SUPER' },
