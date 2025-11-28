@@ -38,7 +38,7 @@ export const customCategoryComponents = {
   //'20:1721': SimpleExampleCategory,     // Простой пример с группировкой
   //'20:1721': BaseTemplate,           // Базовый шаблон для копирования
   '20:1721': VerbConjugationCategory,    // Таблица спряжений глаголов
-  '20:1733': VerbConjugationCategory,    // Таблица спряжений глаголов
+  //'20:1733': VerbConjugationCategory,    // Таблица спряжений глаголов
   
   // Примеры регистрации:
   // '1:5': SimpleExampleCategory,    // Словарь ID=1, Категория ID=5
