@@ -3946,10 +3946,6 @@ h2 .small {
   border-bottom: none;
 }
 
-.verb-row-even {
-  background-color: #F8F9FA;
-}
-
 .verb-pronoun {
   font-weight: bold;
   width: 120px;
@@ -3962,4 +3958,9 @@ h2 .small {
   gap: 8px;
   flex: 1;
   align-items: center;
+}
+
+.word-input.empty {
+  width: 140px;
+  flex-shrink: 0;
 }
