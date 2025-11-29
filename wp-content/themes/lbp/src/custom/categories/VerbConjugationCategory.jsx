@@ -1018,42 +1018,58 @@ const VerbConjugationCategory = (props) => {
           },
 
           "snigt": {
-            name: "snigt - идти (о снеге)",
-            "es_past": "-",
-            "es_present": "-",
-            "es_future": "-",
-            "tu_past": "-",
-            "tu_present": "-",
-            "tu_future": "-",
+            "name": "snigt - идти (о снеге)",
+            "es_past": "snigu",
+            "es_present": "sniegu",
+            "es_future": "snigšu",
+
+            "tu_past": "snigi",
+            "tu_present": "snieg",
+            "tu_future": "snigsi",
+
             "3pers_past": "sniga",
             "3pers_present": "snieg",
             "3pers_future": "snigs",
-            "we_past": "-",
-            "we_present": "-",
-            "we_future": "-",
-            "you_pl_past": "-",
-            "you_pl_present": "-",
-            "you_pl_future": "-"
+
+            "we_past": "snigām",
+            "we_present": "sniegam",
+            "we_future": "snigsim",
+
+            "you_pl_past": "snigāt",
+            "you_pl_present": "sniegat",
+            "you_pl_future": "snigsit",
+
+            "they_past": "sniga",
+            "they_present": "snieg",
+            "they_future": "snigs"
           },
 
           "rasties": {
-            name: "rasties - возникать",
-            "es_past": "-",
-            "es_present": "-",
-            "es_future": "-",
-            "tu_past": "-",
-            "tu_present": "-",
-            "tu_future": "-",
+            "name": "rasties - возникать",
+            "es_past": "rados",
+            "es_present": "rodos",
+            "es_future": "radīšos",
+
+            "tu_past": "radies",
+            "tu_present": "rodies",
+            "tu_future": "radīsies",
+
             "3pers_past": "radās",
             "3pers_present": "rodas",
             "3pers_future": "radīsies",
-            "we_past": "-",
-            "we_present": "-",
-            "we_future": "-",
-            "you_pl_past": "-",
-            "you_pl_present": "-",
-            "you_pl_future": "-"
-          },
+
+            "we_past": "radāmies",
+            "we_present": "radāmies",
+            "we_future": "radīsimies",
+
+            "you_pl_past": "radāties",
+            "you_pl_present": "radāties",
+            "you_pl_future": "radīsieties",
+
+            "they_past": "radās",
+            "they_present": "rodas",
+            "they_future": "radīsies"
+          }
 
 
         };

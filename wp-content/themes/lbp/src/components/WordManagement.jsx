@@ -10,6 +10,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
   const [showBulkInsert, setShowBulkInsert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
   const [error, setError] = useState('');
   const [bulkText, setBulkText] = useState('');
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
@@ -175,6 +176,105 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     }
   };
 
+  const getCategoryWords = async () => {
+    if (!categoryId) return [];
+
+    try {
+      const formData = new FormData();
+      formData.append('action', 'get_words_by_category');
+      formData.append('category_id', categoryId);
+
+      const response = await axios.post(window.myajax.url, formData);
+      
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      return [];
+    } catch (err) {
+      console.error('Ошибка получения слов категории:', err);
+      return [];
+    }
+  };
+
+  const deleteWord = async (wordId) => {
+    const formData = new FormData();
+    formData.append('action', 'delete_word');
+    formData.append('word_id', wordId);
+
+    const response = await axios.post(window.myajax.url, formData);
+    return response.data;
+  };
+
+  const handleDeleteAllWords = async () => {
+    if (!categoryId) {
+      setError('Категория не выбрана');
+      return;
+    }
+
+    const confirmMessage = 'Вы уверены, что хотите удалить ВСЕ слова из этой категории? Это действие нельзя отменить!';
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setDeleteAllLoading(true);
+      setError('');
+
+      // Получаем все слова категории
+      const words = await getCategoryWords();
+      
+      if (words.length === 0) {
+        setError('В категории нет слов для удаления');
+        setDeleteAllLoading(false);
+        return;
+      }
+
+      setBulkProgress({ current: 0, total: words.length });
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Удаляем каждое слово
+      for (let i = 0; i < words.length; i++) {
+        setBulkProgress({ current: i + 1, total: words.length });
+        
+        try {
+          const result = await deleteWord(words[i].id);
+          if (result.success) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.error(`Ошибка удаления слова "${words[i].word}":`, result.message);
+          }
+        } catch (err) {
+          errorCount++;
+          console.error(`Ошибка удаления слова "${words[i].word}":`, err.message);
+        }
+
+        // Небольшая задержка между запросами
+        if (i < words.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      if (errorCount > 0) {
+        setError(`Удалено: ${successCount}, ошибок: ${errorCount}`);
+      } else {
+        setError('');
+      }
+
+      // Обновляем список слов
+      if (onWordsChanged) {
+        onWordsChanged();
+      }
+    } catch (err) {
+      setError('Ошибка при удалении слов: ' + err.message);
+    } finally {
+      setDeleteAllLoading(false);
+      setBulkProgress({ current: 0, total: 0 });
+    }
+  };
+
   return (
     <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#e8f5e9', border: '2px solid #4CAF50', borderRadius: '5px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
@@ -213,6 +313,21 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
             }}
           >
             {showBulkInsert ? '✕ Отменить' : '📋 Вставить список'}
+          </button>
+          <button 
+            onClick={handleDeleteAllWords}
+            disabled={deleteAllLoading || bulkLoading}
+            style={{ 
+              padding: '8px 16px', 
+              backgroundColor: deleteAllLoading ? '#ccc' : '#f44336', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: deleteAllLoading ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            {deleteAllLoading ? `🗑️ Удаление... (${bulkProgress.current}/${bulkProgress.total})` : '🗑️ Удалить все слова'}
           </button>
         </div>
       </div>
@@ -416,7 +531,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
             />
           </div>
 
-          {bulkLoading && bulkProgress.total > 0 && (
+          {(bulkLoading || deleteAllLoading) && bulkProgress.total > 0 && (
             <div style={{ marginBottom: '10px', padding: '8px', backgroundColor: '#e3f2fd', border: '1px solid #2196F3', borderRadius: '4px' }}>
               <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
                 Обработка: {bulkProgress.current} / {bulkProgress.total}
