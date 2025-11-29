@@ -11,6 +11,8 @@
 import SimpleExampleCategory from '../categories/SimpleExampleCategory';
 import BaseTemplate from '../categories/BaseTemplate';
 import VerbConjugationCategory from '../categories/VerbConjugationCategory';
+import VerbConjugationCategory1 from '../categories/VerbConjugationCategory1';
+import VerbConjugationCategory2 from '../categories/VerbConjugationCategory2';
 
 // Ваши компоненты:
 // import MyCategoryComponent from '../categories/MyCategoryComponent';
@@ -38,7 +40,9 @@ export const customCategoryComponents = {
   //'20:1721': SimpleExampleCategory,     // Простой пример с группировкой
   //'20:1721': BaseTemplate,           // Базовый шаблон для копирования
   '20:1721': VerbConjugationCategory,    // Таблица спряжений глаголов
-  //'20:1733': VerbConjugationCategory,    // Таблица спряжений глаголов
+  '20:1733': VerbConjugationCategory,    // Таблица спряжений глаголов
+  '20:1736': VerbConjugationCategory1,    // Таблица спряжений глаголов (первая группа)
+  '20:1737': VerbConjugationCategory2,    // Таблица спряжений глаголов (вторая группа)
   
   // Примеры регистрации:
   // '1:5': SimpleExampleCategory,    // Словарь ID=1, Категория ID=5
