@@ -36,7 +36,13 @@ const tablesData = {
         //{ id: 34, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0005_3.jpg', level: 'a1', alt: 'IMG_20250810_0005_3', width: 1944, height: 544 },
         //{ id: 35, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0005_4.jpg', level: 'a1', alt: 'IMG_20250810_0005_4', width: 1940, height: 544 },
         //{ id: 36, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0005_5.jpg', level: 'a1', alt: 'IMG_20250810_0005_5', width: 1936, height: 584 },
-        //{ id: 37, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0006.jpg', level: 'a1', alt: 'IMG_20250810_0006', width: 1951, height: 568 }
+        //{ id: 37, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0006.jpg', level: 'a1', alt: 'IMG_20250810_0006', width: 1951, height: 568 },
+        { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'a1', title: 'Числа', alt: 'Числа', hintId: '6', description: 'A1' },
+        { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'a1', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'A1-A2' },
+        { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'a1', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'A1' },
+        { id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
+        { id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
+        { id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'a2', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'A2' },
     ],
     group2: [
         //{ id: 38, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0039_3.jpg', level: 'b1', alt: 'IMG_20250810_0039_3', width: 1895, height: 550 },
@@ -56,7 +62,9 @@ const tablesData = {
         //{ id: 52, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0054_5.jpg', level: 'b1', alt: 'IMG_20250810_0054_5', width: 1892, height: 656 },
         //{ id: 53, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055.jpg', level: 'b1', alt: 'IMG_20250810_0055', width: 1891, height: 892 },
         //{ id: 54, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055_2.jpg', level: 'b1', alt: 'IMG_20250810_0055_2', width: 1891, height: 755 },
-        //{ id: 55, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055_3.jpg', level: 'b1', alt: 'IMG_20250810_0055_3', width: 1891, height: 720 }
+        //{ id: 55, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055_3.jpg', level: 'b1', alt: 'IMG_20250810_0055_3', width: 1891, height: 720 },
+        { id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'b1', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'B1' },
+        { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'b1', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'B1' },
     ],
     group3: [
         //{ id: 56, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0057.jpg', level: 'b2', alt: 'IMG_20250810_0057', width: 1825, height: 1636 },
@@ -92,6 +100,7 @@ const tablesData = {
         //{ id: 87, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0088.jpg', level: 'b2', alt: 'IMG_20250810_0088', width: 2056, height: 2952 },
         //{ id: 88, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0089.jpg', level: 'b2', alt: 'IMG_20250810_0089', width: 1808, height: 552 },
         //{ id: 89, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0089_2.jpg', level: 'b2', alt: 'IMG_20250810_0089_2', width: 2056, height: 2375 }
+        { id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'b2', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'B2' },
     ]
 };
 
@@ -101,15 +110,15 @@ export const superTables = [
     //{ id: 'super-9', src: '/wp-content/themes/lbp/assets/images/super-tables/9.png', level: 'super', title: 'Предлоги (тип 2)', alt: 'Предлоги тип 2', hintId: '9', description: 'SUPER' },
     //{ id: 'super-3', src: '/wp-content/themes/lbp/assets/images/super-tables/3.png', level: 'super', title: 'Спряжение глаголов (настоящее)', alt: 'Спряжение глаголов настоящее время', hintId: '3', description: 'SUPER' },
     //{ id: 'super-4', src: '/wp-content/themes/lbp/assets/images/super-tables/4.png', level: 'super', title: 'Спряжение глаголов (прошедшее)', alt: 'Спряжение глаголов прошедшее время', hintId: '4', description: 'SUPER' },
-    { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'super', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'SUPER' },
-    { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'super', title: 'Числа', alt: 'Числа', hintId: '6', description: 'SUPER' },
-    { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'super', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'SUPER' },
-    { id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'super', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'SUPER' },
-    { id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'super', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'SUPER' },
-    { id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'super', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'SUPER' },
-    { id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'super', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'SUPER' },
-    { id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'super', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'SUPER' },
-    { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'super', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'SUPER' }
+    //////{ id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'super', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'SUPER' },
+    //////{ id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'super', title: 'Числа', alt: 'Числа', hintId: '6', description: 'SUPER' },
+    //////{ id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'super', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'SUPER' },
+    //////{ id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'super', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'SUPER' },
+    //////{ id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'super', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'SUPER' },
+    //////{ id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'super', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'SUPER' },
+    //////{ id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'super', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'SUPER' },
+    //////{ id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'super', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'SUPER' },
+    //////{ id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'super', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'SUPER' }
 ];
 
 const baseGroupDefinitions = [
