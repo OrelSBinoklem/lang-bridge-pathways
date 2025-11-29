@@ -1,47 +1,58 @@
 a1 būt
-a2 satikt
-a2 nākt
 a1 iet
 a1 patikt
 a1 pirkt
-a2 ņemt
 a1 pārdot
+a1 braukt
+a1 ēst
+a1 dzert
+a1 atrast
+a1 skriet
+
+
+
+a2 satikt
+a2 nākt
+a2 ņemt
 a2 prast
 a2 doties
 a2 beigties
 a2 sākties
 a2 lūgt
 a2 atrasties
-a1 braukt
-a1 ēst
 a2 dot
 a2 likt
-a1 dzert
-b2 zagt
 a2 tikt
-b1 celt
-b2 krist
-b1 gūt
-b1 kļūt
-b2 laist
-b2 kliegt
 a2 saukt
 a2 teikt
 a2 vilkt
-b1 just
-b2 sēdēt
-a1 skriet
-b2 dzīt
-a1 atrast
-b2 kost
-b2 raut
 a2 nest
+a2 sniegt
+
+
+
+
+
+b1 celt
+b1 gūt
+b1 kļūt
+b1 just
 b1 vest
 b1 mest
+b1 zust
+
+
+
+b2 zagt
+b2 krist
+b2 laist
+b2 kliegt
+b2 sēdēt
+b2 dzīt
+b2 kost
+b2 raut
 b2 plest
 b2 liegt
-a2 sniegt
 b2 spiest
 b2 snigt
 b2 rasties
-b1 zust
