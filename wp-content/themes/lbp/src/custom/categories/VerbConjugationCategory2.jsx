@@ -11,7 +11,7 @@ const VerbConjugationCategory2 = (props) => {
   // Объект с глаголами и их спряжениями для второй категории
   const verbs = {
     //B1
-    'celt': {
+    'celt': {//+
       name: 'celt - поднимать',
 
       'es_past': 'cēlu',
@@ -19,7 +19,7 @@ const VerbConjugationCategory2 = (props) => {
       'es_future': 'celšu',
 
       'tu_past': 'cēli',
-      'tu_present': 'ceļ',
+      'tu_present': 'cel',
       'tu_future': 'celsi',
 
       '3pers_past': 'cēla',
@@ -34,7 +34,7 @@ const VerbConjugationCategory2 = (props) => {
       'you_pl_present': 'ceļat',
       'you_pl_future': 'celsiet',
     },
-    'gūt': {
+    'gūt': {//+
       name: 'gūt - получать, обрести',
 
       'es_past': 'guvu',
@@ -57,7 +57,7 @@ const VerbConjugationCategory2 = (props) => {
       'you_pl_present': 'gūstat',
       'you_pl_future': 'gūsiet',
     },
-    'kļūt': {
+    'kļūt': {//+
       name: 'kļūt - становиться',
 
       'es_past': 'kļuvu',
@@ -80,7 +80,7 @@ const VerbConjugationCategory2 = (props) => {
       'you_pl_present': 'kļūstat',
       'you_pl_future': 'kļūsiet',
     },
-    'just': {
+    'just': {//+
       name: 'just - чувствовать',
 
       'es_past': 'jutu',
@@ -104,7 +104,7 @@ const VerbConjugationCategory2 = (props) => {
       'you_pl_future': 'jutīsiet',
     },
 
-    "vest": {
+    "vest": {//+
       name: "vest - везти",
 
       "es_past": "vedu",
@@ -128,7 +128,7 @@ const VerbConjugationCategory2 = (props) => {
       "you_pl_future": "vedīsiet"
     },
 
-    "mest": {
+    "mest": {//+
       name: "mest - бросать",
 
       "es_past": "metu",
@@ -155,30 +155,30 @@ const VerbConjugationCategory2 = (props) => {
     "zust": {
       name: "zust - исчезать",
 
-      "es_past": "-",
-      "es_present": "-",
-      "es_future": "-",
+      "es_past": "zudu",
+      "es_present": "zūdu",
+      "es_future": "zudīšu",
 
-      "tu_past": "-",
-      "tu_present": "-",
-      "tu_future": "-",
+      "tu_past": "zudi",
+      "tu_present": "zūdi",
+      "tu_future": "zudīsi",
 
       "3pers_past": "zuda",
       "3pers_present": "zūd",
       "3pers_future": "zudīs",
 
-      "we_past": "-",
-      "we_present": "-",
-      "we_future": "-",
+      "we_past": "zudām",
+      "we_present": "zūdam",
+      "we_future": "zudīsim",
 
-      "you_pl_past": "-",
-      "you_pl_present": "-",
-      "you_pl_future": "-"
+      "you_pl_past": "zudāt",
+      "you_pl_present": "zūdat",
+      "you_pl_future": "zudīsiet"
     },
 
     //B2
 
-    'zagt': {
+    'zagt': {//+
       name: 'zagt - воровать',
 
       'es_past': 'zagu',
@@ -203,7 +203,7 @@ const VerbConjugationCategory2 = (props) => {
     },
 
 
-    'krist': {
+    'krist': {//+
       name: 'krist - падать',
 
       'es_past': 'kritu',
@@ -232,7 +232,7 @@ const VerbConjugationCategory2 = (props) => {
 
 
     // ✅ laist по Letonika
-    'laist': {
+    'laist': {//+
       name: 'laist - пускать, отпускать',
 
       'es_past': 'laidu',
@@ -257,7 +257,7 @@ const VerbConjugationCategory2 = (props) => {
     },
 
     // ✅ kliegt по Letonika
-    'kliegt': {
+    'kliegt': {//+
       name: 'kliegt - кричать',
 
       'es_past': 'kliedzu',
@@ -284,7 +284,7 @@ const VerbConjugationCategory2 = (props) => {
 
 
 
-    'sēdēt': {
+    'sēdēt': {//++
       name: 'sēdēt - сидеть',
 
       'es_past': 'sēdēju',
@@ -310,7 +310,7 @@ const VerbConjugationCategory2 = (props) => {
 
 
 
-    'dzīt': {
+    'dzīt': {//+
       name: 'dzīt - гнать',
 
       'es_past': 'dzinu',
@@ -343,26 +343,26 @@ const VerbConjugationCategory2 = (props) => {
 
       "es_past": "kodu",
       "es_present": "kožu",
-      "es_future": "košu",
+      "es_future": "kodīšu",
 
       "tu_past": "kodi",
-      "tu_present": "kož",
-      "tu_future": "kosi",
+      "tu_present": "kod",
+      "tu_future": "kodīsi",
 
       "3pers_past": "koda",
       "3pers_present": "kož",
-      "3pers_future": "kos",
+      "3pers_future": "kodīs",
 
       "we_past": "kodām",
       "we_present": "kožam",
-      "we_future": "kosim",
+      "we_future": "kodīsim",
 
       "you_pl_past": "kodāt",
       "you_pl_present": "kožat",
-      "you_pl_future": "kosiet"
+      "you_pl_future": "kodīsiet"
     },
 
-    "raut": {
+    "raut": {//+
       name: "raut - рвать, дёргать",
 
       "es_past": "rāvu",
@@ -404,7 +404,7 @@ const VerbConjugationCategory2 = (props) => {
       "tu_future": "pletīsi",
 
       "3pers_past": "pleta",
-      "3pers_present": "plēš",
+      "3pers_present": "pleš",
       "3pers_future": "pletīs",
 
       "we_past": "pletām",
