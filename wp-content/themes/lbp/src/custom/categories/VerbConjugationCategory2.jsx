@@ -319,21 +319,21 @@ const VerbConjugationCategory2 = (props) => {
 
     "plest": {
       name: "plest - раскрывать, рвать",
-      "es_past": "plēsu",
+      "es_past": "pletu",
       "es_present": "plešu",
-      "es_future": "plēsīšu",
-      "tu_past": "plēsi",
-      "tu_present": "plēs",
-      "tu_future": "plēsīsi",
-      "3pers_past": "plēsa",
-      "3pers_present": "plēs",
-      "3pers_future": "plēsīs",
-      "we_past": "plēsām",
+      "es_future": "pletīšu",
+      "tu_past": "pleti",
+      "tu_present": "plet",
+      "tu_future": "pletīsi",
+      "3pers_past": "pleta",
+      "3pers_present": "plēš",
+      "3pers_future": "pletīs",
+      "we_past": "pletām",
       "we_present": "plešam",
-      "we_future": "plēsīsim",
-      "you_pl_past": "plēsāt",
+      "we_future": "pletīsim",
+      "you_pl_past": "pletāt",
       "you_pl_present": "plešat",
-      "you_pl_future": "plēsīsiet"
+      "you_pl_future": "pletīsiet"
     },
 
     "liegt": {

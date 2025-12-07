@@ -65,14 +65,14 @@ const VerbModal = ({ verbData, onClose }) => {
     const tenses = hasFullParadigm
         ? [
             {
-                key: 'present',
-                label: 'Tagadne',
-                values: forms.slice(0, 5)
-            },
-            {
                 key: 'past',
                 label: 'Pagātne',
                 values: forms.slice(5, 10)
+            },
+            {
+                key: 'present',
+                label: 'Tagadne',
+                values: forms.slice(0, 5)
             },
             {
                 key: 'future',
@@ -85,14 +85,14 @@ const VerbModal = ({ verbData, onClose }) => {
     const referenceTenses = referenceSource?.forms
         ? [
             {
-                key: 'present',
-                label: 'Tagadne',
-                values: collapseTenseToRow(referenceSource.forms.present || {})
-            },
-            {
                 key: 'past',
                 label: 'Pagātne',
                 values: collapseTenseToRow(referenceSource.forms.past || {})
+            },
+            {
+                key: 'present',
+                label: 'Tagadne',
+                values: collapseTenseToRow(referenceSource.forms.present || {})
             },
             {
                 key: 'future',
@@ -129,11 +129,6 @@ const VerbModal = ({ verbData, onClose }) => {
                             <span className="verb-trans-value">{translationUk || '—'}</span>
                         </span>
                     </div>
-                    {matchedTableNumbers.length > 0 && (
-                        <div className="verb-table-match">
-                            Tabulas Nr.: {matchedTableNumbers.join(', ')}
-                        </div>
-                    )}
                 </div>
 
                 <div className={`verb-modal-body ${(hasReferenceTable || showReferencePlaceholder) && showGeneratedContent ? 'with-reference' : ''}`}>
@@ -179,7 +174,7 @@ const VerbModal = ({ verbData, onClose }) => {
                     {hasReferenceTable && (
                         <div className="verb-table-wrapper reference">
                             <div className="verb-table-title">
-                                Общая таблица соответствующая глаголу (справочник)
+                                Общая таблица соответствующая глаголу {referenceSource?.infinitive ? <strong>"{referenceSource.infinitive}"</strong> : ''} (справочник)
                                 {/*Etalona tabula{referenceTable?.tableNumber ? ` Nr. ${referenceTable.tableNumber}` : ''}*/}
                             </div>
                             <table className="verb-forms-table">

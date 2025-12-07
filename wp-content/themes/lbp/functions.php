@@ -149,14 +149,6 @@ function my_theme_enqueue_styles() {
             ['bootstrap-css'], // Зависимость от Bootstrap
             time() // For production use wp_get_theme()->get('Version')
         );
-        
-        wp_enqueue_script(
-            'interactive-cheat-sheet-script',
-            get_stylesheet_directory_uri() . '/src/InteractiveCheatSheet/interactive-cheat-sheet.js',
-            [], // Зависимости
-            time(), // For production use wp_get_theme()->get('Version')
-            true // В footer
-        );
     }
 
     // Подключение стилей для галереи грамматических таблиц только на нужной странице
