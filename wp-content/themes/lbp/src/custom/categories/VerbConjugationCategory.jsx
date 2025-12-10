@@ -15,7 +15,7 @@ const VerbConjugationCategory = (props) => {
   // Объект с глаголами и их спряжениями
   // Каждое спряжение - отдельный ключ. Удалите ненужные ключи, ячейка останется пустой
   const verbs = {
-    'būt': {
+    'būt': {//+
       name: 'būt - быть',
 
       'es_past': 'biju',
@@ -38,7 +38,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'esat',
       'you_pl_future': 'būsiet',
     },
-    'iet': {
+    'iet': {//+
       name: 'iet - идти',
 
       'es_past': 'gāju',
@@ -61,7 +61,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'ejat',
       'you_pl_future': 'iesiet',
     },
-    'patikt': {
+    'patikt': {//+
       name: 'patikt - нравиться',
 
       'es_past': 'patiku',
@@ -84,7 +84,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'patīkat',
       'you_pl_future': 'patiksiet',
     },
-    'pirkt': {
+    'pirkt': {//+
       name: 'pirkt - покупать',
 
       'es_past': 'pirku',
@@ -107,7 +107,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'pērkat',
       'you_pl_future': 'pirksiet',
     },
-    'pārdot': {
+    'pārdot': {//+
       name: 'pārdot - продать',
 
       'es_past': 'pārdevu',
@@ -130,7 +130,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'pārdodat',
       'you_pl_future': 'pārdosiet',
     },
-    'braukt': {
+    'braukt': {//+
       name: 'braukt - ехать',
 
       'es_past': 'braucu',
@@ -153,7 +153,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'braucat',
       'you_pl_future': 'brauksiet',
     },
-    'ēst': {
+    'ēst': {//+
       name: 'ēst - кушать',
 
       'es_past': 'ēdu',
@@ -176,7 +176,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'ēdat',
       'you_pl_future': 'ēdīsiet',
     },
-    'dzert': {
+    'dzert': {//+
       name: 'dzert - пить',
 
       'es_past': 'dzēru',
@@ -199,7 +199,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'dzerat',
       'you_pl_future': 'dzersiet',
     },
-    'atrast': {
+    'atrast': {//+
       name: 'atrast - находить',
 
       'es_past': 'atradu',
@@ -222,7 +222,7 @@ const VerbConjugationCategory = (props) => {
       'you_pl_present': 'atrodat',
       'you_pl_future': 'atradīsiet',
     },
-    'skriet': {
+    'skriet': {//+
       name: 'skriet - бежать',
 
       'es_past': 'skrēju',

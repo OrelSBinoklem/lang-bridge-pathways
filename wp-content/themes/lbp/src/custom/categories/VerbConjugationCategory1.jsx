@@ -13,7 +13,7 @@ const VerbConjugationCategory1 = (props) => {
     /*A2*/
 
 
-    'satikt': {
+    'satikt': {//+
       name: 'satikt - встретить',
 
       'es_past': 'satiku',
@@ -36,7 +36,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'satiekat',
       'you_pl_future': 'satiksiet',
     },
-    'nākt': {
+    'nākt': {//+
       name: 'nākt - приходить',
 
       'es_past': 'nācu',
@@ -59,31 +59,31 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'nākat',
       'you_pl_future': 'nāksiet',
     },
-    'ņemt': {
+    'ņemt': {//+
       name: 'ņemt - брать',
 
       'es_past': 'ņēmu',
-      'es_present': 'nemu',
+      'es_present': 'ņemu',
       'es_future': 'ņemšu',
 
       'tu_past': 'ņēmi',
-      'tu_present': 'nem',
+      'tu_present': 'ņem',
       'tu_future': 'ņemsi',
 
       '3pers_past': 'ņēma',
-      '3pers_present': 'nem',
+      '3pers_present': 'ņem',
       '3pers_future': 'ņems',
 
       'we_past': 'ņēmām',
-      'we_present': 'nemam',
+      'we_present': 'ņemam',
       'we_future': 'ņemsim',
 
       'you_pl_past': 'ņēmāt',
-      'you_pl_present': 'nemat',
+      'you_pl_present': 'ņemat',
       'you_pl_future': 'ņemsiet',
     },
 
-    'prast': {
+    'prast': {//+
       name: 'prast - уметь',
 
       'es_past': 'pratu',
@@ -106,7 +106,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'protat',
       'you_pl_future': 'pratīsiet',
     },
-    'doties': {
+    'doties': {//+
       name: 'doties - направляться',
 
       'es_past': 'devos',
@@ -129,12 +129,12 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'dodaties',
       'you_pl_future': 'dosieties',
     },
-    'beigties': {
+    'beigties': {//+
       name: 'beigties - (за)кончиться',
 
       'es_past': 'beidzos',
       'es_present': 'beidzos',
-      'es_future': 'beigsos',
+      'es_future': 'beigšos',
 
       'tu_past': 'beidzies',
       'tu_present': 'beidzies',
@@ -152,7 +152,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'beidzaties',
       'you_pl_future': 'beigsieties',
     },
-    'sākties': {
+    'sākties': {//+
       name: 'sākties - начаться',
 
       'es_past': 'sākos',
@@ -175,7 +175,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'sākaties',
       'you_pl_future': 'sāksieties',
     },
-    'lūgt': {
+    'lūgt': {//+
       name: 'lūgt - просить (пригласить)',
 
       'es_past': 'lūdzu',
@@ -198,7 +198,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'lūdzat',
       'you_pl_future': 'lūgsiet',
     },
-    'atrasties': {
+    'atrasties': {//+
       name: 'atrasties - находиться',
 
       'es_past': 'atrados',
@@ -244,7 +244,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'dodat',
       'you_pl_future': 'dosiet',
     },
-    'likt': {
+    'likt': {//+
       name: 'likt - класть, ставить',
 
       'es_past': 'liku',
@@ -267,7 +267,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'liekat',
       'you_pl_future': 'liksiet',
     },
-    'tikt': {
+    'tikt': {//+
       name: 'tikt - попасть, стать',
 
       'es_past': 'tiku',
@@ -291,7 +291,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_future': 'tiksiet',
     },
     // ✅ saukt по Letonika
-    'saukt': {
+    'saukt': {//+
       name: 'saukt - звать, называть',
 
       'es_past': 'saucu',
@@ -315,7 +315,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_future': 'sauksiet',
     },
     // teikt – с чередованием k→c и teikš- в будущем
-    'teikt': {
+    'teikt': {//+
       name: 'teikt - говорить, сказать',
 
       'es_past': 'teicu',
@@ -338,7 +338,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'teicat',
       'you_pl_future': 'teiksiet',
     },
-    'vilkt': {
+    'vilkt': {//+
       name: 'vilkt - тянуть, носить',
 
       'es_past': 'vilku',
@@ -361,7 +361,7 @@ const VerbConjugationCategory1 = (props) => {
       'you_pl_present': 'velkat',
       'you_pl_future': 'vilksiet',
     },
-    "nest": {
+    "nest": {//+
       name: "nest - нести",
 
       "es_past": "nesu",
@@ -384,7 +384,7 @@ const VerbConjugationCategory1 = (props) => {
       "you_pl_present": "nesat",
       "you_pl_future": "nesīsiet"
     },
-    "sniegt": {
+    "sniegt": {//+
       name: "sniegt - подавать",
 
       "es_past": "sniedzu",
