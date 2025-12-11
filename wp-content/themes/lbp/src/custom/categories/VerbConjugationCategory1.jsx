@@ -16,7 +16,7 @@ const VerbConjugationCategory1 = (props) => {
     'satikt': {//+
       name: 'satikt - встретить',
 
-      'es_past': 'satiku',
+      //'es_past': 'satiku',
       'es_present': 'satieku',
       //'es_future': 'satikšu',
 //
