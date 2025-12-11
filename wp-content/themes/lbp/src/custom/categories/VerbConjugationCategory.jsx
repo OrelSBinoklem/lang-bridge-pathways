@@ -20,138 +20,138 @@ const VerbConjugationCategory = (props) => {
 
       'es_past': 'biju',
       'es_present': 'esmu',
-      'es_future': 'būšu',
+      //'es_future': 'būšu',
 
-      'tu_past': 'biji',
+      //'tu_past': 'biji',
       'tu_present': 'esi',
-      'tu_future': 'būsi',
+      //'tu_future': 'būsi',
 
-      '3pers_past': 'bija',
+      //'3pers_past': 'bija',
       '3pers_present': 'ir',
-      '3pers_future': 'būs',
+      //'3pers_future': 'būs',
 
-      'we_past': 'bijām',
+      //'we_past': 'bijām',
       'we_present': 'esam',
-      'we_future': 'būsim',
+      //'we_future': 'būsim',
 
-      'you_pl_past': 'bijāt',
+      //'you_pl_past': 'bijāt',
       'you_pl_present': 'esat',
-      'you_pl_future': 'būsiet',
+      //'you_pl_future': 'būsiet',
     },
     'iet': {//+
       name: 'iet - идти',
 
       'es_past': 'gāju',
       'es_present': 'eju',
-      'es_future': 'iešu',
-
-      'tu_past': 'gāji',
-      'tu_present': 'ej',
-      'tu_future': 'iesi',
-
-      '3pers_past': 'gāja',
+      //'es_future': 'iešu',
+//
+      //'tu_past': 'gāji',
+      //'tu_present': 'ej',
+      //'tu_future': 'iesi',
+//
+      //'3pers_past': 'gāja',
       '3pers_present': 'iet',
-      '3pers_future': 'ies',
-
-      'we_past': 'gājām',
-      'we_present': 'ejam',
-      'we_future': 'iesim',
-
-      'you_pl_past': 'gājāt',
-      'you_pl_present': 'ejat',
-      'you_pl_future': 'iesiet',
+      //'3pers_future': 'ies',
+//
+      //'we_past': 'gājām',
+      //'we_present': 'ejam',
+      //'we_future': 'iesim',
+//
+      //'you_pl_past': 'gājāt',
+      //'you_pl_present': 'ejat',
+      //'you_pl_future': 'iesiet',
     },
     'patikt': {//+
       name: 'patikt - нравиться',
 
-      'es_past': 'patiku',
+      //'es_past': 'patiku',
       'es_present': 'patīku',
-      'es_future': 'patikšu',
-
-      'tu_past': 'patiki',
+      //'es_future': 'patikšu',
+//
+      //'tu_past': 'patiki',
       'tu_present': 'patīc',
-      'tu_future': 'patiksi',
-
-      '3pers_past': 'patika',
-      '3pers_present': 'patīk',
-      '3pers_future': 'patiks',
-
-      'we_past': 'patikām',
-      'we_present': 'patīkam',
-      'we_future': 'patiksim',
-
-      'you_pl_past': 'patikāt',
-      'you_pl_present': 'patīkat',
-      'you_pl_future': 'patiksiet',
+      //'tu_future': 'patiksi',
+//
+      //'3pers_past': 'patika',
+      //'3pers_present': 'patīk',
+      //'3pers_future': 'patiks',
+//
+      //'we_past': 'patikām',
+      //'we_present': 'patīkam',
+      //'we_future': 'patiksim',
+//
+      //'you_pl_past': 'patikāt',
+      //'you_pl_present': 'patīkat',
+      //'you_pl_future': 'patiksiet',
     },
     'pirkt': {//+
       name: 'pirkt - покупать',
 
-      'es_past': 'pirku',
+      //'es_past': 'pirku',
       'es_present': 'pērku',
-      'es_future': 'pirkšu',
-
-      'tu_past': 'pirki',
+      //'es_future': 'pirkšu',
+//
+      //'tu_past': 'pirki',
       'tu_present': 'pērc',
-      'tu_future': 'pirksi',
-
-      '3pers_past': 'pirka',
-      '3pers_present': 'pērk',
-      '3pers_future': 'pirks',
-
-      'we_past': 'pirkām',
-      'we_present': 'pērkam',
-      'we_future': 'pirksim',
-
-      'you_pl_past': 'pirkāt',
-      'you_pl_present': 'pērkat',
-      'you_pl_future': 'pirksiet',
+      //'tu_future': 'pirksi',
+//
+      //'3pers_past': 'pirka',
+      //'3pers_present': 'pērk',
+      //'3pers_future': 'pirks',
+//
+      //'we_past': 'pirkām',
+      //'we_present': 'pērkam',
+      //'we_future': 'pirksim',
+//
+      //'you_pl_past': 'pirkāt',
+      //'you_pl_present': 'pērkat',
+      //'you_pl_future': 'pirksiet',
     },
     'pārdot': {//+
       name: 'pārdot - продать',
 
       'es_past': 'pārdevu',
       'es_present': 'pārdodu',
-      'es_future': 'pārdošu',
+      //'es_future': 'pārdošu',
 
-      'tu_past': 'pārdevi',
-      'tu_present': 'pārdod',
-      'tu_future': 'pārdosi',
-
-      '3pers_past': 'pārdeva',
-      '3pers_present': 'pārdod',
-      '3pers_future': 'pārdos',
-
-      'we_past': 'pārdevām',
-      'we_present': 'pārdodam',
-      'we_future': 'pārdosim',
-
-      'you_pl_past': 'pārdevāt',
-      'you_pl_present': 'pārdodat',
-      'you_pl_future': 'pārdosiet',
+      //'tu_past': 'pārdevi',
+      //'tu_present': 'pārdod',
+      //'tu_future': 'pārdosi',
+//
+      //'3pers_past': 'pārdeva',
+      //'3pers_present': 'pārdod',
+      //'3pers_future': 'pārdos',
+//
+      //'we_past': 'pārdevām',
+      //'we_present': 'pārdodam',
+      //'we_future': 'pārdosim',
+//
+      //'you_pl_past': 'pārdevāt',
+      //'you_pl_present': 'pārdodat',
+      //'you_pl_future': 'pārdosiet',
     },
     'braukt': {//+
       name: 'braukt - ехать',
 
       'es_past': 'braucu',
       'es_present': 'braucu',
-      'es_future': 'braukšu',
-
-      'tu_past': 'brauci',
-      'tu_present': 'brauc',
-      'tu_future': 'brauksi',
-
-      '3pers_past': 'brauca',
-      '3pers_present': 'brauc',
-      '3pers_future': 'brauks',
-
-      'we_past': 'braucām',
-      'we_present': 'braucam',
-      'we_future': 'brauksim',
-
-      'you_pl_past': 'braucāt',
-      'you_pl_present': 'braucat',
-      'you_pl_future': 'brauksiet',
+      //'es_future': 'braukšu',
+//
+      //'tu_past': 'brauci',
+      //'tu_present': 'brauc',
+      //'tu_future': 'brauksi',
+//
+      //'3pers_past': 'brauca',
+      //'3pers_present': 'brauc',
+      //'3pers_future': 'brauks',
+//
+      //'we_past': 'braucām',
+      //'we_present': 'braucam',
+      //'we_future': 'brauksim',
+//
+      //'you_pl_past': 'braucāt',
+      //'you_pl_present': 'braucat',
+      //'you_pl_future': 'brauksiet',
     },
     'ēst': {//+
       name: 'ēst - кушать',
@@ -160,44 +160,44 @@ const VerbConjugationCategory = (props) => {
       'es_present': 'ēdu',
       'es_future': 'ēdīšu',
 
-      'tu_past': 'ēdi',
-      'tu_present': 'ēd',
-      'tu_future': 'ēdīsi',
-
-      '3pers_past': 'ēda',
-      '3pers_present': 'ēd',
-      '3pers_future': 'ēdīs',
-
-      'we_past': 'ēdām',
-      'we_present': 'ēdam',
-      'we_future': 'ēdīsim',
-
-      'you_pl_past': 'ēdāt',
-      'you_pl_present': 'ēdat',
-      'you_pl_future': 'ēdīsiet',
+      //'tu_past': 'ēdi',
+      //'tu_present': 'ēd',
+      //'tu_future': 'ēdīsi',
+//
+      //'3pers_past': 'ēda',
+      //'3pers_present': 'ēd',
+      //'3pers_future': 'ēdīs',
+//
+      //'we_past': 'ēdām',
+      //'we_present': 'ēdam',
+      //'we_future': 'ēdīsim',
+//
+      //'you_pl_past': 'ēdāt',
+      //'you_pl_present': 'ēdat',
+      //'you_pl_future': 'ēdīsiet',
     },
     'dzert': {//+
       name: 'dzert - пить',
 
       'es_past': 'dzēru',
-      'es_present': 'dzeru',
-      'es_future': 'dzeršu',
-
-      'tu_past': 'dzēri',
-      'tu_present': 'dzer',
-      'tu_future': 'dzersi',
-
-      '3pers_past': 'dzēra',
-      '3pers_present': 'dzer',
-      '3pers_future': 'dzers',
-
-      'we_past': 'dzērām',
-      'we_present': 'dzeram',
-      'we_future': 'dzersim',
-
-      'you_pl_past': 'dzērāt',
-      'you_pl_present': 'dzerat',
-      'you_pl_future': 'dzersiet',
+      //'es_present': 'dzeru',
+      //'es_future': 'dzeršu',
+//
+      //'tu_past': 'dzēri',
+      //'tu_present': 'dzer',
+      //'tu_future': 'dzersi',
+//
+      //'3pers_past': 'dzēra',
+      //'3pers_present': 'dzer',
+      //'3pers_future': 'dzers',
+//
+      //'we_past': 'dzērām',
+      //'we_present': 'dzeram',
+      //'we_future': 'dzersim',
+//
+      //'you_pl_past': 'dzērāt',
+      //'you_pl_present': 'dzerat',
+      //'you_pl_future': 'dzersiet',
     },
     'atrast': {//+
       name: 'atrast - находить',
@@ -206,44 +206,44 @@ const VerbConjugationCategory = (props) => {
       'es_present': 'atrodu',
       'es_future': 'atradīšu',
 
-      'tu_past': 'atradi',
-      'tu_present': 'atrodi',
-      'tu_future': 'atradīsi',
-
-      '3pers_past': 'atrada',
-      '3pers_present': 'atrod',
-      '3pers_future': 'atradīs',
-
-      'we_past': 'atradām',
-      'we_present': 'atrodam',
-      'we_future': 'atradīsim',
-
-      'you_pl_past': 'atradāt',
-      'you_pl_present': 'atrodat',
-      'you_pl_future': 'atradīsiet',
+      //'tu_past': 'atradi',
+      //'tu_present': 'atrodi',
+      //'tu_future': 'atradīsi',
+//
+      //'3pers_past': 'atrada',
+      //'3pers_present': 'atrod',
+      //'3pers_future': 'atradīs',
+//
+      //'we_past': 'atradām',
+      //'we_present': 'atrodam',
+      //'we_future': 'atradīsim',
+//
+      //'you_pl_past': 'atradāt',
+      //'you_pl_present': 'atrodat',
+      //'you_pl_future': 'atradīsiet',
     },
     'skriet': {//+
       name: 'skriet - бежать',
 
       'es_past': 'skrēju',
       'es_present': 'skrienu',
-      'es_future': 'skriešu',
-
-      'tu_past': 'skrēji',
-      'tu_present': 'skrien',
-      'tu_future': 'skriesi',
-
-      '3pers_past': 'skrēja',
-      '3pers_present': 'skrien',
-      '3pers_future': 'skries',
-
-      'we_past': 'skrējām',
-      'we_present': 'skrienam',
-      'we_future': 'skriesim',
-
-      'you_pl_past': 'skrējāt',
-      'you_pl_present': 'skrienat',
-      'you_pl_future': 'skriesiet',
+      //'es_future': 'skriešu',
+//
+      //'tu_past': 'skrēji',
+      //'tu_present': 'skrien',
+      //'tu_future': 'skriesi',
+//
+      //'3pers_past': 'skrēja',
+      //'3pers_present': 'skrien',
+      //'3pers_future': 'skries',
+//
+      //'we_past': 'skrējām',
+      //'we_present': 'skrienam',
+      //'we_future': 'skriesim',
+//
+      //'you_pl_past': 'skrējāt',
+      //'you_pl_present': 'skrienat',
+      //'you_pl_future': 'skriesiet',
     },
   };
 
