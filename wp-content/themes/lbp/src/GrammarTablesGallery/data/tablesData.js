@@ -57,7 +57,7 @@ const tablesData = {
         { id: 'irregular-verb-11', src: '/wp-content/themes/lbp/assets/images/tables/a2/likt_tikt_tables.png', level: 'a2', alt: 'likt_tikt_tables' },
         { id: 'irregular-verb-12', src: '/wp-content/themes/lbp/assets/images/tables/a2/saukt_teikt_tables.png', level: 'a2', alt: 'saukt_teikt_tables' },
         { id: 'irregular-verb-13', src: '/wp-content/themes/lbp/assets/images/tables/a2/vilkt_nest_tables.png', level: 'a2', alt: 'vilkt_nest_tables' },
-        { id: 'irregular-verb-14', src: '/wp-content/themes/lbp/assets/images/tables/a2/sniegt_celt_tables.png.png', level: 'a2', alt: 'sniegt_celt_tables.png', description: 'A1-A2' },
+        { id: 'irregular-verb-14', src: '/wp-content/themes/lbp/assets/images/tables/a2/sniegt_celt_tables.png', level: 'a2', alt: 'sniegt_celt_tables.png', description: 'A1-A2' },
     ],
     group2: [
         //{ id: 38, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0039_3.jpg', level: 'b1', alt: 'IMG_20250810_0039_3', width: 1895, height: 550 },
@@ -89,8 +89,7 @@ const tablesData = {
         { id: 'irregular-verb-21', src: '/wp-content/themes/lbp/assets/images/tables/b1/kost_raut_tables.png', level: 'b1', alt: 'kost_raut_tables' },
         { id: 'irregular-verb-22', src: '/wp-content/themes/lbp/assets/images/tables/b1/plest_liegt_tables.png', level: 'b1', alt: 'plest_liegt_tables' },
         { id: 'irregular-verb-23', src: '/wp-content/themes/lbp/assets/images/tables/b1/spiest_snigt_tables.png', level: 'b1', alt: 'spiest_snigt_tables' },
-        { id: 'irregular-verb-24', src: '/wp-content/themes/lbp/assets/images/tables/b1/vilkt_nest_tables.png', level: 'b1', alt: '' },
-        { id: 'irregular-verb-25', src: '/wp-content/themes/lbp/assets/images/tables/b1/rasties_rasties2_tables.png', level: 'b1', alt: 'rasties' },
+        { id: 'irregular-verb-24', src: '/wp-content/themes/lbp/assets/images/tables/b1/rasties_rasties2_tables.png', level: 'b1', alt: 'rasties' },
     ],
     group3: [
         //{ id: 56, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0057.jpg', level: 'b2', alt: 'IMG_20250810_0057', width: 1825, height: 1636 },
