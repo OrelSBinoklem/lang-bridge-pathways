@@ -62,7 +62,7 @@ const VerbConjugationCategory2 = (props) => {
 
       'es_past': 'kļuvu',
       'es_present': 'kļūstu',
-      'es_future': 'kļūšu',
+      //'es_future': 'kļūšu',
 
       //'tu_past': 'kļuvi',
       //'tu_present': 'kļūsti',
@@ -350,15 +350,15 @@ const VerbConjugationCategory2 = (props) => {
       //"tu_future": "kodīsi",
 
       //"3pers_past": "koda",
-      "3pers_present": "kož",
+      //"3pers_present": "kož",
       //"3pers_future": "kodīs",
 
       //"we_past": "kodām",
-      "we_present": "kožam",
+      //"we_present": "kožam",
       //"we_future": "kodīsim",
 
       //"you_pl_past": "kodāt",
-      "you_pl_present": "kožat",
+      //"you_pl_present": "kožat",
       //"you_pl_future": "kodīsiet"
     },
 
@@ -404,15 +404,15 @@ const VerbConjugationCategory2 = (props) => {
       //"tu_future": "pletīsi",
 
       //"3pers_past": "pleta",
-      "3pers_present": "pleš",
+      //"3pers_present": "pleš",
       //"3pers_future": "pletīs",
 
       //"we_past": "pletām",
-      "we_present": "plešam",
+      //"we_present": "plešam",
       //"we_future": "pletīsim",
 
       //"you_pl_past": "pletāt",
-      "you_pl_present": "plešat",
+      //"you_pl_present": "plešat",
       //"you_pl_future": "pletīsiet"
     },
 
@@ -454,22 +454,22 @@ const VerbConjugationCategory2 = (props) => {
       //"tu_future": "spiedīsi",
 
       //"3pers_past": "spieda",
-      "3pers_present": "spiež",
+      //"3pers_present": "spiež",
       //"3pers_future": "spiedīs",
 
       //"we_past": "spiedām",
-      "we_present": "spiežam",
+      //"we_present": "spiežam",
       //"we_future": "spiedīsim",
 
       //"you_pl_past": "spiedāt",
-      "you_pl_present": "spiežat",
+      //"you_pl_present": "spiežat",
       //"you_pl_future": "spiedīsiet"
     },
 
     "snigt": {
       "name": "snigt - идти (о снеге)",
 
-      "3pers_past": "sniga",
+      //"3pers_past": "sniga",
       "3pers_present": "snieg",
       //"3pers_future": "snigs",
     },
@@ -482,11 +482,11 @@ const VerbConjugationCategory2 = (props) => {
       "es_future": "radīšos",
 
       //"tu_past": "radies",
-      "tu_present": "rodies",
+      //"tu_present": "rodies",
       //"tu_future": "radīsies",
 
       //"3pers_past": "radās",
-      "3pers_present": "rodas",
+      //"3pers_present": "rodas",
       //"3pers_future": "radīsies",
 
       //"we_past": "radāmies",

@@ -365,7 +365,9 @@ if(document.getElementById('react-app-dictionary')) {
 			</div>
 		)}
 
-			<div style={{ visibility: "hidden", position: "absolute", top: "-9999px" }}>
+		{/* Матрица слов после словаря - показываем только когда показываются категории */}
+		{!isExamenActive && dictionaryWords.length > 0 && (
+			<div style={{ marginTop: '20px' }}>
 				<h2 className="words-matrix-title">Матрица слов (декорация)</h2>
 				<WordsMatrix 
 					dictionaryId={dictionaryId} 
@@ -375,7 +377,8 @@ if(document.getElementById('react-app-dictionary')) {
 					loadingDictionaryWords={loadingDictionaryWords}
 				/>
 			</div>
-			</div>
+		)}
+		</div>
 		);
 	};
 	
