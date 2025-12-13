@@ -87,7 +87,13 @@ const TrainingInterface = ({
       </h3>
       
       <div className="training-word-display">
-        {currentMode ? currentWord.translation_1 : currentWord.word}
+        {currentMode ? (
+          <>
+            {currentWord.translation_1}
+            {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
+            {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
+          </>
+        ) : currentWord.word}
         
         {/* Кнопка повтора звука для прямого перевода (лат→рус) */}
         {!currentMode && (
