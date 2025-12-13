@@ -10,6 +10,7 @@ let scene, camera, renderer, water, sun, moon, sunLight, moonLight, composer;
 let startTime = Date.now();
 let isAnimationActive = true;
 let lastFrameTime = 0;
+let gui = null;
 const params = {
 	speed: 1,
 	developerMode: false,
@@ -89,13 +90,20 @@ function init() {
 	window.addEventListener('resize', onWindowResize, false);
 	
 	// GUI setup
-	const gui = new GUI({ closed: true }); // Создаём GUI уже закрытым
+	gui = new GUI({ closed: false }); // Создаём GUI открытым
 	const controlsFolder = gui.addFolder('Controls');
 	controlsFolder.add(params, 'developerMode').name('Developer Mode').onChange(toggleDeveloperMode);
 	controlsFolder.add(params, 'speed', 0.1, 10, 0.1).name('Speed');
 	controlsFolder.add(params, 'waveHeight', 1, 500, 1).name('Wave Height').onChange(updateWaveHeight);
 	controlsFolder.add(params, 'waveSpeed', 0.1, 5, 0.1).name('Wave Speed');
 	controlsFolder.open(); // Открываем папку Controls
+	
+	// Добавляем класс к body для стилизации
+	document.body.classList.add('webgl-gui-active');
+	document.body.classList.add('webgl-gui-hidden'); // GUI скрыт по умолчанию
+	
+	// Создаём кнопку для открытия/закрытия GUI вверху слева
+	createGuiToggleButton();
 	
 	animate();
 }
@@ -280,6 +288,47 @@ function setCookie(name, value, days) {
 	date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
 	const expires = "expires=" + date.toUTCString();
 	document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+
+function createGuiToggleButton() {
+	// Проверяем, не существует ли уже кнопка
+	if (document.getElementById('webgl-gui-toggle-button')) {
+		return;
+	}
+	
+	const button = document.createElement('div');
+	button.id = 'webgl-gui-toggle-button';
+	button.className = 'webgl-gui-toggle-button';
+	
+	// Создаём простую SVG иконку (три точки)
+	const iconSvg = `
+		<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+			<circle cx="12" cy="6" r="2"/>
+			<circle cx="12" cy="12" r="2"/>
+			<circle cx="12" cy="18" r="2"/>
+		</svg>
+	`;
+	button.innerHTML = iconSvg;
+	
+	button.addEventListener('click', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		
+		// Переключаем класс на body для управления видимостью GUI через CSS
+		if (document.body.classList.contains('webgl-gui-visible')) {
+			document.body.classList.remove('webgl-gui-visible');
+			document.body.classList.add('webgl-gui-hidden');
+		} else {
+			document.body.classList.remove('webgl-gui-hidden');
+			document.body.classList.add('webgl-gui-visible');
+		}
+	});
+	
+	// Добавляем кнопку в header
+	const header = document.querySelector('.site-header');
+	if (header) {
+		header.appendChild(button);
+	}
 }
 
 if (document.getElementById('super-logo-bg')) {
