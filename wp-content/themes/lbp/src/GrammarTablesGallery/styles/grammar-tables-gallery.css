@@ -1468,7 +1468,7 @@ body:has(.galleries.horizontal-mode) .page-indicator {
 .admin-tables-toggle-btn {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    right: 170px;
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
     padding: 12px 20px;
