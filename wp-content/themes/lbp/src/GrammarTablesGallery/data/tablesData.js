@@ -147,7 +147,7 @@ const tablesData_admin = {
         { id: 17, src: '/wp-content/themes/lbp/assets/images/tables_old/a1/IMG_20250810_0003_2.jpg', level: 'a1', alt: 'IMG_20250810_0003_2', width: 1899, height: 567 },
         { id: 18, src: '/wp-content/themes/lbp/assets/images/tables_old/a1/IMG_20250810_0003_3.jpg', level: 'a1', alt: 'IMG_20250810_0003_3', width: 1967, height: 916 },
         { id: 19, src: '/wp-content/themes/lbp/assets/images/tables_old/a1/IMG_20250810_0004.jpg', level: 'a1', alt: 'IMG_20250810_0004', width: 2131, height: 994 },
-        { id: 20, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0066_4.jpg', level: 'b2', alt: 'IMG_20250810_0066_4', width: 1787, height: 884 },
+        // todo уже есть а описание добавил{ id: 20, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0066_4.jpg', level: 'b2', alt: 'IMG_20250810_0066_4', width: 1787, height: 884 },
         { id: 21, src: '/wp-content/themes/lbp/assets/images/tables_old/a2/IMG_20250810_0014.jpg', level: 'a2', alt: 'IMG_20250810_0014', width: 1912, height: 747 },
         { id: 22, src: '/wp-content/themes/lbp/assets/images/tables_old/b1/IMG_20250810_0036_2.jpg', level: 'a1', alt: 'IMG_20250810_0004_3', width: 1937, height: 605 },
         { id: 23, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0068_only_desc.jpg', level: 'b2', alt: 'IMG_20250810_0068', width: 1823, height: 798 },
