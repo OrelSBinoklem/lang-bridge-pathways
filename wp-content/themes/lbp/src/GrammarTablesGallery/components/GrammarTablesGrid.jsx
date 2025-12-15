@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import tablesData from '../data/tablesData';
+import defaultTablesData from '../data/tablesData';
 
 const GrammarTablesGrid = ({
     cols,
@@ -12,7 +12,8 @@ const GrammarTablesGrid = ({
     onMoveSuperTable,
     activeIds = [],
     showHidden = false,
-    superGroups = []
+    superGroups = [],
+    tablesData = defaultTablesData
 }) => {
     const [filteredGroups, setFilteredGroups] = useState({ group1: [], group2: [], group3: [], super: [] });
 
@@ -72,7 +73,7 @@ const GrammarTablesGrid = ({
             group3: filterTables(tablesData.group3),
             super: []
         });
-    }, [selectedLevel, superOrder, activeIds, showHidden, superGroups]);
+    }, [selectedLevel, superOrder, activeIds, showHidden, superGroups, tablesData]);
 
     // Установка CSS переменной для реальной ширины viewport (без скроллбара)
     useEffect(() => {

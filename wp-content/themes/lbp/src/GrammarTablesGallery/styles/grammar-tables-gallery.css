@@ -1463,3 +1463,35 @@ body:has(.galleries.horizontal-mode) .page-indicator {
 .modal-level-badge.b1 { background: rgba(74, 159, 20, 0.85); }
 .modal-level-badge.b2 { background: rgba(1, 133, 135, 0.85); }
 .modal-level-badge.super { background: rgba(0, 80, 179, 0.9); }
+
+/* Кнопка переключения режима для админов */
+.admin-tables-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: none;
+    font-size: 14px;
+}
+
+.admin-tables-toggle-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.6);
+}
+
+.admin-tables-toggle-btn.active {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.admin-tables-toggle-btn.active:hover {
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+}

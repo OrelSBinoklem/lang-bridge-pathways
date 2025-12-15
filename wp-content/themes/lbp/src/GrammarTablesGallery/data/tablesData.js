@@ -296,6 +296,45 @@ const normalizedBaseTables = getTablesData().group1
 
 export const managerTables = [...normalizedBaseTables];
 
+// Экспортируем данные для переключения режима
+export { tablesData, tablesData_admin };
+
+// Функции для получения данных в зависимости от режима
+export const getManagerTables = (useAdminMode = false) => {
+    const data = useAdminMode ? tablesData_admin : tablesData;
+    return data.group1
+        .concat(data.group2)
+        .concat(data.group3)
+        .map(table => ({
+            ...table,
+            id: String(table.id),
+            title: table.description || table.alt || `Таблица ${table.id}`,
+            description: table.description || (table.level ? table.level.toUpperCase() : 'A1'),
+            isSuperEntry: true
+        }));
+};
+
+export const getSuperGroups = (useAdminMode = false) => {
+    const data = useAdminMode ? tablesData_admin : tablesData;
+    return [
+        {
+            id: 'base-group-1',
+            title: 'Группа A1–A2',
+            itemIds: data.group1.map(table => String(table.id))
+        },
+        {
+            id: 'base-group-2',
+            title: 'Группа B1',
+            itemIds: data.group2.map(table => String(table.id))
+        },
+        {
+            id: 'base-group-3',
+            title: 'Группа B2',
+            itemIds: data.group3.map(table => String(table.id))
+        }
+    ];
+};
+
 // Объединенный массив всех таблиц
 export const allTables = [
     { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.jpg', level: 'a1', alt: 'IMG_20250810_0001', description: 'есть Š в первой деклинации', width: 1942, height: 948 },

@@ -4,7 +4,7 @@ import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
-import { managerTables as superTables, superGroups as PRESET_SUPER_GROUPS } from './data/tablesData';
+import { managerTables as defaultSuperTables, superGroups as defaultSuperGroups, getManagerTables, getSuperGroups, tablesData as defaultTablesData, tablesData_admin } from './data/tablesData';
 import './styles/grammar-tables-gallery.css';
 
 const normalizeLatvian = (text = '') => {
@@ -56,25 +56,16 @@ const getStorageJSON = (name, defaultValue) => {
     }
 };
 
-const SUPER_TABLES = superTables;
-const DEFAULT_SUPER_GROUPS = Array.isArray(PRESET_SUPER_GROUPS) ? PRESET_SUPER_GROUPS : [];
-const SUPER_TABLES_MAP = SUPER_TABLES.reduce((acc, table) => {
-    acc[table.id] = table;
-    return acc;
-}, {});
-const SORTED_SUPER_TABLES = [...SUPER_TABLES].sort((a, b) => {
-    const titleA = (a.title || '').toString();
-    const titleB = (b.title || '').toString();
-    return titleA.localeCompare(titleB, 'ru', { sensitivity: 'base' });
-});
+// Значения по умолчанию (для инициализации)
+const DEFAULT_SUPER_TABLES = defaultSuperTables;
+const DEFAULT_SUPER_GROUPS_INIT = Array.isArray(defaultSuperGroups) ? defaultSuperGroups : [];
 
 const SUPER_STATE_KEY_PROFILE_1 = 'grammar-super-state';
 const SUPER_STATE_KEY_PROFILE_2 = 'grammar-super-state-2';
-const DEFAULT_SUPER_ORDER = SUPER_TABLES.map(table => table.id);
 
-const loadSuperStateForProfile = (profileId) => {
+const loadSuperStateForProfile = (profileId, superTables = DEFAULT_SUPER_TABLES) => {
     const key = profileId === '2' ? SUPER_STATE_KEY_PROFILE_2 : SUPER_STATE_KEY_PROFILE_1;
-    return normalizeStoredSuperState(getStorageJSON(key, null));
+    return normalizeStoredSuperState(getStorageJSON(key, null), superTables);
 };
 
 const appendMissingIds = (primary = [], reference = []) => {
@@ -89,12 +80,12 @@ const appendMissingIds = (primary = [], reference = []) => {
     return result;
 };
 
-const buildDefaultSuperGroups = () => {
-    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+const buildDefaultSuperGroups = (superTables = DEFAULT_SUPER_TABLES, defaultSuperGroups = DEFAULT_SUPER_GROUPS_INIT) => {
+    const validIds = new Set(superTables.map(table => table.id));
     const seenGroupIds = new Set();
     const usedTableIds = new Set();
 
-    const groups = DEFAULT_SUPER_GROUPS.map((group, index) => {
+    const groups = defaultSuperGroups.map((group, index) => {
         const rawId = group && group.id ? String(group.id).trim() : '';
         let groupId = rawId || `super-group-${index + 1}`;
         while (seenGroupIds.has(groupId)) {
@@ -121,7 +112,7 @@ const buildDefaultSuperGroups = () => {
         };
     });
 
-    const remaining = SUPER_TABLES
+    const remaining = superTables
         .map(table => table.id)
         .filter(id => !usedTableIds.has(id));
 
@@ -129,7 +120,7 @@ const buildDefaultSuperGroups = () => {
         return [{
             id: 'super-group-1',
             title: 'Группа 1',
-            itemIds: remaining.length ? remaining.slice() : SUPER_TABLES.map(table => table.id)
+            itemIds: remaining.length ? remaining.slice() : superTables.map(table => table.id)
         }];
     }
 
@@ -145,9 +136,9 @@ const buildDefaultSuperGroups = () => {
     return groups;
 };
 
-const normalizeSuperGroups = (value) => {
-    const defaultGroups = buildDefaultSuperGroups();
-    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+const normalizeSuperGroups = (value, superTables = DEFAULT_SUPER_TABLES) => {
+    const defaultGroups = buildDefaultSuperGroups(superTables);
+    const validIds = new Set(superTables.map(table => table.id));
 
     if (!Array.isArray(value) || value.length === 0) {
         return defaultGroups;
@@ -193,7 +184,7 @@ const normalizeSuperGroups = (value) => {
         return defaultGroups;
     }
 
-    const remaining = SUPER_TABLES
+    const remaining = superTables
         .map(table => table.id)
         .filter(id => !usedTableIds.has(id));
 
@@ -208,10 +199,11 @@ const normalizeSuperGroups = (value) => {
     return normalized;
 };
 
-const buildDefaultSuperState = () => {
-    const groups = buildDefaultSuperGroups();
+const buildDefaultSuperState = (superTables = DEFAULT_SUPER_TABLES) => {
+    const groups = buildDefaultSuperGroups(superTables);
     const orderFromGroups = groups.flatMap(group => group.itemIds);
-    const order = orderFromGroups.length ? orderFromGroups : DEFAULT_SUPER_ORDER.slice();
+    const defaultOrder = superTables.map(table => table.id);
+    const order = orderFromGroups.length ? orderFromGroups : defaultOrder.slice();
 
     return {
         order,
@@ -221,22 +213,23 @@ const buildDefaultSuperState = () => {
     };
 };
 
-const normalizeStoredSuperState = (value) => {
-    const defaultState = buildDefaultSuperState();
+const normalizeStoredSuperState = (value, superTables = DEFAULT_SUPER_TABLES) => {
+    const defaultState = buildDefaultSuperState(superTables);
     if (!value || typeof value !== 'object') {
         return defaultState;
     }
 
-    const validIds = new Set(SUPER_TABLES.map(table => table.id));
+    const validIds = new Set(superTables.map(table => table.id));
+    const defaultOrder = superTables.map(table => table.id);
     const rawOrder = Array.isArray(value.order)
         ? value.order.map(id => String(id).trim()).filter(id => validIds.has(id))
         : [];
 
-    const groups = normalizeSuperGroups(value.groups);
+    const groups = normalizeSuperGroups(value.groups, superTables);
     let order = groups.flatMap(group => group.itemIds);
     if (!order.length) {
         order = rawOrder.length
-            ? appendMissingIds(rawOrder, DEFAULT_SUPER_ORDER)
+            ? appendMissingIds(rawOrder, defaultOrder)
             : defaultState.order.slice();
     }
 
@@ -271,17 +264,64 @@ const GrammarTablesGallery = () => {
     const [verbFormsLookup, setVerbFormsLookup] = useState({ byLemma: {}, byNormalized: {} });
     const [hintModalData, setHintModalData] = useState(null);
     const [superProfileId, setSuperProfileId] = useState(() => getStorage('grammar-super-profile', '1'));
+    // Состояние для переключения между списками таблиц (только для админов)
+    const isAdmin = typeof window !== 'undefined' && window.myajax && window.myajax.is_admin;
+    const [useAdminTablesList, setUseAdminTablesList] = useState(() => {
+        if (!isAdmin) return false;
+        return getStorage('grammar-use-admin-tables', 'false') === 'true';
+    });
+    
+    // Получаем динамические значения на основе выбранного списка
+    const dynamicSuperTables = useMemo(() => getManagerTables(useAdminTablesList), [useAdminTablesList]);
+    const dynamicSuperGroups = useMemo(() => getSuperGroups(useAdminTablesList), [useAdminTablesList]);
+    const currentTablesData = useMemo(() => {
+        return useAdminTablesList ? tablesData_admin : defaultTablesData;
+    }, [useAdminTablesList]);
+    
+    // Создаем мапы для быстрого доступа
+    const SUPER_TABLES_MAP = useMemo(() => {
+        const map = {};
+        dynamicSuperTables.forEach(table => {
+            map[table.id] = table;
+        });
+        return map;
+    }, [dynamicSuperTables]);
+    
+    const SORTED_SUPER_TABLES = useMemo(() => {
+        return [...dynamicSuperTables].sort((a, b) => {
+            const titleA = (a.title || '').toString();
+            const titleB = (b.title || '').toString();
+            return titleA.localeCompare(titleB, 'ru', { sensitivity: 'base' });
+        });
+    }, [dynamicSuperTables]);
+    
     const [superState, setSuperState] = useState(() => {
         const initialProfile = getStorage('grammar-super-profile', '1');
-        return loadSuperStateForProfile(initialProfile);
+        return loadSuperStateForProfile(initialProfile, DEFAULT_SUPER_TABLES);
     });
     const [currentSuperGroupId, setCurrentSuperGroupId] = useState(() => {
         const groups = Array.isArray(superState.groups) && superState.groups.length
             ? superState.groups
-            : buildDefaultSuperGroups();
+            : buildDefaultSuperGroups(DEFAULT_SUPER_TABLES, DEFAULT_SUPER_GROUPS_INIT);
         return groups.length ? groups[0].id : null;
     });
     const [showSuperManager, setShowSuperManager] = useState(false);
+    
+    // Обновляем superState при изменении режима
+    useEffect(() => {
+        if (isAdmin) {
+            const currentProfile = getStorage('grammar-super-profile', '1');
+            const newState = loadSuperStateForProfile(currentProfile, dynamicSuperTables);
+            setSuperState(newState);
+            // Обновляем currentSuperGroupId, если текущая группа больше не существует
+            const groups = Array.isArray(newState.groups) && newState.groups.length
+                ? newState.groups
+                : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
+            if (groups.length && (!currentSuperGroupId || !groups.find(g => g.id === currentSuperGroupId))) {
+                setCurrentSuperGroupId(groups[0].id);
+            }
+        }
+    }, [useAdminTablesList, dynamicSuperTables, dynamicSuperGroups, isAdmin]);
 
     useEffect(() => {
         setStorage('gallery-columns', cols.toString());
@@ -294,6 +334,12 @@ const GrammarTablesGallery = () => {
     useEffect(() => {
         setStorage('view-mode', viewMode);
     }, [viewMode]);
+    
+    useEffect(() => {
+        if (isAdmin) {
+            setStorage('grammar-use-admin-tables', useAdminTablesList ? 'true' : 'false');
+        }
+    }, [useAdminTablesList, isAdmin]);
 
     useEffect(() => {
         setStorage('grammar-super-profile', superProfileId);
@@ -307,7 +353,7 @@ const GrammarTablesGallery = () => {
     useEffect(() => {
         const groups = Array.isArray(superState.groups) && superState.groups.length
             ? superState.groups
-            : buildDefaultSuperGroups();
+            : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
 
         if (!groups.length) {
             if (currentSuperGroupId !== null) {
@@ -706,12 +752,13 @@ const GrammarTablesGallery = () => {
 
     const superGroups = Array.isArray(superState.groups) && superState.groups.length
         ? superState.groups
-        : buildDefaultSuperGroups();
+        : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
 
     const groupedOrder = superGroups.flatMap(group => Array.isArray(group.itemIds) ? group.itemIds : []);
+    const defaultSuperOrder = dynamicSuperTables.map(table => table.id);
     const superOrder = groupedOrder.length
-        ? appendMissingIds(groupedOrder, DEFAULT_SUPER_ORDER)
-        : appendMissingIds(superState.order, DEFAULT_SUPER_ORDER);
+        ? appendMissingIds(groupedOrder, defaultSuperOrder)
+        : appendMissingIds(superState.order, defaultSuperOrder);
 
     const rawActiveSuperIds = Array.isArray(superState.active) ? superState.active : [];
     const filteredActiveSuperIds = rawActiveSuperIds.filter(id => superOrder.includes(id));
@@ -760,7 +807,7 @@ const GrammarTablesGallery = () => {
     const superGroupsDetailed = superGroups.map(group => {
         const tables = (group.itemIds || [])
             .map(id => {
-                const table = SUPER_TABLES.find(item => item.id === id);
+                const table = dynamicSuperTables.find(item => item.id === id);
                 if (!table) return null;
                 const isActive = activeSuperSet.has(id);
                 if (!showHiddenSuper && !isActive) {
@@ -816,7 +863,7 @@ const GrammarTablesGallery = () => {
                     ...group,
                     itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
                 }))
-                : buildDefaultSuperGroups();
+                : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
 
             if (!groups.length) {
                 return prev;
@@ -899,7 +946,7 @@ const GrammarTablesGallery = () => {
     };
 
     const resetSuperOrder = () => {
-        const defaultState = buildDefaultSuperState();
+        const defaultState = buildDefaultSuperState(dynamicSuperTables);
         setSuperState(prev => ({
             ...prev,
             order: defaultState.order,
@@ -924,7 +971,7 @@ const GrammarTablesGallery = () => {
                     ...group,
                     itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
                 }))
-                : buildDefaultSuperGroups();
+                : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
 
             const existingIds = new Set(baseGroups.map(group => group.id));
             let index = baseGroups.length + 1;
@@ -1113,7 +1160,7 @@ const GrammarTablesGallery = () => {
                     ...group,
                     itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
                 }))
-                : buildDefaultSuperGroups();
+                : buildDefaultSuperGroups(dynamicSuperTables, dynamicSuperGroups);
 
             const targetIndex = baseGroups.findIndex(group => group.id === targetGroupId);
             if (targetIndex === -1) {
@@ -1224,6 +1271,7 @@ const GrammarTablesGallery = () => {
                     activeIds={activeSuperIds}
                     showHidden={showHiddenSuper}
                     superGroups={superGroupsDetailed}
+                    tablesData={currentTablesData}
                 />
 
                 {modalData && (
@@ -1528,6 +1576,18 @@ const GrammarTablesGallery = () => {
                         />
                     </div>
                 </div>
+            )}
+            
+            {/* Фиксированная кнопка переключения списков таблиц (только для админов) */}
+            {isAdmin && (
+                <button
+                    type="button"
+                    className={`admin-tables-toggle-btn ${useAdminTablesList ? 'active' : ''}`}
+                    onClick={() => setUseAdminTablesList(!useAdminTablesList)}
+                    title={useAdminTablesList ? 'Показать обычный список' : 'Показать полный список (админ)'}
+                >
+                    {useAdminTablesList ? '📋 Обычный' : '🔧 Админ'}
+                </button>
             )}
         </>
     );
