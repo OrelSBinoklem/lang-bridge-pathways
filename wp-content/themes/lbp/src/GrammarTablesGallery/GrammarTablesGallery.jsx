@@ -804,33 +804,36 @@ const GrammarTablesGallery = () => {
         });
     }, [superGroups, activeSuperSet, tableIdToGroupId]);
 
-    const superGroupsDetailed = superGroups.map(group => {
-        const tables = (group.itemIds || [])
-            .map(id => {
-                const table = dynamicSuperTables.find(item => item.id === id);
-                if (!table) return null;
-                const isActive = activeSuperSet.has(id);
-                if (!showHiddenSuper && !isActive) {
-                    return null;
-                }
-                return {
-                    ...table,
-                    isActive,
-                    groupId: group.id
-                };
-            })
-            .filter(Boolean);
+    const superGroupsDetailed = useMemo(() => {
+        return superGroups.map(group => {
+            const tables = (group.itemIds || [])
+                .map(id => {
+                    const table = dynamicSuperTables.find(item => item.id === id);
+                    if (!table) return null;
+                    const isActive = activeSuperSet.has(id);
+                    if (!showHiddenSuper && !isActive) {
+                        return null;
+                    }
+                    return {
+                        ...table,
+                        isActive,
+                        groupId: group.id
+                    };
+                })
+                .filter(Boolean);
 
-        return {
-            id: group.id,
-            title: group.title,
-            tables
-        };
-    }).filter(group => group.tables.length > 0 || showHiddenSuper);
+            return {
+                id: group.id,
+                title: group.title,
+                tables
+            };
+        }).filter(group => group.tables.length > 0 || showHiddenSuper);
+    }, [superGroups, dynamicSuperTables, activeSuperSet, showHiddenSuper]);
 
     const toggleSuperTable = (tableId) => {
         setSuperState(prev => {
-            const normalizedOrder = appendMissingIds(prev.order, DEFAULT_SUPER_ORDER);
+            const defaultOrder = dynamicSuperTables.map(table => table.id);
+            const normalizedOrder = appendMissingIds(prev.order, defaultOrder);
             const activeSet = new Set(prev.active);
             if (activeSet.has(tableId)) {
                 activeSet.delete(tableId);

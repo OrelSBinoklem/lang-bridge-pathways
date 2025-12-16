@@ -258,9 +258,25 @@ body {
 }
 
 .table-img .level-badge.super {
-    background: rgba(0, 80, 179, 0.9);
     font-size: 10px;
     letter-spacing: 0.5px;
+}
+
+/* Цвета уровней для super таблиц (более высокая специфичность) */
+.table-img .level-badge.super.a1 {
+    background: rgba(200, 35, 65, 0.9); /* #C82341 - A1 */
+}
+
+.table-img .level-badge.super.a2 {
+    background: rgba(252, 132, 35, 0.9); /* #FC8423 - A2 */
+}
+
+.table-img .level-badge.super.b1 {
+    background: rgba(74, 159, 20, 0.9); /* #4A9F14 - B1 */
+}
+
+.table-img .level-badge.super.b2 {
+    background: rgba(1, 133, 135, 0.9); /* #018587 - B2 */
 }
 
 .table-img.__super-inactive {

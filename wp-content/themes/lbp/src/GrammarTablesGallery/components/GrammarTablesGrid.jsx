@@ -242,7 +242,9 @@ const GrammarTablesGrid = ({
 
     // Получить CSS-класс для уровня (берём первую часть если диапазон)
     const getLevelClass = (level) => {
-        const baseLevel = level.indexOf('-') !== -1 ? level.split('-')[0] : level;
+        if (!level) return 'a1';
+        const normalizedLevel = level.toLowerCase();
+        const baseLevel = normalizedLevel.indexOf('-') !== -1 ? normalizedLevel.split('-')[0] : normalizedLevel;
         const validLevels = ['a1', 'a2', 'b1', 'b2', 'super'];
         return validLevels.includes(baseLevel) ? baseLevel : 'a1';
     };
@@ -275,11 +277,11 @@ const GrammarTablesGrid = ({
     const activeCount = activeOrder.length;
 
     const renderHintIcon = (image) => {
-        const hintId = image.level === 'super'
+        const hintId = image.isSuperEntry
             ? (image.hintId || String(image.id).replace('super-', ''))
             : image.id;
 
-        const hintPayload = image.level === 'super'
+        const hintPayload = image.isSuperEntry
             ? `super-${hintId}`
             : image.id;
 
@@ -368,14 +370,19 @@ const GrammarTablesGrid = ({
                     </div>
                 ) : null}
                 <div className="gallery" data-cols={cols}>
-                    {tables.map(image => (
+                    {tables.map(image => {
+                        // Применяем прозрачность только к супер-таблицам, которые неактивны, когда включен режим показа скрытых
+                        const isInactive = image.isSuperEntry && image.hasOwnProperty('isActive') && !image.isActive && showHidden;
+                        const className = `table-img ${image.isSuperEntry && image.isActive ? '__super-active' : ''} ${isInactive ? '__super-inactive' : ''}`;
+                        
+                        return (
                         <div 
                             key={image.id} 
-                            className={`table-img ${image.level === 'super' ? (image.isActive ? '__super-active' : '__super-inactive') : ''}`}
+                            className={className.trim()}
                             data-id={image.id}
                             data-level={image.level}
                             onClick={() => {
-                                const hintPath = image.level === 'super'
+                                const hintPath = image.isSuperEntry
                                     ? `/wp-content/themes/lbp/assets/hints-super-tables/${image.hintId || String(image.id).replace('super-', '')}.html`
                                     : `/wp-content/themes/lbp/assets/hints/${image.id}.html`;
                                 onImageClick({
@@ -392,9 +399,9 @@ const GrammarTablesGrid = ({
                                 loading="lazy" 
                                 decoding="async" 
                             />
-                            {image.level === 'super' ? (
-                                <span className="level-badge super">
-                                    {image.title || 'SUPER'}
+                            {image.isSuperEntry ? (
+                                <span className={`level-badge super ${getLevelClass(image.level)}`}>
+                                    {image.description || 'SUPER'}
                                 </span>
                             ) : (
                                 <span className={`level-badge ${getLevelClass(image.level)}`}>
@@ -404,7 +411,8 @@ const GrammarTablesGrid = ({
                             {renderHintIcon(image)}
                             {renderSuperControls(image)}
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         );

@@ -30,6 +30,9 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций
   const [showBulkActions, setShowBulkActions] = useState(false); // Показать режим массовых операций
   const [isUpdating, setIsUpdating] = useState(false); // Идёт обновление данных на сервере
+  const [trainingQueue, setTrainingQueue] = useState([]); // Очередь пар слов для тренировки
+  const [currentQueueIndex, setCurrentQueueIndex] = useState(0); // Текущая позиция в очереди
+  const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
@@ -120,6 +123,70 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     return trainingWords;
   };
 
+  // Формирование очереди тренировки: сначала прямые, потом обратные, потом по кругу
+  const buildTrainingQueue = () => {
+    const trainingWords = getTrainingWords();
+    if (trainingWords.length === 0) {
+      return [];
+    }
+
+    // Разделяем слова на группы: прямые и обратные переводы
+    const directWords = []; // Прямые переводы (лат→рус)
+    const revertWords = []; // Обратные переводы (рус→лат)
+
+    trainingWords.forEach(word => {
+      const userData = userWordsData[word.id];
+      
+      if (!userData) {
+        // Если нет данных, добавляем в прямые
+        directWords.push({ word, mode: false });
+      } else {
+        const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+        const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+
+        if (directAvailable) {
+          directWords.push({ word, mode: false });
+        }
+        if (revertAvailable) {
+          revertWords.push({ word, mode: true });
+        }
+      }
+    });
+
+    // Перемешиваем каждую группу
+    const shuffle = (array) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+
+    const shuffledDirect = shuffle(directWords);
+    const shuffledRevert = shuffle(revertWords);
+
+    // Формируем финальную очередь: сначала все прямые, потом все обратные, потом по кругу (1→2→1→2...)
+    const queue = [];
+    
+    // Фаза 1: все прямые переводы
+    shuffledDirect.forEach(item => {
+      queue.push({ ...item, phase: 'direct' });
+    });
+    
+    // Фаза 2: все обратные переводы
+    shuffledRevert.forEach(item => {
+      queue.push({ ...item, phase: 'revert' });
+    });
+
+    // Далее по кругу: снова прямые, потом обратные, и так далее
+    // Для этого создаем цикл, который повторяет фазы 1 и 2 несколько раз
+    // Но так как слова могут стать недоступными, лучше формировать очередь динамически
+    // Поэтому здесь мы формируем только первые две фазы, а дальше будем пересчитывать
+
+    return queue;
+  };
+
   // Начать тренировку
   const startTraining = async () => {
     // Проверяем авторизацию
@@ -192,44 +259,23 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       }
     }
     
-    const trainingWords = getTrainingWords();
-    if (trainingWords.length === 0) {
+    // Формируем очередь тренировки
+    const queue = buildTrainingQueue();
+    
+    if (queue.length === 0) {
       alert('Нет доступных слов для тренировки! Все слова либо изучены, либо на откате.');
       return;
     }
     
+    setTrainingQueue(queue);
+    setCurrentQueueIndex(0);
+    setTrainingPhase('direct');
     setTrainingMode(true);
-    const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
-    setCurrentWord(randomWord);
     
-    // Определяем режим тренировки (прямой или обратный) на основе статуса слова
-    const userData = userWordsData[randomWord.id];
-    let mode;
-    
-    if (!userData) {
-      // Если нет данных, начинаем с прямого перевода (показываем слово)
-      mode = false;
-    } else {
-      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
-      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
-
-      console.log('directAvailable', directAvailable);
-      console.log('revertAvailable', revertAvailable);
-      console.log('userData', userData);
-
-      if (directAvailable && revertAvailable) {
-        mode = Math.random() < 0.5;
-      } else if (directAvailable) {
-        mode = false; // Прямой перевод
-      } else if (revertAvailable) {
-        mode = true; // Обратный перевод
-      } else {
-        // Если оба недоступны, выбираем случайно
-        mode = Math.random() < 0.5;
-      }
-    }
-    
-    setCurrentMode(mode);
+    // Устанавливаем первое слово из очереди
+    const firstItem = queue[0];
+    setCurrentWord(firstItem.word);
+    setCurrentMode(firstItem.mode);
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
@@ -404,43 +450,102 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     }
   };
 
+  // Проверка доступности слова для тренировки в указанном режиме
+  const isWordAvailableForMode = (word, mode) => {
+    const userData = userWordsData[word.id];
+    
+    if (!userData) {
+      // Если нет данных, доступен только прямой перевод
+      return !mode;
+    }
+    
+    if (mode) {
+      // Обратный перевод
+      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+      return revertAvailable;
+    } else {
+      // Прямой перевод
+      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+      return directAvailable;
+    }
+  };
+
   const handleNextWord = () => {
     // Сбрасываем состояние обновления при переходе к следующему слову
     setIsUpdating(false);
     
-    const trainingWords = getTrainingWords();
-    if (trainingWords.length === 0) {
-      setTrainingMode(false);
-      alert('Отлично! Все доступные слова тренированы!');
-      return;
+    // Ищем следующее доступное слово в очереди
+    let nextIndex = currentQueueIndex + 1;
+    let found = false;
+    let attempts = 0;
+    const maxAttempts = trainingQueue.length; // Защита от бесконечного цикла
+    
+    while (nextIndex < trainingQueue.length && attempts < maxAttempts) {
+      const nextItem = trainingQueue[nextIndex];
+      
+      // Проверяем, доступно ли слово для тренировки в этом режиме
+      if (isWordAvailableForMode(nextItem.word, nextItem.mode)) {
+        setCurrentQueueIndex(nextIndex);
+        setCurrentWord(nextItem.word);
+        setCurrentMode(nextItem.mode);
+        setTrainingPhase(nextItem.phase || 'direct');
+        setUserAnswer('');
+        setShowResult(false);
+        setAttemptCount(0);
+        found = true;
+        break;
+      }
+      
+      nextIndex++;
+      attempts++;
     }
     
-    const randomWord = trainingWords[Math.floor(Math.random() * trainingWords.length)];
-    setCurrentWord(randomWord);
-    
-    // Определяем режим тренировки
-    const userData = userWordsData[randomWord.id];
-    let mode;
-    
-    if (!userData) {
-      mode = false;
-    } else {
-      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
-      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
-      
-      if (directAvailable && revertAvailable) {
-        mode = Math.random() < 0.5;
-      } else if (directAvailable) {
-        mode = false;
+    // Если не нашли доступное слово в текущей очереди, формируем новую очередь (следующий цикл)
+    if (!found) {
+      const remainingWords = getTrainingWords();
+      if (remainingWords.length === 0) {
+        setTrainingMode(false);
+        setTrainingQueue([]);
+        setCurrentQueueIndex(0);
+        alert('Отлично! Все доступные слова тренированы!');
+        return;
       } else {
-        mode = true;
+        // Есть еще слова, формируем новую очередь (следующий цикл: прямые → обратные)
+        // Определяем, какая была последняя фаза, чтобы начать с противоположной
+        const lastPhase = trainingPhase;
+        const newQueue = buildTrainingQueue();
+        
+        if (newQueue.length === 0) {
+          setTrainingMode(false);
+          setTrainingQueue([]);
+          setCurrentQueueIndex(0);
+          alert('Отлично! Все доступные слова тренированы!');
+          return;
+        }
+        
+        // Если последняя фаза была 'revert', начинаем новый цикл с 'direct' (и наоборот)
+        // Но так как buildTrainingQueue всегда формирует сначала direct, потом revert,
+        // нам нужно просто использовать новую очередь, которая уже правильно сформирована
+        setTrainingQueue(newQueue);
+        setCurrentQueueIndex(0);
+        const firstItem = newQueue[0];
+        setCurrentWord(firstItem.word);
+        setCurrentMode(firstItem.mode);
+        setTrainingPhase(firstItem.phase || 'direct');
+        setUserAnswer('');
+        setShowResult(false);
+        setAttemptCount(0);
+        
+        // Возвращаем фокус на поле ввода после рендера
+        setTimeout(() => {
+          const inputField = document.querySelector('[data-training-input]');
+          if (inputField) {
+            inputField.focus();
+          }
+        }, 100);
+        return;
       }
     }
-    
-    setCurrentMode(mode);
-    setUserAnswer('');
-    setShowResult(false);
-    setAttemptCount(0);
 
     // Возвращаем фокус на поле ввода после рендера
     setTimeout(() => {
@@ -453,6 +558,9 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
 
   const handleFinishTraining = () => {
     setTrainingMode(false);
+    setTrainingQueue([]);
+    setCurrentQueueIndex(0);
+    setTrainingPhase('direct');
     setCurrentWord(null);
     setUserAnswer('');
     setShowResult(false);
