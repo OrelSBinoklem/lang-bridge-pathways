@@ -227,34 +227,36 @@ body {
 /* Стили для меток уровней языка */
 .table-img .level-badge {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0, 123, 255, 0.9);
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 123, 255, 1);
     color: white;
     padding: 4px 8px;
     border-radius: 4px;
+    border-bottom-right-radius: 0;
     font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
     z-index: 10;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0.8;
 }
 
 /* Разные цвета для разных уровней */
 .table-img .level-badge.a1 {
-    background: rgba(200, 35, 65, 0.9); /* #C82341 - A1 */
+    background: rgba(200, 35, 65, 1); /* #C82341 - A1 */
 }
 
 .table-img .level-badge.a2 {
-    background: rgba(252, 132, 35, 0.9); /* #FC8423 - A2 */
+    background: rgba(252, 132, 35, 1); /* #FC8423 - A2 */
 }
 
 .table-img .level-badge.b1 {
-    background: rgba(74, 159, 20, 0.9); /* #4A9F14 - B1 */
+    background: rgba(74, 159, 20, 1); /* #4A9F14 - B1 */
 }
 
 .table-img .level-badge.b2 {
-    background: rgba(1, 133, 135, 0.9); /* #018587 - B2 */
+    background: rgba(1, 133, 135, 1); /* #018587 - B2 */
 }
 
 .table-img .level-badge.super {
@@ -264,19 +266,19 @@ body {
 
 /* Цвета уровней для super таблиц (более высокая специфичность) */
 .table-img .level-badge.super.a1 {
-    background: rgba(200, 35, 65, 0.9); /* #C82341 - A1 */
+    background: rgba(200, 35, 65, 1); /* #C82341 - A1 */
 }
 
 .table-img .level-badge.super.a2 {
-    background: rgba(252, 132, 35, 0.9); /* #FC8423 - A2 */
+    background: rgba(252, 132, 35, 1); /* #FC8423 - A2 */
 }
 
 .table-img .level-badge.super.b1 {
-    background: rgba(74, 159, 20, 0.9); /* #4A9F14 - B1 */
+    background: rgba(74, 159, 20, 1); /* #4A9F14 - B1 */
 }
 
 .table-img .level-badge.super.b2 {
-    background: rgba(1, 133, 135, 0.9); /* #018587 - B2 */
+    background: rgba(1, 133, 135, 1); /* #018587 - B2 */
 }
 
 .table-img.__super-inactive {
