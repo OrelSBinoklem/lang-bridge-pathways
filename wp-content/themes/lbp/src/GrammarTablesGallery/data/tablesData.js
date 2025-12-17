@@ -6,7 +6,7 @@ const tablesData = {
         { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.png', level: 'a1', alt: 'IMG_20250810_0001', width: 1942, height: 948 },
         //{ id: 7, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_3.jpg', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
         //{ id: 8, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_2.jpg', level: 'a2', alt: 'IMG_20250810_0010_2', width: 1935, height: 603 },
-        //{ id: 9, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_3.jpg', level: 'a2', alt: 'IMG_20250810_0010_3', width: 1935, height: 960 },
+        { id: 9, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0010_3.png', level: 'a1', alt: 'IMG_20250810_0010_3', width: 1536, height: 560 },
         { id: 90, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-1.png', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
         { id: 91, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-2.png', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
         //{ id: 10, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0029_2.jpg', level: 'b1', alt: 'IMG_20250810_0029_2', width: 2093, height: 1352 },
