@@ -733,7 +733,7 @@ const GrammarTablesGallery = () => {
     };
 
     const handleHintClick = (imageId) => {
-        if (!imageId) return;
+        if (imageId === null || imageId === undefined || imageId === '') return;
         const idString = String(imageId);
         const isSuper = idString.startsWith('super-');
         const cleanId = isSuper ? idString.replace('super-', '') : idString;

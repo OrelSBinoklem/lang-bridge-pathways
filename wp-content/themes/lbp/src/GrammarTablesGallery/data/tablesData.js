@@ -3,12 +3,13 @@
 
 const tablesData = {
     group1: [
+        { id: 0, src: '/wp-content/themes/lbp/assets/images/tables/a1/alphabet-table-2.png', level: 'a1', alt: 'alphabet-table', width: 1536, height: 1438 },
         { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.png', level: 'a1', alt: 'IMG_20250810_0001', width: 1942, height: 948 },
-        //{ id: 7, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_3.jpg', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
+        { id: 7, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_3.png', level: 'a1', alt: 'IMG_20250810_0002_3' },
         //{ id: 8, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_2.jpg', level: 'a2', alt: 'IMG_20250810_0010_2', width: 1935, height: 603 },
         { id: 9, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0010_3.png', level: 'a1', alt: 'IMG_20250810_0010_3', width: 1536, height: 560 },
-        { id: 90, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-1.png', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
-        { id: 91, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-2.png', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
+        { id: 90, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-1.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
+        { id: 91, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-2.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
         //{ id: 10, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0029_2.jpg', level: 'b1', alt: 'IMG_20250810_0029_2', width: 2093, height: 1352 },
         //{ id: 11, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0030_2.jpg', level: 'b1', alt: 'IMG_20250810_0030_2', width: 1929, height: 672 },
         //todo не нужно (скл. прилаг.){ id: 12, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_4.jpg', level: 'a1', alt: 'IMG_20250810_0002_4', width: 2045, height: 908 },
@@ -39,13 +40,14 @@ const tablesData = {
         //{ id: 37, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0006.jpg', level: 'a1', alt: 'IMG_20250810_0006', width: 1951, height: 568 },
         { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'a1', title: 'Числа', alt: 'Числа', hintId: '6', description: 'A1' },
         { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'a1', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'A1-A2' },
-        { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'a1', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'A1' },
-        { id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
-        { id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
-        { id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'a2', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'A2' },
-        { id: 'irregular-verb-1', src: '/wp-content/themes/lbp/assets/images/tables/a1/irregular-verbs-1.png', level: 'a1', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-6', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-1.png', level: 'a2', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-11', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-2.png', level: 'a2', alt: 'irregular-verbs-2' },
+        //{ id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'a1', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'A1' },
+        //todo временно{ id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
+        //todo временно{ id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
+        //todo временно{ id: 'super-15', src: '/wp-content/themes/lbp/assets/images/super-tables/15.png', level: 'a2', title: 'Глаголы A2 — часть 3', alt: 'Глаголы A2 часть 3', hintId: '11', description: 'A2' },
+        //{ id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'a2', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'A2' },
+        { id: 'irregular-verb-1', src: '/wp-content/themes/lbp/assets/images/tables/a1/irregular-verbs-1-new.png', level: 'a1', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-6', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-1-new.png', level: 'a2', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-11', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-2-new.png', level: 'a2', alt: 'irregular-verbs-2' },
     ],
     group2: [
         //{ id: 38, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0039_3.jpg', level: 'b1', alt: 'IMG_20250810_0039_3', width: 1895, height: 550 },
@@ -66,10 +68,10 @@ const tablesData = {
         //{ id: 53, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055.jpg', level: 'b1', alt: 'IMG_20250810_0055', width: 1891, height: 892 },
         //{ id: 54, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055_2.jpg', level: 'b1', alt: 'IMG_20250810_0055_2', width: 1891, height: 755 },
         //{ id: 55, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0055_3.jpg', level: 'b1', alt: 'IMG_20250810_0055_3', width: 1891, height: 720 },
-        { id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'b1', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'B1' },
-        { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'b1', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'B1' },
-        { id: 'irregular-verb-15', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-1.png', level: 'b1', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-16', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-2.png', level: 'b1', alt: 'irregular-verbs-2' },
+        //{ id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'b1', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'B1' },
+        //todo временно{ id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'b1', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'B1' },
+        { id: 'irregular-verb-15', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-1-new.png', level: 'b1', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-16', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-2-new.png', level: 'b1', alt: 'irregular-verbs-2' },
     ],
     group3: [
         //{ id: 56, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0057.jpg', level: 'b2', alt: 'IMG_20250810_0057', width: 1825, height: 1636 },
@@ -105,12 +107,13 @@ const tablesData = {
         //{ id: 87, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0088.jpg', level: 'b2', alt: 'IMG_20250810_0088', width: 2056, height: 2952 },
         //{ id: 88, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0089.jpg', level: 'b2', alt: 'IMG_20250810_0089', width: 1808, height: 552 },
         //{ id: 89, src: '/wp-content/themes/lbp/assets/images/tables/b2/IMG_20250810_0089_2.jpg', level: 'b2', alt: 'IMG_20250810_0089_2', width: 2056, height: 2375 }
-        { id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'b2', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'B2' },
+        //{ id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'b2', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'B2' },
     ]
 };
 
 const tablesData_admin = {
     group1: [
+        { id: 0, src: '/wp-content/themes/lbp/assets/images/tables/a1/alphabet-table-2.png', level: 'a1', alt: 'alphabet-table', width: 1536, height: 1438 },
         { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.png', level: 'a1', alt: 'IMG_20250810_0001', width: 1942, height: 948 },
         { id: 7, src: '/wp-content/themes/lbp/assets/images/tables_old/a1/IMG_20250810_0002_3.jpg', level: 'a1', alt: 'IMG_20250810_0002_3', width: 2013, height: 563 },
         //{ id: 8, src: '/wp-content/themes/lbp/assets/images/tables_old/a2/IMG_20250810_0010_2.jpg', level: 'a2', alt: 'IMG_20250810_0010_2', width: 1935, height: 603 },
@@ -148,12 +151,13 @@ const tablesData_admin = {
         { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'a1', title: 'Числа', alt: 'Числа', hintId: '6', description: 'A1' },
         { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'a1', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'A1-A2' },
         { id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'a1', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'A1' },
-        { id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
-        { id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
-        { id: 'irregular-verb-1', src: '/wp-content/themes/lbp/assets/images/tables/a1/irregular-verbs-1.png', level: 'a1', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-6', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-1.png', level: 'a2', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-11', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-2.png', level: 'a2', alt: 'irregular-verbs-2' },
-        { id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'a2', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'A2' },
+        //todo временно{ id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
+        //todo временно{ id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
+        //todo временно{ id: 'super-15', src: '/wp-content/themes/lbp/assets/images/super-tables/15.png', level: 'a2', title: 'Глаголы A2 — часть 3', alt: 'Глаголы A2 часть 3', hintId: '11', description: 'A2' },
+        { id: 'irregular-verb-1', src: '/wp-content/themes/lbp/assets/images/tables/a1/irregular-verbs-1-new.png', level: 'a1', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-6', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-1-new.png', level: 'a2', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-11', src: '/wp-content/themes/lbp/assets/images/tables/a2/irregular-verbs-2-new.png', level: 'a2', alt: 'irregular-verbs-2' },
+        //{ id: 'super-8', src: '/wp-content/themes/lbp/assets/images/super-tables/8.png', level: 'a2', title: 'Прилагательные (A2)', alt: 'Прилагательные уровень A2', hintId: '8', description: 'A2' },
     ],
     group2: [
         { id: 38, src: '/wp-content/themes/lbp/assets/images/tables_old/b1/IMG_20250810_0039_3.jpg', level: 'b1', alt: 'IMG_20250810_0039_3', width: 1895, height: 550 },
@@ -174,10 +178,10 @@ const tablesData_admin = {
         { id: 53, src: '/wp-content/themes/lbp/assets/images/tables_old/b1/IMG_20250810_0055.jpg', level: 'b1', alt: 'IMG_20250810_0055', width: 1891, height: 892 },
         { id: 54, src: '/wp-content/themes/lbp/assets/images/tables_old/b1/IMG_20250810_0055_2.jpg', level: 'b1', alt: 'IMG_20250810_0055_2', width: 1891, height: 755 },
         { id: 55, src: '/wp-content/themes/lbp/assets/images/tables_old/b1/IMG_20250810_0055_3.jpg', level: 'b1', alt: 'IMG_20250810_0055_3', width: 1891, height: 720 },
-        { id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'b1', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'B1' },
-        { id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'b1', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'B1' },
-        { id: 'irregular-verb-15', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-1.png', level: 'b1', alt: 'irregular-verbs-1' },
-        { id: 'irregular-verb-16', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-2.png', level: 'b1', alt: 'irregular-verbs-2' },
+        //{ id: 'super-13', src: '/wp-content/themes/lbp/assets/images/super-tables/13.png', level: 'b1', title: 'Прилагательные (B1)', alt: 'Прилагательные уровень B1', hintId: '13', description: 'B1' },
+        //todo временно{ id: 'super-12', src: '/wp-content/themes/lbp/assets/images/super-tables/12.png', level: 'b1', title: 'Глаголы B1', alt: 'Глаголы уровень B1', hintId: '12', description: 'B1' },
+        { id: 'irregular-verb-15', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-1-new.png', level: 'b1', alt: 'irregular-verbs-1' },
+        { id: 'irregular-verb-16', src: '/wp-content/themes/lbp/assets/images/tables/b1/irregular-verbs-2-new.png', level: 'b1', alt: 'irregular-verbs-2' },
     ],
     group3: [
         { id: 56, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0057.jpg', level: 'b2', alt: 'IMG_20250810_0057', width: 1825, height: 1636 },
@@ -213,7 +217,7 @@ const tablesData_admin = {
         { id: 87, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0088.jpg', level: 'b2', alt: 'IMG_20250810_0088', width: 2056, height: 2952 },
         { id: 88, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0089.jpg', level: 'b2', alt: 'IMG_20250810_0089', width: 1808, height: 552 },
         { id: 89, src: '/wp-content/themes/lbp/assets/images/tables_old/b2/IMG_20250810_0089_2.jpg', level: 'b2', alt: 'IMG_20250810_0089_2', width: 2056, height: 2375 },
-        { id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'b2', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'B2' },
+        //{ id: 'super-14', src: '/wp-content/themes/lbp/assets/images/super-tables/14.png', level: 'b2', title: 'Прилагательные (B2)', alt: 'Прилагательные уровень B2', hintId: '14', description: 'B2' },
     ]
 };
 
