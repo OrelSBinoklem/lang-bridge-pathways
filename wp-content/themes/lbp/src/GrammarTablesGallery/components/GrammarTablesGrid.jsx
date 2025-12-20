@@ -279,11 +279,11 @@ const GrammarTablesGrid = ({
     const renderHintIcon = (image) => {
         const hintId = image.isSuperEntry
             ? (image.hintId || String(image.id).replace('super-', ''))
-            : image.id;
+            : (image.hintId || image.id);
 
         const hintPayload = image.isSuperEntry
             ? `super-${hintId}`
-            : image.id;
+            : hintId;
 
         return (
             <span 
@@ -382,9 +382,12 @@ const GrammarTablesGrid = ({
                             data-id={image.id}
                             data-level={image.level}
                             onClick={() => {
+                                const hintId = image.isSuperEntry
+                                    ? (image.hintId || String(image.id).replace('super-', ''))
+                                    : (image.hintId || image.id);
                                 const hintPath = image.isSuperEntry
-                                    ? `/wp-content/themes/lbp/assets/hints-super-tables/${image.hintId || String(image.id).replace('super-', '')}.html`
-                                    : `/wp-content/themes/lbp/assets/hints/${image.id}.html`;
+                                    ? `/wp-content/themes/lbp/assets/hints-super-tables/${hintId}.html`
+                                    : `/wp-content/themes/lbp/assets/hints/${hintId}.html`;
                                 onImageClick({
                                     ...image,
                                     hintPath
