@@ -3473,8 +3473,8 @@ h2 .small {
 
 /* Мобильное меню для страниц Interactive Cheat Sheet и Grammar Tables */
 @media (max-width: 1199px) {
-  /* Скрываем react-header-root и кнопку выбора языка на мобильных для этих страниц */
-  .react-header-container,
+  /* Скрываем только кнопку выбора языка на мобильных для этих страниц */
+  /* НЕ скрываем react-header-container, так как там находится поиск глаголов */
   #language-selector-btn {
     display: none !important;
   }
@@ -3751,6 +3751,17 @@ h2 .small {
   }
 }
 
+/* Меню не должно выходить за правую границу на экранах ниже 1500px */
+@media (max-width: 1500px) {
+  .site-navigation ul {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 20px);
+    min-width: min(250px, calc(100vw - 20px));
+    width: auto;
+  }
+}
+
 /* На маленьких экранах скрываем текст "Menu" в кнопке */
 @media (max-width: 767px) {
   .menu-toggle {
@@ -3767,15 +3778,6 @@ h2 .small {
   /* Скрываем текст "Menu" на мобильных */
   .menu-toggle .menu-text {
     display: none;
-  }
-  
-  /* Меню не должно выходить за правую границу */
-  .site-navigation ul {
-    right: 0;
-    left: auto;
-    max-width: calc(100vw - 20px);
-    min-width: min(250px, calc(100vw - 20px));
-    width: auto;
   }
   
   /* WebGL контроллы (dat.gui) позиционируем слева */

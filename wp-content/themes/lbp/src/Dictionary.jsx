@@ -368,7 +368,7 @@ if(document.getElementById('react-app-dictionary')) {
 		{/* Матрица слов после словаря - показываем только когда показываются категории */}
 		{!isExamenActive && dictionaryWords.length > 0 && (
 			<div style={{ marginTop: '20px' }}>
-				<h2 className="words-matrix-title">Матрица слов (декорация)</h2>
+				<h2 className="words-matrix-title">Матрица {dictionaryWords.length} слов (декорация)</h2>
 				<WordsMatrix 
 					dictionaryId={dictionaryId} 
 					userWordsData={userWordsData}

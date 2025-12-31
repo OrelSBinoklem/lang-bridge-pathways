@@ -15,7 +15,9 @@ const VerbSearch = ({ onVerbSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const searchRef = useRef(null);
+    const inputRef = useRef(null);
 
     // Загружаем данные глаголов
     useEffect(() => {
@@ -40,12 +42,16 @@ const VerbSearch = ({ onVerbSelect }) => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setShowSuggestions(false);
+                // Закрываем мобильный поиск при клике вне на мобильных
+                if (isMobileSearchOpen && window.innerWidth <= 768) {
+                    setIsMobileSearchOpen(false);
+                }
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isMobileSearchOpen]);
 
     const searchVerbs = (term) => {
         if (!verbData) {
@@ -150,6 +156,7 @@ const VerbSearch = ({ onVerbSelect }) => {
         
         setSearchTerm(verb.latvian || '');
         setShowSuggestions(false);
+        setIsMobileSearchOpen(false); // Закрываем мобильный поиск при выборе
         
         if (onVerbSelect) {
             const payload = verb.raw ? {
@@ -171,22 +178,58 @@ const VerbSearch = ({ onVerbSelect }) => {
         setTimeout(() => e.target.select(), 0);
     };
 
+    const handleMobileSearchToggle = () => {
+        setIsMobileSearchOpen(!isMobileSearchOpen);
+        if (!isMobileSearchOpen && inputRef.current) {
+            setTimeout(() => inputRef.current?.focus(), 100);
+        }
+    };
+
+    const handleMobileSearchClose = () => {
+        setIsMobileSearchOpen(false);
+        setShowSuggestions(false);
+    };
+
     console.log('VerbSearch: Рендерим компонент, searchTerm:', searchTerm);
     console.log('VerbSearch: Привязываем onFocus:', !!handleInputFocus);
     
     return (
-        <div className="verb-search-wrapper" ref={searchRef}>
+        <div className={`verb-search-wrapper ${isMobileSearchOpen ? 'mobile-open' : ''}`} ref={searchRef}>
             <div className="verb-search-container">
-                <input
-                    type="text"
-                    className="form-control form-control-sm"
-                    placeholder="Поиск глагола..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    onFocus={handleInputFocus}
-                    style={{ width: '200px' }}
-                    autoComplete="off"
-                />
+                {/* Иконка поиска для мобильных */}
+                <button
+                    className="verb-search-icon-btn"
+                    onClick={handleMobileSearchToggle}
+                    aria-label="Открыть поиск глагола"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" fill="currentColor"/>
+                    </svg>
+                </button>
+                
+                {/* Поле поиска */}
+                <div className={`verb-search-input-wrapper ${isMobileSearchOpen ? 'mobile-open' : ''}`}>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        className="form-control form-control-sm verb-search-input"
+                        placeholder="Поиск глагола..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        onFocus={handleInputFocus}
+                        style={{ width: '200px' }}
+                        autoComplete="off"
+                    />
+                    {isMobileSearchOpen && (
+                        <button
+                            className="verb-search-close-btn"
+                            onClick={handleMobileSearchClose}
+                            aria-label="Закрыть поиск"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
                 {showSuggestions && suggestions.length > 0 && (
                     <div className="verb-suggestions">
                         {suggestions.map((suggestion, index) => {

@@ -63,6 +63,9 @@ const GrammarTablesMobileMenu = ({
                                 );
                             }
 
+                            // TODO: Скрытый функционал - кнопки выбора наборов супер таблиц (Набор 1, Набор 2)
+                            // Раскомментировать при необходимости активации функционала выбора наборов
+                            /*
                             return (
                                 <React.Fragment key="super-sets-mobile">
                                     <button
@@ -95,6 +98,8 @@ const GrammarTablesMobileMenu = ({
                                     </button>
                                 </React.Fragment>
                             );
+                            */
+                            return null;
                         })}
                     </div>
                 </div>
@@ -130,6 +135,10 @@ const GrammarTablesMobileMenu = ({
                     </button>
                 </div>
 
+                {/* TODO: Скрытый функционал - блок управления супер таблицами в мобильном меню
+                    Раскомментировать при необходимости активации функционала редактирования наборов и показа скрытых таблиц
+                */}
+                {/*
                 <div className="mobile-super-controls">
                     <label>Супер таблицы:</label>
                     <button
@@ -155,6 +164,7 @@ const GrammarTablesMobileMenu = ({
                         {showHiddenSuper ? '☑ Показать скрытые' : '☐ Показать скрытые'}
                     </button>
                 </div>
+                */}
             </div>
         </li>
     );
