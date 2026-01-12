@@ -788,6 +788,7 @@ body:has(#grammar-tables-gallery-root) {
 .words-education-list__word {
     padding-top: 2px;
     padding-bottom: 2px;
+    flex: 0 0 auto;
     display: inline-block;
     width: calc(50% - 21px);
     text-align: right;
