@@ -1464,6 +1464,25 @@ body:has(.galleries.horizontal-mode) .page-indicator {
     margin-bottom: 20px;
 }
 
+@media (max-width: 768px) {
+    .hint-modal {
+        padding: 20px 0;
+    }
+    
+    .hint-modal-content {
+        width: 100%;
+        height: calc(100vh - 40px);
+        max-height: calc(100vh - 40px);
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    
+    .hint-modal iframe {
+        min-height: calc(100vh - 40px);
+        height: calc(100vh - 40px);
+    }
+}
+
 .hint-modal-close {
     position: absolute;
     top: 10px;

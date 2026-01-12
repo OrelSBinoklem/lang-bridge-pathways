@@ -139,7 +139,7 @@ const WordInput = ({
               right: '6px',
               pointerEvents: 'none'
             }}>
-              📚 Учу
+              <span className="learning-mode-icon">📚 Учу</span>
             </span>
           )}
           {showTooltip && (
@@ -160,7 +160,7 @@ const WordInput = ({
         }}>
           {userData && userData.mode_education_revert === 1 ? (
             <span className="learning-mode-text">
-              📚 Учу
+              <span className="learning-mode-icon">📚 Учу</span> <span style={{ color: '#333' }}>{word.word}</span>
             </span>
           ) : (
             word.word.split('').map((char, index) => 

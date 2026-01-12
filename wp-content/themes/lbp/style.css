@@ -2340,27 +2340,29 @@ h2 .small {
 }
 
 /* Анимация пульсации для режима обучения */
-@keyframes pulse {
+/* @keyframes learning-pulse {
     0% {
         opacity: 1;
-        transform: scale(1);
     }
     50% {
         opacity: 0.7;
-        transform: scale(1.05);
     }
     100% {
         opacity: 1;
-        transform: scale(1);
     }
-}
+} */
 
 /* Стили для режима обучения */
 .learning-mode-text {
     color: #ff9800;
     font-weight: bold;
-    animation: pulse 1.5s ease-in-out infinite;
     font-size: 14px;
+}
+
+/* Анимация только для значка "📚 Учу" */
+.learning-mode-icon {
+    /* animation: learning-pulse 1.5s ease-in-out infinite; */
+    display: inline-block;
 }
 
 /* Стили для редактора слов */

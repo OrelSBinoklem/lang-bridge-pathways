@@ -64,7 +64,7 @@ const WordRow = ({
           <span className="words-hidden-text">
             {userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
-                📚 Учу
+                <span className="learning-mode-icon">📚 Учу</span> <span style={{ color: '#333' }}>{word.word}</span>
               </span>
             ) : (
               word.word.split('').map((char, index) => 
@@ -88,7 +88,7 @@ const WordRow = ({
           <span className="words-hidden-text">
             {userData && userData.mode_education === 1 ? (
               <span className="learning-mode-text">
-                📚 Учу
+                <span style={{ color: '#333' }}>{word.translation_1}</span> <span className="learning-mode-icon">📚 Учу</span>
               </span>
             ) : (
               word.translation_1.split('').map((char, index) => 
