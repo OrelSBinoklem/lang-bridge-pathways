@@ -2340,7 +2340,7 @@ h2 .small {
 }
 
 /* Анимация пульсации для режима обучения */
-/* @keyframes learning-pulse {
+@keyframes learning-pulse {
     0% {
         opacity: 1;
     }
@@ -2350,7 +2350,7 @@ h2 .small {
     100% {
         opacity: 1;
     }
-} */
+}
 
 /* Стили для режима обучения */
 .learning-mode-text {
@@ -2361,7 +2361,7 @@ h2 .small {
 
 /* Анимация только для значка "📚 Учу" */
 .learning-mode-icon {
-    /* animation: learning-pulse 1.5s ease-in-out infinite; */
+    animation: learning-pulse 1.5s ease-in-out infinite;
     display: inline-block;
 }
 
