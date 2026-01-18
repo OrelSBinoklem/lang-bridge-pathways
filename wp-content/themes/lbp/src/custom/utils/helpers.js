@@ -293,8 +293,8 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   const hasAnyAttempts = userData.attempts > 0 || userData.attempts_revert > 0;
   
   return {
-    showWord: directLearned,
-    showTranslation: revertLearned,
+    showWord: revertLearned,
+    showTranslation: directLearned,
     fullyLearned: directLearned && revertLearned,
     hasAttempts: hasAnyAttempts,
     cooldownDirect: cooldownDirect,

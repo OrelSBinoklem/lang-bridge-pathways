@@ -100,7 +100,7 @@ const WordRow = ({
       </span>
       
       {/* Перевод 2 */}
-      {word.translation_2 && !displayStatus.cooldownDirect && !(userData && userData.mode_education === 1) && (
+      {word.translation_2 && !displayStatus.cooldownDirect && (
         <span className="words-education-list__translation_2">
           , {displayStatus.showTranslation ? (
             word.translation_2
@@ -115,7 +115,7 @@ const WordRow = ({
       )}
       
       {/* Перевод 3 */}
-      {word.translation_3 && !displayStatus.cooldownDirect && !(userData && userData.mode_education === 1) && (
+      {word.translation_3 && !displayStatus.cooldownDirect && (
         <span className="words-education-list__translation_3">
           , {displayStatus.showTranslation ? (
             word.translation_3
