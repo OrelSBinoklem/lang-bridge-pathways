@@ -924,9 +924,28 @@ body:has(#grammar-tables-gallery-root) {
     z-index: 0;
     transition: width 0.25s ease;
 }
+.category-item-with-progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
 .category-item-with-progress .category-three-name {
     position: relative;
     z-index: 1;
+}
+.category-item-with-progress > .category-progress-done {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.category-item-with-progress > ul.category-three-sub {
+    flex-basis: 100%;
+    width: 100%;
+}
+.category-progress-done {
+    color: #2e7d32;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
 }
 
 .edit-button {

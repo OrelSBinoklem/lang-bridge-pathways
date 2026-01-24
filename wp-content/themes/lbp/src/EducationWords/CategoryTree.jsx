@@ -109,9 +109,10 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
               className={isClickable ? 'category-item-with-progress' : ''}
               style={isClickable ? { '--category-progress': progress } : undefined}
             >
-              <span className="category-three-name">
-                {category.name}
-              </span>
+              <span className="category-three-name">{category.name}</span>
+              {isClickable && progress >= 1 && (
+                <span className="category-progress-done" aria-hidden="true">✓</span>
+              )}
               {category.children && category.children.length > 0 && renderCategoryTree(category.children, true)}
             </li>
           );
