@@ -20,18 +20,21 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
   };
 
   /**
-   * Прогресс категории: доля слов, засчитанных по прямому или обратному переводу
-   * (correct_attempts >= 2 ИЛИ correct_attempts_revert >= 2).
+   * Прогресс категории: прямой и обратный перевод считаются отдельно.
+   * 100% — когда все прямые и все обратные переводы выполнены (correct_attempts >= 2 и correct_attempts_revert >= 2).
    */
   const getCategoryProgress = (categoryId) => {
     const words = dictionaryWords.filter((w) => wordBelongsToCategory(w, categoryId));
-    const total = words.length;
-    if (!total) return { total: 0, learned: 0, progress: 0 };
-    const learned = words.filter((w) => {
+    const n = words.length;
+    if (!n) return { total: 0, learned: 0, progress: 0 };
+    const totalUnits = n * 2; // каждое слово = 2 единицы: прямой + обратный
+    let learned = 0;
+    words.forEach((w) => {
       const u = userWordsData[w.id];
-      return u && (u.correct_attempts >= 2 || u.correct_attempts_revert >= 2);
-    }).length;
-    return { total, learned, progress: learned / total };
+      if (u && u.correct_attempts >= 2) learned += 1;
+      if (u && u.correct_attempts_revert >= 2) learned += 1;
+    });
+    return { total: totalUnits, learned, progress: learned / totalUnits };
   };
 
   // Функция генерации фейковых категорий по 50 слов
