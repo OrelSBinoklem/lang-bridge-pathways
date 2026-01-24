@@ -1,10 +1,38 @@
-import axios from "axios";
 const { useEffect, useState } = wp.element;
 
-const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], categories: propCategories = [], loadingCategories: propLoading = false }) => {
+const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], categories: propCategories = [], loadingCategories: propLoading = false, userWordsData = {} }) => {
   const [categories, setCategories] = useState(propCategories); // Используем категории из пропов
   const [loading, setLoading] = useState(propLoading); // Используем loading из пропов
   const [error, setError] = useState(null); // Состояние ошибки
+
+  /**
+   * Проверка принадлежности слова категории (как в Examen: category_id или category_ids).
+   */
+  const wordBelongsToCategory = (word, catId) => {
+    const catIdNum = parseInt(catId, 10);
+    if (word.category_id !== undefined && word.category_id !== null) {
+      return parseInt(word.category_id, 10) === catIdNum;
+    }
+    if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
+      return word.category_ids.some((id) => parseInt(id, 10) === catIdNum);
+    }
+    return false;
+  };
+
+  /**
+   * Прогресс категории: доля слов, засчитанных по прямому или обратному переводу
+   * (correct_attempts >= 2 ИЛИ correct_attempts_revert >= 2).
+   */
+  const getCategoryProgress = (categoryId) => {
+    const words = dictionaryWords.filter((w) => wordBelongsToCategory(w, categoryId));
+    const total = words.length;
+    if (!total) return { total: 0, learned: 0, progress: 0 };
+    const learned = words.filter((w) => {
+      const u = userWordsData[w.id];
+      return u && (u.correct_attempts >= 2 || u.correct_attempts_revert >= 2);
+    }).length;
+    return { total, learned, progress: learned / total };
+  };
 
   // Функция генерации фейковых категорий по 50 слов
   const generateFakeCategories = (words) => {
@@ -68,19 +96,23 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
     
     return (
       <ul className={subCat ? 'category-three-sub' : 'category-three'}>
-        {sortedTree.map((category) => (
-          <li
-            onClick={() => subCat && onCategoryClick && onCategoryClick(category)}
-            key={category.id}
-          >
-            <span
-              className="category-three-name"
+        {sortedTree.map((category) => {
+          const { progress } = subCat ? getCategoryProgress(category.id) : { progress: 0 };
+          const isClickable = !!subCat;
+          return (
+            <li
+              onClick={() => subCat && onCategoryClick && onCategoryClick(category)}
+              key={category.id}
+              className={isClickable ? 'category-item-with-progress' : ''}
+              style={isClickable ? { '--category-progress': progress } : undefined}
             >
-              {category.name}
-            </span>
-            {category.children && category.children.length > 0 && renderCategoryTree(category.children, true)}
-          </li>
-        ))}
+              <span className="category-three-name">
+                {category.name}
+              </span>
+              {category.children && category.children.length > 0 && renderCategoryTree(category.children, true)}
+            </li>
+          );
+        })}
       </ul>
     );
   };

@@ -110,6 +110,7 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 						categories={categories}
 						loadingCategories={loadingCategories}
 						dictionaryWords={dictionaryWords}
+						userWordsData={userWordsData}
 					/>
 				</>
 			)}

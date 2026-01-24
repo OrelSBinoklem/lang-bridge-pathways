@@ -905,9 +905,28 @@ body:has(#grammar-tables-gallery-root) {
     cursor: pointer;
 }
 
-.category-three > li > ul > li > .category-tree-name {
+.category-three > li > ul > li > .category-tree-name,
+.category-three > li > ul > li > .category-three-name {
     position: relative;
     z-index: 3;
+}
+
+/* Прогресс-заливка категории по мере засчитывания прямого/обратного перевода */
+.category-item-with-progress::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(var(--category-progress, 0) * 100%);
+    background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: 2px;
+    z-index: 0;
+    transition: width 0.25s ease;
+}
+.category-item-with-progress .category-three-name {
+    position: relative;
+    z-index: 1;
 }
 
 .edit-button {

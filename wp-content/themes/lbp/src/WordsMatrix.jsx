@@ -37,24 +37,24 @@ const WordsMatrix = ({
 
       const canvas = canvasRef.current;
 
+      const sizeWithGap = 8;
+      const size = 7;
+
       const updateCanvasSize = () => {
         if (!canvas) return;
-        
         const parent = canvas.parentElement;
-
-        if (parent) {
-          canvas.width = parent.offsetWidth;
-          canvas.height = parent.offsetWidth * 0.5; // Пример пропорции
-        }
+        if (!parent) return;
+        const availWidth = parent.offsetWidth || 1;
+        const cols = Math.max(1, Math.floor(availWidth / sizeWithGap));
+        const rows = Math.max(1, Math.ceil(dictionaryWords.length / cols));
+        canvas.width = cols * sizeWithGap;
+        canvas.height = rows * sizeWithGap;
       };
 
       const drawMatrix = () => {
         if (!canvas) return;
-        
         const ctx = canvas.getContext("2d");
-        const sizeWithGap = 8; // Общий размер с отступом
-        const size = 7; // Размер квадрата
-        const cols = Math.floor(canvas.width / sizeWithGap);
+        const cols = Math.max(1, Math.floor(canvas.width / sizeWithGap));
 
         // Очистка canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -146,8 +146,6 @@ const WordsMatrix = ({
       <canvas
         ref={canvasRef}
         onMouseMove={handleMouseMove}
-        width={600}
-        height={400}
       />
       {hoveredWord && (
         <div
