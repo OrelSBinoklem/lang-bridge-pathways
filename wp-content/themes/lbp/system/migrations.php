@@ -118,6 +118,23 @@ function create_words_table() {
 
 add_action('after_setup_theme', 'create_words_table');
 
+/** Поле info в d_words: добавить при отсутствии, при varchar — обновить до TEXT. */
+function ensure_info_column_words() {
+    global $wpdb;
+    $t = $wpdb->prefix . 'd_words';
+    if ($wpdb->get_var("SHOW TABLES LIKE '$t'") !== $t) return;
+    $has = $wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $t LIKE %s", 'info'));
+    if (!$has) {
+        $wpdb->query("ALTER TABLE $t ADD COLUMN info TEXT DEFAULT NULL AFTER difficult_translation");
+        return;
+    }
+    $col = $wpdb->get_row($wpdb->prepare("SHOW FULL COLUMNS FROM $t WHERE Field = %s", 'info'));
+    if ($col && strpos(strtolower($col->Type), 'varchar') === 0) {
+        $wpdb->query("ALTER TABLE $t MODIFY COLUMN info TEXT DEFAULT NULL");
+    }
+}
+add_action('after_setup_theme', 'ensure_info_column_words');
+
 /** Создаём таблицу связей между словами и категориями словарей
  * @return void
  */

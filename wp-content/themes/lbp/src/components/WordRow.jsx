@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import WordEditor from '../WordEditor';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
 
@@ -35,7 +36,26 @@ const WordRow = ({
   onToggleSelect
 }) => {
   const { isAdminModeActive } = useAdminMode();
-  
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
+  const popoverRef = useRef(null);
+
+  const closeInfoPopover = () => setShowInfoPopover(false);
+
+  useEffect(() => {
+    if (!showInfoPopover) return;
+    const onDoc = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) closeInfoPopover();
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [showInfoPopover]);
+
+  const handleRowClick = (e) => {
+    if (!word.info || !String(word.info).trim()) return;
+    if (e.target && e.target.closest && e.target.closest('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover')) return;
+    setShowInfoPopover((v) => !v);
+  };
+
   // Рендер индикатора прогресса
   const renderProgressIndicator = () => {
     return userData && displayStatus.hasAttempts ? (
@@ -51,7 +71,19 @@ const WordRow = ({
   };
 
   return (
-    <li key={word.id}>
+    <li
+      key={word.id}
+      className={word.info && String(word.info).trim() ? 'words-education-list__row--has-info' : ''}
+      onClick={handleRowClick}
+      role={word.info && String(word.info).trim() ? 'button' : undefined}
+      tabIndex={word.info && String(word.info).trim() ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (word.info && String(word.info).trim() && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          handleRowClick(e);
+        }
+      }}
+    >
       {/* Слово */}
       <span className="words-education-list__word">
         {displayStatus.cooldownRevert ? (
@@ -161,6 +193,32 @@ const WordRow = ({
             />
           )}
         </>
+      )}
+
+      {/* Значок подсказки (?) справа — только если есть info и видны и слово, и перевод */}
+      {word.info && String(word.info).trim() &&
+       displayStatus.showWord && displayStatus.showTranslation &&
+       !displayStatus.cooldownDirect && !displayStatus.cooldownRevert && (
+        <span className="words-education-list__info-hint" title="Подсказка">
+          ?
+        </span>
+      )}
+
+      {showInfoPopover && word.info && String(word.info).trim() && createPortal(
+        <div className="word-info-popover-backdrop" aria-hidden="true">
+          <div
+            ref={popoverRef}
+            className="word-info-popover"
+            role="dialog"
+            aria-label="Подсказка"
+          >
+            <div
+              className="word-info-popover__content"
+              dangerouslySetInnerHTML={{ __html: word.info }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       {editingWordId === word.id && (

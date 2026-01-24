@@ -21,6 +21,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     translation_3: '',
     translation_input_variable: '',
     difficult_translation: '',
+    info: '',
     sound_url: '',
     level: '',
     maxLevel: '',
@@ -60,6 +61,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
           translation_3: '',
           translation_input_variable: '',
           difficult_translation: '',
+          info: '',
           sound_url: '',
           level: '',
           maxLevel: '',
@@ -99,6 +101,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
           translation_3: parts[3] || '',
           translation_input_variable: '',
           difficult_translation: '',
+          info: '',
           sound_url: '',
           level: '',
           maxLevel: '',
@@ -408,6 +411,16 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
                   onChange={(e) => setNewWord({...newWord, difficult_translation: e.target.value})}
                   style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
                   placeholder="Сложный вариант перевода..."
+                />
+              </div>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Info:</label>
+                <input
+                  type="text"
+                  value={newWord.info}
+                  onChange={(e) => setNewWord({...newWord, info: e.target.value})}
+                  style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                  placeholder="Дополнительная информация..."
                 />
               </div>
             </div>

@@ -84,6 +84,17 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
       </div>
 
       <div className="field-row">
+        <label>Подсказка:</label>
+        <textarea
+          name="info"
+          value={formData.info || ''}
+          onChange={handleChange}
+          rows={5}
+          style={{ resize: 'vertical', minHeight: '5em' }}
+        />
+      </div>
+
+      <div className="field-row">
         <label>Ссылка на звук:</label>
         <input name="sound_url" value={formData.sound_url || ''} onChange={handleChange} />
       </div>

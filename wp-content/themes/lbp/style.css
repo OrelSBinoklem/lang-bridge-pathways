@@ -785,6 +785,105 @@ body:has(#grammar-tables-gallery-root) {
     display: flex;
 }
 
+.words-education-list__row--has-info {
+    flex-wrap: wrap;
+    cursor: pointer;
+}
+
+/* Затемнённая область — клик закрывает подсказку; поповер внутри */
+.word-info-popover-backdrop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Поповер подсказки (word.info) — по центру (flex в бэкдропе) */
+.word-info-popover {
+    position: relative;
+    z-index: 1;
+    width: max-content;
+    max-width: 320px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    cursor: default;
+}
+
+.word-info-popover__content {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.word-info-popover__content ul,
+.word-info-popover__content ol {
+    margin: 0.5em 0 0.75em 0;
+    padding-left: 1.5em;
+}
+
+.word-info-popover__content ul {
+    list-style-type: disc;
+}
+
+.word-info-popover__content ol {
+    list-style-type: decimal;
+}
+
+.word-info-popover__content li {
+    display: list-item;
+    margin: 0.25em 0;
+}
+
+.word-info-popover__content strong {
+    font-weight: 700;
+}
+
+.word-info-popover__content em {
+    font-style: italic;
+}
+
+.word-info-popover__content p {
+    margin: 0.5em 0;
+}
+
+.word-info-popover__content p:first-child {
+    margin-top: 0;
+}
+
+.word-info-popover__content p:last-child {
+    margin-bottom: 0;
+}
+
+.word-info-popover__content a {
+    color: #0073aa;
+    text-decoration: underline;
+}
+
+.word-info-popover__content a:hover {
+    color: #005177;
+}
+
+.words-education-list__info-hint {
+    margin-left: 4px;
+    color: #1976d2;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.words-education-list__row--has-info .words-education-list__info-hint {
+    cursor: pointer;
+}
+
 .words-education-list__word {
     padding-top: 2px;
     padding-bottom: 2px;
