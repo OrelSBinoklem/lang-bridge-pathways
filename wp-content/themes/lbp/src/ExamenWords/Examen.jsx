@@ -5,14 +5,14 @@ import HelpModal from "../components/HelpModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
-import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen } from "../custom/utils/helpers";
+import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 
 // Тестовые данные для отладки (закомментируйте следующую строку в production)
 import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
 const ENABLE_TEST_DATA = true; // Установите false, чтобы отключить тестовые строки
 
-const { useEffect, useState } = wp.element;
+const { useEffect, useState, useMemo } = wp.element;
 
 const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const { isAdminModeActive } = useAdminMode();
@@ -33,6 +33,36 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
   const [trainingQueue, setTrainingQueue] = useState([]); // Очередь пар слов для тренировки
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0); // Текущая позиция в очереди
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
+  const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
+
+  // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
+  useEffect(() => {
+    const cached = getTrainingAnswerMode();
+    if (cached) {
+      setSelectionMode(cached === 'select');
+      return;
+    }
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const defaultMode = isMobile ? 'select' : 'type';
+    setTrainingAnswerMode(defaultMode);
+    setSelectionMode(defaultMode === 'select');
+  }, []);
+
+  // Синхронизация с переключателем в шапке (до #default-mobile-lang-controls)
+  useEffect(() => {
+    const onModeChange = () => {
+      const cached = getTrainingAnswerMode();
+      if (cached) setSelectionMode(cached === 'select');
+    };
+    window.addEventListener('training-answer-mode-changed', onModeChange);
+    return () => window.removeEventListener('training-answer-mode-changed', onModeChange);
+  }, []);
+
+  // Варианты выбора — только при смене слова или режима, иначе порядок «прыгает» при каждом ререндере
+  const choiceOptions = useMemo(() => {
+    if (!currentWord || !selectionMode) return [];
+    return getChoiceOptions(currentWord, currentMode);
+  }, [currentWord?.id, currentMode, selectionMode]);
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
@@ -185,6 +215,60 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     // Поэтому здесь мы формируем только первые две фазы, а дальше будем пересчитывать
 
     return queue;
+  };
+
+  const shuffleArray = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  // Шесть вариантов ответа для режима «выбор»: 1 правильный + 5 из категории (невыученные в приоритете), при нехватке — похожие по первому символу из словаря
+  const getChoiceOptions = (word, mode) => {
+    const getAnswer = (w) => (mode ? w.word : (w.translation_1 || '')).trim();
+    const correct = getAnswer(word);
+    if (!correct) return [correct];
+
+    const catFilter = (w) => {
+      if (categoryId === 0) return true;
+      const cid = parseInt(categoryId);
+      if (w.category_id !== undefined) return parseInt(w.category_id) === cid;
+      if (Array.isArray(w.category_ids) && w.category_ids.length > 0) return w.category_ids.some(id => parseInt(id) === cid);
+      return false;
+    };
+    const categoryWords = dictionaryWords.filter(catFilter);
+    const restWords = dictionaryWords.filter(w => !catFilter(w));
+
+    const firstChar = correct.charAt(0).toLowerCase();
+    const used = new Set([correct]);
+    const wrong = [];
+
+    const addFrom = (list, preferUnlearned = false) => {
+      const withStatus = list
+        .filter(w => w.id !== word.id)
+        .map(w => ({ w, a: getAnswer(w), unlearned: !getWordDisplayStatus(w.id).fullyLearned }))
+        .filter(x => x.a && !used.has(x.a));
+      if (preferUnlearned) withStatus.sort((a, b) => (a.unlearned ? 0 : 1) - (b.unlearned ? 0 : 1));
+      for (const { a } of withStatus) {
+        if (wrong.length >= 5) break;
+        if (!used.has(a)) { used.add(a); wrong.push(a); }
+      }
+    };
+
+    addFrom(categoryWords, true);
+    if (wrong.length < 5) {
+      const similar = restWords.filter(w => {
+        const a = getAnswer(w);
+        return a && !used.has(a) && a.charAt(0).toLowerCase() === firstChar;
+      });
+      addFrom(similar);
+    }
+    if (wrong.length < 5) addFrom(restWords);
+
+    return shuffleArray([correct, ...wrong.slice(0, 5)]);
   };
 
   // Начать тренировку
@@ -379,9 +463,10 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     return variants;
   };
 
-  // Обработчики для TrainingInterface
-  const handleCheckAnswer = async () => {
-    if (!currentWord || !userAnswer.trim() || isUpdating) return;
+  // Обработчики для TrainingInterface. overrideAnswer — при выборе из вариантов (режим «выбор»)
+  const handleCheckAnswer = async (overrideAnswer) => {
+    const toCheck = (overrideAnswer != null && String(overrideAnswer).trim()) ? String(overrideAnswer).trim() : userAnswer.trim();
+    if (!currentWord || !toCheck || isUpdating) return;
 
     let correct = false;
     let correctAnswers = [];
@@ -414,7 +499,7 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       allAcceptableVariants.push(...variants);
     });
 
-    const normalizedUserAnswer = normalizeString(userAnswer);
+    const normalizedUserAnswer = normalizeString(toCheck);
     
     correct = allAcceptableVariants.some(answer => {
       const normalizedAnswer = normalizeString(answer);
@@ -536,22 +621,25 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         setShowResult(false);
         setAttemptCount(0);
         
-        // Возвращаем фокус на поле ввода после рендера
+        // Возвращаем фокус: поле ввода или первая кнопка выбора (режим «выбор»)
         setTimeout(() => {
           const inputField = document.querySelector('[data-training-input]');
-          if (inputField) {
-            inputField.focus();
+          if (inputField) inputField.focus();
+          else {
+            const firstChoice = document.querySelector('.training-choice-btn');
+            if (firstChoice) firstChoice.focus();
           }
         }, 100);
         return;
       }
     }
 
-    // Возвращаем фокус на поле ввода после рендера
     setTimeout(() => {
       const inputField = document.querySelector('[data-training-input]');
-      if (inputField) {
-        inputField.focus();
+      if (inputField) inputField.focus();
+      else {
+        const firstChoice = document.querySelector('.training-choice-btn');
+        if (firstChoice) firstChoice.focus();
       }
     }, 100);
   };
@@ -669,6 +757,8 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
           onNextWord={handleNextWord}
           onFinishTraining={handleFinishTraining}
           isUpdating={isUpdating}
+          selectionMode={selectionMode}
+          choiceOptions={choiceOptions}
           inEducationMode={(() => {
             const userData = userWordsData[currentWord?.id];
             return currentMode ? userData?.mode_education_revert : userData?.mode_education;

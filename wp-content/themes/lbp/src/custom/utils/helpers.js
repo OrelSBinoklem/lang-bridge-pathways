@@ -2,6 +2,30 @@
  * Полезные утилиты для кастомных категорий
  */
 
+const TRAINING_ANSWER_MODE_KEY = 'lbp_training_answer_mode';
+const TRAINING_ANSWER_MODE_MAX_AGE_DAYS = 7;
+
+/**
+ * Режим ввода ответа: 'select' — выбор из предложенных, 'type' — ввод вручную.
+ * @returns {'select'|'type'|null} null если нет в куках
+ */
+export const getTrainingAnswerMode = () => {
+  if (typeof document === 'undefined') return null;
+  const m = document.cookie.match(new RegExp('(^|;)\\s*' + TRAINING_ANSWER_MODE_KEY + '=([^;]+)'));
+  const v = m ? m[2].trim().toLowerCase() : null;
+  return (v === 'select' || v === 'type') ? v : null;
+};
+
+/**
+ * Сохранить режим в куки на 1 неделю.
+ * @param {'select'|'type'} mode
+ */
+export const setTrainingAnswerMode = (mode) => {
+  if (typeof document === 'undefined') return;
+  const maxAge = TRAINING_ANSWER_MODE_MAX_AGE_DAYS * 24 * 60 * 60;
+  document.cookie = `${TRAINING_ANSWER_MODE_KEY}=${mode}; path=/; max-age=${maxAge}; SameSite=Lax`;
+};
+
 /**
  * Нормализация строки для сравнения
  * @param {string} str - Строка для нормализации

@@ -44,7 +44,9 @@ const TrainingInterface = ({
   onNextWord,
   onFinishTraining,
   isUpdating = false,
-  inEducationMode = false
+  inEducationMode = false,
+  selectionMode = false,
+  choiceOptions = []
 }) => {
   // Автоматически проигрываем слово при смене слова
   useEffect(() => {
@@ -111,66 +113,85 @@ const TrainingInterface = ({
         )}
       </div>
 
-      <input
-        data-training-input
-        type="text"
-        value={userAnswer}
-        onChange={(e) => setUserAnswer(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && !showResult && onCheckAnswer()}
-        placeholder="Введите ваш ответ..."
-        autoFocus
-        className="training-input"
-        disabled={showResult}
-      />
+      {!showResult && (
+        <>
+          <input
+            data-training-input
+            type="text"
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && onCheckAnswer()}
+            placeholder="Введите ваш ответ..."
+            autoFocus
+            className="training-input"
+          />
 
-      {!showResult ? (
-        <button
-          onClick={onCheckAnswer}
-          disabled={!userAnswer.trim() || isUpdating}
-          className="training-button"
-        >
-          {isUpdating ? (
-            <>
-              <span className="training-button-spinner"></span>
-              Обновление...
-            </>
-          ) : (
-            'Проверить'
+          {selectionMode && choiceOptions.length > 0 && (
+            <div className="training-choice-options">
+              {choiceOptions.map((opt, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="training-choice-btn"
+                  disabled={isUpdating}
+                  onClick={() => {
+                    setUserAnswer(opt);
+                    onCheckAnswer(opt);
+                  }}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           )}
-        </button>
-      ) : (
+
+          <button
+            onClick={() => onCheckAnswer()}
+            disabled={!userAnswer.trim() || isUpdating}
+            className="training-button"
+          >
+            {isUpdating ? (
+              <>
+                <span className="training-button-spinner"></span>
+                Обновление...
+              </>
+            ) : (
+              'Проверить'
+            )}
+          </button>
+        </>
+      )}
+
+      {showResult && (
         <div>
           <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
             {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
           </div>
-          
-          
-            {!isCorrect && (
-              <div className="training-correct-answer">
-                <strong>Правильный ответ:</strong>
-                {currentMode ? (
-                  <div 
-                    className="correct-answer-with-audio"
-                    onClick={() => {
-                      const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-                      playAudio(currentWord.word, learnLang);
-                    }}
-                    title="Кликните для воспроизведения звука"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <span className="correct-answer-text">{currentWord.word}</span>
-                    <span className="training-audio-button-inline">🔊</span>
-                  </div>
-                ) : (
-                  <span className="correct-answer-text">
-                    {' '}{currentWord.translation_1}
-                    {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
-                    {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
-                  </span>
-                )}
-              </div>
-            )}
-
+          {!isCorrect && (
+            <div className="training-correct-answer">
+              <strong>Правильный ответ:</strong>
+              {currentMode ? (
+                <div
+                  className="correct-answer-with-audio"
+                  onClick={() => {
+                    const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+                    playAudio(currentWord.word, learnLang);
+                  }}
+                  title="Кликните для воспроизведения звука"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className="correct-answer-text">{currentWord.word}</span>
+                  <span className="training-audio-button-inline">🔊</span>
+                </div>
+              ) : (
+                <span className="correct-answer-text">
+                  {' '}{currentWord.translation_1}
+                  {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
+                  {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
+                </span>
+              )}
+            </div>
+          )}
           <div className="training-controls">
             <button
               data-next-word
@@ -181,7 +202,6 @@ const TrainingInterface = ({
             >
               Следующее слово
             </button>
-            
             <button
               onClick={onFinishTraining}
               onKeyPress={(e) => e.key === 'Enter' && onFinishTraining()}

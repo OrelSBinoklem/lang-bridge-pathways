@@ -356,6 +356,11 @@ body:has(#grammar-tables-gallery-root) {
     overflow: hidden;
 }
 
+#primary-menu .menu-item a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
 .site-navigation a::before {
     content: '';
     position: absolute;
@@ -2054,6 +2059,33 @@ h2 .small {
     border: 2px solid #ddd;
     border-radius: 8px;
     margin-bottom: 15px;
+}
+
+.training-choice-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.training-choice-btn {
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+}
+
+.training-choice-btn:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.training-choice-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .training-button {
@@ -3826,11 +3858,40 @@ h2 .small {
   padding: 15px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  margin: 10px 0;
+  margin-top: 0;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
+
+.training-mode-toggle-wrap {
+  flex-direction: row;
+  gap: 0;
+  padding: 4px 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 100%;
+}
+.training-mode-toggle-btn {
+  flex: 1;
+  width: 50%;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 0 -1px 0 0;
+}
+.training-mode-toggle-btn:first-child { border-radius: 4px 0 0 4px; }
+.training-mode-toggle-btn:last-child { border-radius: 0 4px 4px 0; margin-right: 0; }
+.training-mode-toggle-btn.is-active {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.training-mode-toggle-btn:hover { background: rgba(255,255,255,0.1); }
 
 /* Кнопка выбора языка в мобильном меню */
 .mobile-lang-btn {
@@ -3939,6 +4000,16 @@ h2 .small {
   gap: 8px;
 }
 
+.mobile-view-mode {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-view-mode label {
+  flex-shrink: 0;
+}
+
 .mobile-number-control label,
 .mobile-cols-controls label,
 .mobile-level-filters label,
@@ -4041,7 +4112,8 @@ h2 .small {
 
 /* Кнопка режима просмотра */
 .mobile-view-mode .btn {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 10px 15px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);

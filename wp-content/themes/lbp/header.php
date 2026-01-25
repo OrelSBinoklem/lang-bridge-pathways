@@ -262,46 +262,73 @@ document.addEventListener('DOMContentLoaded', function() {
         currentLangCode.textContent = currentLang;
     }
     
-    // Добавляем мобильную кнопку языка в меню (для всех страниц)
+    // Режим ответов в тренировке: type | select (куки lbp_training_answer_mode, 1 неделя)
+    const TRAINING_MODE_KEY = 'lbp_training_answer_mode';
+    const TRAINING_MODE_MAX_AGE = 7 * 24 * 60 * 60;
+    function getTrainingModeCookie() {
+        const m = document.cookie.match(new RegExp('(^|;)\\s*' + TRAINING_MODE_KEY + '=([^;]+)'));
+        const v = m ? m[2].trim().toLowerCase() : null;
+        return (v === 'select' || v === 'type') ? v : null;
+    }
+    function setTrainingModeCookie(mode) {
+        document.cookie = TRAINING_MODE_KEY + '=' + mode + '; path=/; max-age=' + TRAINING_MODE_MAX_AGE + '; SameSite=Lax';
+    }
+
+    // Добавляем переключатель режима тренировки и мобильную кнопку языка в меню
     function addMobileLangButton() {
-        console.log('Trying to add mobile lang button...');
-        
         const primaryMenu = document.getElementById('primary-menu');
-        console.log('Primary menu found:', primaryMenu);
-        
-        if (!primaryMenu) {
-            console.log('Primary menu not found!');
-            return;
+        if (!primaryMenu) return;
+        if (document.getElementById('default-mobile-lang-controls')) return;
+
+        // Переключатель режима (до кнопки языка)
+        const toggleItem = document.createElement('li');
+        toggleItem.className = 'menu-item-mobile-controls';
+        toggleItem.id = 'training-mode-toggle';
+        const toggleWrap = document.createElement('div');
+        toggleWrap.className = 'mobile-controls-wrapper training-mode-toggle-wrap';
+        const current = getTrainingModeCookie();
+        const isSelect = current === 'select' || (!current && window.innerWidth <= 768);
+        if (!current) setTrainingModeCookie(isSelect ? 'select' : 'type');
+        const btnType = document.createElement('button');
+        btnType.type = 'button';
+        btnType.className = 'training-mode-toggle-btn' + (isSelect ? '' : ' is-active');
+        btnType.textContent = 'Ввод слов';
+        btnType.title = 'Ввод вручную';
+        const btnSelect = document.createElement('button');
+        btnSelect.type = 'button';
+        btnSelect.className = 'training-mode-toggle-btn' + (isSelect ? ' is-active' : '');
+        btnSelect.textContent = 'Выбор слов';
+        btnSelect.title = 'Выбор из предложенных';
+        function setActive(select) {
+            btnType.classList.toggle('is-active', !select);
+            btnSelect.classList.toggle('is-active', select);
+            setTrainingModeCookie(select ? 'select' : 'type');
+            window.dispatchEvent(new CustomEvent('training-answer-mode-changed', { detail: { mode: select ? 'select' : 'type' } }));
         }
-        
-        if (document.getElementById('default-mobile-lang-controls')) {
-            console.log('Mobile lang button already exists');
-            return; // Уже добавлено
-        }
-        
-        // Создаем элемент меню с кнопкой языка
+        btnType.addEventListener('click', function(e) { e.stopPropagation(); setActive(false); });
+        btnSelect.addEventListener('click', function(e) { e.stopPropagation(); setActive(true); });
+        toggleWrap.appendChild(btnType);
+        toggleWrap.appendChild(btnSelect);
+        toggleItem.appendChild(toggleWrap);
+
+        // Кнопка языка
         const mobileLangItem = document.createElement('li');
         mobileLangItem.className = 'menu-item-mobile-controls';
         mobileLangItem.id = 'default-mobile-lang-controls';
-        
         const wrapper = document.createElement('div');
         wrapper.className = 'mobile-controls-wrapper';
-        
         const langButton = document.createElement('button');
         langButton.className = 'mobile-lang-btn';
         langButton.innerHTML = `🌐 <span class="current-lang-code-mobile">${currentLang}</span>`;
         langButton.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (langModal) {
-                langModal.classList.add('active');
-            }
+            if (langModal) langModal.classList.add('active');
         });
-        
         wrapper.appendChild(langButton);
         mobileLangItem.appendChild(wrapper);
+
         primaryMenu.appendChild(mobileLangItem);
-        
-        console.log('✅ Mobile lang button added to menu!');
+        primaryMenu.insertBefore(toggleItem, mobileLangItem);
     }
     
     // Пробуем добавить несколько раз с разными задержками
