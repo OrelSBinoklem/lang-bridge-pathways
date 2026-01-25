@@ -6,6 +6,7 @@ import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
+import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 
 // Тестовые данные для отладки (закомментируйте следующую строку в production)
@@ -73,196 +74,16 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     return a;
   };
 
-  /**
-   * Генерирует 6 вариантов ответа для режима выбора (1 правильный + 5 неправильных)
-   * 
-   * Алгоритм с модификацией гласных для латышского языка:
-   * 1. Собираем 3 неправильных слова: сначала из текущей категории (приоритет невыученным),
-   *    если не хватает - берём из всего словаря
-   * 2. Добавляем правильный ответ → получаем 4 слова (1 правильный + 3 неправильных)
-   * 3. Из этих 4 слов случайно выбираем 2 для модификации (может попасть правильный)
-   * 4. Модифицируем гласные в выбранных 2 словах: короткие ↔ длинные (a↔ā, e↔ē, i↔ī, u↔ū)
-   *    (модифицированный правильный становится неправильным вариантом)
-   * 5. Формируем список: правильный (оригинал) + неправильные (обычные + модифицированные)
-   * 6. Если в сумме нет 6 слов, ищем ещё слова во всём словаре и добавляем
-   * 
-   * @param {Object} word - Текущее слово для тренировки
-   * @param {boolean} mode - Режим: false = прямой перевод (лат→рус), true = обратный (рус→лат)
-   * @returns {Array<string>} Массив из 6 вариантов ответа (перемешанных)
-   */
+  // Генерация вариантов ответов вынесена в отдельный модуль
   const getChoiceOptions = (word, mode) => {
-    // Функция для получения правильного ответа в зависимости от режима
-    // mode = false (прямой): показываем слово, ждём перевод → берём translation_1
-    // mode = true (обратный): показываем перевод, ждём слово → берём word
-    const getAnswer = (w) => (mode ? w.word : (w.translation_1 || '')).trim();
-    
-    // Получаем правильный ответ для текущего слова
-    const correct = getAnswer(word);
-    if (!correct) return [correct]; // Если нет правильного ответа, возвращаем пустой массив
-
-    // Функция для фильтрации слов по категории
-    // Поддерживает как единичный category_id, так и массив category_ids
-    const catFilter = (w) => {
-      if (categoryId === 0) return true; // categoryId = 0 означает "все категории"
-      const cid = parseInt(categoryId);
-      // Проверяем единичный category_id
-      if (w.category_id !== undefined) return parseInt(w.category_id) === cid;
-      // Проверяем массив category_ids (если category_id нет)
-      if (Array.isArray(w.category_ids) && w.category_ids.length > 0) {
-        return w.category_ids.some(id => parseInt(id) === cid);
-      }
-      return false;
-    };
-    
-    // Фильтруем слова текущей категории
-    const categoryWords = dictionaryWords.filter(catFilter);
-    
-    // Множество уже использованных ответов (чтобы избежать дубликатов)
-    const used = new Set([correct]);
-    
-    // Массив для сбора слов по старому алгоритму (нужно минимум 4, желательно 5)
-    const baseWords = [];
-
-    /**
-     * Вспомогательная функция для добавления слов из списка (для базовой выборки)
-     * @param {Array} list - Список слов для выбора вариантов
-     * @param {boolean} preferUnlearned - Если true, приоритет отдаётся невыученным словам
-     * @param {number} maxCount - Максимальное количество слов для сбора
-     */
-    const addFrom = (list, preferUnlearned = false, maxCount = 5) => {
-      // Преобразуем список слов в объекты с информацией: само слово, его ответ, статус изучения
-      const withStatus = list
-        .filter(w => w.id !== word.id) // Исключаем текущее слово
-        .map(w => ({ 
-          w, // Само слово
-          a: getAnswer(w), // Ответ для этого слова (в зависимости от режима)
-          unlearned: !getWordDisplayStatus(w.id).fullyLearned // Статус: выучено ли слово
-        }))
-        .filter(x => x.a && !used.has(x.a)); // Оставляем только те, у которых есть ответ и он ещё не использован
-      
-      // Если нужно отдавать приоритет невыученным, сортируем: сначала невыученные
-      if (preferUnlearned) {
-        withStatus.sort((a, b) => (a.unlearned ? 0 : 1) - (b.unlearned ? 0 : 1));
-      }
-      
-      // Добавляем варианты в массив baseWords
-      for (const { a, w } of withStatus) {
-        if (baseWords.length >= maxCount) break; // Уже собрали достаточно слов, выходим
-        if (!used.has(a)) { 
-          used.add(a); // Помечаем как использованный
-          baseWords.push({ answer: a, word: w }); // Сохраняем и ответ, и само слово
-        }
-      }
-    };
-
-    // ШАГ 1: Собираем 3 неправильных слова
-    // 1.1: Сначала берём слова из текущей категории (приоритет невыученным)
-    addFrom(categoryWords, true, 3);
-    
-    // 1.2: Если не хватает, берём любые слова из всего словаря (без поиска похожих)
-    if (baseWords.length < 3) {
-      addFrom(dictionaryWords, false, 3);
-    }
-
-    // Если не удалось собрать минимум 3 неправильных слова, возвращаем то, что есть (старый алгоритм)
-    if (baseWords.length < 3) {
-      const wrong = baseWords.map(item => item.answer);
-      return shuffleArray([correct, ...wrong]);
-    }
-
-    /**
-     * Функция для модификации гласных в слове (короткие ↔ длинные)
-     * @param {string} text - Исходное слово
-     * @returns {string} Слово с изменённой гласной (или исходное, если не удалось изменить)
-     */
-    const modifyVowel = (text) => {
-      // Маппинг гласных: короткие ↔ длинные
-      const vowelMap = {
-        'a': 'ā', 'ā': 'a',
-        'e': 'ē', 'ē': 'e',
-        'i': 'ī', 'ī': 'i',
-        'u': 'ū', 'ū': 'u',
-        'A': 'Ā', 'Ā': 'A',
-        'E': 'Ē', 'Ē': 'E',
-        'I': 'Ī', 'Ī': 'I',
-        'U': 'Ū', 'Ū': 'U',
-      };
-      
-      // Находим все позиции гласных, которые можно изменить
-      const vowelPositions = [];
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        if (vowelMap[char]) {
-          vowelPositions.push(i);
-        }
-      }
-      
-      // Если нет гласных для изменения, возвращаем исходное слово
-      if (vowelPositions.length === 0) {
-        return text;
-      }
-      
-      // Случайно выбираем одну позицию для изменения
-      const randomIndex = Math.floor(Math.random() * vowelPositions.length);
-      const pos = vowelPositions[randomIndex];
-      const char = text[pos];
-      
-      // Заменяем гласную на противоположную (короткая ↔ длинная)
-      const modified = text.substring(0, pos) + vowelMap[char] + text.substring(pos + 1);
-      return modified;
-    };
-
-    // ШАГ 2: Формируем массив из 4 слов: 1 правильный + 3 неправильных
-    const allFour = [
-      { answer: correct, isCorrect: true }, // Правильный ответ
-      ...baseWords.map(item => ({ answer: item.answer, isCorrect: false })) // 3 неправильных
-    ];
-
-    // ШАГ 3: Из этих 4 слов случайно выбираем 2 для модификации (может попасть правильный, может нет)
-    const shuffledFour = shuffleArray([...allFour]);
-    const toModify = shuffledFour.slice(0, 2); // Берём первые 2 слова для модификации
-    const toKeep = shuffledFour.slice(2); // Остальные 2 слова оставляем без изменений
-
-    // ШАГ 4: Модифицируем гласные в выбранных 2 словах
-    const modified = toModify.map(item => ({
-      answer: modifyVowel(item.answer),
-      isCorrect: false // Модифицированный вариант всегда неправильный (даже если был правильным)
-    }));
-
-    // ШАГ 5: Формируем финальный список вариантов
-    // Правильный ответ всегда остаётся правильным (оригинал)
-    // Все остальные варианты (обычные неправильные + модифицированные) = неправильные
-    
-    // Определяем, попал ли правильный ответ в модификацию
-    const correctWasModified = toModify.some(item => item.isCorrect);
-    
-    // Формируем список неправильных вариантов
-    const wrong = [];
-    
-    // Добавляем обычные неправильные (которые не модифицировали и не являются правильным)
-    toKeep.forEach(item => {
-      if (!item.isCorrect) {
-        wrong.push(item.answer);
-      }
+    return generateChoiceOptions({
+      word,
+      mode,
+      categoryId,
+      dictionaryWords,
+      getWordDisplayStatus,
+      shuffleArray
     });
-    
-    // Добавляем модифицированные варианты (все они неправильные, даже если один был правильным)
-    modified.forEach(item => {
-      wrong.push(item.answer);
-    });
-    
-    // ШАГ 6: Если в сумме нет 6 слов (1 правильный + 5 неправильных), ищем ещё во всём словаре
-    if (wrong.length < 5) {
-      const needed = 5 - wrong.length;
-      // Ищем ещё слова во всём словаре (без приоритета похожих)
-      addFrom(dictionaryWords, false, baseWords.length + needed);
-      // Добавляем дополнительные слова (начиная с 4-го, так как первые 3 уже использованы)
-      const additional = baseWords.slice(3, 3 + needed).map(item => item.answer);
-      wrong.push(...additional);
-    }
-
-    // Возвращаем перемешанный массив: правильный ответ + 5 неправильных (итого 6 вариантов)
-    return shuffleArray([correct, ...wrong.slice(0, 5)]);
   };
 
   // Варианты выбора — только при смене слова или режима, иначе порядок «прыгает» при каждом ререндере
