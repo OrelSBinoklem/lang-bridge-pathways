@@ -41,6 +41,10 @@ const WordRow = ({
 
   const closeInfoPopover = () => setShowInfoPopover(false);
 
+  const showInfoHint = word.info && String(word.info).trim() &&
+    ((displayStatus.showWord && displayStatus.showTranslation) || (userData?.mode_education_revert === 1 && userData?.mode_education === 1)) &&
+    !displayStatus.cooldownDirect && !displayStatus.cooldownRevert;
+
   useEffect(() => {
     if (!showInfoPopover) return;
     const onDoc = (e) => {
@@ -51,8 +55,8 @@ const WordRow = ({
   }, [showInfoPopover]);
 
   const handleRowClick = (e) => {
-    if (!word.info || !String(word.info).trim()) return;
-    if (e.target && e.target.closest && e.target.closest('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover')) return;
+    if (!showInfoHint) return;
+    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover')) return;
     setShowInfoPopover((v) => !v);
   };
 
@@ -73,12 +77,12 @@ const WordRow = ({
   return (
     <li
       key={word.id}
-      className={word.info && String(word.info).trim() ? 'words-education-list__row--has-info' : ''}
+      className={showInfoHint ? 'words-education-list__row--has-info' : ''}
       onClick={handleRowClick}
-      role={word.info && String(word.info).trim() ? 'button' : undefined}
-      tabIndex={word.info && String(word.info).trim() ? 0 : undefined}
+      role={showInfoHint ? 'button' : undefined}
+      tabIndex={showInfoHint ? 0 : undefined}
       onKeyDown={(e) => {
-        if (word.info && String(word.info).trim() && (e.key === 'Enter' || e.key === ' ')) {
+        if (showInfoHint && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           handleRowClick(e);
         }
@@ -134,7 +138,7 @@ const WordRow = ({
       {/* Перевод 2 */}
       {word.translation_2 && !displayStatus.cooldownDirect && (
         <span className="words-education-list__translation_2">
-          , {displayStatus.showTranslation ? (
+          , {displayStatus.showTranslation || (userData && userData.mode_education === 1) ? (
             word.translation_2
           ) : (
             <span className="words-hidden-text">
@@ -149,7 +153,7 @@ const WordRow = ({
       {/* Перевод 3 */}
       {word.translation_3 && !displayStatus.cooldownDirect && (
         <span className="words-education-list__translation_3">
-          , {displayStatus.showTranslation ? (
+          , {displayStatus.showTranslation || (userData && userData.mode_education === 1) ? (
             word.translation_3
           ) : (
             <span className="words-hidden-text">
@@ -195,13 +199,8 @@ const WordRow = ({
         </>
       )}
 
-      {/* Значок подсказки (?) справа — только если есть info и видны и слово, и перевод */}
-      {word.info && String(word.info).trim() &&
-       displayStatus.showWord && displayStatus.showTranslation &&
-       !displayStatus.cooldownDirect && !displayStatus.cooldownRevert && (
-        <span className="words-education-list__info-hint" title="Подсказка">
-          ?
-        </span>
+      {showInfoHint && (
+        <span className="words-education-list__info-hint" title="Подсказка">?</span>
       )}
 
       {showInfoPopover && word.info && String(word.info).trim() && createPortal(
