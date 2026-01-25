@@ -1875,10 +1875,31 @@ h2 .small {
     border: 2px solid #495057;
 }
 
+.mode-button.admin-mode-toggle {
+    color: #333 !important;
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.mode-button.admin-mode-toggle.active {
+    animation: none !important;
+}
+
 .site-header.__bright .mode-button.admin:hover {
     background: linear-gradient(135deg, #23272b, #1d2124);
     box-shadow: 0 8px 25px rgba(33, 37, 41, 0.5);
     border-color: #343a40;
+    color: white;
+}
+
+.mode-button.admin-mode-toggle:hover {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+    border-color: #007bff;
+    transition: none !important;
+    opacity: 1 !important;
 }
 
 /* Адаптивные стили для тёмной темы (ночью) */
