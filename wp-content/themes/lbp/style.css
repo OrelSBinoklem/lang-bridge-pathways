@@ -844,12 +844,14 @@ body:has(#grammar-tables-gallery-root) {
     margin: 0.25em 0;
 }
 
-.word-info-popover__content strong {
-    font-weight: 700;
+.word-info-popover__content strong,
+.word-info-popover__content b {
+    font-weight: 700 !important;
 }
 
-.word-info-popover__content em {
-    font-style: italic;
+.word-info-popover__content em,
+.word-info-popover__content i {
+    font-style: italic !important;
 }
 
 .word-info-popover__content p {
@@ -862,6 +864,24 @@ body:has(#grammar-tables-gallery-root) {
 
 .word-info-popover__content p:last-child {
     margin-bottom: 0;
+}
+
+.word-info-popover__content h1,
+.word-info-popover__content h2,
+.word-info-popover__content h3 {
+    font-weight: 700;
+    margin: 0.75em 0 0.35em 0;
+    line-height: 1.25;
+}
+
+.word-info-popover__content h1 { font-size: 1.4em; }
+.word-info-popover__content h2 { font-size: 1.2em; }
+.word-info-popover__content h3 { font-size: 1.1em; }
+
+.word-info-popover__content h1:first-child,
+.word-info-popover__content h2:first-child,
+.word-info-popover__content h3:first-child {
+    margin-top: 0;
 }
 
 .word-info-popover__content a {
@@ -2601,6 +2621,176 @@ h2 .small {
     color: #dc3545;
     font-weight: 600;
     margin-top: 10px;
+}
+
+.word-editor .field-row--info {
+    align-items: flex-start;
+}
+
+.word-editor .field-row--info label {
+    padding-top: 6px;
+}
+
+.word-editor .info-editor-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.word-editor .info-editor-actions {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.word-editor .info-mode-btn {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    background: #e9ecef !important;
+    color: #495057 !important;
+    border: 1px solid #ced4da !important;
+}
+
+.word-editor .info-mode-btn:hover {
+    background: #dee2e6 !important;
+}
+
+.word-editor .info-mode-btn.is-active {
+    background: #007cba !important;
+    color: white !important;
+    border-color: #007cba !important;
+}
+
+.word-editor .info-quill {
+    background: #fff;
+}
+
+.word-editor .info-quill .ql-container {
+    min-height: 120px;
+}
+
+.word-editor .info-preview {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f9fa;
+    font-size: 14px;
+    color: #555;
+    min-height: 5em;
+}
+
+.word-editor .info-preview-empty {
+    color: #999;
+}
+
+.word-editor .info-preview-editing {
+    color: #666;
+    font-style: italic;
+}
+
+/* Модальное окно визуального редактора */
+.info-wysiwyg-modal-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100001;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.info-wysiwyg-modal {
+    width: 100%;
+    max-width: 900px;
+    height: 85vh;
+    max-height: 700px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.info-wysiwyg-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.info-wysiwyg-modal-header span {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+}
+
+.info-wysiwyg-modal-close {
+    padding: 8px 20px;
+    background: #007cba;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.info-wysiwyg-modal-close:hover {
+    background: #005a87;
+}
+
+.info-wysiwyg-modal-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.info-quill--modal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.info-quill--modal .ql-toolbar.ql-snow {
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.info-quill--modal .ql-container.ql-snow {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 0 0 6px 6px;
+    background: #fff;
+    font-size: 15px;
+}
+
+.info-quill--modal .ql-editor {
+    min-height: 180px;
+}
+
+.info-quill--modal .ql-editor strong,
+.info-quill--modal .ql-editor b {
+    font-weight: 700 !important;
+}
+
+.info-quill--modal .ql-editor em,
+.info-quill--modal .ql-editor i {
+    font-style: italic !important;
 }
 
 /* Стили для кастомной категории SimpleExampleCategory */

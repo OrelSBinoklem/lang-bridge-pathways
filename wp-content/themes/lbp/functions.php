@@ -116,6 +116,13 @@ function my_theme_enqueue_styles() {
         time() //wp_get_theme()->get('Version')
     );
 
+    wp_enqueue_style(
+        'quill-snow',
+        'https://cdn.quilljs.com/1.3.7/quill.snow.css',
+        [],
+        '1.3.7'
+    );
+
     wp_enqueue_script(
         'my-theme-frontend',
         get_stylesheet_directory_uri() . '/build/index.js',

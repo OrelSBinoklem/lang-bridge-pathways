@@ -41,22 +41,28 @@ const WordRow = ({
 
   const closeInfoPopover = () => setShowInfoPopover(false);
 
-  const showInfoHint = word.info && String(word.info).trim() &&
+  const isEditingThisRow = editingWordId === word.id;
+  const showInfoHint = !isEditingThisRow && word.info && String(word.info).trim() &&
     ((displayStatus.showWord && displayStatus.showTranslation) || (userData?.mode_education_revert === 1 && userData?.mode_education === 1)) &&
     !displayStatus.cooldownDirect && !displayStatus.cooldownRevert;
 
   useEffect(() => {
+    if (isEditingThisRow) {
+      closeInfoPopover();
+      return;
+    }
     if (!showInfoPopover) return;
     const onDoc = (e) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target)) closeInfoPopover();
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [showInfoPopover]);
+  }, [showInfoPopover, isEditingThisRow]);
 
   const handleRowClick = (e) => {
     if (!showInfoHint) return;
-    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover')) return;
+    if (editingWordId === word.id) return;
+    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal')) return;
     setShowInfoPopover((v) => !v);
   };
 
@@ -203,7 +209,7 @@ const WordRow = ({
         <span className="words-education-list__info-hint" title="Подсказка">?</span>
       )}
 
-      {showInfoPopover && word.info && String(word.info).trim() && createPortal(
+      {showInfoPopover && !isEditingThisRow && word.info && String(word.info).trim() && createPortal(
         <div className="word-info-popover-backdrop" aria-hidden="true">
           <div
             ref={popoverRef}

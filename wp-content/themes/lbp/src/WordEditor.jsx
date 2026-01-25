@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
+import ReactQuill from 'react-quill';
+
+const INFO_MODULES = {
+  toolbar: [
+    ['bold', 'italic', 'underline'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ header: [1, 2, 3, false] }],
+    ['clean'],
+  ],
+};
 
 const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) => {
   const [formData, setFormData] = useState({ ...word });
   const [status, setStatus] = useState(null);
+  const [infoWysiwyg, setInfoWysiwyg] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,16 +96,73 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
         <input name="difficult_translation" value={formData.difficult_translation || ''} onChange={handleChange} />
       </div>
 
-      <div className="field-row">
+      <div className="field-row field-row--info">
         <label>Подсказка:</label>
-        <textarea
-          name="info"
-          value={formData.info || ''}
-          onChange={handleChange}
-          rows={5}
-          style={{ resize: 'vertical', minHeight: '5em' }}
-        />
+        <div className="info-editor-wrap">
+          <div className="info-editor-actions">
+            <button
+              type="button"
+              className={`info-mode-btn ${!infoWysiwyg ? 'is-active' : ''}`}
+              onClick={() => { setInfoWysiwyg(false); setShowInfoModal(false); }}
+            >
+              HTML
+            </button>
+            <button
+              type="button"
+              className={`info-mode-btn ${infoWysiwyg ? 'is-active' : ''}`}
+              onClick={() => { setInfoWysiwyg(true); setShowInfoModal(true); }}
+              title="Списки, заголовки, выделение"
+            >
+              Визуальный
+            </button>
+          </div>
+          {infoWysiwyg ? (
+            <div className="info-preview">
+              {showInfoModal ? (
+                <span className="info-preview-editing">Редактируется в окне…</span>
+              ) : formData.info ? (
+                (() => {
+                  const plain = String(formData.info).replace(/<[^>]+>/g, ' ').trim();
+                  return <span>{plain.slice(0, 80)}{plain.length > 80 ? '…' : ''}</span>;
+                })()
+              ) : (
+                <span className="info-preview-empty">Нет текста</span>
+              )}
+            </div>
+          ) : (
+            <textarea
+              name="info"
+              value={formData.info || ''}
+              onChange={handleChange}
+              rows={5}
+              style={{ resize: 'vertical', minHeight: '5em' }}
+            />
+          )}
+        </div>
       </div>
+
+      {showInfoModal && createPortal(
+        <div className="info-wysiwyg-modal-overlay">
+          <div className="info-wysiwyg-modal">
+            <div className="info-wysiwyg-modal-header">
+              <span>Подсказка — визуальный редактор</span>
+              <button type="button" className="info-wysiwyg-modal-close" onClick={() => setShowInfoModal(false)}>
+                Готово
+              </button>
+            </div>
+            <div className="info-wysiwyg-modal-body">
+              <ReactQuill
+                theme="snow"
+                value={formData.info || ''}
+                onChange={(v) => setFormData((p) => ({ ...p, info: v }))}
+                modules={INFO_MODULES}
+                className="info-quill info-quill--modal"
+              />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       <div className="field-row">
         <label>Ссылка на звук:</label>
