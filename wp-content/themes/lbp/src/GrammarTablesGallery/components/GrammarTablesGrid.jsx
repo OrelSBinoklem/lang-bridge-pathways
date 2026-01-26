@@ -16,6 +16,25 @@ const GrammarTablesGrid = ({
     tablesData = defaultTablesData
 }) => {
     const [filteredGroups, setFilteredGroups] = useState({ group1: [], group2: [], group3: [], super: [] });
+    const [useMobileImages, setUseMobileImages] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const m = document.cookie.match(/(^|;)\s*lbp_mobile_font_large=([^;]+)/);
+        const v = m ? m[2].trim().toLowerCase() : null;
+        if (v === null) {
+            // По умолчанию: true если экран <= 768px
+            return window.innerWidth <= 768;
+        }
+        return v === 'true';
+    });
+
+    // Слушаем изменения состояния кнопки увеличенного шрифта
+    useEffect(() => {
+        const handleMobileFontChange = (e) => {
+            setUseMobileImages(e.detail?.enabled ?? false);
+        };
+        window.addEventListener('mobile-font-changed', handleMobileFontChange);
+        return () => window.removeEventListener('mobile-font-changed', handleMobileFontChange);
+    }, []);
 
     // Ранк уровней как в оригинале
     const LEVEL_RANK = { a1: 0, a2: 1, b1: 2, b2: 3 };
@@ -375,6 +394,23 @@ const GrammarTablesGrid = ({
                         const isInactive = image.isSuperEntry && image.hasOwnProperty('isActive') && !image.isActive && showHidden;
                         const className = `table-img ${image.isSuperEntry && image.isActive ? '__super-active' : ''} ${isInactive ? '__super-inactive' : ''}`;
                         
+                        // Определяем путь к изображению: если useMobileImages и не super-таблица, используем папку mobile
+                        let imageSrc = image.src;
+                        let imageWidth = image.width;
+                        let imageHeight = image.height;
+                        
+                        if (!useMobileImages && !image.isSuperEntry && image.src) {
+                            // Заменяем путь: добавляем /mobile/ перед именем файла
+                            const pathParts = image.src.split('/');
+                            const fileName = pathParts.pop();
+                            const basePath = pathParts.join('/');
+                            imageSrc = `${basePath}/mobile/${fileName}`;
+                            
+                            // Используем мобильные размеры если они есть
+                            if (image.widthMob !== undefined) imageWidth = image.widthMob;
+                            if (image.heightMob !== undefined) imageHeight = image.heightMob;
+                        }
+                        
                         return (
                         <div 
                             key={image.id} 
@@ -391,15 +427,18 @@ const GrammarTablesGrid = ({
                                     : `/wp-content/themes/lbp/assets/hints/${hintId}.html`;
                                 onImageClick({
                                     ...image,
+                                    src: imageSrc,
+                                    width: imageWidth,
+                                    height: imageHeight,
                                     hintPath
                                 });
                             }}
                         >
                             <img 
-                                src={image.src} 
+                                src={imageSrc} 
                                 alt={image.alt || image.title || `Таблица ${image.id}`}
-                                width={image.width}
-                                height={image.height}
+                                width={imageWidth}
+                                height={imageHeight}
                                 loading="lazy" 
                                 decoding="async" 
                             />

@@ -274,6 +274,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.cookie = TRAINING_MODE_KEY + '=' + mode + '; path=/; max-age=' + TRAINING_MODE_MAX_AGE + '; SameSite=Lax';
     }
 
+    // Увеличенный шрифт для таблиц (куки lbp_mobile_font_large, 1 неделя)
+    const MOBILE_FONT_KEY = 'lbp_mobile_font_large';
+    const MOBILE_FONT_MAX_AGE = 7 * 24 * 60 * 60;
+    function getMobileFontCookie() {
+        const m = document.cookie.match(new RegExp('(^|;)\\s*' + MOBILE_FONT_KEY + '=([^;]+)'));
+        const v = m ? m[2].trim().toLowerCase() : null;
+        return v === 'true';
+    }
+    function setMobileFontCookie(enabled) {
+        document.cookie = MOBILE_FONT_KEY + '=' + (enabled ? 'true' : 'false') + '; path=/; max-age=' + MOBILE_FONT_MAX_AGE + '; SameSite=Lax';
+    }
+
     // Добавляем переключатель режима тренировки и мобильную кнопку языка в меню
     function addMobileLangButton() {
         const primaryMenu = document.getElementById('primary-menu');
@@ -311,6 +323,33 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleWrap.appendChild(btnSelect);
         toggleItem.appendChild(toggleWrap);
 
+        // Кнопка увеличенного шрифта
+        const fontItem = document.createElement('li');
+        fontItem.className = 'menu-item-mobile-controls';
+        fontItem.id = 'mobile-font-toggle';
+        const fontWrap = document.createElement('div');
+        fontWrap.className = 'mobile-controls-wrapper';
+        const fontButton = document.createElement('button');
+        fontButton.type = 'button';
+        fontButton.className = 'mobile-font-toggle-btn';
+        const isMobileFontEnabled = getMobileFontCookie() || (!document.cookie.match(new RegExp('(^|;)\\s*' + MOBILE_FONT_KEY + '=')) && window.innerWidth <= 768);
+        if (!document.cookie.match(new RegExp('(^|;)\\s*' + MOBILE_FONT_KEY + '='))) {
+            setMobileFontCookie(isMobileFontEnabled);
+        }
+        fontButton.classList.toggle('is-active', isMobileFontEnabled);
+        fontButton.innerHTML = '<span class="font-checkbox">' + (isMobileFontEnabled ? '✓' : '') + '</span> <span class="font-label">Увеличенный шрифт</span>';
+        fontButton.title = 'Увеличенный шрифт';
+        fontButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const newState = !fontButton.classList.contains('is-active');
+            fontButton.classList.toggle('is-active', newState);
+            fontButton.querySelector('.font-checkbox').textContent = newState ? '✓' : '';
+            setMobileFontCookie(newState);
+            window.dispatchEvent(new CustomEvent('mobile-font-changed', { detail: { enabled: newState } }));
+        });
+        fontWrap.appendChild(fontButton);
+        fontItem.appendChild(fontWrap);
+
         // Кнопка языка
         const mobileLangItem = document.createElement('li');
         mobileLangItem.className = 'menu-item-mobile-controls';
@@ -329,6 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         primaryMenu.appendChild(mobileLangItem);
         primaryMenu.insertBefore(toggleItem, mobileLangItem);
+        primaryMenu.insertBefore(fontItem, mobileLangItem);
     }
     
     // Пробуем добавить несколько раз с разными задержками
