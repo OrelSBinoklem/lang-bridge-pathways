@@ -592,11 +592,17 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
         
         // Возвращаем фокус: поле ввода или первая кнопка выбора (режим «выбор»)
         setTimeout(() => {
-          const inputField = document.querySelector('[data-training-input]');
-          if (inputField) inputField.focus();
-          else {
+          if (selectionMode) {
+            // В режиме выбора фокусируемся на первой кнопке, а не на поле ввода
             const firstChoice = document.querySelector('.training-choice-btn');
             if (firstChoice) firstChoice.focus();
+          } else {
+            const inputField = document.querySelector('[data-training-input]');
+            if (inputField) inputField.focus();
+            else {
+              const firstChoice = document.querySelector('.training-choice-btn');
+              if (firstChoice) firstChoice.focus();
+            }
           }
         }, 100);
         return;
@@ -604,11 +610,17 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
     }
 
     setTimeout(() => {
-      const inputField = document.querySelector('[data-training-input]');
-      if (inputField) inputField.focus();
-      else {
+      if (selectionMode) {
+        // В режиме выбора фокусируемся на первой кнопке, а не на поле ввода
         const firstChoice = document.querySelector('.training-choice-btn');
         if (firstChoice) firstChoice.focus();
+      } else {
+        const inputField = document.querySelector('[data-training-input]');
+        if (inputField) inputField.focus();
+        else {
+          const firstChoice = document.querySelector('.training-choice-btn');
+          if (firstChoice) firstChoice.focus();
+        }
       }
     }, 100);
   };

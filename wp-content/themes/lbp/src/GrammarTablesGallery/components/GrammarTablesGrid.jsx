@@ -378,6 +378,7 @@ const GrammarTablesGrid = ({
                         return (
                         <div 
                             key={image.id} 
+                            id={`table-${image.id}`}
                             className={className.trim()}
                             data-id={image.id}
                             data-level={image.level}

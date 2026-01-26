@@ -122,7 +122,7 @@ const TrainingInterface = ({
             onChange={(e) => setUserAnswer(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && onCheckAnswer()}
             placeholder="Введите ваш ответ..."
-            autoFocus
+            autoFocus={!selectionMode}
             className="training-input"
           />
 

@@ -166,9 +166,9 @@ body:has(#grammar-tables-gallery-root) .site-footer {
     display: none;
 }
 
-/* На странице галереи грамматических таблиц скрываем общий скролл страницы */
-html:has(#grammar-tables-gallery-root),
-body:has(#grammar-tables-gallery-root) {
+/* Скрываем общий скролл только в горизонтальном режиме галереи; в вертикальном — скролл страницы */
+html:has(.galleries.horizontal-mode),
+body:has(.galleries.horizontal-mode) {
     overflow-y: hidden;
 }
 

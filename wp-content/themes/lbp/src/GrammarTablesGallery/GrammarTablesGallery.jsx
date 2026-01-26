@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import GrammarTablesHeaderPortal from './components/GrammarTablesHeaderPortal';
 import GrammarTablesMobileMenu from './components/GrammarTablesMobileMenu';
 import GrammarTablesGrid from './components/GrammarTablesGrid';
+import MobileTablesToc from './components/MobileTablesToc';
 import GrammarTablesModal from './components/GrammarTablesModal';
 import VerbModal from '../shared/components/VerbModal';
 import { managerTables as defaultSuperTables, superGroups as defaultSuperGroups, getManagerTables, getSuperGroups, tablesData as defaultTablesData, tablesData_admin } from './data/tablesData';
@@ -1262,6 +1263,10 @@ const GrammarTablesGallery = () => {
             />
             
             <div className={`grammar-tables-gallery __view-${viewMode}`}>
+                <MobileTablesToc
+                    viewMode={viewMode}
+                    tablesData={currentTablesData}
+                />
                 <GrammarTablesGrid
                     cols={cols}
                     selectedLevel={selectedLevel}

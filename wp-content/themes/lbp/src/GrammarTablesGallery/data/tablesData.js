@@ -5,11 +5,11 @@ const tablesData = {
     group1: [
         { id: 0, src: '/wp-content/themes/lbp/assets/images/tables/a1/alphabet-table-2.png', level: 'a1', alt: 'alphabet-table', width: 1536, height: 1438 },
         { id: 1, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0001.png', level: 'a1', alt: 'IMG_20250810_0001', width: 1942, height: 948 },
+        { id: 90, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-1.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
+        { id: 91, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-2.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
         { id: 7, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_3.png', level: 'a1', alt: 'IMG_20250810_0002_3', width: 1536, height: 414 },
         //{ id: 8, src: '/wp-content/themes/lbp/assets/images/tables/a2/IMG_20250810_0010_2.jpg', level: 'a2', alt: 'IMG_20250810_0010_2', width: 1935, height: 603 },
         { id: 9, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0010_3.png', level: 'a1', alt: 'IMG_20250810_0010_3', width: 1536, height: 560 },
-        { id: 90, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-1.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
-        { id: 91, src: '/wp-content/themes/lbp/assets/images/tables/a1/verb-2.png', level: 'a1', alt: 'verb-1', width: 2013, height: 563 },
         { id: 10, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0029_2.png', level: 'b1', alt: 'IMG_20250810_0029_2', width: 1536, height: 514 },
         //{ id: 11, src: '/wp-content/themes/lbp/assets/images/tables/b1/IMG_20250810_0030_2.jpg', level: 'b1', alt: 'IMG_20250810_0030_2', width: 1929, height: 672 },
         //todo не нужно (скл. прилаг.){ id: 12, src: '/wp-content/themes/lbp/assets/images/tables/a1/IMG_20250810_0002_4.jpg', level: 'a1', alt: 'IMG_20250810_0002_4', width: 2045, height: 908 },
@@ -267,6 +267,89 @@ const normalizedBaseTables = getTablesData().group1
     }));
 
 export const managerTables = [...normalizedBaseTables];
+
+// Коллекция названий таблиц для супер-меню (якоря). Приоритет: title > alt. Редактируй по необходимости.
+const buildTableTitles = (data) => {
+    const out = {};
+    [].concat(data.group1, data.group2, data.group3).forEach((t) => {
+        const id = String(t.id);
+        out[id] = (t.title || t.alt || `Таблица ${id}`).trim();
+    });
+    return out;
+};
+export const tableTitles = buildTableTitles(tablesData);
+
+/**
+ * Свои названия для пунктов супер-меню (мобильное меню таблиц).
+ * Ключ — id таблицы (как в group1/2/3), значение — текст в меню.
+ * Взяты из подсказок (hints): id/hintId → {id}.html <title>. Приоритет выше tableTitles. Редактируй по необходимости.
+ */
+export const tableMenuLabels = {
+    '0': 'Алфавит',
+    '1': 'Склонения',
+    '7': 'Звательный падеж',
+    '9': 'Чередование согласных',
+    '10': 'Исключения 2-го скл.',
+    '13': 'Склонение Определенных прилагательных',
+    '14': 'Степени сравнения прилагательных',
+    '16': 'Предлоги',
+    '29': 'es, tu, viņš, viņa, mēs, jūs, viņi, viņas',
+    '30': 'mans, mana, mani, manas',
+    '31': 'Tavs, tava, tavi, tavas',
+    '32': 'Savs, sava, savi, savas',
+    '33': 'Mūsu, jūsu, viņa, viņas, viņu',
+    '34': 'Kāds, kāda, kādi, kādas',
+    '35': 'Kurš, kura, kuri, kuras',
+    '36': 'Tas, tā, tie, tās',
+    '37': 'Šis, šī, šie, šīs',
+    '38': 'Pats, pati',
+    '41': 'Комплексная таблица причастий',
+    '45': 'Деепричастия',
+    '47': 'Времена и залоги',
+    '51': 'Наклонения',
+    '54': 'Косвенная речь (простые времена)',
+    '55': 'Косвенная речь (сложные времена)',
+    '56': 'Структура слова',
+    '57': 'Глаголы, образованные с помощью приставок',
+    '58': 'Составные слова',
+    '59': 'Части речи',
+    '60': 'Части речи (Продолжение)',
+    '61': 'Единственное и множественное число',
+    '62': 'Основные условия использования неопределенных и определенных окончаний',
+    '65': 'Десятичные дроби',
+    '66': 'Местоимения',
+    '67': 'Sevis',
+    '68': 'Использование tu и jūs',
+    '70': 'Времена глагола',
+    '71': 'Залоги глагола',
+    '73': 'Предложение и классификация предложений',
+    '74': 'Использование союзов',
+    '75': 'Прямая речь',
+    '76': 'Косвенная речь',
+    '77': 'Обращение и группа обращения',
+    '78': 'Формы обращения',
+    '79': 'Вводные слова и выражения',
+    '80': 'Пунктуация с вводными словами',
+    '81': 'Обособленные члены предложения',
+    '82': 'Обособленные обстоятельства',
+    '83': 'Причастный оборот',
+    '84': 'Однородные члены предложения',
+    '85': 'Однородные члены и обобщающее слово',
+    '86': 'Придаточные предложения',
+    '87': 'Придаточные предложения (расширенная таблица)',
+    '88': 'Вводные слова придаточных',
+    '89': 'Написание заглавных букв в названиях',
+    '90': 'Спряжения настоящее',
+    '91': 'Спряжения прошлое и будущее',
+    'diminutivi': 'Уменьшительно-ласкательные',
+    'irregular-verb-1': 'Неправильные глаголы (A1)',
+    'irregular-verb-6': 'Неправильные глаголы (A2), ч. 1',
+    'irregular-verb-11': 'Неправильные глаголы (A2), ч. 2',
+    'irregular-verb-15': 'Неправильные глаголы (B1), ч. 1',
+    'irregular-verb-16': 'Неправильные глаголы (B1), ч. 2',
+    'super-5': 'Вопросы',
+    'super-6': 'Числа',
+};
 
 // Экспортируем данные для переключения режима
 export { tablesData, tablesData_admin };
