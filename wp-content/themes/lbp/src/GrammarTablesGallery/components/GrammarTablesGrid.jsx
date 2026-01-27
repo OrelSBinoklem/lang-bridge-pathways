@@ -399,8 +399,8 @@ const GrammarTablesGrid = ({
                         let imageWidth = image.width;
                         let imageHeight = image.height;
                         
-                        if (!useMobileImages && !image.isSuperEntry && image.src) {
-                            // Заменяем путь: добавляем /mobile/ перед именем файла
+                        if (useMobileImages && !image.isSuperEntry && image.src) {
+                            // Заменяем путь: добавляем /mobile/ перед именем файла (когда включён «Увеличенный шрифт»)
                             const pathParts = image.src.split('/');
                             const fileName = pathParts.pop();
                             const basePath = pathParts.join('/');
