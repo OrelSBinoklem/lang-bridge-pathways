@@ -1773,6 +1773,36 @@ h2 .small {
     transform: scale(0.98);
 }
 
+/* Группы (корневая категория + подкатегории) в модальном окне порядка слов */
+.words-list-by-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.word-reorder-group {
+    border: 2px dashed #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem;
+    background: #fafafa;
+    min-height: 60px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.word-reorder-group.drop-target {
+    border-color: #2196f3;
+    background: #e3f2fd;
+}
+.word-reorder-group-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #333;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+.word-reorder-group .words-list {
+    margin: 0;
+}
+
 .word-order {
     font-weight: bold;
     color: #666;
@@ -2191,6 +2221,30 @@ h2 .small {
     border-radius: 6px;
     cursor: pointer;
 }
+
+/* Блоки категорий и подкатегорий на странице тренировки */
+.examen-category-block { margin-bottom: 1.5rem; }
+.examen-category-block-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.examen-category-block-title span {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%);
+  border-left: 4px solid #28a745;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.examen-category-block-title .training-start-button { flex-shrink: 0; }
 
 /* Стили для кнопок тренировки */
 .training-start-button {

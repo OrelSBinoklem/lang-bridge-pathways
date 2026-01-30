@@ -119,6 +119,7 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 		<div className="training-words-examen-wrapper">
 			<Examen 
 				dictionary={dictionary} 
+				categories={categories}
 				categoryId={categoryId}
 				dictionaryId={dictionaryId}
 				userWordsData={userWordsData}

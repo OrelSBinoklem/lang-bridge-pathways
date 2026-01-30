@@ -15,7 +15,39 @@ const ENABLE_TEST_DATA = true; // Установите false, чтобы отк�
 
 const { useEffect, useState, useMemo } = wp.element;
 
-const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
+// Найти прямых потомков категории (3-й уровень) в дереве категорий
+const getDirectChildCategories = (tree, parentId) => {
+  if (!tree || !Array.isArray(tree)) return [];
+  const pid = parseInt(parentId, 10);
+  for (const node of tree) {
+    if (parseInt(node.id, 10) === pid) return Array.isArray(node.children) ? node.children : [];
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      const sub = getDirectChildCategories(node.children, parentId);
+      if (sub.length > 0) return sub;
+    }
+  }
+  return [];
+};
+
+// Принадлежность слова категории. Бэкенд отдаёт category_ids (массив); category_id может быть не задан.
+const wordBelongsToCategoryId = (word, catIdNum) => {
+  const cid = parseInt(catIdNum, 10);
+  if (Number.isNaN(cid)) return false;
+  if (word.category_id != null && word.category_id !== '') {
+    if (parseInt(word.category_id, 10) === cid) return true;
+  }
+  if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
+    return word.category_ids.some(id => parseInt(id, 10) === cid);
+  }
+  return false;
+};
+
+// Слово входит хотя бы в одну из категорий (для категории 2 уровня + все подкатегории 3 уровня)
+const wordBelongsToAnyOfCategories = (word, categoryIds) => {
+  return categoryIds.some(id => wordBelongsToCategoryId(word, parseInt(id, 10)));
+};
+
+const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const { isAdminModeActive } = useAdminMode();
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
@@ -34,6 +66,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
   const [trainingQueue, setTrainingQueue] = useState([]); // Очередь пар слов для тренировки
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0); // Текущая позиция в очереди
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
+  const [trainingScopeIds, setTrainingScopeIds] = useState(null); // Область тренировки: null = вся категория, иначе [id подкатегории]
   const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
@@ -93,6 +126,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
     return getChoiceOptions(currentWord, currentMode);
   }, [currentWord?.id, currentMode, selectionMode, dictionary?.learn_lang]);
 
+  // Подкатегории 3 уровня для текущей категории 2 уровня; ID категорий для «вся категория» (2 + все 3)
+  const subcategories = useMemo(() => getDirectChildCategories(categories, categoryId), [categories, categoryId]);
+  const allCategoryIds = useMemo(() => {
+    const id = parseInt(categoryId, 10);
+    if (!categoryId || categoryId === 0) return [];
+    return [id, ...subcategories.map(c => parseInt(c.id, 10))];
+  }, [categoryId, subcategories]);
+
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
     // ID для настройки кастомных компонентов
@@ -150,36 +191,55 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
     return userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2;
   };
 
-  // Получить слова для тренировки (те, которые еще не изучены полностью и откат закончен)
-  const getTrainingWords = () => {
-    const categoryWords = dictionaryWords.filter(word => {
-      if (categoryId === 0) return true;
-      const categoryIdNum = parseInt(categoryId);
-      
-      // Поддержка как массива category_ids, так и единичного category_id
-      // Сначала проверяем единичный category_id
-      if (word.category_id !== undefined) {
-        return parseInt(word.category_id) === categoryIdNum;
-      }
-      // Потом проверяем массив category_ids (только если category_id нет)
-      if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
-        return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-      }
-      return false;
-    });
+  // Получить слова для тренировки. scopeCategoryIds = [categoryId, ...subs] или [subId].
+  // Для главной кнопки: сначала слова из корня категории 2 уровня, затем из подкатегорий. Для подкатегории — только её слова.
+  const getTrainingWords = (scopeCategoryIds = null) => {
+    const ids = scopeCategoryIds != null ? scopeCategoryIds : allCategoryIds;
+    const seen = new Set();
+    const list = [];
+    const catIdNum = parseInt(categoryId, 10);
+    const isSubcategoryOnly = ids.length === 1 && parseInt(ids[0], 10) !== catIdNum;
 
+    if (ids.length === 0) {
+      if (categoryId === 0) list.push(...dictionaryWords);
+    } else if (isSubcategoryOnly) {
+      const subNum = parseInt(ids[0], 10);
+      dictionaryWords.forEach(w => {
+        if (wordBelongsToCategoryId(w, subNum)) list.push(w);
+      });
+    } else {
+      // Главная кнопка: 1) слова из корня категории 2 уровня, 2) слова из подкатегорий
+      if (!Number.isNaN(catIdNum) && categoryId !== 0) {
+        dictionaryWords.forEach(w => {
+          if (wordBelongsToCategoryId(w, catIdNum) && !seen.has(w.id)) {
+            seen.add(w.id);
+            list.push(w);
+          }
+        });
+      }
+      ids.forEach(catId => {
+        const num = parseInt(catId, 10);
+        if (Number.isNaN(num) || num === catIdNum) return;
+        dictionaryWords.forEach(w => {
+          if (wordBelongsToCategoryId(w, num) && !seen.has(w.id)) {
+            seen.add(w.id);
+            list.push(w);
+          }
+        });
+      });
+    }
+
+    const categoryWords = list;
     const trainingWords = categoryWords.filter(word => {
       const displayStatus = getWordDisplayStatus(word.id);
-      // Включаем в тренировку только слова без активного отката и не полностью изученные
       return !displayStatus.fullyLearned && (!displayStatus.cooldownDirect || !displayStatus.cooldownRevert);
     });
-
     return trainingWords;
   };
 
-  // Формирование очереди тренировки: сначала прямые, потом обратные, потом по кругу
-  const buildTrainingQueue = () => {
-    const trainingWords = getTrainingWords();
+  // Формирование очереди тренировки. scopeCategoryIds — вся категория (allCategoryIds) или одна подкатегория
+  const buildTrainingQueue = (scopeCategoryIds = null) => {
+    const trainingWords = getTrainingWords(scopeCategoryIds);
     if (trainingWords.length === 0) {
       return [];
     }
@@ -241,30 +301,52 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
     return queue;
   };
 
-  // Начать тренировку
-  const startTraining = async () => {
+  // Начать тренировку. subcategoryId = null — вся категория (2 уровень + все подкатегории 3); иначе только эта подкатегория
+  const startTraining = async (subcategoryId = null) => {
     // Проверяем авторизацию
     if (!window.myajax || !window.myajax.is_logged_in) {
       alert('Для тренировки необходимо войти в систему');
       return;
     }
-    
-    // Проверяем есть ли слова в категории без записей в БД ИЛИ со сброшенными записями
-    const categoryWords = dictionaryWords.filter(word => {
-      if (categoryId === 0) return true;
-      const categoryIdNum = parseInt(categoryId);
-      // Поддержка как массива category_ids, так и единичного category_id
-      // Сначала проверяем единичный category_id
-      if (word.category_id !== undefined) {
-        return parseInt(word.category_id) === categoryIdNum;
+
+    // Главная кнопка: используем allCategoryIds (корень + подкатегории)
+    const scopeIds = subcategoryId != null
+      ? [parseInt(subcategoryId, 10)]
+      : allCategoryIds;
+    // Слова для тренировки. Для главной кнопки — тот же расчёт, что и rootWords в дебаге: сначала корень, потом подкатегории.
+    let categoryWords;
+    if (subcategoryId != null) {
+      const subIdNum = parseInt(subcategoryId, 10);
+      categoryWords = dictionaryWords.filter(w => wordBelongsToCategoryId(w, subIdNum));
+    } else {
+      const catIdNum = parseInt(categoryId, 10);
+      if (categoryId === 0) {
+        categoryWords = dictionaryWords;
+      } else if (Number.isNaN(catIdNum)) {
+        categoryWords = [];
+      } else {
+        // Точно так же, как в блоке дебага: корень по wordBelongsToCategoryId(w, catIdNum)
+        const rootWordsForScope = dictionaryWords.filter(w => wordBelongsToCategoryId(w, catIdNum));
+        const seenIds = new Set();
+        categoryWords = [];
+        rootWordsForScope.forEach(w => {
+          if (w && !seenIds.has(w.id)) {
+            seenIds.add(w.id);
+            categoryWords.push(w);
+          }
+        });
+        (subcategories || []).forEach(sub => {
+          const subIdNum = parseInt(sub.id, 10);
+          dictionaryWords.forEach(w => {
+            if (wordBelongsToCategoryId(w, subIdNum) && !seenIds.has(w.id)) {
+              seenIds.add(w.id);
+              categoryWords.push(w);
+            }
+          });
+        });
       }
-      // Потом проверяем массив category_ids (только если category_id нет)
-      if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
-        return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-      }
-      return false;
-    });
-    
+    }
+
     // Слова без записей ИЛИ со сброшенными записями
     const wordsToInitialize = categoryWords.filter(word => {
       const userData = userWordsData[word.id];
@@ -313,9 +395,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
       }
     }
     
-    // Формируем очередь тренировки
-    const queue = buildTrainingQueue();
-    
+    // Формируем очередь тренировки (в той же области: вся категория или подкатегория)
+    const queue = buildTrainingQueue(scopeIds);
+
     if (queue.length === 0) {
       alert('Нет доступных слов для тренировки! Все слова либо изучены, либо на откате.');
       return;
@@ -324,6 +406,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
     setTrainingQueue(queue);
     setCurrentQueueIndex(0);
     setTrainingPhase('direct');
+    setTrainingScopeIds(scopeIds); // запоминаем область: только подкатегория или вся категория
     setTrainingMode(true);
     
     // Устанавливаем первое слово из очереди
@@ -364,26 +447,18 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
   };
 
 
-  // Сбросить категорию из тренировки (аналог Education.jsx)
+  // Сбросить категорию из тренировки (вся категория 2 + все подкатегории 3)
   const resetCategoryFromTraining = async () => {
     if (!confirm('Вы уверены, что хотите сбросить эту категорию из тренировки? Все слова будут отключены от тренировки.')) {
       return;
     }
 
     try {
-      // Получаем все слова текущей категории
-      const categoryWords = dictionaryWords.filter(word => {
-        if (categoryId === 0) return true;
-        const categoryIdNum = parseInt(categoryId);
-        
-        if (word.category_id !== undefined) {
-          return parseInt(word.category_id) === categoryIdNum;
-        }
-        if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
-          return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-        }
-        return false;
-      });
+      const categoryWords = allCategoryIds.length === 0 && categoryId !== 0
+        ? []
+        : allCategoryIds.length === 0
+          ? dictionaryWords
+          : dictionaryWords.filter(word => wordBelongsToAnyOfCategories(word, allCategoryIds));
 
       const wordIds = categoryWords.map(word => word.id);
       
@@ -555,25 +630,25 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
       attempts++;
     }
     
-    // Если не нашли доступное слово в текущей очереди, формируем новую очередь (следующий цикл)
+    // Если не нашли доступное слово в текущей очереди, формируем новую очередь в той же области (подкатегория или вся категория)
     if (!found) {
-      const remainingWords = getTrainingWords();
+      const scopeIds = trainingScopeIds != null ? trainingScopeIds : allCategoryIds;
+      const remainingWords = getTrainingWords(scopeIds);
       if (remainingWords.length === 0) {
         setTrainingMode(false);
         setTrainingQueue([]);
         setCurrentQueueIndex(0);
+        setTrainingScopeIds(null);
         alert('Отлично! Все доступные слова тренированы!');
         return;
       } else {
-        // Есть еще слова, формируем новую очередь (следующий цикл: прямые → обратные)
-        // Определяем, какая была последняя фаза, чтобы начать с противоположной
-        const lastPhase = trainingPhase;
-        const newQueue = buildTrainingQueue();
+        const newQueue = buildTrainingQueue(scopeIds);
         
         if (newQueue.length === 0) {
           setTrainingMode(false);
           setTrainingQueue([]);
           setCurrentQueueIndex(0);
+          setTrainingScopeIds(null);
           alert('Отлично! Все доступные слова тренированы!');
           return;
         }
@@ -631,6 +706,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
     setTrainingQueue([]);
     setCurrentQueueIndex(0);
     setTrainingPhase('direct');
+    setTrainingScopeIds(null);
     setCurrentWord(null);
     setUserAnswer('');
     setShowResult(false);
@@ -675,7 +751,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
       {!trainingMode && (
         <div className="training-buttons-container">
           <button
-            onClick={startTraining}
+            onClick={() => startTraining()}
             className="training-start-button"
           >
             🎯 Начать тренировку
@@ -749,22 +825,10 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
       )}
 
       {!trainingMode && (() => {
-        // Фильтруем слова по категории из dictionaryWords
-        const categoryWords = dictionaryWords.filter(word => {
-          if (categoryId === 0) return true;
-          const categoryIdNum = parseInt(categoryId);
-          
-          // Поддержка как массива category_ids, так и единичного category_id
-          // Сначала проверяем единичный category_id
-          if (word.category_id !== undefined) {
-            return parseInt(word.category_id) === categoryIdNum;
-          }
-          // Потом проверяем массив category_ids (только если category_id нет)
-          if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
-            return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-          }
-          return false;
-        });
+        // Слова страницы: вся категория 2 уровня + все подкатегории 3 уровня
+        const categoryWords = (categoryId === 0 || allCategoryIds.length === 0)
+          ? (categoryId === 0 ? dictionaryWords : dictionaryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10))))
+          : dictionaryWords.filter(w => wordBelongsToAnyOfCategories(w, allCategoryIds));
 
         // Блок массовых операций теперь отображается через CategoryWordManagement
 
@@ -806,43 +870,90 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
           );
         }
 
-        // Стандартный список слов
-        const realWords = categoryWords.map((word) => {
+        // Рендер одной строки слова (переиспользуется в списке и в группах по подкатегориям)
+        const renderWordRow = (word) => {
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
           const isSelected = selectedWordIds.includes(word.id);
           const showCheckbox = showBulkActions && isAdminModeActive;
-          
-            return (
-              <WordRow
-                key={word.id}
-                word={word}
-                userData={userData}
-                displayStatus={displayStatus}
-                formatTime={formatTime}
-                dictionaryId={dictionaryId}
-                editingWordId={editingWordId}
-                onToggleEdit={toggleEdit}
-                onRefreshDictionaryWords={onRefreshDictionaryWords}
-                onDeleteWord={handleDeleteWord}
-                mode="examen"
-                showCheckbox={showCheckbox}
-                isSelected={isSelected}
-                onToggleSelect={() => {
-                  setSelectedWordIds(prev => {
-                    if (prev.includes(word.id)) {
-                      return prev.filter(id => id !== word.id);
-                    } else {
-                      return [...prev, word.id];
-                    }
-                  });
-                }}
-              />
-            );
-        });
+          return (
+            <WordRow
+              key={word.id}
+              word={word}
+              userData={userData}
+              displayStatus={displayStatus}
+              formatTime={formatTime}
+              dictionaryId={dictionaryId}
+              editingWordId={editingWordId}
+              onToggleEdit={toggleEdit}
+              onRefreshDictionaryWords={onRefreshDictionaryWords}
+              onDeleteWord={handleDeleteWord}
+              mode="examen"
+              showCheckbox={showCheckbox}
+              isSelected={isSelected}
+              onToggleSelect={() => {
+                setSelectedWordIds(prev => {
+                  if (prev.includes(word.id)) return prev.filter(id => id !== word.id);
+                  return [...prev, word.id];
+                });
+              }}
+            />
+          );
+        };
+
+        // Слова напрямую в категории 2 уровня; по подкатегориям 3 уровня — группы с заголовком и кнопкой тренировки
+        const directWords = categoryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10)));
+        const hasSubs = subcategories.length > 0;
+
+        const realWords = hasSubs
+          ? null
+          : categoryWords.map(renderWordRow);
 
         // Блок управления словами теперь отображается через CategoryWordManagement
         // в CategoryLayout для кастомных категорий и здесь для обычных
+
+        // При наличии подкатегорий 3 уровня — группировка с кнопками тренировки по подкатегориям
+        if (hasSubs) {
+          return (
+            <>
+              {directWords.length > 0 && (
+                <section className="examen-category-block examen-category-direct">
+                  <h4 className="examen-category-block-title">Слова категории</h4>
+                  <ul className="words-education-list">{directWords.map(renderWordRow)}</ul>
+                </section>
+              )}
+              {subcategories.map((sub) => {
+                const subWords = categoryWords.filter(w => wordBelongsToCategoryId(w, parseInt(sub.id, 10)));
+                if (subWords.length === 0) return null;
+                return (
+                  <section key={sub.id} className="examen-category-block examen-category-sub">
+                    <h4 className="examen-category-block-title">
+                      <span>{sub.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => startTraining(sub.id)}
+                        className="training-start-button"
+                      >
+                        🎯 Начать тренировку
+                      </button>
+                    </h4>
+                    <ul className="words-education-list">{subWords.map(renderWordRow)}</ul>
+                  </section>
+                );
+              })}
+              <CategoryWordManagement
+                dictionaryId={dictionaryId}
+                categoryId={categoryId}
+                categoryWords={categoryWords}
+                onWordsChanged={onRefreshDictionaryWords}
+                externalShowBulkActions={showBulkActions}
+                externalSelectedWordIds={selectedWordIds}
+                onBulkActionsToggle={setShowBulkActions}
+                onSelectedWordsChange={setSelectedWordIds}
+              />
+            </>
+          );
+        }
 
         // Тестовые строки для отладки (можно удалить в production)
         if (ENABLE_TEST_DATA && isAdminModeActive) {
@@ -907,7 +1018,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
             <ul className="words-education-list">
               {realWords}
             </ul>
-            {/* Управление словами - отображается во всех категориях */}
             <CategoryWordManagement
               dictionaryId={dictionaryId}
               categoryId={categoryId}
@@ -924,24 +1034,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {
       
       {/* Модальное окно изменения порядка слов */}
       {showReorder && (() => {
-        // Получаем слова текущей категории
-        const categoryWords = dictionaryWords.filter(word => {
-          if (categoryId === 0) return true;
-          const categoryIdNum = parseInt(categoryId);
-          
-          if (word.category_id !== undefined) {
-            return parseInt(word.category_id) === categoryIdNum;
-          }
-          if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
-            return word.category_ids.some(id => parseInt(id) === categoryIdNum);
-          }
-          return false;
-        });
-        
+        const reorderWords = allCategoryIds.length === 0 && categoryId !== 0
+          ? []
+          : allCategoryIds.length === 0
+            ? dictionaryWords
+            : dictionaryWords.filter(w => wordBelongsToAnyOfCategories(w, allCategoryIds));
         return (
           <CategoryWordReorder
             categoryId={categoryId}
-            words={categoryWords}
+            subcategories={subcategories}
+            words={reorderWords}
             onClose={() => {
               setShowReorder(false);
             }}

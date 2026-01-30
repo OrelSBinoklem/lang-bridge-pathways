@@ -1,66 +1,132 @@
 import axios from "axios";
-const { useState, useEffect } = wp.element;
+const { useState, useEffect, useMemo } = wp.element;
+
+const wordBelongsToCategoryId = (word, catIdNum) => {
+  if (word.category_id !== undefined) return parseInt(word.category_id, 10) === catIdNum;
+  if (Array.isArray(word.category_ids) && word.category_ids.length > 0) {
+    return word.category_ids.some(id => parseInt(id, 10) === catIdNum);
+  }
+  return false;
+};
 
 /**
- * Компонент для изменения порядка слов в категории
- * Два режима:
- * 1. Drag & Drop - перетаскивание слов мышью
- * 2. Text mode - вставка списка слов через textarea
+ * Компонент для изменения порядка слов в категории.
+ * Если передан subcategories — показываются группы (корневая категория + подкатегории), перетаскивание между группами и внутри.
  */
 const CategoryWordReorder = ({ 
   categoryId, 
+  subcategories = [], 
   words, 
   onClose, 
   onReorderComplete 
 }) => {
-  const [mode, setMode] = useState('drag'); // 'drag' или 'text'
+  const [mode, setMode] = useState('drag');
   const [orderedWords, setOrderedWords] = useState([]);
+  const [groups, setGroups] = useState([]); // [{ id, name, words: [] }, ...]
+  const [wordToInitialCategoryId, setWordToInitialCategoryId] = useState(new Map()); // для сохранения перемещений
   const [textInput, setTextInput] = useState('');
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [draggedGroup, setDraggedGroup] = useState(null);
+  const [draggedWordIndex, setDraggedWordIndex] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null); // { groupIndex, wordIndex } или { groupIndex, wordIndex: -1 }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [sortingWithAI, setSortingWithAI] = useState(false);
 
-  // Инициализация списка слов (только один раз при монтировании)
-  useEffect(() => {
-    if (words.length > 0) {
-      // Сортируем по текущему order
-      const sorted = [...words].sort((a, b) => a.order - b.order);
-      setOrderedWords(sorted);
-      
-      // Заполняем textarea текущим порядком
-      const textList = sorted.map(w => w.word).join('\n');
-      setTextInput(textList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Только при монтировании, words берем из замыкания
+  const hasGroups = subcategories && subcategories.length > 0;
 
-  // === DRAG & DROP MODE ===
-  
+  // Инициализация: плоский список или группы по подкатегориям
+  useEffect(() => {
+    if (words.length === 0) return;
+    const sortedAll = [...words].sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (!hasGroups) {
+      setOrderedWords(sortedAll);
+      setTextInput(sortedAll.map(w => w.word).join('\n'));
+      return;
+    }
+    const catIdNum = parseInt(categoryId, 10);
+    const direct = sortedAll.filter(w => wordBelongsToCategoryId(w, catIdNum));
+    const directSorted = [...direct].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const initialGroups = [
+      { id: categoryId, name: 'Слова категории', words: directSorted }
+    ];
+    const wordToCat = new Map();
+    directSorted.forEach(w => wordToCat.set(w.id, catIdNum));
+    subcategories.forEach(sub => {
+      const subIdNum = parseInt(sub.id, 10);
+      const subWords = sortedAll.filter(w => wordBelongsToCategoryId(w, subIdNum));
+      subWords.forEach(w => wordToCat.set(w.id, subIdNum));
+      initialGroups.push({
+        id: sub.id,
+        name: sub.name,
+        words: [...subWords].sort((a, b) => (a.order || 0) - (b.order || 0))
+      });
+    });
+    setGroups(initialGroups);
+    setWordToInitialCategoryId(wordToCat);
+    setTextInput(sortedAll.map(w => w.word).join('\n'));
+  }, [words.length, categoryId, hasGroups, subcategories?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // === DRAG & DROP (плоский список, без подкатегорий) ===
   const handleDragStart = (e, index) => {
+    if (hasGroups) return;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e, index) => {
+  const handleDragOverFlat = (e, index) => {
     e.preventDefault();
-    
-    if (draggedIndex === null || draggedIndex === index) return;
-
+    if (hasGroups || draggedIndex === null || draggedIndex === index) return;
     const newWords = [...orderedWords];
     const draggedWord = newWords[draggedIndex];
-    
-    // Удаляем из старой позиции
     newWords.splice(draggedIndex, 1);
-    // Вставляем в новую позицию
     newWords.splice(index, 0, draggedWord);
-    
     setOrderedWords(newWords);
     setDraggedIndex(index);
   };
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+    setDraggedGroup(null);
+    setDraggedWordIndex(null);
+    setDropTarget(null);
+  };
+
+  // === DRAG & DROP (группы: между подкатегориями и внутри) ===
+  const handleGroupDragStart = (e, groupIndex, wordIndex) => {
+    if (!hasGroups) return;
+    setDraggedGroup(groupIndex);
+    setDraggedWordIndex(wordIndex);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleGroupDragOver = (e, targetGroupIndex, targetWordIndex) => {
+    e.preventDefault();
+    if (!hasGroups) return;
+    setDropTarget({ groupIndex: targetGroupIndex, wordIndex: targetWordIndex });
+  };
+
+  const handleGroupDrop = (e, targetGroupIndex, targetWordIndex) => {
+    e.preventDefault();
+    if (!hasGroups || draggedGroup === null || draggedWordIndex === null) return;
+    const g = groups.map(gr => ({ ...gr, words: [...gr.words] }));
+    const src = g[draggedGroup];
+    const word = src.words[draggedWordIndex];
+    if (draggedGroup === targetGroupIndex) {
+      const list = [...src.words];
+      list.splice(draggedWordIndex, 1);
+      let insertAt = targetWordIndex < 0 ? list.length : Math.min(targetWordIndex, list.length);
+      if (insertAt > draggedWordIndex) insertAt -= 1;
+      list.splice(insertAt, 0, word);
+      g[targetGroupIndex] = { ...src, words: list };
+    } else {
+      src.words.splice(draggedWordIndex, 1);
+      const target = g[targetGroupIndex];
+      const insertAt = targetWordIndex < 0 ? target.words.length : Math.min(targetWordIndex, target.words.length);
+      target.words.splice(insertAt, 0, word);
+    }
+    setGroups(g);
+    handleDragEnd();
   };
 
   // === TEXT MODE ===
@@ -123,97 +189,98 @@ const CategoryWordReorder = ({
   // === SAVE ===
   
   const handleSave = async () => {
-    console.log('💾 Начинаем сохранение нового порядка');
     setSaving(true);
     setError(null);
-    
     try {
-      // Получаем финальный порядок слов
-      let finalWords = orderedWords;
-      
-      // Если в текстовом режиме, применяем порядок из текста
-      if (mode === 'text') {
-        console.log('📝 В текстовом режиме - применяем порядок из текста');
-        
-        const lines = textInput.split('\n')
-          .map(line => line.trim())
-          .filter(line => line.length > 0);
-        
-        const remainingWords = [...orderedWords];
-        const newOrder = [];
-        
-        lines.forEach(line => {
-          const wordIndex = remainingWords.findIndex(w => w.word.toLowerCase() === line.toLowerCase());
-          if (wordIndex !== -1) {
-            newOrder.push(remainingWords[wordIndex]);
-            remainingWords.splice(wordIndex, 1);
+      if (hasGroups && groups.length > 0) {
+        // Группы: сначала перемещаем слова между категориями, потом сохраняем порядок в каждой
+        const initialCat = wordToInitialCategoryId;
+        for (const group of groups) {
+          const targetCatId = parseInt(group.id, 10);
+          for (let i = 0; i < group.words.length; i++) {
+            const w = group.words[i];
+            const prevCatId = initialCat.get(w.id);
+            if (prevCatId !== undefined && prevCatId !== targetCatId) {
+              const formData = new FormData();
+              formData.append('action', 'move_words_to_category');
+              formData.append('word_ids', JSON.stringify([w.id]));
+              formData.append('source_category_id', prevCatId);
+              formData.append('target_category_id', targetCatId);
+              const res = await axios.post(window.myajax.url, formData);
+              if (!res.data.success) {
+                setError(res.data.data?.message || 'Ошибка перемещения слова');
+                setSaving(false);
+                return;
+              }
+            }
           }
-        });
-        
-        // Добавляем не упомянутые слова в конец
-        remainingWords.forEach(word => newOrder.push(word));
-        
-        finalWords = newOrder;
-      }
-      
-      // Создаем массив с новым порядком
-      const wordOrders = finalWords.map((word, index) => ({
-        word_id: word.id,
-        order: index + 1 // order начинается с 1
-      }));
-      
-      console.log('📤 Отправляем данные:', {
-        category_id: categoryId,
-        words_count: wordOrders.length
-      });
-      
-      // Показываем все слова в порядке сохранения
-      console.log('📋 СПИСОК СЛОВ В НОВОМ ПОРЯДКЕ:');
-      finalWords.forEach((word, index) => {
-        console.log(`${index + 1}. [ID: ${word.id}] ${word.word} → ${word.translation_1 || ''}`);
-      });
-      
-      console.log('📦 Данные для отправки (word_orders):', wordOrders);
-      
-      const formData = new FormData();
-      formData.append('action', 'reorder_category_words');
-      formData.append('category_id', categoryId);
-      formData.append('word_orders', JSON.stringify(wordOrders));
-      
-      const response = await axios.post(window.myajax.url, formData);
-      
-      console.log('📥 Ответ сервера:', response.data);
-      
-      if (response.data.success) {
-        console.log('✅ Сохранение успешно');
-        if (onReorderComplete) {
-          onReorderComplete();
         }
-        onClose();
+        for (const group of groups) {
+          const wordOrders = group.words.map((w, i) => ({ word_id: w.id, order: i + 1 }));
+          const formData = new FormData();
+          formData.append('action', 'reorder_category_words');
+          formData.append('category_id', group.id);
+          formData.append('word_orders', JSON.stringify(wordOrders));
+          const res = await axios.post(window.myajax.url, formData);
+          if (!res.data.success) {
+            setError(res.data.data?.message || 'Ошибка сохранения порядка');
+            setSaving(false);
+            return;
+          }
+        }
       } else {
-        console.error('❌ Ошибка от сервера:', response.data.data?.message);
-        setError(response.data.data?.message || 'Ошибка при сохранении');
+        let finalWords = orderedWords;
+        if (mode === 'text') {
+          const lines = textInput.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+          const remaining = [...orderedWords];
+          const newOrder = [];
+          lines.forEach(line => {
+            const idx = remaining.findIndex(w => w.word.toLowerCase() === line.toLowerCase());
+            if (idx !== -1) { newOrder.push(remaining[idx]); remaining.splice(idx, 1); }
+          });
+          remaining.forEach(w => newOrder.push(w));
+          finalWords = newOrder;
+        }
+        const wordOrders = finalWords.map((w, i) => ({ word_id: w.id, order: i + 1 }));
+        const formData = new FormData();
+        formData.append('action', 'reorder_category_words');
+        formData.append('category_id', categoryId);
+        formData.append('word_orders', JSON.stringify(wordOrders));
+        const response = await axios.post(window.myajax.url, formData);
+        if (!response.data.success) {
+          setError(response.data.data?.message || 'Ошибка при сохранении');
+          setSaving(false);
+          return;
+        }
       }
+      if (onReorderComplete) onReorderComplete();
+      onClose();
     } catch (err) {
-      console.error('❌ Ошибка сети:', err);
-      setError('Ошибка сети: ' + err.message);
+      setError('Ошибка сети: ' + (err.message || ''));
     } finally {
       setSaving(false);
     }
   };
 
-  // Функция для перемешивания слов (случайный порядок)
-  const handleShuffle = () => {
-    const shuffled = [...orderedWords];
-    for (let i = shuffled.length - 1; i > 0; i--) {
+  const shuffleArray = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      [a[i], a[j]] = [a[j], a[i]];
     }
-    setOrderedWords(shuffled);
-    
-    // Обновляем текстовое поле
-    const textList = shuffled.map(w => w.word).join('\n');
-    setTextInput(textList);
+    return a;
+  };
+
+  const handleShuffle = () => {
+    if (hasGroups && groups.length > 0) {
+      setGroups(prev => prev.map(gr => ({ ...gr, words: shuffleArray(gr.words) })));
+      const flat = groups.flatMap(gr => gr.words);
+      setTextInput(flat.map(w => w.word).join('\n'));
+    } else {
+      const shuffled = shuffleArray(orderedWords);
+      setOrderedWords(shuffled);
+      setTextInput(shuffled.map(w => w.word).join('\n'));
+    }
   };
 
   // Функция для автоматической сортировки через AI
@@ -297,25 +364,28 @@ const CategoryWordReorder = ({
             >
               🖱️ Перетаскивание
             </button>
-            <button 
-              className={mode === 'text' ? 'active' : ''}
-              onClick={() => setMode('text')}
-              disabled={sortingWithAI}
-            >
-              📝 Текстовый режим
-            </button>
+            {!hasGroups && (
+              <button 
+                className={mode === 'text' ? 'active' : ''}
+                onClick={() => setMode('text')}
+                disabled={sortingWithAI}
+              >
+                📝 Текстовый режим
+              </button>
+            )}
           </div>
           
           <div className="toolbar-actions">
-            <button 
-              className="ai-sort-btn"
-              onClick={handleAISort}
-              disabled={sortingWithAI}
-              title="Автоматическая сортировка по смыслу через AI"
-            >
-              {sortingWithAI ? '⏳ Сортирую...' : '🤖 Упорядочить ботом'}
-            </button>
-            
+            {!hasGroups && (
+              <button 
+                className="ai-sort-btn"
+                onClick={handleAISort}
+                disabled={sortingWithAI}
+                title="Автоматическая сортировка по смыслу через AI"
+              >
+                {sortingWithAI ? '⏳ Сортирую...' : '🤖 Упорядочить ботом'}
+              </button>
+            )}
             <button 
               className="shuffle-btn"
               onClick={handleShuffle}
@@ -336,25 +406,71 @@ const CategoryWordReorder = ({
         <div className="word-reorder-body">
           {mode === 'drag' ? (
             <div className="drag-mode">
-              <p className="hint">Перетащите слова мышью для изменения порядка</p>
-              <div className="words-list">
-                {orderedWords.map((word, index) => (
-                  <div
-                    key={word.id}
-                    className={`word-item ${draggedIndex === index ? 'dragging' : ''}`}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <span className="word-order">{index + 1}</span>
-                    <span className="word-text">{word.word}</span>
-                    <span className="word-translation">
-                      {word.translation_1 && word.translation_1 !== '0' ? word.translation_1 : ''}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="hint">
+                {hasGroups
+                  ? 'Перетащите слова мышью для изменения порядка. Можно перетаскивать между блоками (корневая категория и подкатегории).'
+                  : 'Перетащите слова мышью для изменения порядка'}
+              </p>
+              {hasGroups && groups.length > 0 ? (
+                <div className="words-list-by-groups">
+                  {groups.map((group, groupIndex) => (
+                    <div
+                      key={group.id}
+                      className={`word-reorder-group ${dropTarget && dropTarget.groupIndex === groupIndex ? 'drop-target' : ''}`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        handleGroupDragOver(e, groupIndex, -1);
+                      }}
+                      onDrop={(e) => handleGroupDrop(e, groupIndex, -1)}
+                      onDragLeave={() => setDropTarget(null)}
+                    >
+                      <h4 className="word-reorder-group-title">{group.name}</h4>
+                      <div className="words-list">
+                        {group.words.map((word, wordIndex) => (
+                          <div
+                            key={word.id}
+                            className={`word-item ${draggedGroup === groupIndex && draggedWordIndex === wordIndex ? 'dragging' : ''}`}
+                            draggable
+                            onDragStart={(e) => handleGroupDragStart(e, groupIndex, wordIndex)}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleGroupDragOver(e, groupIndex, wordIndex);
+                            }}
+                            onDrop={(e) => handleGroupDrop(e, groupIndex, wordIndex)}
+                            onDragEnd={handleDragEnd}
+                          >
+                            <span className="word-order">{wordIndex + 1}</span>
+                            <span className="word-text">{word.word}</span>
+                            <span className="word-translation">
+                              {word.translation_1 && word.translation_1 !== '0' ? word.translation_1 : ''}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="words-list">
+                  {orderedWords.map((word, index) => (
+                    <div
+                      key={word.id}
+                      className={`word-item ${draggedIndex === index ? 'dragging' : ''}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => handleDragOverFlat(e, index)}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <span className="word-order">{index + 1}</span>
+                      <span className="word-text">{word.word}</span>
+                      <span className="word-translation">
+                        {word.translation_1 && word.translation_1 !== '0' ? word.translation_1 : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-mode">
