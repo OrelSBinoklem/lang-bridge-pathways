@@ -191,12 +191,16 @@ body {
 
 /* Стили для галереи */
 .galleries {
-    padding: 20px 0;
+    padding: 0;
     min-height: calc(100vh - 76px);
 }
 
 .gallery-wrapper {
     display: block;
+}
+
+.__view-vertical .gallery-wrapper:nth-child(n + 2) {
+    margin-top: 12px;
 }
 
 .gallery {
@@ -207,7 +211,6 @@ body {
 }
 
 .gallery .table-img {
-    display: inline-block;
     width: 100%;
     margin: 0 0 12px;
     break-inside: avoid;
