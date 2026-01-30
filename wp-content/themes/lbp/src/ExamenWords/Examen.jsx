@@ -5,7 +5,7 @@ import HelpModal from "../components/HelpModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
-import { normalizeString, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
+import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 
@@ -15,7 +15,7 @@ const ENABLE_TEST_DATA = true; // Установите false, чтобы отк�
 
 const { useEffect, useState, useMemo } = wp.element;
 
-const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
+const Examen = ({ categoryId, dictionaryId, dictionary = null, userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const { isAdminModeActive } = useAdminMode();
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
@@ -82,15 +82,16 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       categoryId,
       dictionaryWords,
       getWordDisplayStatus,
-      shuffleArray
+      shuffleArray,
+      learnLang: dictionary?.learn_lang ?? word?.learn_lang
     });
   };
 
-  // Варианты выбора — только при смене слова или режима, иначе порядок «прыгает» при каждом ререндере
+  // Варианты выбора — только при смене слова, режима или языка словаря
   const choiceOptions = useMemo(() => {
     if (!currentWord || !selectionMode) return [];
     return getChoiceOptions(currentWord, currentMode);
-  }, [currentWord?.id, currentMode, selectionMode]);
+  }, [currentWord?.id, currentMode, selectionMode, dictionary?.learn_lang]);
 
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
@@ -468,10 +469,10 @@ const Examen = ({ categoryId, dictionaryId, userWordsData = {}, dictionaryWords 
       allAcceptableVariants.push(...variants);
     });
 
-    const normalizedUserAnswer = normalizeString(toCheck);
+    const normalizedUserAnswer = normalizeString(stripParenthesesAndPunctuation(toCheck));
     
     correct = allAcceptableVariants.some(answer => {
-      const normalizedAnswer = normalizeString(answer);
+      const normalizedAnswer = normalizeString(stripParenthesesAndPunctuation(answer));
       return normalizedAnswer === normalizedUserAnswer;
     });
 

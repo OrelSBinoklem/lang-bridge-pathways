@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { AUDIO_CONFIG, getLanguageConfig, isLanguageSupported } from '../config/audioConfig';
+import { stripParenthesesAndPunctuation } from '../custom/utils/helpers';
 
 // Универсальная функция проигрывания звука
 const playAudio = (word, learnLang) => {
@@ -135,8 +136,9 @@ const TrainingInterface = ({
                   className="training-choice-btn"
                   disabled={isUpdating}
                   onClick={() => {
-                    setUserAnswer(opt);
-                    onCheckAnswer(opt);
+                    const cleaned = stripParenthesesAndPunctuation(opt);
+                    setUserAnswer(cleaned);
+                    onCheckAnswer(cleaned);
                   }}
                 >
                   {opt}

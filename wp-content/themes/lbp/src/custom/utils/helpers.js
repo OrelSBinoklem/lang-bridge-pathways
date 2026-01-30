@@ -27,6 +27,19 @@ export const setTrainingAnswerMode = (mode) => {
 };
 
 /**
+/**
+ * Удаляет скобки с содержимым и знаки препинания (. , ; : ? !) — для подстановки в поле и сравнения ответов
+ */
+export const stripParenthesesAndPunctuation = (str) => {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/\s*\([^)]*\)\s*/g, ' ')
+    .replace(/[.,;:?!]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+/**
  * Нормализация строки для сравнения
  * @param {string} str - Строка для нормализации
  * @returns {string} - Нормализованная строка
