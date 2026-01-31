@@ -1147,6 +1147,11 @@ body:has(.galleries.horizontal-mode) {
     margin-right: 5px;
 }
 
+.useful-links a.highlighted-link.download-link::before {
+    content: '💾 ';
+    font-size: 1.2em;
+}
+
 .useful-links a.highlighted-link:hover {
     color: #a02761;
     border-left-color: #d63384;

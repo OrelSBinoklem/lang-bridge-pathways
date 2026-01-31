@@ -19,13 +19,15 @@ wp_nav_menu(array(
 
 <div class="useful-links <?=$lang !== 'LV'?'d-none':''?>">
     <h2>Полезные ссылки</h2>
+    <a href="https://elaipa.lv/Home/A1" target="_blank" class="highlighted-link">Elaipa (лучшие интерактивные задания с проверкой)</a>
+    <a href="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/progress_latvieshu.xlsx'); ?>" download class="highlighted-link download-link">Скачать: Ексель файл для самоконтроля прогресса на сайте Elaipa (можно портировать в Google таблицы)</a>
+    <a href="https://ru.glosbe.com/%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8C-%D0%BB%D0%B0%D1%82%D1%8B%D1%88%D1%81%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9" target="_blank" class="highlighted-link">Словарь (большой) с примерами использования слов и переводом</a>
     <a href="https://maciunmacies.valoda.lv/16-un-vairak" target="_blank" class="highlighted-link">Главный сайт где всё! (примеры экзаменов, озвучка заданий учебника Laipa, ссылки на интерактивные задания)</a>
     <a href="https://www.viaa.gov.lv/lv/parbaudes-programma" target="_blank" class="highlighted-link">Примеры экзаменов - Если нет программы Word, чтобы открыть без багов файлы, то установите LibreOffice</a>
-    <a href="https://elaipa.lv/Home/A1" target="_blank" class="highlighted-link">Elaipa (лучшие интерактивные задания с проверкой)</a>
-    <a href="https://www.gramatika.lv/" target="_blank" class="highlighted-link">Gramatika (чей-то незаконченный сайт по грамматике)</a>
-    <a href="https://www.dokobit.com/lv/" target="_blank" class="highlighted-link">Dokobit - можно подписать документы для подачи заявления на экзамен</a>
-    <a href="https://www.facebook.com/resume.lv.lv/videos/3554350828015245/" target="_blank" class="highlighted-link">Dokobit - видео как подписать!</a>
-    <a href="https://epupa.valoda.lv/" target="_blank">Словарь с примерами использования слов и склонениями!!!</a>
+    <a href="https://www.gramatika.lv/" target="_blank">Gramatika (чей-то незаконченный сайт по грамматике)</a>
+    <a href="https://www.dokobit.com/lv/" target="_blank">Dokobit - можно подписать документы для подачи заявления на экзамен</a>
+    <a href="https://www.facebook.com/resume.lv.lv/videos/3554350828015245/" target="_blank">Dokobit - видео как подписать!</a>
+    <a href="https://epupa.valoda.lv/" target="_blank">Словарь с примерами использования слов и склонениями</a>
     <a href="https://forvo.com/languages/lv/" target="_blank">Словарь с озвучкой</a>
     <a href="https://www.valodukursi.lv/en/language-training-courses-classes-lessons/latvian-for-foreigners" target="_blank">Платный разговорный клуб</a>
     <a href="https://t.me/uaenlv" target="_blank">Бесплатный для беженцев разговорный клуб (как обычный курс с заданиями!)</a>
