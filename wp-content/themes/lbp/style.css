@@ -1029,6 +1029,11 @@ body:has(.galleries.horizontal-mode) {
     cursor: pointer;
 }
 
+/* Скрыть категории 3 уровня */
+.category-three > li > ul > li > ul.category-three-sub {
+    display: none;
+}
+
 .category-three > li > ul > li > .category-tree-name,
 .category-three > li > ul > li > .category-three-name {
     position: relative;

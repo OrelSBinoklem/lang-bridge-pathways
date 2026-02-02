@@ -22,9 +22,20 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
   /**
    * Прогресс категории: прямой и обратный перевод считаются отдельно.
    * 100% — когда все прямые и все обратные переводы выполнены (correct_attempts >= 2 и correct_attempts_revert >= 2).
+   * @param {number} categoryId - ID категории
+   * @param {array} [childIds] - ID вложенных категорий (слова из них тоже учитываются)
    */
-  const getCategoryProgress = (categoryId) => {
-    const words = dictionaryWords.filter((w) => wordBelongsToCategory(w, categoryId));
+  const getCategoryProgress = (categoryId, childIds = []) => {
+    const allIds = [parseInt(categoryId, 10), ...(childIds || []).map((id) => parseInt(id, 10))];
+    const seen = new Set();
+    const words = [];
+    dictionaryWords.forEach((w) => {
+      if (seen.has(w.id)) return;
+      if (allIds.some((cid) => wordBelongsToCategory(w, cid))) {
+        seen.add(w.id);
+        words.push(w);
+      }
+    });
     const n = words.length;
     if (!n) return { total: 0, learned: 0, progress: 0 };
     const totalUnits = n * 2; // каждое слово = 2 единицы: прямой + обратный
@@ -35,6 +46,12 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
       if (u && u.correct_attempts_revert >= 2) learned += 1;
     });
     return { total: totalUnits, learned, progress: learned / totalUnits };
+  };
+
+  /** Собрать ID всех вложенных категорий рекурсивно */
+  const getDescendantIds = (category) => {
+    if (!category?.children?.length) return [];
+    return category.children.flatMap((c) => [parseInt(c.id, 10), ...getDescendantIds(c)]);
   };
 
   // Функция генерации фейковых категорий по 50 слов
@@ -92,15 +109,15 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
     });
   };
 
-  // Функция для рекурсивного рендера дерева категорий
+  // Функция для рекурсивного рендера дерева категорий. 3 уровень скрывается стилями.
   const renderCategoryTree = (tree, subCat = false) => {
-    // Сортируем категории по полю order перед рендерингом
     const sortedTree = sortCategoriesByOrder(tree);
     
     return (
       <ul className={subCat ? 'category-three-sub' : 'category-three'}>
         {sortedTree.map((category) => {
-          const { progress } = subCat ? getCategoryProgress(category.id) : { progress: 0 };
+          const childIds = getDescendantIds(category);
+          const { progress } = subCat ? getCategoryProgress(category.id, childIds) : { progress: 0 };
           const isClickable = !!subCat;
           return (
             <li
