@@ -157,17 +157,19 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setEditingWordId((prevId) => (prevId === id ? null : id));
   };
 
-  // Удалить слово
-  const handleDeleteWord = async (wordId) => {
+  // Удалить слово (из категории или полностью, если categoryId передан — только из категории)
+  const handleDeleteWord = async (wordId, categoryIdForDelete = null) => {
     try {
       const formData = new FormData();
       formData.append('action', 'delete_word');
       formData.append('word_id', wordId);
+      if (categoryIdForDelete != null) {
+        formData.append('category_id', categoryIdForDelete);
+      }
 
       const response = await axios.post(window.myajax.url, formData);
       
       if (response.data.success) {
-        // Обновляем список слов
         if (onRefreshDictionaryWords) {
           onRefreshDictionaryWords();
         }
@@ -870,8 +872,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           );
         }
 
-        // Рендер одной строки слова (переиспользуется в списке и в группах по подкатегориям)
-        const renderWordRow = (word) => {
+        // Рендер одной строки слова. categoryIdForDelete — из какой категории удалять (null = полное удаление).
+        const renderWordRow = (word, categoryIdForDelete = null) => {
+          const catId = categoryIdForDelete ?? parseInt(categoryId, 10);
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
           const isSelected = selectedWordIds.includes(word.id);
@@ -888,6 +891,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               onToggleEdit={toggleEdit}
               onRefreshDictionaryWords={onRefreshDictionaryWords}
               onDeleteWord={handleDeleteWord}
+              categoryIdForDelete={catId}
               mode="examen"
               showCheckbox={showCheckbox}
               isSelected={isSelected}
@@ -907,7 +911,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
         const realWords = hasSubs
           ? null
-          : categoryWords.map(renderWordRow);
+          : categoryWords.map(w => renderWordRow(w, parseInt(categoryId, 10)));
 
         // Блок управления словами теперь отображается через CategoryWordManagement
         // в CategoryLayout для кастомных категорий и здесь для обычных
@@ -919,7 +923,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               {directWords.length > 0 && (
                 <section className="examen-category-block examen-category-direct">
                   <h4 className="examen-category-block-title">Слова категории</h4>
-                  <ul className="words-education-list">{directWords.map(renderWordRow)}</ul>
+                  <ul className="words-education-list">{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
                 </section>
               )}
               {subcategories.map((sub) => {
@@ -937,7 +941,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                         🎯 Начать тренировку
                       </button>
                     </h4>
-                    <ul className="words-education-list">{subWords.map(renderWordRow)}</ul>
+                    <ul className="words-education-list">{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
                   </section>
                 );
               })}

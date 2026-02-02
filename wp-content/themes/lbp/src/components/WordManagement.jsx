@@ -199,10 +199,13 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     }
   };
 
-  const deleteWord = async (wordId) => {
+  const deleteWord = async (wordId, categoryIdForDelete) => {
     const formData = new FormData();
     formData.append('action', 'delete_word');
     formData.append('word_id', wordId);
+    if (categoryIdForDelete) {
+      formData.append('category_id', categoryIdForDelete);
+    }
 
     const response = await axios.post(window.myajax.url, formData);
     return response.data;
@@ -242,7 +245,7 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
         setBulkProgress({ current: i + 1, total: words.length });
         
         try {
-          const result = await deleteWord(words[i].id);
+          const result = await deleteWord(words[i].id, categoryId);
           if (result.success) {
             successCount++;
           } else {

@@ -260,7 +260,18 @@ class WordsService {
     }
 
     /**
-     * Удалить слово из словаря.
+     * Удалить слово из категории. Если слово не осталось ни в одной категории — удалить полностью.
+     *
+     * @param int $word_id
+     * @param int $category_id
+     * @return bool
+     */
+    public static function remove_word_from_category($word_id, $category_id) {
+        return remove_word_from_category($word_id, $category_id);
+    }
+
+    /**
+     * Удалить слово из словаря полностью (из всех категорий).
      *
      * @param int $word_id
      * @return bool

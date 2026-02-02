@@ -14,7 +14,8 @@ import { useAdminMode } from '../custom/contexts/AdminModeContext';
  * @param {number} editingWordId - ID редактируемого слова (null если ничего не редактируется)
  * @param {function} onToggleEdit - Колбэк переключения редактирования: (wordId) => void
  * @param {function} onRefreshDictionaryWords - Колбэк обновления списка слов после редактирования: () => void
- * @param {function} onDeleteWord - Колбэк удаления слова: (wordId) => void
+ * @param {function} onDeleteWord - Колбэк удаления слова: (wordId, categoryId?) => void
+ * @param {number} [categoryIdForDelete] - ID категории для удаления (если задан — удалит только из категории)
  * @param {boolean} showEditButton - Показывать кнопку редактирования ✏️ (только для админов)
  * @param {boolean} showCheckbox - Показывать чекбокс для массового выбора
  * @param {boolean} isSelected - Выбрано ли слово
@@ -30,6 +31,7 @@ const WordRow = ({
   onToggleEdit,
   onRefreshDictionaryWords,
   onDeleteWord,
+  categoryIdForDelete = null,
   showEditButton = true,
   showCheckbox = false,
   isSelected = false,
@@ -186,10 +188,10 @@ const WordRow = ({
               className="delete-button"
               onClick={() => {
                 if (confirm(`Удалить слово "${word.word}"?`)) {
-                  onDeleteWord(word.id);
+                  onDeleteWord(word.id, categoryIdForDelete);
                 }
               }}
-              title="Удалить слово"
+              title={categoryIdForDelete ? "Удалить из категории" : "Удалить слово"}
             >
               🗑️
             </button>

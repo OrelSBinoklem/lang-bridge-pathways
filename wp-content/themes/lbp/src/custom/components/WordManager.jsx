@@ -100,9 +100,9 @@ const WordManager = ({ dictionaryId, categories }) => {
     }
   };
 
-  // Удалить слово
+  // Удалить слово из категории (если не останется категорий — удалится полностью)
   const handleDeleteWord = async (wordId) => {
-    if (!confirm('Вы уверены, что хотите удалить это слово?')) {
+    if (!confirm('Вы уверены, что хотите удалить это слово из категории?')) {
       return;
     }
 
@@ -111,6 +111,9 @@ const WordManager = ({ dictionaryId, categories }) => {
       const formData = new FormData();
       formData.append('action', 'delete_word');
       formData.append('word_id', wordId);
+      if (selectedCategory) {
+        formData.append('category_id', selectedCategory);
+      }
 
       const response = await axios.post(window.myajax.url, formData);
       

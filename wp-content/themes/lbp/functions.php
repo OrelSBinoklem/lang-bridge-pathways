@@ -771,7 +771,8 @@ class WordsAjaxHandler {
     }
 
     /**
-     * AJAX-метод для удаления слова
+     * AJAX-метод для удаления слова. Если передан category_id — удалить только из этой категории.
+     * Если слово не останется ни в одной категории — удалить полностью.
      */
     public static function handle_delete_word() {
         // Только для админов
@@ -781,16 +782,21 @@ class WordsAjaxHandler {
         }
 
         $word_id = intval($_POST['word_id']);
+        $category_id = !empty($_POST['category_id']) ? intval($_POST['category_id']) : 0;
 
         if (!$word_id) {
             wp_send_json_error(['message' => 'Не передан ID слова']);
             wp_die();
         }
 
-        $result = WordsService::delete_word_from_dictionary($word_id);
+        if ($category_id) {
+            $result = WordsService::remove_word_from_category($word_id, $category_id);
+        } else {
+            $result = WordsService::delete_word_from_dictionary($word_id);
+        }
 
         if ($result) {
-            wp_send_json_success(['message' => 'Слово удалено успешно']);
+            wp_send_json_success(['message' => $category_id ? 'Слово удалено из категории' : 'Слово удалено успешно']);
         } else {
             wp_send_json_error(['message' => 'Ошибка при удалении слова']);
         }

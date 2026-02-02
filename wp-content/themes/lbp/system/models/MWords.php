@@ -259,7 +259,43 @@ function create_word($dictionary_id, $word_data, $category_ids = []) {
 }
 
 /**
- * Удалить слово
+ * Удалить слово из категории. Если после удаления слово не принадлежит ни одной категории — удалить слово полностью.
+ * @param int $word_id ID слова
+ * @param int $category_id ID категории
+ * @return bool Результат операции
+ */
+function remove_word_from_category($word_id, $category_id) {
+    global $wpdb;
+
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+
+    // Удаляем связь слово-категория
+    $deleted = $wpdb->delete(
+        $word_category_table,
+        ['word_id' => $word_id, 'category_id' => $category_id],
+        ['%d', '%d']
+    );
+
+    if ($deleted === false) {
+        return false;
+    }
+
+    // Проверяем, остались ли у слова другие категории
+    $remaining = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $word_category_table WHERE word_id = %d",
+        $word_id
+    ));
+
+    if ($remaining > 0) {
+        return true; // Слово ещё в других категориях — удалили только из этой
+    }
+
+    // Слова больше ни в какой категории — удаляем полностью
+    return delete_word($word_id);
+}
+
+/**
+ * Удалить слово полностью (из всех категорий)
  * @param int $word_id ID слова
  * @return bool Результат операции
  */
