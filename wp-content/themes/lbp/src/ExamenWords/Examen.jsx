@@ -920,12 +920,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         if (hasSubs) {
           return (
             <>
-              {directWords.length > 0 && (
-                <section className="examen-category-block examen-category-direct">
-                  <h4 className="examen-category-block-title">Слова категории</h4>
-                  <ul className="words-education-list">{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
-                </section>
-              )}
               {subcategories.map((sub) => {
                 const subWords = categoryWords.filter(w => wordBelongsToCategoryId(w, parseInt(sub.id, 10)));
                 if (subWords.length === 0) return null;
@@ -945,6 +939,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   </section>
                 );
               })}
+              {directWords.length > 0 && (
+                <section className="examen-category-block examen-category-direct">
+                  <h4 className="examen-category-block-title">
+                    <span>Оставшиеся слова</span>
+                  </h4>
+                  <ul className="words-education-list">{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
+                </section>
+              )}
               <CategoryWordManagement
                 dictionaryId={dictionaryId}
                 categoryId={categoryId}
