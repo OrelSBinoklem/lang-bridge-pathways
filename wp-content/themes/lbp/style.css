@@ -1105,6 +1105,152 @@ body:has(.galleries.horizontal-mode) {
 
 }
 
+/* Кнопки и модалки контента страниц (Общая грамматика, Понятия) */
+.lang-content-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.lang-modal-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.lang-modal-btn:hover {
+    background: #0056b3;
+}
+.lang-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+.lang-modal-overlay[aria-hidden="true"] {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+.lang-modal-overlay[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+.lang-modal-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.lang-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+    color: #555;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.lang-modal-close:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+.lang-modal-content {
+    padding: 24px 24px 24px 24px;
+    overflow: auto;
+    flex: 1;
+    font-size: 16px;
+    line-height: 1.5;
+}
+.lang-modal-content p {
+    margin: 0 0 1em;
+}
+.lang-modal-content strong {
+    font-weight: 700;
+}
+.lang-modal-content em {
+    font-style: italic;
+}
+.lang-modal-content strong em,
+.lang-modal-content em strong {
+    font-weight: 700;
+    font-style: italic;
+}
+.lang-modal-content ul,
+.lang-modal-content ol {
+    margin: 0 0 1em;
+    padding-left: 1.5em;
+}
+.lang-modal-content ul {
+    list-style-type: disc;
+}
+.lang-modal-content ol {
+    list-style-type: decimal;
+}
+.lang-modal-content li {
+    margin: 0.25em 0;
+}
+.lang-modal-content table {
+    max-width: 100%;
+    border-collapse: collapse;
+}
+.lang-modal-content img {
+    max-width: 100%;
+    height: auto;
+}
+.lang-modal-content img.aligncenter,
+.lang-modal-content .aligncenter img,
+.lang-modal-content p.has-text-align-center img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.lang-modal-content figure.aligncenter,
+.lang-modal-content .wp-block-image.aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+.lang-modal-content figure.aligncenter img,
+.lang-modal-content .wp-block-image.aligncenter img {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.lang-modal-iframe {
+    display: block;
+    width: 100%;
+    min-height: 80vh;
+    border: none;
+    flex: 1;
+}
+
 /* Стили для полезных ссылок */
 .useful-links {
     margin-top: 60px;
