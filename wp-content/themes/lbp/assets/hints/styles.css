@@ -73,3 +73,37 @@ ul {
   color: #e83e8c;
   font-weight: bold;
 }
+
+/* Мобильная адаптация таблиц (≤1024px): каждая ячейка на новой строке */
+@media (max-width: 1024px) {
+  table thead tr {
+    display: block;
+  }
+  table thead th {
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 8px 12px;
+  }
+  table thead th:last-child {
+    border-bottom: none;
+  }
+  table tbody tr {
+    display: block;
+    border-bottom: 2px solid #bbb;
+  }
+  table tbody td {
+    display: block;
+    border: none;
+    border-bottom: 1px solid #bbb;
+    padding: 8px 12px;
+  }
+  /* Первая ячейка строки — маркер новой строки: акцент слева */
+  table tbody td:first-child {
+    border-left: 8px solid #3498db;
+    background: rgba(52, 152, 219, 0.06);
+    font-weight: 600;
+  }
+  table tbody td:last-child {
+    border-bottom: 2px solid #bbb;
+  }
+}
