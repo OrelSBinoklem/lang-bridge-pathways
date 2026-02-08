@@ -361,6 +361,11 @@ body:has(.galleries.horizontal-mode) {
     padding-bottom: 1px;
 }
 
+#primary-menu li:nth-child(1).menu-item a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
 .site-navigation a::before {
     content: '';
     position: absolute;
@@ -1108,23 +1113,64 @@ body:has(.galleries.horizontal-mode) {
 /* Кнопки и модалки контента страниц (Общая грамматика, Понятия) */
 .lang-content-buttons {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 28px;
     flex-wrap: wrap;
 }
 .lang-modal-btn {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: 600;
+    flex: 1;
+    min-width: 180px;
+    max-width: 260px;
+    padding: 16px 24px;
+    font-size: 17px;
+    font-weight: 700;
     color: #fff;
-    background: #007bff;
     border: none;
-    border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.lang-modal-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 .lang-modal-btn:hover {
-    background: #0056b3;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    filter: brightness(1.08);
+}
+.lang-modal-btn:hover::before {
+    opacity: 1;
+}
+/* Общая грамматика — тёплый «книжный» акцент */
+.lang-modal-btn:first-of-type {
+    background: linear-gradient(135deg, #c45c26 0%, #e07b3a 50%, #d4692e 100%);
+    border-radius: 16px 16px 4px 16px;
+    box-shadow: 0 4px 0 #8b3d1a, 0 6px 16px rgba(196, 92, 38, 0.45);
+}
+.lang-modal-btn:first-of-type::before {
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 100%);
+}
+.lang-modal-btn:first-of-type:hover {
+    box-shadow: 0 6px 0 #8b3d1a, 0 10px 28px rgba(196, 92, 38, 0.5);
+}
+/* Понятия — холодный «идея» акцент */
+.lang-modal-btn:last-of-type {
+    background: linear-gradient(135deg, #0a7c6e 0%, #0eb8a8 50%, #0d9b8c 100%);
+    border-radius: 16px 4px 16px 16px;
+    box-shadow: 0 4px 0 #065a51, 0 6px 16px rgba(10, 124, 110, 0.45);
+}
+.lang-modal-btn:last-of-type::before {
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.25) 100%);
+}
+.lang-modal-btn:last-of-type:hover {
+    box-shadow: 0 6px 0 #065a51, 0 10px 28px rgba(10, 124, 110, 0.5);
 }
 .lang-modal-overlay {
     position: fixed;
@@ -1186,6 +1232,31 @@ body:has(.galleries.horizontal-mode) {
     flex: 1;
     font-size: 16px;
     line-height: 1.5;
+}
+.lang-modal-content h1,
+.lang-modal-content h2,
+.lang-modal-content h3,
+.lang-modal-content h4,
+.lang-modal-content h5,
+.lang-modal-content h6 {
+    margin: 1em 0 0.5em;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #1a1a1a;
+}
+.lang-modal-content h1 { font-size: 1.75rem; }
+.lang-modal-content h2 { font-size: 1.5rem; }
+.lang-modal-content h3 { font-size: 1.3rem; }
+.lang-modal-content h4 { font-size: 1.15rem; }
+.lang-modal-content h5 { font-size: 1.05rem; }
+.lang-modal-content h6 { font-size: 1rem; }
+.lang-modal-content h1:first-child,
+.lang-modal-content h2:first-child,
+.lang-modal-content h3:first-child,
+.lang-modal-content h4:first-child,
+.lang-modal-content h5:first-child,
+.lang-modal-content h6:first-child {
+    margin-top: 0;
 }
 .lang-modal-content p {
     margin: 0 0 1em;

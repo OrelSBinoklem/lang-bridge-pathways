@@ -44,6 +44,7 @@ const tablesData = {
         { id: 'super-6', src: '/wp-content/themes/lbp/assets/images/super-tables/6.jpg', level: 'a1', title: 'Числа', alt: 'Числа', hintId: '6', description: 'A1' },
         { id: 'super-5', src: '/wp-content/themes/lbp/assets/images/super-tables/5.jpg', level: 'a1', title: 'Вопросы', alt: 'Вопросительные слова', hintId: '5', description: 'A1-A2' },
         { id: 'diminutivi', src: '/wp-content/themes/lbp/assets/images/tables/a2/diminutivi.png', level: 'a2', title: 'Уменьшительно ласкательные', alt: 'Уменьшительно ласкательные', hintId: '92', width: 1102, height: 521, widthMob: 1102, heightMob: 521 },
+        { id: 'pre-verb', src: '/wp-content/themes/lbp/assets/images/tables/a2/pre-verb.png', level: 'a2', title: 'Приставки глаголов', alt: 'Приставки глаголов', hintId: '99', width: 1098, height: 885, widthMob: 1104, heightMob: 1080 },
         //{ id: 'super-7', src: '/wp-content/themes/lbp/assets/images/super-tables/7.png', level: 'a1', title: 'Глаголы (A1)', alt: 'Глаголы уровень A1', hintId: '7', description: 'A1' },
         //todo временно{ id: 'super-10', src: '/wp-content/themes/lbp/assets/images/super-tables/10.png', level: 'a2', title: 'Глаголы A2 — часть 1', alt: 'Глаголы A2 часть 1', hintId: '10', description: 'A2' },
         //todo временно{ id: 'super-11', src: '/wp-content/themes/lbp/assets/images/super-tables/11.png', level: 'a2', title: 'Глаголы A2 — часть 2', alt: 'Глаголы A2 часть 2', hintId: '11', description: 'A2' },
