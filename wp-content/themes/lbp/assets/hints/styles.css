@@ -87,6 +87,20 @@ ul {
   table thead th:last-child {
     border-bottom: none;
   }
+  /* Заголовки внутри tbody (Падеж, Название, Вопрос и т.д.) */
+  table tbody th {
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 8px 12px;
+    background: #3498db;
+    color: white;
+  }
+  table tbody th:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  table tbody th:last-child {
+    border-bottom: 2px solid #bbb;
+  }
   table tbody tr {
     display: block;
     border-bottom: 2px solid #bbb;
