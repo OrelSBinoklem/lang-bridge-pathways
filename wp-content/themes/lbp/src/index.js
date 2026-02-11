@@ -7,9 +7,19 @@ require('./Dictionary.jsx');
 
 // Grammar Tables Gallery
 import GrammarTablesGallery from './GrammarTablesGallery/GrammarTablesGallery.jsx';
+// Lang page modals (Общая грамматика, Понятия)
+import LangModalGrammarContent from './LangModals/LangModalGrammarContent.jsx';
+import LangModalConceptsContent from './LangModals/LangModalConceptsContent.jsx';
 
 if(document.getElementById('grammar-tables-gallery-root')) {
 	render(<GrammarTablesGallery />, document.getElementById('grammar-tables-gallery-root'));
+}
+
+if (document.getElementById('lang-modal-184-content')) {
+	render(<LangModalGrammarContent />, document.getElementById('lang-modal-184-content'));
+}
+if (document.getElementById('lang-modal-187-content')) {
+	render(<LangModalConceptsContent />, document.getElementById('lang-modal-187-content'));
 }
 
 //https://www.youtube.com/watch?v=EaC7x6QCjjQ

@@ -16,38 +16,6 @@ wp_nav_menu(array(
     'walker'         => new Custom_Nav_Walker()
 ));
 
-$page_184 = get_post(184);
-$page_187 = get_post(187);
-$content_184 = '';
-$content_187 = '';
-if ($page_184 && $page_184->post_status === 'publish') {
-    global $post;
-    $post = $page_184;
-    setup_postdata($post);
-    ob_start();
-    the_content();
-    $content_184 = ob_get_clean();
-    wp_reset_postdata();
-    $content_184 = do_shortcode($content_184);
-}
-if ($page_187 && $page_187->post_status === 'publish') {
-    global $post;
-    $post = $page_187;
-    setup_postdata($post);
-    ob_start();
-    the_content();
-    $content_187 = ob_get_clean();
-    wp_reset_postdata();
-    $content_187 = do_shortcode($content_187);
-}
-
-$wptb_registered = shortcode_exists('wptb');
-$content_184_has_raw_shortcode = $content_184 && strpos($content_184, '[wptb') !== false;
-$content_187_has_raw_shortcode = $content_187 && strpos($content_187, '[wptb') !== false;
-$use_iframe_184 = !$wptb_registered && $content_184_has_raw_shortcode;
-$use_iframe_187 = !$wptb_registered && $content_187_has_raw_shortcode;
-$url_184 = $page_184 && $page_184->post_status === 'publish' ? get_permalink(184) : '';
-$url_187 = $page_187 && $page_187->post_status === 'publish' ? get_permalink(187) : '';
 ?>
 
 <div class="lang-content-buttons <?=$lang !== 'LV'?'d-none':''?>">
@@ -58,21 +26,13 @@ $url_187 = $page_187 && $page_187->post_status === 'publish' ? get_permalink(187
 <div id="lang-modal-184" class="lang-modal-overlay" aria-hidden="true">
     <div class="lang-modal-wrap">
         <button type="button" class="lang-modal-close" aria-label="Закрыть">&times;</button>
-        <?php if ($use_iframe_184 && $url_184) : ?>
-        <iframe class="lang-modal-iframe" src="<?php echo esc_url($url_184); ?>" title="Общая грамматика"></iframe>
-        <?php else : ?>
-        <div class="lang-modal-content"><?php echo $content_184; ?></div>
-        <?php endif; ?>
+        <div id="lang-modal-184-content" class="lang-modal-content"></div>
     </div>
 </div>
 <div id="lang-modal-187" class="lang-modal-overlay" aria-hidden="true">
     <div class="lang-modal-wrap">
         <button type="button" class="lang-modal-close" aria-label="Закрыть">&times;</button>
-        <?php if ($use_iframe_187 && $url_187) : ?>
-        <iframe class="lang-modal-iframe" src="<?php echo esc_url($url_187); ?>" title="Понятия"></iframe>
-        <?php else : ?>
-        <div class="lang-modal-content"><?php echo $content_187; ?></div>
-        <?php endif; ?>
+        <div id="lang-modal-187-content" class="lang-modal-content"></div>
     </div>
 </div>
 
