@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 /**
@@ -14,6 +14,8 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
   const [error, setError] = useState('');
   const [bulkText, setBulkText] = useState('');
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [bulkTargetCategoryId, setBulkTargetCategoryId] = useState(categoryId);
+  const [bulkTargetOptions, setBulkTargetOptions] = useState([]);
   const [newWord, setNewWord] = useState({
     word: '',
     translation_1: '',
@@ -30,16 +32,73 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
     is_phrase: '0'
   });
 
-  const createWord = async (wordData) => {
+  const createWord = async (wordData, targetCategoryIds = [categoryId]) => {
     const formData = new FormData();
     formData.append('action', 'create_word');
     formData.append('dictionary_id', dictionaryId);
     formData.append('word_data', JSON.stringify(wordData));
-    formData.append('category_ids', JSON.stringify([categoryId]));
+    formData.append('category_ids', JSON.stringify(targetCategoryIds));
 
     const response = await axios.post(window.myajax.url, formData);
     return response.data;
   };
+
+  useEffect(() => {
+    setBulkTargetCategoryId(categoryId);
+  }, [categoryId]);
+
+  useEffect(() => {
+    if (!showBulkInsert || !dictionaryId || !categoryId) return;
+
+    const fetchTargetCategories = async () => {
+      try {
+        const formData = new FormData();
+        formData.append('action', 'get_category_tree');
+        formData.append('dictionary_id', dictionaryId);
+
+        const response = await axios.post(window.myajax.url, formData);
+        if (!response.data?.success || !Array.isArray(response.data.data)) {
+          setBulkTargetOptions([]);
+          return;
+        }
+
+        const toInt = (v) => parseInt(v, 10);
+        const currentId = toInt(categoryId);
+
+        const findNodeById = (nodes, id) => {
+          for (const node of nodes) {
+            if (toInt(node.id) === id) return node;
+            if (node.children && node.children.length > 0) {
+              const found = findNodeById(node.children, id);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        const currentNode = findNodeById(response.data.data, currentId);
+        if (!currentNode) {
+          setBulkTargetOptions([]);
+          return;
+        }
+
+        const childOptions = (currentNode.children || []).map((child) => ({
+          id: toInt(child.id),
+          name: child.name
+        }));
+
+        setBulkTargetOptions([
+          { id: currentId, name: `${currentNode.name} (текущая категория)` },
+          ...childOptions
+        ]);
+      } catch (err) {
+        console.error('Ошибка загрузки подкатегорий для массовой вставки:', err);
+        setBulkTargetOptions([]);
+      }
+    };
+
+    fetchTargetCategories();
+  }, [showBulkInsert, dictionaryId, categoryId]);
 
   const handleCreateWord = async (e) => {
     e.preventDefault();
@@ -135,12 +194,14 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
 
       let successCount = 0;
       let errorCount = 0;
+      const targetCategory = parseInt(bulkTargetCategoryId, 10) || parseInt(categoryId, 10);
+      const targetCategoryIds = [targetCategory];
 
       for (let i = 0; i < words.length; i++) {
         setBulkProgress({ current: i + 1, total: words.length });
         
         try {
-          const result = await createWord(words[i]);
+          const result = await createWord(words[i], targetCategoryIds);
           if (result.success) {
             successCount++;
           } else {
@@ -522,6 +583,24 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
       {showBulkInsert && (
         <div style={{ padding: '15px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px' }}>
           <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Куда добавить слова:
+            </label>
+            <select
+              value={bulkTargetCategoryId || ''}
+              onChange={(e) => setBulkTargetCategoryId(parseInt(e.target.value, 10))}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '10px' }}
+              disabled={bulkLoading}
+            >
+              {bulkTargetOptions.length > 0 ? (
+                bulkTargetOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id}>{opt.name}</option>
+                ))
+              ) : (
+                <option value={categoryId}>Текущая категория</option>
+              )}
+            </select>
+
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Вставьте список слов (CSV формат):
             </label>
