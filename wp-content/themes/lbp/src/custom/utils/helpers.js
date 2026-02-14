@@ -174,19 +174,12 @@ export const formatTime = (milliseconds) => {
  * @param {number} currentTime - Текущее время (по умолчанию Date.now())
  * @returns {number|null} - Оставшееся время в миллисекундах или null
  */
-// ============================================================================
-// ТЕСТОВЫЙ РЕЖИМ ОТКАТОВ
-// ============================================================================
-// Установите true для тестового режима (1 мин и 2 мин вместо 30 мин и 20 часов)
-const TEST_COOLDOWN_MODE = false; // Измените на true для тестирования
-
-// Значения откатов в тестовом режиме
-const TEST_COOLDOWN_FIRST = 1 * 60 * 1000; // 1 минута
-const TEST_COOLDOWN_SECOND = 2 * 60 * 1000; // 2 минуты
-
-// Значения откатов в обычном режиме
-const NORMAL_COOLDOWN_FIRST = 30 * 60 * 1000; // 30 минут
-const NORMAL_COOLDOWN_SECOND = 20 * 60 * 60 * 1000; // 20 часов
+// ТЕСТОВЫЙ РЕЖИМ ОТКАТОВ: true = 1 мин и 2 мин, false = 30 мин и 20 часов
+const TEST_COOLDOWN_MODE = false;
+const TEST_COOLDOWN_FIRST = 1 * 60 * 1000;   // 1 минута
+const TEST_COOLDOWN_SECOND = 2 * 60 * 1000;  // 2 минуты
+const NORMAL_COOLDOWN_FIRST = 30 * 60 * 1000;   // 30 минут
+const NORMAL_COOLDOWN_SECOND = 20 * 60 * 60 * 1000;  // 20 часов
 
 export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, currentTime = Date.now()) => {
   // Проверяем на пустое значение или MySQL нулевую дату
@@ -208,18 +201,16 @@ export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, c
   const elapsed = currentTime - lastShownTime;
   
   let cooldownDuration;
-  
-  // Выбираем значения откатов в зависимости от режима
   const cooldownFirst = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_FIRST : NORMAL_COOLDOWN_FIRST;
   const cooldownSecond = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : NORMAL_COOLDOWN_SECOND;
-  
+
   if (correctAttempts === 0) {
     if (modeEducation === 0) {
-      cooldownDuration = cooldownFirst; // 30 минут или 1 минута (тест)
+      cooldownDuration = cooldownFirst;
     }
   } else if (correctAttempts === 1) {
     if (modeEducation === 0) {
-      cooldownDuration = cooldownSecond; // 20 часов или 2 минуты (тест)
+      cooldownDuration = cooldownSecond;
     }
   } else if (correctAttempts >= 2) {
     return null;

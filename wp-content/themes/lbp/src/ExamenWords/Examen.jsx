@@ -1,6 +1,7 @@
 import axios from "axios";
 import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
+import ExamenErrorBoundary from "../components/ExamenErrorBoundary";
 import HelpModal from "../components/HelpModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
@@ -9,11 +10,7 @@ import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, forma
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 
-// Тестовые данные для отладки (закомментируйте следующую строку в production)
-import { testWords, testUserData, testDisplayStatuses, additionalTestWords } from "./testData";
-const ENABLE_TEST_DATA = true; // Установите false, чтобы отключить тестовые строки
-
-const { useEffect, useState, useMemo } = wp.element;
+const { useEffect, useState, useMemo, useRef } = wp.element;
 
 // Найти прямых потомков категории (3-й уровень) в дереве категорий
 const getDirectChildCategories = (tree, parentId) => {
@@ -145,11 +142,17 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setShowBulkActions(false);
   }, [categoryId]);
 
-  // Обновляем текущее время каждую секунду для таймеров
+  // Обновляем currentTime: интервал для таймера + при возврате на вкладку
+  const refreshCurrentTime = () => setCurrentTime(Date.now());
+  useEffect(() => {
+    const onVisible = () => refreshCurrentTime();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 10000);
+      setTimeout(refreshCurrentTime, 0);
+    }, 10000); // раз в 10 сек (фиксы в WordRow должны предотвратить removeChild)
     return () => clearInterval(interval);
   }, []);
 
@@ -772,6 +775,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           
           <div className="training-control-buttons">
             <button
+              onClick={refreshCurrentTime}
+              className="training-help-button"
+              title="Обновить отображение таймеров отката"
+            >
+              ⏱️ Обновить таймеры
+            </button>
+            <button
               onClick={() => setShowHelp(true)}
               className="training-help-button"
               title="Показать справку"
@@ -826,7 +836,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         />
       )}
 
-      {!trainingMode && (() => {
+      {!trainingMode && (
+        <ExamenErrorBoundary>
+      {(() => {
         // Слова страницы: вся категория 2 уровня + все подкатегории 3 уровня
         const categoryWords = (categoryId === 0 || allCategoryIds.length === 0)
           ? (categoryId === 0 ? dictionaryWords : dictionaryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10))))
@@ -961,64 +973,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           );
         }
 
-        // Тестовые строки для отладки (можно удалить в production)
-        if (ENABLE_TEST_DATA && isAdminModeActive) {
-          const separator = (
-            <li key="test-separator" style={{ 
-              margin: '20px 0', 
-              padding: '10px', 
-              background: '#f0f0f0', 
-              textAlign: 'center',
-              fontWeight: 'bold',
-              color: '#666',
-              borderTop: '2px dashed #999',
-              borderBottom: '2px dashed #999'
-            }}>
-              ⬇️ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ (ТОЛЬКО ДЛЯ АДМИНОВ) ⬇️
-            </li>
-          );
-          
-          const allTestWords = [...testWords, ...additionalTestWords];
-          const testRows = allTestWords.map((word) => {
-            const displayStatus = testDisplayStatuses[word.id];
-            const userData = testUserData[word.id];
-            
-            return (
-              <WordRow
-                key={`test-${word.id}`}
-                word={word}
-                userData={userData}
-                displayStatus={displayStatus}
-                formatTime={formatTime}
-                dictionaryId={dictionaryId}
-                editingWordId={editingWordId}
-                onToggleEdit={toggleEdit}
-                onRefreshDictionaryWords={onRefreshDictionaryWords}
-                mode="examen"
-              />
-            );
-          });
-          
-          return (
-            <>
-              <ul className="words-education-list">
-                {[...realWords, separator, ...testRows].filter(Boolean)}
-              </ul>
-              {/* Управление словами - отображается во всех категориях */}
-              <CategoryWordManagement
-                dictionaryId={dictionaryId}
-                categoryId={categoryId}
-                categoryWords={categoryWords}
-                onWordsChanged={onRefreshDictionaryWords}
-                externalShowBulkActions={showBulkActions}
-                externalSelectedWordIds={selectedWordIds}
-                onBulkActionsToggle={setShowBulkActions}
-                onSelectedWordsChange={setSelectedWordIds}
-              />
-            </>
-          );
-        }
-
         return (
           <>
             <ul className="words-education-list">
@@ -1037,6 +991,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           </>
         );
       })()}
+        </ExamenErrorBoundary>
+      )}
       
       {/* Модальное окно изменения порядка слов */}
       {showReorder && (() => {

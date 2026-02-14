@@ -85,10 +85,6 @@ const TrainingInterface = ({
         ×
       </button>
       
-      <h3 className="training-title">
-        {currentMode ? 'Переведите на латышский:' : 'Переведите на русский:'}
-      </h3>
-      
       <div className="training-word-display">
         {currentMode ? (
           <>
@@ -167,10 +163,18 @@ const TrainingInterface = ({
       {showResult && (
         <div>
           <div className={`training-result ${isCorrect ? 'correct' : 'incorrect'}`}>
-            {isCorrect ? '✅ Правильно!' : '❌ Неправильно'}
+            {isCorrect ? '✅ Правильно!' : (
+              <>
+                ❌ Неправильно:
+                {userAnswer && userAnswer.trim() && (
+                  <div style={{ marginTop: '4px', fontSize: '1.1em' }}>{userAnswer.trim()}</div>
+                )}
+              </>
+            )}
           </div>
           {!isCorrect && (
-            <div className="training-correct-answer">
+            <>
+              <div className="training-correct-answer">
               <strong>Правильный ответ:</strong>
               {currentMode ? (
                 <div
@@ -192,7 +196,8 @@ const TrainingInterface = ({
                   {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
                 </span>
               )}
-            </div>
+              </div>
+            </>
           )}
           <div className="training-controls">
             <button

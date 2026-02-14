@@ -1,5 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useRef, useEffect, memo } from 'react';
+
+// Изолируем dangerouslySetInnerHTML: React не управляет этим DOM, при ре-рендере родителя
+// может возникнуть removeChild. Мемоизация предотвращает лишние обновления.
+const PopoverHtmlContent = memo(({ html }) => (
+  <div className="word-info-popover__content" dangerouslySetInnerHTML={{ __html: html || '' }} />
+));
 import WordEditor from '../WordEditor';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
 
@@ -96,8 +101,9 @@ const WordRow = ({
         }
       }}
     >
-      {/* Слово */}
+      {/* Слово — key принуждает remount при смене режима, избегая removeChild */}
       <span className="words-education-list__word">
+        <span key={displayStatus.cooldownRevert ? 'cooldown' : 'ready'}>
         {displayStatus.cooldownRevert ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
             ⏱️ {formatTime(displayStatus.cooldownRevert)}
@@ -117,11 +123,13 @@ const WordRow = ({
             )}
           </span>
         )}
+        </span>
       </span>
       
-      {/* Перевод 1 */}
+      {/* Перевод 1 — key принуждает remount при смене режима */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
+        <span key={displayStatus.cooldownDirect ? 'cooldown' : 'ready'}>
         {displayStatus.cooldownDirect ? (
           <span style={{ color: '#ff9800', fontWeight: 'bold' }}>
             ⏱️ {formatTime(displayStatus.cooldownDirect)}
@@ -141,6 +149,7 @@ const WordRow = ({
             )}
           </span>
         )}
+        </span>
       </span>
       
       {/* Перевод 2 */}
@@ -211,21 +220,17 @@ const WordRow = ({
         <span className="words-education-list__info-hint" title="Подсказка">?</span>
       )}
 
-      {showInfoPopover && !isEditingThisRow && word.info && String(word.info).trim() && createPortal(
-        <div className="word-info-popover-backdrop" aria-hidden="true">
+      {showInfoPopover && !isEditingThisRow && word.info && String(word.info).trim() && (
+        <div className="word-info-popover-backdrop" aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 100000 }}>
           <div
             ref={popoverRef}
             className="word-info-popover"
             role="dialog"
             aria-label="Подсказка"
           >
-            <div
-              className="word-info-popover__content"
-              dangerouslySetInnerHTML={{ __html: word.info }}
-            />
+            <PopoverHtmlContent html={word.info} />
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {editingWordId === word.id && (
@@ -242,4 +247,23 @@ const WordRow = ({
   );
 };
 
-export default WordRow;
+// Пропускаем ре-рендер при редактировании, если изменились только displayStatus/formatTime
+// (избегаем конфликта ReactQuill с обновлениями из setCurrentTime)
+function arePropsEqual(prev, next) {
+  const isEditingPrev = prev.editingWordId === prev.word?.id;
+  const isEditingNext = next.editingWordId === next.word?.id;
+  if (isEditingPrev && isEditingNext && prev.word?.id === next.word?.id) {
+    return (
+      prev.word === next.word &&
+      prev.userData === next.userData &&
+      prev.editingWordId === next.editingWordId &&
+      prev.dictionaryId === next.dictionaryId &&
+      prev.categoryIdForDelete === next.categoryIdForDelete &&
+      prev.showCheckbox === next.showCheckbox &&
+      prev.isSelected === next.isSelected
+    );
+  }
+  return false;
+}
+
+export default memo(WordRow, arePropsEqual);

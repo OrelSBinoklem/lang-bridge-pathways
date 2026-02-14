@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 
@@ -141,8 +140,8 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
         </div>
       </div>
 
-      {showInfoModal && createPortal(
-        <div className="info-wysiwyg-modal-overlay">
+      {showInfoModal && (
+        <div className="info-wysiwyg-modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100001 }}>
           <div className="info-wysiwyg-modal">
             <div className="info-wysiwyg-modal-header">
               <span>Подсказка — визуальный редактор</span>
@@ -160,8 +159,7 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
               />
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       <div className="field-row">
