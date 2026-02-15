@@ -775,13 +775,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           
           <div className="training-control-buttons">
             <button
-              onClick={refreshCurrentTime}
-              className="training-help-button"
-              title="Обновить отображение таймеров отката"
-            >
-              ⏱️ Обновить таймеры
-            </button>
-            <button
               onClick={() => setShowHelp(true)}
               className="training-help-button"
               title="Показать справку"
