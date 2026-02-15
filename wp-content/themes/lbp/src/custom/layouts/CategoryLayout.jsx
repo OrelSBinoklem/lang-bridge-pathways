@@ -48,16 +48,24 @@ const CategoryLayout = ({
   const checkGroupWords = async (wordIds, answers, isRevert = false) => {
     const results = {};
     let hasChanges = false;
-    
-    console.log('🔍 checkGroupWords начало', { wordIds, isRevert });
-    
-    for (const wordId of wordIds) {
+    const seen = new Set();
+    const uniqueWordIds = wordIds.filter(id => {
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+
+    for (const wordId of uniqueWordIds) {
       const word = dictionaryWordsById[wordId];
       if (!word) {
         console.warn(`⚠️ Слово ${wordId} не найдено`);
         continue;
       }
-      
+      // Не отправляем на сервер слова, которые сейчас на откате (таймер)
+      const displayStatus = displayStatuses[wordId];
+      const onCooldown = isRevert ? displayStatus?.cooldownRevert : displayStatus?.cooldownDirect;
+      if (onCooldown) continue;
+
       const answer = answers[wordId] || '';
       console.log(`📝 Слово ${wordId}: ответ = "${answer}"`);
       
@@ -140,22 +148,37 @@ const CategoryLayout = ({
   };
   
   /**
-   * Создаём эффективный индекс: { [categoryId]: { [word]: wordObject } }
+   * Индекс: { [categoryId]: { [word]: wordObject } }
+   * При дубликатах word.word сохраняем массив — берём слово из words (порядок категории)
    */
   const wordIndexByCategory = {};
+  // Сначала заполняем из words категории (приоритет), чтобы при дубликатах брать нужное
+  if (words && words.length > 0) {
+    const catId = category?.id;
+    if (catId != null) {
+      wordIndexByCategory[catId] = {};
+      words.forEach(word => {
+        if (!wordIndexByCategory[catId][word.word]) {
+          wordIndexByCategory[catId][word.word] = word;
+        }
+      });
+    }
+  }
   dictionaryWords.forEach(word => {
     if (Array.isArray(word.category_ids)) {
       word.category_ids.forEach(catId => {
         if (!wordIndexByCategory[catId]) {
           wordIndexByCategory[catId] = {};
         }
-        wordIndexByCategory[catId][word.word] = word;
+        if (!wordIndexByCategory[catId][word.word]) {
+          wordIndexByCategory[catId][word.word] = word;
+        }
       });
     }
   });
-  
+
   /**
-   * Получить слово по тексту из текущей категории
+   * Получить слово по тексту из текущей категории (при дубликатах — приоритет у words)
    */
   const getWordByText = (wordText, categoryId = category.id) => {
     return wordIndexByCategory[categoryId]?.[wordText] || null;

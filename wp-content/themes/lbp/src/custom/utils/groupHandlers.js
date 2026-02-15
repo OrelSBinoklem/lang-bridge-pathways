@@ -5,9 +5,10 @@ import axios from 'axios';
  * Хелпер для создания функций проверки групп
  */
 export const createGroupCheckHandlers = (groupWords, groupCheck, checkGroupWords, getWordIdByText, isRevert = false) => {
-  const handleCheck = useCallback(async () => {
-    // Фильтруем только валидные wordId (исключаем 0 и null)
-    const wordIds = groupWords.words
+  // wordsToCheck — опционально: если передан, проверяем только эти слова (для verb: один глагол)
+  const handleCheck = useCallback(async (wordsToCheck) => {
+    const words = Array.isArray(wordsToCheck) && wordsToCheck.length > 0 ? wordsToCheck : groupWords.words;
+    const wordIds = words
       .map(word => getWordIdByText(word))
       .filter(id => id && id !== 0);
     
@@ -29,8 +30,9 @@ export const createGroupCheckHandlers = (groupWords, groupCheck, checkGroupWords
     });
   }, [groupWords.words, groupCheck, checkGroupWords, getWordIdByText, isRevert]);
 
-  const handleReset = useCallback(() => {
-    const wordIds = groupWords.words.map(word => getWordIdByText(word) || 0);
+  const handleReset = useCallback((wordsToReset) => {
+    const words = Array.isArray(wordsToReset) && wordsToReset.length > 0 ? wordsToReset : groupWords.words;
+    const wordIds = words.map(word => getWordIdByText(word) || 0);
     groupCheck.reset(wordIds);
   }, [groupWords.words, groupCheck, getWordIdByText]);
 

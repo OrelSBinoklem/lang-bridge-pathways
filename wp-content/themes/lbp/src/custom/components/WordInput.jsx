@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import WordEditor from '../../WordEditor';
 import { useAdminMode } from '../contexts/AdminModeContext';
 
@@ -59,6 +59,10 @@ const WordInput = ({
       padding: '4px 8px',
       fontSize: '13px',
       width: '140px',
+      minWidth: '140px',
+      maxWidth: '140px',
+      boxSizing: 'border-box',
+      flexShrink: 0,
       fontFamily: 'inherit',
       textAlign: 'center',
     };
@@ -75,37 +79,49 @@ const WordInput = ({
       padding: '4px 8px',
       fontSize: '13px',
       width: '140px',
+      minWidth: '140px',
+      maxWidth: '140px',
+      boxSizing: 'border-box',
+      flexShrink: 0,
       textAlign: 'center',
       color: '#ff9800',
       fontWeight: 'bold',
       backgroundColor: '#fff3e0',
+      display: 'inline-block',
     };
   };
   
   return (
-    <div style={{ 
+    <div className="word-input" style={{ 
       display: 'flex', 
       alignItems: 'center', 
       gap: '4px',
-      padding: '2px 0px'
+      padding: '2px 0px',
+      minWidth: '140px',
+      flexShrink: 0
     }}>
       
-      {/* Поле ввода или таймер отката */}
+      {/* Поле ввода или таймер — key избегает removeChild; minWidth сохраняет фикс. ширину */}
+      <span key={displayStatus.cooldownRevert ? 'cooldown' : displayStatus.showWord ? 'word' : onChange ? 'input' : 'hidden'} style={{ display: 'inline-block', width: '140px', minWidth: '140px', maxWidth: '140px', flexShrink: 0 }}>
       {displayStatus.cooldownRevert ? (
-        // Показываем таймер отката вместо поля ввода
         <span style={getTimerStyle()}>
           ⏱️ {formatTime(displayStatus.cooldownRevert)}
         </span>
       ) : displayStatus.showWord ? (
-        // Если слово уже показано - показываем его
+        // Если слово уже показано — фикс. ширина 140px
         <span style={{
           border: '1px solid #ced4da',
           borderRadius: '3px',
           padding: '4px 8px',
           fontSize: '13px',
           width: '140px',
+          minWidth: '140px',
+          maxWidth: '140px',
+          boxSizing: 'border-box',
+          flexShrink: 0,
           textAlign: 'center',
           backgroundColor: '#f5f5f5',
+          display: 'inline-block',
         }}>
           {word.word}
         </span>
@@ -149,14 +165,19 @@ const WordInput = ({
           )}
         </span>
       ) : (
-        // Если нет onChange - показываем скрытое слово
+        // Если нет onChange — скрытое слово, фикс. ширина
         <span className="words-hidden-text" style={{
           border: '1px solid #ced4da',
           borderRadius: '3px',
           padding: '4px 8px',
           fontSize: '13px',
           width: '140px',
+          minWidth: '140px',
+          maxWidth: '140px',
+          boxSizing: 'border-box',
+          flexShrink: 0,
           textAlign: 'center',
+          display: 'inline-block',
         }}>
           {userData && userData.mode_education_revert === 1 ? (
             <span className="learning-mode-text">
@@ -169,6 +190,7 @@ const WordInput = ({
           )}
         </span>
       )}
+      </span>
 
       {/* Кнопка редактирования (только для админов) */}
       {showEditButton && isAdminModeActive && (
@@ -197,5 +219,22 @@ const WordInput = ({
   );
 };
 
-export default WordInput;
+// Пропуск ре-рендера при редактировании (избегаем removeChild с ReactQuill)
+function arePropsEqual(prev, next) {
+  const isEditingPrev = prev.editingWordId === prev.word?.id;
+  const isEditingNext = next.editingWordId === next.word?.id;
+  if (isEditingPrev && isEditingNext && prev.word?.id === next.word?.id) {
+    return (
+      prev.word === next.word &&
+      prev.userData === next.userData &&
+      prev.editingWordId === next.editingWordId &&
+      prev.value === next.value &&
+      prev.highlightCorrect === next.highlightCorrect &&
+      prev.highlightIncorrect === next.highlightIncorrect
+    );
+  }
+  return false;
+}
+
+export default memo(WordInput, arePropsEqual);
 

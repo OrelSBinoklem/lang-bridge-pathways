@@ -196,8 +196,18 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
                           <button onClick={() => handleStartLearning(allWords, verbKey)} className="btn-start-learning">📚 Начать обучение</button>
                         ) : (
                           <>
-                            <button onClick={handlers.handleCheck} className="btn-check-group">✓ Проверить</button>
-                            <button onClick={() => setInputValues({})} className="btn-reset-group">🔄 Очистить поля</button>
+                            <button onClick={() => handlers.handleCheck(allWords)} className="btn-check-group">✓ Проверить</button>
+                            <button onClick={() => {
+                              handlers.handleReset(allWords);
+                              setInputValues(prev => {
+                                const next = { ...prev };
+                                allWords.forEach(w => {
+                                  const id = getWordIdByText(w);
+                                  if (id) delete next[id];
+                                });
+                                return next;
+                              });
+                            }} className="btn-reset-group">🔄 Очистить поля</button>
                           </>
                         )}
                       </div>

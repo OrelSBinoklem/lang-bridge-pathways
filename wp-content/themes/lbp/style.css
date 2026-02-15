@@ -4747,7 +4747,6 @@ body.webgl-gui-visible .dg.ac {
 .verb-rows {
   background-color: white;
   border-radius: 2px;
-  overflow: hidden;
   font-size: 12px;
 }
 
@@ -4776,7 +4775,11 @@ body.webgl-gui-visible .dg.ac {
   align-items: center;
 }
 
+.word-input {
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
 .word-input.empty {
   width: 140px;
-  flex-shrink: 0;
 }
