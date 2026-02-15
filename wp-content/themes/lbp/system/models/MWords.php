@@ -707,30 +707,39 @@ function reset_training_category_data($user_id, $category_id = null, $word_ids =
  * Создаёт записи для слов без БД данных
  * 
  * @param int $user_id ID пользователя
- * @param int $category_id ID категории
+ * @param int|int[] $category_id_or_ids ID категории или массив ID (категория + подкатегории)
  * @return bool
  */
-function set_category_to_easy_mode($user_id, $category_id) {
+function set_category_to_easy_mode($user_id, $category_id_or_ids) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
     $words_table = $wpdb->prefix . 'd_words';
     $word_category_table = $wpdb->prefix . 'd_word_category';
-    
-    error_log("🎓 set_category_to_easy_mode: user_id=$user_id, category_id=$category_id");
-    
-    // Получаем все слова из категории
-    $word_ids = $wpdb->get_col($wpdb->prepare("
-        SELECT w.id 
-        FROM $words_table AS w
-        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
-        WHERE wc.category_id = %d
-    ", $category_id));
-    
-    if (empty($word_ids)) {
-        error_log("⚠️ Нет слов в категории $category_id");
+
+    $category_ids = is_array($category_id_or_ids) ? array_map('intval', $category_id_or_ids) : [intval($category_id_or_ids)];
+    $category_ids = array_filter($category_ids);
+
+    error_log("🎓 set_category_to_easy_mode: user_id=$user_id, category_ids=" . implode(',', $category_ids));
+
+    if (empty($category_ids)) {
         return false;
     }
-    
+
+    $placeholders = implode(',', array_fill(0, count($category_ids), '%d'));
+    $query = $wpdb->prepare("
+        SELECT DISTINCT w.id
+        FROM $words_table AS w
+        INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+        WHERE wc.category_id IN ($placeholders)
+    ", ...$category_ids);
+
+    $word_ids = $wpdb->get_col($query);
+
+    if (empty($word_ids)) {
+        error_log("⚠️ Нет слов в категориях " . implode(',', $category_ids));
+        return false;
+    }
+
     error_log("📚 Найдено слов: " . count($word_ids));
     
     $updated_count = 0;

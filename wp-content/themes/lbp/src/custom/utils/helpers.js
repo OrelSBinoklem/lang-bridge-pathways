@@ -319,11 +319,14 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   const directLearned = userData.correct_attempts >= 2;
   const revertLearned = userData.correct_attempts_revert >= 2;
   const hasAnyAttempts = userData.attempts > 0 || userData.attempts_revert > 0;
-  
+  // В лёгком режиме (mode_education/mode_education_revert == 1) не считаем слово выученным
+  const inEasyMode = Number(userData.mode_education) === 1 || Number(userData.mode_education_revert) === 1;
+  const fullyLearned = (directLearned && revertLearned) && !inEasyMode;
+
   return {
     showWord: revertLearned,
     showTranslation: directLearned,
-    fullyLearned: directLearned && revertLearned,
+    fullyLearned,
     hasAttempts: hasAnyAttempts,
     cooldownDirect: cooldownDirect,
     cooldownRevert: cooldownRevert,

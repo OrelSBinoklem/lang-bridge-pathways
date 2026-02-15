@@ -517,13 +517,23 @@ class WordsAjaxHandler {
             wp_die();
         }
 
-        $category_id = intval($_POST['category_id'] ?? 0);
-        if (!$category_id) {
+        $category_ids = [];
+        if (!empty($_POST['category_ids'])) {
+            $decoded = json_decode(stripslashes($_POST['category_ids']), true);
+            if (is_array($decoded)) {
+                $category_ids = array_map('intval', $decoded);
+            }
+        }
+        if (empty($category_ids) && isset($_POST['category_id'])) {
+            $category_ids = [intval($_POST['category_id'])];
+        }
+        $category_ids = array_filter($category_ids);
+        if (empty($category_ids)) {
             wp_send_json_error(['message' => 'Не передан ID категории']);
             wp_die();
         }
 
-        $result = set_category_to_easy_mode($user_id, $category_id);
+        $result = set_category_to_easy_mode($user_id, $category_ids);
         if ($result) {
             wp_send_json_success(['message' => 'Категория переведена в режим лёгкого обучения']);
         } else {

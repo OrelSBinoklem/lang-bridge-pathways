@@ -73,15 +73,16 @@ const WordRow = ({
     setShowInfoPopover((v) => !v);
   };
 
-  // Рендер индикатора прогресса
+  // Рендер индикатора прогресса (в лёгком режиме не показываем ✓ как выученное)
+  const inEasyMode = Number(displayStatus.modeEducation) === 1 || Number(displayStatus.modeEducationRevert) === 1;
   const renderProgressIndicator = () => {
     return userData && displayStatus.hasAttempts ? (
       <span className={`words-progress-indicator ${
-        displayStatus.fullyLearned ? 'fully-learned' : 
-        (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
+        displayStatus.fullyLearned ? 'fully-learned' :
+        !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
       }`}>
         {displayStatus.fullyLearned ? "✓" :
-         (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
+         !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
          <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
       </span>
     ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
@@ -109,7 +110,13 @@ const WordRow = ({
             ⏱️ {formatTime(displayStatus.cooldownRevert)}
           </span>
         ) : displayStatus.showWord ? (
-          word.word
+          userData && Number(userData.mode_education_revert) === 1 ? (
+            <span className="learning-mode-text">
+              <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}>{word.word}</span>
+            </span>
+          ) : (
+            word.word
+          )
         ) : (
           <span className="words-hidden-text">
             {userData && userData.mode_education_revert === 1 ? (
@@ -135,7 +142,13 @@ const WordRow = ({
             ⏱️ {formatTime(displayStatus.cooldownDirect)}
           </span>
         ) : displayStatus.showTranslation ? (
-          word.translation_1
+          userData && Number(userData.mode_education) === 1 ? (
+            <span className="learning-mode-text">
+              <span style={{ color: '#333', fontSize: '16px', fontWeight: 'normal' }}>{word.translation_1}</span> <span className="learning-mode-icon">📚</span>
+            </span>
+          ) : (
+            word.translation_1
+          )
         ) : (
           <span className="words-hidden-text">
             {userData && userData.mode_education === 1 ? (

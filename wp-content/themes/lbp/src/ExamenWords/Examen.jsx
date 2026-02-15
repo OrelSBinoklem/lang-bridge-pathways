@@ -255,13 +255,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
     trainingWords.forEach(word => {
       const userData = userWordsData[word.id];
-      
+      const easyDirect = Number(userData?.mode_education) === 1;
+      const easyRevert = Number(userData?.mode_education_revert) === 1;
+
       if (!userData) {
-        // Если нет данных, добавляем в прямые
         directWords.push({ word, mode: false });
       } else {
-        const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
-        const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+        const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+        const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
 
         if (directAvailable) {
           directWords.push({ word, mode: false });
@@ -585,24 +586,20 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }
   };
 
-  // Проверка доступности слова для тренировки в указанном режиме
+  // Проверка доступности слова для тренировки в указанном режиме (учёт лёгкого режима)
   const isWordAvailableForMode = (word, mode) => {
     const userData = userWordsData[word.id];
-    
-    if (!userData) {
-      // Если нет данных, доступен только прямой перевод
-      return !mode;
-    }
-    
+    if (!userData) return !mode;
+
+    const easyDirect = Number(userData.mode_education) === 1;
+    const easyRevert = Number(userData.mode_education_revert) === 1;
+
     if (mode) {
-      // Обратный перевод
-      const revertAvailable = userData.correct_attempts_revert < 2 && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+      const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
       return revertAvailable;
-    } else {
-      // Прямой перевод
-      const directAvailable = userData.correct_attempts < 2 && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
-      return directAvailable;
     }
+    const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+    return directAvailable;
   };
 
   const handleNextWord = () => {
@@ -718,12 +715,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setAttemptCount(0);
   };
 
-  // Лёгкая тренировка - установить mode_education = 1 для всех слов
+  // Лёгкая тренировка — mode_education = 1 для всех слов категории и подкатегорий
   const handleEasyTraining = async () => {
     if (!categoryId || categoryId === 0) {
       alert('Выберите категорию');
       return;
     }
+    const idsToUpdate = allCategoryIds.length > 0 ? allCategoryIds : [categoryId];
 
     if (!confirm('Перевести все слова категории в режим лёгкой тренировки? Откат будет 30 минут вместо 20 часов.')) {
       return;
@@ -732,12 +730,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     try {
       const formData = new FormData();
       formData.append('action', 'set_category_to_easy_mode');
-      formData.append('category_id', categoryId);
+      formData.append('category_ids', JSON.stringify(idsToUpdate));
 
       const response = await axios.post(window.myajax.url, formData);
-      
+
       if (response.data.success) {
-        // Обновляем данные пользователя
         if (onRefreshUserData) {
           await onRefreshUserData();
         }
