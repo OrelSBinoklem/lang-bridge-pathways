@@ -24,8 +24,10 @@
     "webpack-cli": "^5.0.0"
   },
   "dependencies": {
+    "@codemirror/lang-html": "^6.4.11",
     "@google-cloud/speech": "^7.0.1",
     "@ricky0123/vad-web": "^0.0.22",
+    "@uiw/react-codemirror": "^4.25.4",
     "axios": "^1.6.8",
     "dat.gui": "^0.7.9",
     "diff": "^7.0.0",

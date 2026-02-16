@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
+import CodeMirror from '@uiw/react-codemirror';
+import { html } from '@codemirror/lang-html';
 
 const INFO_MODULES = {
   toolbar: [
@@ -16,6 +18,11 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
   const [status, setStatus] = useState(null);
   const [infoWysiwyg, setInfoWysiwyg] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showInfoHtmlModal, setShowInfoHtmlModal] = useState(false);
+
+  const onInfoHtmlChange = useCallback((value) => {
+    setFormData((prev) => ({ ...prev, info: value }));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -102,43 +109,56 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords }) =
             <button
               type="button"
               className={`info-mode-btn ${!infoWysiwyg ? 'is-active' : ''}`}
-              onClick={() => { setInfoWysiwyg(false); setShowInfoModal(false); }}
+              onClick={() => { setInfoWysiwyg(false); setShowInfoModal(false); setShowInfoHtmlModal(true); }}
             >
               HTML
             </button>
             <button
               type="button"
               className={`info-mode-btn ${infoWysiwyg ? 'is-active' : ''}`}
-              onClick={() => { setInfoWysiwyg(true); setShowInfoModal(true); }}
+              onClick={() => { setInfoWysiwyg(true); setShowInfoHtmlModal(false); setShowInfoModal(true); }}
               title="Списки, заголовки, выделение"
             >
               Визуальный
             </button>
           </div>
-          {infoWysiwyg ? (
-            <div className="info-preview">
-              {showInfoModal ? (
-                <span className="info-preview-editing">Редактируется в окне…</span>
-              ) : formData.info ? (
-                (() => {
-                  const plain = String(formData.info).replace(/<[^>]+>/g, ' ').trim();
-                  return <span>{plain.slice(0, 80)}{plain.length > 80 ? '…' : ''}</span>;
-                })()
-              ) : (
-                <span className="info-preview-empty">Нет текста</span>
-              )}
-            </div>
-          ) : (
-            <textarea
-              name="info"
-              value={formData.info || ''}
-              onChange={handleChange}
-              rows={5}
-              style={{ resize: 'vertical', minHeight: '5em' }}
-            />
-          )}
+          <div className="info-preview">
+            {showInfoHtmlModal || showInfoModal ? (
+              <span className="info-preview-editing">Редактируется в окне…</span>
+            ) : formData.info ? (
+              (() => {
+                const plain = String(formData.info).replace(/<[^>]+>/g, ' ').trim();
+                return <span>{plain.slice(0, 80)}{plain.length > 80 ? '…' : ''}</span>;
+              })()
+            ) : (
+              <span className="info-preview-empty">Нет текста</span>
+            )}
+          </div>
         </div>
       </div>
+
+      {showInfoHtmlModal && (
+        <div className="info-wysiwyg-modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100001 }}>
+          <div className="info-wysiwyg-modal">
+            <div className="info-wysiwyg-modal-header">
+              <span>Подсказка — редактор HTML</span>
+              <button type="button" className="info-wysiwyg-modal-close" onClick={() => setShowInfoHtmlModal(false)}>
+                Готово
+              </button>
+            </div>
+            <div className="info-wysiwyg-modal-body" style={{ minHeight: '280px' }}>
+              <CodeMirror
+                value={formData.info || ''}
+                onChange={onInfoHtmlChange}
+                extensions={[html({ matchClosingTags: true, autoCloseTags: true })]}
+                placeholder="HTML-код подсказки..."
+                basicSetup={{ lineNumbers: true, foldGutter: true }}
+                style={{ fontSize: '13px' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {showInfoModal && (
         <div className="info-wysiwyg-modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100001 }}>
