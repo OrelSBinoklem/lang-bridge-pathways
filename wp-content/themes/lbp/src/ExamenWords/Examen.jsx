@@ -517,45 +517,45 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   // Обработчики для TrainingInterface. overrideAnswer — при выборе из вариантов (режим «выбор»)
   const handleCheckAnswer = async (overrideAnswer) => {
     const toCheck = (overrideAnswer != null && String(overrideAnswer).trim()) ? String(overrideAnswer).trim() : userAnswer.trim();
-    if (!currentWord || !toCheck || isUpdating) return;
+    if (!currentWord || isUpdating) return;
 
     let correct = false;
-    let correctAnswers = [];
 
-    if (currentMode) {
-      // Обратный перевод: показываем перевод, ждем слово (правильный ответ - само слово)
-      correctAnswers = [currentWord.word];
-    } else {
-      // Прямой перевод: показываем слово, ждем перевод (правильные ответы - переводы)
-      correctAnswers = [
-        currentWord.translation_1,
-        currentWord.translation_2,
-        currentWord.translation_3
-      ].filter(t => t && t !== '0');
-      
-      // Добавляем дополнительные варианты из translation_input_variable
-      if (currentWord.translation_input_variable && currentWord.translation_input_variable.trim()) {
-        const additionalVariants = currentWord.translation_input_variable
-          .split(',')
-          .map(v => v.trim())
-          .filter(v => v.length > 0);
-        correctAnswers.push(...additionalVariants);
+    // Если пользователь нажал «Посмотреть правильный ответ» (пустой ввод) — считаем неправильным, записываем попытку
+    if (toCheck) {
+      let correctAnswers = [];
+
+      if (currentMode) {
+        correctAnswers = [currentWord.word];
+      } else {
+        correctAnswers = [
+          currentWord.translation_1,
+          currentWord.translation_2,
+          currentWord.translation_3
+        ].filter(t => t && t !== '0');
+        
+        if (currentWord.translation_input_variable && currentWord.translation_input_variable.trim()) {
+          const additionalVariants = currentWord.translation_input_variable
+            .split(',')
+            .map(v => v.trim())
+            .filter(v => v.length > 0);
+          correctAnswers.push(...additionalVariants);
+        }
       }
-    }
-    
-    // Генерируем все возможные варианты для каждого правильного ответа
-    const allAcceptableVariants = [];
-    correctAnswers.forEach(answer => {
-      const variants = generateAnswerVariants(answer);
-      allAcceptableVariants.push(...variants);
-    });
+      
+      const allAcceptableVariants = [];
+      correctAnswers.forEach(answer => {
+        const variants = generateAnswerVariants(answer);
+        allAcceptableVariants.push(...variants);
+      });
 
-    const normalizedUserAnswer = normalizeString(stripParenthesesAndPunctuation(toCheck));
-    
-    correct = allAcceptableVariants.some(answer => {
-      const normalizedAnswer = normalizeString(stripParenthesesAndPunctuation(answer));
-      return normalizedAnswer === normalizedUserAnswer;
-    });
+      const normalizedUserAnswer = normalizeString(stripParenthesesAndPunctuation(toCheck));
+      
+      correct = allAcceptableVariants.some(answer => {
+        const normalizedAnswer = normalizeString(stripParenthesesAndPunctuation(answer));
+        return normalizedAnswer === normalizedUserAnswer;
+      });
+    }
 
     setIsCorrect(correct);
     

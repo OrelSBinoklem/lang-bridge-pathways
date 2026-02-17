@@ -2280,7 +2280,9 @@ h2 .small {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     z-index: 1000;
-    min-width: 400px;
+    width: 460px;
+    max-width: 100%;
+    box-sizing: border-box;
     text-align: center;
 }
 

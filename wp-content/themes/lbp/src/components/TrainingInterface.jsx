@@ -145,7 +145,7 @@ const TrainingInterface = ({
 
           <button
             onClick={() => onCheckAnswer()}
-            disabled={!userAnswer.trim() || isUpdating}
+            disabled={isUpdating}
             className="training-button"
           >
             {isUpdating ? (
@@ -153,8 +153,10 @@ const TrainingInterface = ({
                 <span className="training-button-spinner"></span>
                 Обновление...
               </>
-            ) : (
+            ) : userAnswer.trim() ? (
               'Проверить'
+            ) : (
+              'Пропустить'
             )}
           </button>
         </>
