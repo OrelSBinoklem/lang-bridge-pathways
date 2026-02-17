@@ -9,6 +9,7 @@ import { getCustomCategoryComponent } from "../custom/config/customComponents";
 import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
+import { TRAINING_CONFIG } from "../config/trainingConfig";
 
 const { useEffect, useState, useMemo, useRef } = wp.element;
 
@@ -65,6 +66,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
   const [trainingScopeIds, setTrainingScopeIds] = useState(null); // Область тренировки: null = вся категория, иначе [id подкатегории]
   const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
+  const [showRetrainingNotice, setShowRetrainingNotice] = useState(false); // Показать сообщение о режиме дообучения
+  const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
+  const [stackHasNonRetrainingWord, setStackHasNonRetrainingWord] = useState(false); // Флаг: в текущем стеке есть хотя бы одно слово НЕ в режиме дообучения (выставляется при создании стека)
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
   useEffect(() => {
@@ -88,6 +92,17 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     window.addEventListener('training-answer-mode-changed', onModeChange);
     return () => window.removeEventListener('training-answer-mode-changed', onModeChange);
   }, []);
+
+  // Фокус на кнопку «Закрыть и повторить слова» при открытии окна режима дообучения (чтобы Enter срабатывал)
+  useEffect(() => {
+    if (showRetrainingNotice) {
+      const timer = setTimeout(() => {
+        const btn = document.querySelector('.training-retraining-notice .training-retraining-btn');
+        if (btn) btn.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [showRetrainingNotice]);
 
   // Получить статус изучения для умного отображения
   const getWordDisplayStatus = (wordId) => {
@@ -408,8 +423,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       alert('Нет доступных слов для тренировки! Все слова либо изучены, либо на откате.');
       return;
     }
+
+    const hasNonRetraining = queue.some(item => {
+      const ud = userWordsData[item.word?.id];
+      if (!ud) return true;
+      const flag = item.mode ? Number(ud.mode_education_revert) : Number(ud.mode_education);
+      return flag === 0;
+    });
     
     setTrainingQueue(queue);
+    setStackHasNonRetrainingWord(hasNonRetraining);
     setCurrentQueueIndex(0);
     setTrainingPhase('direct');
     setTrainingScopeIds(scopeIds); // запоминаем область: только подкатегория или вся категория
@@ -655,34 +678,42 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           return;
         }
         
-        // Если последняя фаза была 'revert', начинаем новый цикл с 'direct' (и наоборот)
-        // Но так как buildTrainingQueue всегда формирует сначала direct, потом revert,
-        // нам нужно просто использовать новую очередь, которая уже правильно сформирована
-        setTrainingQueue(newQueue);
-        setCurrentQueueIndex(0);
+        // Показываем сообщение о режиме дообучения по настройке TRAINING_CONFIG.RETRAINING_NOTICE_MODE
         const firstItem = newQueue[0];
-        setCurrentWord(firstItem.word);
-        setCurrentMode(firstItem.mode);
-        setTrainingPhase(firstItem.phase || 'direct');
-        setUserAnswer('');
-        setShowResult(false);
-        setAttemptCount(0);
-        
-        // Возвращаем фокус: поле ввода или первая кнопка выбора (режим «выбор»)
-        setTimeout(() => {
-          if (selectionMode) {
-            // В режиме выбора фокусируемся на первой кнопке, а не на поле ввода
-            const firstChoice = document.querySelector('.training-choice-btn');
-            if (firstChoice) firstChoice.focus();
-          } else {
-            const inputField = document.querySelector('[data-training-input]');
-            if (inputField) inputField.focus();
-            else {
+        const hasNonRetrainingForNew = newQueue.some(item => {
+          const ud = userWordsData[item.word?.id];
+          if (!ud) return true;
+          const flag = item.mode ? Number(ud.mode_education_revert) : Number(ud.mode_education);
+          return flag === 0;
+        });
+        const showNotice = TRAINING_CONFIG.RETRAINING_NOTICE_MODE === 'always' || stackHasNonRetrainingWord;
+        if (showNotice) {
+          setPendingRetrainingState({ queue: newQueue, firstItem });
+          setShowRetrainingNotice(true);
+        } else {
+          setTrainingQueue(newQueue);
+          setStackHasNonRetrainingWord(hasNonRetrainingForNew);
+          setCurrentQueueIndex(0);
+          setCurrentWord(firstItem.word);
+          setCurrentMode(firstItem.mode);
+          setTrainingPhase(firstItem.phase || 'direct');
+          setUserAnswer('');
+          setShowResult(false);
+          setAttemptCount(0);
+          setTimeout(() => {
+            if (selectionMode) {
               const firstChoice = document.querySelector('.training-choice-btn');
               if (firstChoice) firstChoice.focus();
+            } else {
+              const inputField = document.querySelector('[data-training-input]');
+              if (inputField) inputField.focus();
+              else {
+                const firstChoice = document.querySelector('.training-choice-btn');
+                if (firstChoice) firstChoice.focus();
+              }
             }
-          }
-        }, 100);
+          }, 100);
+        }
         return;
       }
     }
@@ -713,6 +744,44 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
+    setShowRetrainingNotice(false);
+    setPendingRetrainingState(null);
+    setStackHasNonRetrainingWord(false);
+  };
+
+  const handleContinueRetraining = () => {
+    if (!pendingRetrainingState) return;
+    const { queue, firstItem } = pendingRetrainingState;
+    const hasNonRetrainingForNew = queue.some(item => {
+      const ud = userWordsData[item.word?.id];
+      if (!ud) return true;
+      const flag = item.mode ? Number(ud.mode_education_revert) : Number(ud.mode_education);
+      return flag === 0;
+    });
+    setTrainingQueue(queue);
+    setStackHasNonRetrainingWord(hasNonRetrainingForNew);
+    setCurrentQueueIndex(0);
+    setCurrentWord(firstItem.word);
+    setCurrentMode(firstItem.mode);
+    setTrainingPhase(firstItem.phase || 'direct');
+    setUserAnswer('');
+    setShowResult(false);
+    setAttemptCount(0);
+    setShowRetrainingNotice(false);
+    setPendingRetrainingState(null);
+    setTimeout(() => {
+      if (selectionMode) {
+        const firstChoice = document.querySelector('.training-choice-btn');
+        if (firstChoice) firstChoice.focus();
+      } else {
+        const inputField = document.querySelector('[data-training-input]');
+        if (inputField) inputField.focus();
+        else {
+          const firstChoice = document.querySelector('.training-choice-btn');
+          if (firstChoice) firstChoice.focus();
+        }
+      }
+    }, 100);
   };
 
   // Лёгкая тренировка — mode_education = 1 для всех слов категории и подкатегорий
@@ -805,7 +874,48 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
-      {trainingMode && (
+      {trainingMode && showRetrainingNotice && (
+        <div
+          className="training-interface training-retraining-notice"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleFinishTraining();
+            }
+          }}
+        >
+          <button
+            onClick={handleFinishTraining}
+            className="training-close-button"
+            title="Выйти из тренировки"
+            type="button"
+          >
+            ×
+          </button>
+          <div className="training-retraining-notice-text">
+            <p>Слова, на которые вы ответили неправильно, перешли в режим дообучения. Вы можете просмотреть и запомнить их — уделите этому хотя бы пару минут. Затем продолжайте отвечать.</p>
+          </div>
+          <div className="training-retraining-notice-buttons">
+            <button
+              type="button"
+              className="training-button"
+              onClick={handleContinueRetraining}
+            >
+              Продолжить отвечать
+            </button>
+            <button
+              type="button"
+              className="training-retraining-btn"
+              onClick={handleFinishTraining}
+            >
+              Закрыть и повторить слова
+            </button>
+          </div>
+        </div>
+      )}
+
+      {trainingMode && !showRetrainingNotice && (
         <TrainingInterface
           currentWord={currentWord}
           currentMode={currentMode}

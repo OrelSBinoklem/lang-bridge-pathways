@@ -2390,6 +2390,52 @@ h2 .small {
     margin-bottom: 15px;
 }
 
+.training-retraining-notice .training-retraining-notice-text {
+    margin: 20px 0 24px;
+    padding: 16px;
+    background: #eef7ff;
+    border-left: 4px solid #3498db;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.training-retraining-notice .training-retraining-notice-text p {
+    margin: 0;
+}
+
+.training-retraining-notice .training-retraining-notice-buttons {
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.training-retraining-notice .training-retraining-notice-buttons .training-button,
+.training-retraining-notice .training-retraining-notice-buttons .training-retraining-btn {
+    width: 100%;
+}
+
+.training-retraining-notice .training-retraining-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 2px solid #6c757d;
+    background: #fff;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.training-retraining-notice .training-retraining-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
 .training-result.correct {
     color: #28a745;
 }
