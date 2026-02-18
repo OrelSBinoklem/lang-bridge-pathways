@@ -676,9 +676,21 @@ body:has(.galleries.horizontal-mode) {
     margin-top: 30px;
 }
 
+#menu-dictionaries a,
+#menu-dictionaries .menu-item a {
+    white-space: nowrap;
+    color: #1a1a1a !important;
+}
+
+#menu-dictionaries a:hover,
+#menu-dictionaries .menu-item a:hover {
+    color: #333 !important;
+}
+
 .menu-dictionaries h2 {
     display: inline-block;
     margin-left: 86px;
+    margin-bottom: 0;
     font-family: Arial, sans-serif;
     font-size: 16px;
     font-weight: bold;
@@ -687,6 +699,7 @@ body:has(.galleries.horizontal-mode) {
 @media screen and (max-width: 767px) {
     .menu-dictionaries h2 {
         display: block;
+        margin-bottom: 0;
     }
 }
 
