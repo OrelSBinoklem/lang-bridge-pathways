@@ -7,12 +7,18 @@ require('./Dictionary.jsx');
 
 // Grammar Tables Gallery
 import GrammarTablesGallery from './GrammarTablesGallery/GrammarTablesGallery.jsx';
+import VerbSearchWithModal from './shared/components/VerbSearchWithModal.jsx';
 // Lang page modals (Общая грамматика, Понятия)
 import LangModalGrammarContent from './LangModals/LangModalGrammarContent.jsx';
 import LangModalConceptsContent from './LangModals/LangModalConceptsContent.jsx';
 
 if(document.getElementById('grammar-tables-gallery-root')) {
 	render(<GrammarTablesGallery />, document.getElementById('grammar-tables-gallery-root'));
+} else if (document.getElementById('interactive-cheat-sheet-root')) {
+	// CheatSheetHeaderPortal рендерит свой VerbSearch
+} else {
+	const hr = document.getElementById('react-header-root');
+	if (hr) render(<VerbSearchWithModal />, hr);
 }
 
 if (document.getElementById('lang-modal-184-content')) {

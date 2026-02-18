@@ -1,5 +1,7 @@
 /* ==================== VERB SEARCH COMMON STYLES ==================== */
 
+.grammar-tables-header-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+
 /* Verb search wrapper */
 .verb-search-wrapper {
     position: relative;
