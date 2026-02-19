@@ -275,6 +275,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
       if (!userData) {
         directWords.push({ word, mode: false });
+        revertWords.push({ word, mode: true });
       } else {
         const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
         const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
