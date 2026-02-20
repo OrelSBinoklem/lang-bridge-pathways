@@ -1100,6 +1100,34 @@ add_action('wp_ajax_copy_words_to_category', ['WordsAjaxHandler', 'handle_copy_w
 
 
 
+/**
+ * Проверка наличия точного перевода в Glosbe (латышский–русский).
+ * Если на странице есть фраза "нет переводов" — в словаре только автоперевод.
+ */
+function lbp_check_glosbe_has_translation() {
+    $word = isset($_POST['word']) ? trim((string) $_POST['word']) : '';
+    if ($word === '') {
+        wp_send_json_success(['hasExact' => null]);
+        return;
+    }
+    $base = 'https://ru.glosbe.com/словарь-латышский-русский/';
+    $url = $base . rawurlencode($word);
+    $response = wp_remote_get($url, [
+        'timeout' => 12,
+        'redirection' => 2,
+        'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    ]);
+    if (is_wp_error($response)) {
+        wp_send_json_success(['hasExact' => null]);
+        return;
+    }
+    $body = wp_remote_retrieve_body($response);
+    $no_translation = (stripos($body, 'нет переводов') !== false);
+    wp_send_json_success(['hasExact' => !$no_translation]);
+}
+add_action('wp_ajax_check_glosbe_has_translation', 'lbp_check_glosbe_has_translation');
+add_action('wp_ajax_nopriv_check_glosbe_has_translation', 'lbp_check_glosbe_has_translation');
+
 // NOTE: 8 - before `wp_print_head_scripts`
 add_action( 'wp_head', 'myajax_data', 8 );
 function myajax_data(){

@@ -2976,6 +2976,132 @@ h2 .small {
     color: #c62828;
 }
 
+/* Кнопка «Словарь Glosbe» у пары слов */
+.glosbe-lookup-trigger {
+    flex-shrink: 0;
+    margin-left: 8px;
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1em;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    border-radius: 4px;
+}
+.glosbe-lookup-trigger:hover {
+    opacity: 1;
+    background: rgba(33, 150, 243, 0.1);
+}
+
+/* Модальное окно Glosbe (iframe) */
+.glosbe-lookup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.glosbe-lookup-modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+.glosbe-lookup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f0f0f0;
+    color: #555;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.2s, color 0.2s;
+}
+.glosbe-lookup-close:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.glosbe-lookup-header {
+    flex-shrink: 0;
+    padding: 14px 50px 10px 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.glosbe-lookup-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+}
+
+.glosbe-lookup-badge {
+    font-size: 12px;
+    color: #e65100;
+    background: #fff3e0;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.glosbe-lookup-body {
+    padding: 16px 20px 24px;
+}
+
+.glosbe-lookup-note {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #666;
+}
+
+.glosbe-lookup-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #2196F3;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.glosbe-lookup-link:hover {
+    background: #1976D2;
+    color: #fff;
+}
+
+.glosbe-lookup-empty {
+    margin: 0;
+    color: #666;
+}
+
 .training-buttons-container {
     margin-bottom: 20px;
     display: flex;

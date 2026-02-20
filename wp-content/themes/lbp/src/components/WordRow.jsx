@@ -8,6 +8,8 @@ const PopoverHtmlContent = memo(({ html }) => (
 import WordEditor from '../WordEditor';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
 
+const GLOSBE_BASE = 'https://ru.glosbe.com/словарь-латышский-русский/';
+
 /**
  * Компонент для отображения одного слова в списке
  * 
@@ -67,10 +69,10 @@ const WordRow = ({
   }, [showInfoPopover, isEditingThisRow]);
 
   const handleRowClick = (e) => {
-    if (!showInfoHint) return;
     if (editingWordId === word.id) return;
-    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal')) return;
-    setShowInfoPopover((v) => !v);
+    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal, .words-education-list__info-hint')) return;
+    const w = word.word != null ? String(word.word).trim() : '';
+    if (w) window.open(GLOSBE_BASE + encodeURIComponent(w), '_blank');
   };
 
   // Рендер индикатора прогресса (в лёгком режиме не показываем ✓ как выученное)
@@ -93,10 +95,10 @@ const WordRow = ({
       key={word.id}
       className={showInfoHint ? 'words-education-list__row--has-info' : ''}
       onClick={handleRowClick}
-      role={showInfoHint ? 'button' : undefined}
-      tabIndex={showInfoHint ? 0 : undefined}
+      role="button"
+      tabIndex={0}
       onKeyDown={(e) => {
-        if (showInfoHint && (e.key === 'Enter' || e.key === ' ')) {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleRowClick(e);
         }
@@ -195,6 +197,19 @@ const WordRow = ({
         </span>
       )}
 
+      {showInfoHint && (
+        <span
+          className="words-education-list__info-hint"
+          title="Подсказка"
+          onClick={(e) => { e.stopPropagation(); setShowInfoPopover((v) => !v); }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setShowInfoPopover((v) => !v); } }}
+        >
+          ?
+        </span>
+      )}
+
       {showEditButton && isAdminModeActive && (
         <>
           <button
@@ -227,10 +242,6 @@ const WordRow = ({
             />
           )}
         </>
-      )}
-
-      {showInfoHint && (
-        <span className="words-education-list__info-hint" title="Подсказка">?</span>
       )}
 
       {showInfoPopover && !isEditingThisRow && word.info && String(word.info).trim() && (
