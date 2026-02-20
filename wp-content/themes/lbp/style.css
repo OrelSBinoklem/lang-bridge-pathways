@@ -2786,6 +2786,196 @@ h2 .small {
     color: #4caf50;
 }
 
+/* Мини-игра: сопоставь переводы */
+.match-game-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.match-game-modal {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    padding: 24px 24px 20px;
+}
+
+.match-game-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f0f0f0;
+    color: #555;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.match-game-close:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.match-game-title {
+    margin: 0 0 8px;
+    font-size: 20px;
+    color: #333;
+}
+
+.match-game-hint {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #666;
+}
+
+.match-game-empty {
+    margin: 0;
+    padding: 20px 0;
+    color: #666;
+    text-align: center;
+}
+
+.match-game-columns {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    min-height: 200px;
+}
+
+.match-game-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.match-game-col-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.match-game-word-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed transparent;
+    min-height: 44px;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.match-game-word-row:hover,
+.match-game-word-row:focus-within {
+    border-color: #2196F3;
+    background: #e3f2fd;
+}
+
+.match-game-word-text {
+    flex: 0 0 auto;
+    font-weight: 600;
+    color: #1a1a1a;
+    min-width: 80px;
+}
+
+.match-game-word-slot {
+    flex: 1;
+    min-height: 24px;
+}
+
+.match-game-slot-placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+.match-game-dropped {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #2196F3;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.match-game-dropped:hover {
+    background: #1976D2;
+}
+
+.match-game-translation-item {
+    padding: 10px 12px;
+    background: #e3f2fd;
+    border: 1px solid #2196F3;
+    border-radius: 8px;
+    cursor: grab;
+    font-size: 14px;
+    color: #1565C0;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.match-game-translation-item:active {
+    cursor: grabbing;
+}
+
+.match-game-translation-item:hover {
+    background: #bbdefb;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.match-game-actions {
+    text-align: center;
+    padding: 12px 0 8px;
+}
+
+.match-game-check-btn {
+    min-width: 140px;
+}
+
+.match-game-result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.match-game-result-ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.match-game-result-wrong {
+    background: #ffebee;
+    color: #c62828;
+}
+
 .training-buttons-container {
     margin-bottom: 20px;
     display: flex;

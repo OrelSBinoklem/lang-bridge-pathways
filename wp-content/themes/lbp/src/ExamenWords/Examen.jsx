@@ -3,6 +3,7 @@ import TrainingInterface from "../components/TrainingInterface";
 import WordRow from "../components/WordRow";
 import ExamenErrorBoundary from "../components/ExamenErrorBoundary";
 import HelpModal from "../components/HelpModal";
+import MatchGameModal from "../components/MatchGameModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
@@ -67,6 +68,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [trainingScopeIds, setTrainingScopeIds] = useState(null); // Область тренировки: null = вся категория, иначе [id подкатегории]
   const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
   const [showRetrainingNotice, setShowRetrainingNotice] = useState(false); // Показать сообщение о режиме дообучения
+  const [showMatchGame, setShowMatchGame] = useState(false); // Мини-игра: сопоставь переводы
   const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
   const [stackHasNonRetrainingWord, setStackHasNonRetrainingWord] = useState(false); // Флаг: в текущем стеке есть хотя бы одно слово НЕ в режиме дообучения (выставляется при создании стека)
 
@@ -211,9 +213,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2;
   };
 
-  // Получить слова для тренировки. scopeCategoryIds = [categoryId, ...subs] или [subId].
-  // Для главной кнопки: сначала слова из корня категории 2 уровня, затем из подкатегорий. Для подкатегории — только её слова.
-  const getTrainingWords = (scopeCategoryIds = null) => {
+  // Список слов категории (без фильтра по готовности к тренировке). scopeCategoryIds = allCategoryIds или [subId].
+  const getCategoryWordsList = (scopeCategoryIds = null) => {
     const ids = scopeCategoryIds != null ? scopeCategoryIds : allCategoryIds;
     const seen = new Set();
     const list = [];
@@ -228,7 +229,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         if (wordBelongsToCategoryId(w, subNum)) list.push(w);
       });
     } else {
-      // Главная кнопка: 1) слова из корня категории 2 уровня, 2) слова из подкатегорий
       if (!Number.isNaN(catIdNum) && categoryId !== 0) {
         dictionaryWords.forEach(w => {
           if (wordBelongsToCategoryId(w, catIdNum) && !seen.has(w.id)) {
@@ -248,14 +248,24 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         });
       });
     }
+    return list;
+  };
 
-    const categoryWords = list;
-    const trainingWords = categoryWords.filter(word => {
+  // Получить слова для тренировки (категория + фильтр по готовности).
+  const getTrainingWords = (scopeCategoryIds = null) => {
+    const categoryWords = getCategoryWordsList(scopeCategoryIds);
+    return categoryWords.filter(word => {
       const displayStatus = getWordDisplayStatus(word.id);
       return !displayStatus.fullyLearned && (!displayStatus.cooldownDirect || !displayStatus.cooldownRevert);
     });
-    return trainingWords;
   };
+
+  // Слова в режиме дообучения для мини-игры (не выученные); если таких нет — все слова категории.
+  const retrainingWordsForGame = useMemo(() => {
+    const list = getCategoryWordsList(allCategoryIds);
+    const notLearned = list.filter(w => !getWordDisplayStatus(w.id).fullyLearned);
+    return notLearned.length > 0 ? notLearned : list;
+  }, [dictionaryWords, allCategoryIds, categoryId, userWordsData, currentTime]);
 
   // Формирование очереди тренировки. scopeCategoryIds — вся категория (allCategoryIds) или одна подкатегория
   const buildTrainingQueue = (scopeCategoryIds = null) => {
@@ -839,6 +849,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           >
             😊 Лёгкая тренировка
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowMatchGame(true)}
+            className="training-start-button"
+            title="Мини-игра: сопоставь слова и переводы (не влияет на прогресс)"
+            style={{ backgroundColor: '#2196F3' }}
+          >
+            🎮 Мини-игра
+          </button>
           
           <div className="training-control-buttons">
             <button
@@ -874,6 +894,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       )}
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      <MatchGameModal isOpen={showMatchGame} onClose={() => setShowMatchGame(false)} words={retrainingWordsForGame} />
 
       {trainingMode && showRetrainingNotice && (
         <div
