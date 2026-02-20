@@ -21,6 +21,7 @@ if(document.getElementById('react-app-dictionary')) {
 		const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 		const [dictionaryInfo, setDictionaryInfo] = useState(null);
 		const [loadingDictionaryInfo, setLoadingDictionaryInfo] = useState(false);
+		const [categoryBreadcrumb, setCategoryBreadcrumb] = useState({ level1Name: '', level2Name: '' });
 		
 		const initialLoadDone = useRef(false); // Флаг первой загрузки
 
@@ -322,8 +323,22 @@ if(document.getElementById('react-app-dictionary')) {
 							title="Вернуться к категориям"
 							style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
 						>
-							{dictionaryInfo.name || 'Словарь'}
-							<span className="words-count"> ({dictionaryInfo.words} слов)</span>
+							{categoryBreadcrumb.level1Name || categoryBreadcrumb.level2Name ? (
+								<>
+									{[categoryBreadcrumb.level1Name, categoryBreadcrumb.level2Name].filter(Boolean).map((name, i) => (
+										<span key={i}>
+											{i > 0 && <span className="dictionary-breadcrumb-sep" aria-hidden="true"> → </span>}
+											{name}
+										</span>
+									))}
+									<span className="words-count"> ({dictionaryInfo.words} слов)</span>
+								</>
+							) : (
+								<>
+									{dictionaryInfo.name || 'Словарь'}
+									<span className="words-count"> ({dictionaryInfo.words} слов)</span>
+								</>
+							)}
 						</a>
 					) : (
 							<>
@@ -346,6 +361,7 @@ if(document.getElementById('react-app-dictionary')) {
 			onRefreshDictionaryWords={refreshDictionaryWords}
 			categories={categories}
 			loadingCategories={loadingCategories}
+			onExamenCategoryChange={setCategoryBreadcrumb}
 		/>
 		
 		{/* Кнопки для админов */}

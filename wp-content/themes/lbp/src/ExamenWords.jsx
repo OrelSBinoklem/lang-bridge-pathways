@@ -6,7 +6,21 @@ import useDictionary from './hooks/useDictionary';
 import CategoryTree from "./EducationWords/CategoryTree";
 import Examen from "./ExamenWords/Examen";
 
-const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories }) => {
+// Найти категорию по id в дереве и вернуть узел и родителя (для хлебных крошек)
+const findCategoryInTree = (tree, categoryId, parent = null) => {
+	if (!tree || !Array.isArray(tree)) return null;
+	const cid = parseInt(categoryId, 10);
+	for (const node of tree) {
+		if (parseInt(node.id, 10) === cid) return { node, parent };
+		if (Array.isArray(node.children) && node.children.length > 0) {
+			const found = findCategoryInTree(node.children, categoryId, node);
+			if (found) return found;
+		}
+	}
+	return null;
+};
+
+const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories, onExamenCategoryChange }) => {
 
 	const { dictionary, loading, error } = useDictionary(dictionaryId);
 
@@ -85,6 +99,23 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 	useEffect(() => {
 		categoryIdRef.current = categoryId;
 	}, [categoryId]);
+
+	// Хлебные крошки категории для заголовка словаря (уровень 1 и текущий уровень 2)
+	useEffect(() => {
+		if (!onExamenCategoryChange) return;
+		if (!showExamen || !categoryId || categoryId === 0) {
+			onExamenCategoryChange({ level1Name: '', level2Name: '' });
+			return;
+		}
+		const found = findCategoryInTree(categories, categoryId);
+		if (!found) {
+			onExamenCategoryChange({ level1Name: '', level2Name: '' });
+			return;
+		}
+		const level1Name = found.parent ? (found.parent.name || '') : '';
+		const level2Name = found.node ? (found.node.name || '') : '';
+		onExamenCategoryChange({ level1Name, level2Name });
+	}, [showExamen, categoryId, categories, onExamenCategoryChange]);
 
 	// Управляем видимостью кнопки в header через класс на body
 	useEffect(() => {

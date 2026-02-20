@@ -466,6 +466,19 @@ body:has(.galleries.horizontal-mode) {
     color: #666;
 }
 
+/* Стрелка между уровнями категорий в заголовке */
+.dictionary-info .dictionary-breadcrumb-sep {
+    margin: 0 0.4em;
+    color: #111;
+    font-weight: 900;
+    font-size: 1.1em;
+    line-height: 1;
+    vertical-align: super;
+    position: relative;
+    top: 0.35em;
+    -webkit-text-stroke: 0.35px currentColor;
+}
+
 #super-logo-bg {
     position: absolute;
     left: 50%;
