@@ -93,11 +93,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return () => window.removeEventListener('training-answer-mode-changed', onModeChange);
   }, []);
 
-  // Фокус на кнопку «Закрыть и повторить слова» при открытии окна режима дообучения (чтобы Enter срабатывал)
+  // Фокус на кнопку «Продолжить отвечать» при открытии окна режима дообучения (чтобы Enter срабатывал)
   useEffect(() => {
     if (showRetrainingNotice) {
       const timer = setTimeout(() => {
-        const btn = document.querySelector('.training-retraining-notice .training-retraining-btn');
+        const btn = document.querySelector('.training-retraining-notice .training-retraining-continue-btn');
         if (btn) btn.focus();
       }, 50);
       return () => clearTimeout(timer);
@@ -882,7 +882,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              handleFinishTraining();
+              handleContinueRetraining();
             }
           }}
         >
@@ -900,7 +900,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           <div className="training-retraining-notice-buttons">
             <button
               type="button"
-              className="training-button"
+              className="training-button training-retraining-continue-btn"
               onClick={handleContinueRetraining}
             >
               Продолжить отвечать
