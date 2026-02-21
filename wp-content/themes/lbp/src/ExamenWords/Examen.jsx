@@ -260,11 +260,18 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     });
   };
 
-  // Слова в режиме дообучения для мини-игры (не выученные); если таких нет — все слова категории.
+  // Слова для мини-игры: только те, что в режиме дообучения, лёгкой тренировки или с хотя бы одним невыученным направлением.
   const retrainingWordsForGame = useMemo(() => {
     const list = getCategoryWordsList(allCategoryIds);
-    const notLearned = list.filter(w => !getWordDisplayStatus(w.id).fullyLearned);
-    return notLearned.length > 0 ? notLearned : list;
+    const forGame = list.filter(w => {
+      const ud = userWordsData[w.id];
+      if (!ud) return true; // нет записи — показываем (ещё не тренировали)
+      const inDense = (ud.dense_remaining_direct || 0) > 0 || (ud.dense_remaining_revert || 0) > 0;
+      const inEasy = Number(ud.mode_education) === 1 || Number(ud.mode_education_revert) === 1;
+      const oneDirectionNotLearned = (ud.correct_attempts || 0) < 2 || (ud.correct_attempts_revert || 0) < 2;
+      return inDense || inEasy || oneDirectionNotLearned;
+    });
+    return forGame.length > 0 ? forGame : list;
   }, [dictionaryWords, allCategoryIds, categoryId, userWordsData, currentTime]);
 
   // Формирование очереди тренировки. scopeCategoryIds — вся категория (allCategoryIds) или одна подкатегория
