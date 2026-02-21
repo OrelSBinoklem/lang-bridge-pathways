@@ -205,17 +205,13 @@ export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, c
   const cooldownSecond = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : NORMAL_COOLDOWN_SECOND;
 
   if (correctAttempts === 0) {
-    if (modeEducation === 0) {
-      cooldownDuration = cooldownFirst;
-    }
+    cooldownDuration = cooldownFirst;   // 30 мин
   } else if (correctAttempts === 1) {
-    if (modeEducation === 0) {
-      cooldownDuration = cooldownSecond;
-    }
+    cooldownDuration = cooldownSecond;  // 20 часов
   } else if (correctAttempts >= 2) {
     return null;
   }
-  
+
   const remaining = cooldownDuration - elapsed;
   if (remaining <= 0) return null;
   

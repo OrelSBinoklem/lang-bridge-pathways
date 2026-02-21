@@ -16,33 +16,41 @@ const GLOSBE_BASE = 'https://ru.glosbe.com/словарь-латышский-р�
  * @param {object} word - Объект слова: {id, word, translation_1, translation_2, translation_3, learn_lang, category_ids, ...}
  * @param {object} userData - Данные пользователя по слову: {correct_attempts, correct_attempts_revert, mode_education, mode_education_revert, last_shown, last_shown_revert, ...}
  * @param {object} displayStatus - Статус отображения: {showWord, showTranslation, fullyLearned, hasAttempts, cooldownDirect, cooldownRevert}
+ * @param {object|null} denseMeta - Данные dense-сессии по слову
  * @param {function} formatTime - Функция форматирования времени откатов: (milliseconds) => string (например "19:30")
  * @param {number} dictionaryId - ID словаря
  * @param {number} editingWordId - ID редактируемого слова (null если ничего не редактируется)
  * @param {function} onToggleEdit - Колбэк переключения редактирования: (wordId) => void
  * @param {function} onRefreshDictionaryWords - Колбэк обновления списка слов после редактирования: () => void
+ * @param {function} [onRefreshUserData] - Колбэк обновления данных прогресса пользователя (состояние слов): () => void
  * @param {function} onDeleteWord - Колбэк удаления слова: (wordId, categoryId?) => void
  * @param {number} [categoryIdForDelete] - ID категории для удаления (если задан — удалит только из категории)
  * @param {boolean} showEditButton - Показывать кнопку редактирования ✏️ (только для админов)
  * @param {boolean} showCheckbox - Показывать чекбокс для массового выбора
  * @param {boolean} isSelected - Выбрано ли слово
  * @param {function} onToggleSelect - Колбэк переключения выбора слова
+ * @param {boolean} denseAddMode - Режим «клик по слову = добавить/убрать из плотного»
+ * @param {function} onDenseToggle - Колбэк переключения слова в плотном: (wordId) => void
  */
 const WordRow = ({
   word,
   userData,
   displayStatus,
+  denseMeta = null,
   formatTime,
   dictionaryId,
   editingWordId,
   onToggleEdit,
   onRefreshDictionaryWords,
+  onRefreshUserData,
   onDeleteWord,
   categoryIdForDelete = null,
   showEditButton = true,
   showCheckbox = false,
   isSelected = false,
-  onToggleSelect
+  onToggleSelect,
+  denseAddMode = false,
+  onDenseToggle
 }) => {
   const { isAdminModeActive } = useAdminMode();
   const [showInfoPopover, setShowInfoPopover] = useState(false);
@@ -59,7 +67,7 @@ const WordRow = ({
   const canOpenGlosbe =
     (((displayStatus.showWord && displayStatus.showTranslation) || (userData?.mode_education_revert === 1 && userData?.mode_education === 1)) &&
       !displayStatus.cooldownDirect && !displayStatus.cooldownRevert) ||
-    (userData && ((userData.dense_remaining_direct || 0) > 0 || (userData.dense_remaining_revert || 0) > 0));
+    Boolean(denseMeta);
 
   useEffect(() => {
     if (isEditingThisRow) {
@@ -77,6 +85,10 @@ const WordRow = ({
   const handleRowClick = (e) => {
     if (editingWordId === word.id) return;
     if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal, .words-education-list__info-hint')) return;
+    if (denseAddMode && onDenseToggle) {
+      onDenseToggle(word.id);
+      return;
+    }
     const w = word.word != null ? String(word.word).trim() : '';
     if (w && canOpenGlosbe) window.open(GLOSBE_BASE + encodeURIComponent(w), '_blank');
   };
@@ -99,7 +111,7 @@ const WordRow = ({
   return (
     <li
       key={word.id}
-      className={showInfoHint ? 'words-education-list__row--has-info' : ''}
+      className={`${showInfoHint ? 'words-education-list__row--has-info' : ''} ${denseMeta ? 'words-education-list__row--dense' : ''}`}
       onClick={handleRowClick}
       role="button"
       tabIndex={0}
@@ -110,6 +122,17 @@ const WordRow = ({
         }
       }}
     >
+      {denseMeta && (
+        <span className="words-education-list__dense-badge">
+          <span className="words-education-list__dense-badge-icon">🔒</span>
+          <span className="words-education-list__dense-badge-count">{denseMeta.attemptsLeft}</span>
+          {!!denseMeta.waitingRemainingSec && (
+            <span className="words-education-list__dense-badge-time">
+              ⏱️ {formatTime(denseMeta.waitingRemainingSec * 1000)}
+            </span>
+          )}
+        </span>
+      )}
       {/* Слово — key принуждает remount при смене режима, избегая removeChild */}
       <span className="words-education-list__word">
         <span key={displayStatus.cooldownRevert ? 'cooldown' : 'ready'}>
@@ -239,15 +262,16 @@ const WordRow = ({
               🗑️
             </button>
           )}
-          {showCheckbox && (
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggleSelect}
-              style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, marginLeft: '10px' }}
-            />
-          )}
         </>
+      )}
+
+      {showCheckbox && (
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onToggleSelect}
+          style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0, marginLeft: '10px' }}
+        />
       )}
 
       {showInfoPopover && !isEditingThisRow && word.info && String(word.info).trim() && (
@@ -270,6 +294,7 @@ const WordRow = ({
             word={word} 
             onClose={() => onToggleEdit(null)}
             onRefreshDictionaryWords={onRefreshDictionaryWords}
+            onRefreshUserData={onRefreshUserData}
           />
         </div>
       )}

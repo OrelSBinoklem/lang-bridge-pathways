@@ -304,6 +304,64 @@ class WordsAjaxHandler {
         wp_die();
     }
 
+    /**
+     * Получить прогресс обучения по слову для текущего админа (для редактирования в модалке).
+     */
+    public static function handle_get_word_progress_admin() {
+        $user_id = get_current_user_id();
+        if (!$user_id || !current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Доступ только для администратора']);
+            wp_die();
+        }
+        $word_id = intval($_POST['word_id'] ?? 0);
+        if (!$word_id) {
+            wp_send_json_error(['message' => 'Не передан ID слова']);
+            wp_die();
+        }
+        $progress = get_single_word_progress($user_id, $word_id);
+        $user = get_userdata($user_id);
+        wp_send_json_success([
+            'progress' => $progress,
+            'user_id' => $user_id,
+            'user_display' => $user ? $user->display_name : (string) $user_id,
+        ]);
+        wp_die();
+    }
+
+    /**
+     * Обновить прогресс обучения по слову для текущего админа.
+     */
+    public static function handle_update_word_progress_admin() {
+        $user_id = get_current_user_id();
+        if (!$user_id || !current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Доступ только для администратора']);
+            wp_die();
+        }
+        $word_id = intval($_POST['word_id'] ?? 0);
+        if (!$word_id) {
+            wp_send_json_error(['message' => 'Не передан ID слова']);
+            wp_die();
+        }
+        $data = [
+            'attempts' => isset($_POST['attempts']) ? (int) $_POST['attempts'] : null,
+            'correct_attempts' => isset($_POST['correct_attempts']) ? (int) $_POST['correct_attempts'] : null,
+            'attempts_revert' => isset($_POST['attempts_revert']) ? (int) $_POST['attempts_revert'] : null,
+            'correct_attempts_revert' => isset($_POST['correct_attempts_revert']) ? (int) $_POST['correct_attempts_revert'] : null,
+            'mode_education' => isset($_POST['mode_education']) ? (int) $_POST['mode_education'] : null,
+            'mode_education_revert' => isset($_POST['mode_education_revert']) ? (int) $_POST['mode_education_revert'] : null,
+            'last_shown' => isset($_POST['last_shown']) ? sanitize_text_field($_POST['last_shown']) : null,
+            'last_shown_revert' => isset($_POST['last_shown_revert']) ? sanitize_text_field($_POST['last_shown_revert']) : null,
+        ];
+        $data = array_filter($data, static function ($v) { return $v !== null; });
+        $result = update_single_word_progress_admin($user_id, $word_id, $data);
+        if ($result) {
+            wp_send_json_success(['message' => 'Прогресс сохранён']);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка сохранения']);
+        }
+        wp_die();
+    }
+
     public static function handle_reset_category_progress() {
         $user_id = get_current_user_id();
         if (!$user_id) {
@@ -1013,6 +1071,141 @@ class WordsAjaxHandler {
         wp_die();
     }
 
+    public static function handle_get_dense_training_state() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $no_rotate = !empty($_POST['no_rotate']);
+        $state = lbp_dense_get_state($user_id, $category_id, !$no_rotate);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    public static function handle_add_dense_training_words() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $dictionary_id = intval($_POST['dictionary_id'] ?? 0);
+        $use_random = intval($_POST['use_random'] ?? 1) ? 1 : 0;
+        $word_ids_raw = $_POST['word_ids'] ?? '';
+        $word_ids = json_decode(stripslashes($word_ids_raw), true);
+
+        if (!$category_id || !is_array($word_ids) || empty($word_ids)) {
+            wp_send_json_error(['message' => 'Некорректные данные: category_id/word_ids']);
+            wp_die();
+        }
+
+        $state = lbp_dense_add_words($user_id, $dictionary_id, $category_id, $word_ids, $use_random);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    public static function handle_remove_dense_training_word() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $word_id = intval($_POST['word_id'] ?? 0);
+        if (!$category_id || !$word_id) {
+            wp_send_json_error(['message' => 'Не переданы category_id/word_id']);
+            wp_die();
+        }
+        $state = lbp_dense_remove_word($user_id, $category_id, $word_id);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    public static function handle_dense_training_submit_answer() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $word_id = intval($_POST['word_id'] ?? 0);
+        $is_revert = (intval($_POST['is_revert'] ?? 0) !== 0) ? 1 : 0; // Строго 0 = прямой, 1 = обратный
+        $is_correct = intval($_POST['is_correct'] ?? 0);
+
+        if (!$category_id || !$word_id) {
+            wp_send_json_error(['message' => 'Не переданы category_id/word_id']);
+            wp_die();
+        }
+
+        // В режиме плотного дообучения не обновляем обычную статистику. Обновляем только dense-стеки (одно направление за запрос).
+        $state = lbp_dense_submit_answer($user_id, $category_id, $word_id, $is_revert, $is_correct);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    public static function handle_dense_training_tick() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $state = lbp_dense_get_state($user_id, $category_id);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    /**
+     * Засчитать полностью правильный ответ в мини-игре: счётчик плотного дообучения уменьшается на 1.
+     */
+    public static function handle_dense_match_game_success() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+        $state = lbp_dense_count_match_game_success($user_id, $category_id);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
+    public static function handle_clear_dense_training() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+        $category_id = intval($_POST['category_id'] ?? 0);
+        if (!$category_id) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+        $state = lbp_dense_clear_session($user_id, $category_id);
+        wp_send_json_success($state);
+        wp_die();
+    }
+
     /**
      * AJAX-метод для автоматической сортировки слов через OpenAI GPT
      */
@@ -1064,6 +1257,8 @@ add_action('wp_ajax_nopriv_get_category_tree', ['WordsAjaxHandler', 'handle_get_
 add_action('wp_ajax_update_word', ['WordsAjaxHandler', 'handle_update_word']);
 
 add_action('wp_ajax_get_user_dict_words', ['WordsAjaxHandler', 'handle_get_user_dict_words']);
+add_action('wp_ajax_get_word_progress_admin', ['WordsAjaxHandler', 'handle_get_word_progress_admin']);
+add_action('wp_ajax_update_word_progress_admin', ['WordsAjaxHandler', 'handle_update_word_progress_admin']);
 add_action('wp_ajax_reset_category_progress', ['WordsAjaxHandler', 'handle_reset_category_progress']);
 add_action('wp_ajax_update_word_progress', ['WordsAjaxHandler', 'handle_update_word_progress']);
 add_action('wp_ajax_reset_category_from_training', ['WordsAjaxHandler', 'handle_reset_category_from_training']);
@@ -1076,6 +1271,13 @@ add_action('wp_ajax_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handl
 add_action('wp_ajax_nopriv_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handle_create_easy_mode_for_new_words']);
 add_action('wp_ajax_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
 add_action('wp_ajax_nopriv_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
+add_action('wp_ajax_get_dense_training_state', ['WordsAjaxHandler', 'handle_get_dense_training_state']);
+add_action('wp_ajax_add_dense_training_words', ['WordsAjaxHandler', 'handle_add_dense_training_words']);
+add_action('wp_ajax_remove_dense_training_word', ['WordsAjaxHandler', 'handle_remove_dense_training_word']);
+add_action('wp_ajax_dense_training_submit_answer', ['WordsAjaxHandler', 'handle_dense_training_submit_answer']);
+add_action('wp_ajax_dense_training_tick', ['WordsAjaxHandler', 'handle_dense_training_tick']);
+add_action('wp_ajax_dense_match_game_success', ['WordsAjaxHandler', 'handle_dense_match_game_success']);
+add_action('wp_ajax_clear_dense_training', ['WordsAjaxHandler', 'handle_clear_dense_training']);
 
 // AJAX обработчики для управления категориями
 add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_category']);

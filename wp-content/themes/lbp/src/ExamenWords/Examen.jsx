@@ -59,9 +59,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
   const [showHelp, setShowHelp] = useState(false); // Показать справку
   const [showReorder, setShowReorder] = useState(false); // Показать инструмент изменения порядка
-  const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций
-  const [showBulkActions, setShowBulkActions] = useState(false); // Показать режим массовых операций
+  const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций (админ)
+  const [showBulkActions, setShowBulkActions] = useState(false); // Режим массовых операций (админ: чекбоксы)
+  const [denseAddMode, setDenseAddMode] = useState(false); // Режим «клик по слову = добавить/убрать из плотного»
   const [isUpdating, setIsUpdating] = useState(false); // Идёт обновление данных на сервере
+  const checkAnswerSubmittingRef = useRef(false); // Защита от двойной отправки при проверке ответа
   const [trainingQueue, setTrainingQueue] = useState([]); // Очередь пар слов для тренировки
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0); // Текущая позиция в очереди
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
@@ -71,6 +73,10 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [showMatchGame, setShowMatchGame] = useState(false); // Мини-игра: сопоставь переводы
   const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
   const [stackHasNonRetrainingWord, setStackHasNonRetrainingWord] = useState(false); // Флаг: в текущем стеке есть хотя бы одно слово НЕ в режиме дообучения (выставляется при создании стека)
+  const [denseSessionState, setDenseSessionState] = useState(null); // Новая сессия плотного дообучения (4 стека)
+  const [denseTrainingMode, setDenseTrainingMode] = useState(false); // Окно проверки работает только по dense-стекам
+  const [liveDenseRemainingSec, setLiveDenseRemainingSec] = useState(null); // Локальный обратный отсчёт для отображения в лайве (обновление раз в секунду)
+  const [denseMessagePopup, setDenseMessagePopup] = useState(null); // { title, message } — попап как в окне результата (подождать / слова пройдены)
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
   useEffect(() => {
@@ -111,6 +117,104 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return getWordDisplayStatusExamen(userWordsData[wordId], currentTime);
   };
 
+  const currentDenseCategoryId = useMemo(() => {
+    const cid = parseInt(categoryId, 10);
+    return Number.isNaN(cid) ? 0 : cid;
+  }, [categoryId]);
+
+  const dictionaryWordsById = useMemo(() => {
+    const map = {};
+    dictionaryWords.forEach(w => { map[w.id] = w; });
+    return map;
+  }, [dictionaryWords]);
+
+  const fetchDenseState = async (action = 'dense_training_tick') => {
+    if (!window.myajax || !window.myajax.is_logged_in || !currentDenseCategoryId) {
+      setDenseSessionState(null);
+      return null;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('action', action);
+      formData.append('category_id', currentDenseCategoryId);
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data?.success) {
+        setDenseSessionState(response.data.data || null);
+        return response.data.data || null;
+      }
+    } catch (err) {
+      console.error('Ошибка получения dense-состояния:', err?.message || err);
+    }
+    return null;
+  };
+
+  /** Получить состояние dense без ротации/очистки — для открытия окна тренировки без сброса сессии */
+  const fetchDenseStateForStart = async () => {
+    if (!window.myajax || !window.myajax.is_logged_in || !currentDenseCategoryId) {
+      setDenseSessionState(null);
+      return null;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('action', 'get_dense_training_state');
+      formData.append('category_id', currentDenseCategoryId);
+      formData.append('no_rotate', '1');
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data?.success) {
+        setDenseSessionState(response.data.data || null);
+        return response.data.data || null;
+      }
+    } catch (err) {
+      console.error('Ошибка получения dense-состояния:', err?.message || err);
+    }
+    return null;
+  };
+
+  const shuffleDense = (array) => shuffleArray(array);
+
+  const buildDenseQueueFromState = (state) => {
+    if (!state) return [];
+    const directIds = Array.isArray(state.dense_word_ids_direct) ? state.dense_word_ids_direct : [];
+    const revertIds = Array.isArray(state.dense_word_ids_revert) ? state.dense_word_ids_revert : [];
+    const direct = shuffleDense(directIds)
+      .map(id => dictionaryWordsById[id])
+      .filter(Boolean)
+      .map(word => ({ word, mode: false, phase: 'direct' }));
+    const revert = shuffleDense(revertIds)
+      .map(id => dictionaryWordsById[id])
+      .filter(Boolean)
+      .map(word => ({ word, mode: true, phase: 'revert' }));
+    return [...direct, ...revert];
+  };
+
+  /** Проверка вхождения ID в массив (бэкенд может вернуть числа или строки) */
+  const denseIdIn = (arr, id) => {
+    if (!Array.isArray(arr) || arr.length === 0) return false;
+    const num = Number(id);
+    if (Number.isNaN(num)) return false;
+    return arr.some((x) => Number(x) === num);
+  };
+
+  const getDenseWordMeta = (wordId) => {
+    const st = denseSessionState;
+    if (!st || !st.exists) return null;
+    const inStartDirect = denseIdIn(st.dense_word_ids_direct, wordId);
+    const inReviewDirect = denseIdIn(st.dense_review_word_ids_direct, wordId);
+    const inStartRevert = denseIdIn(st.dense_word_ids_revert, wordId);
+    const inReviewRevert = denseIdIn(st.dense_review_word_ids_revert, wordId);
+    const isDenseWord = inStartDirect || inReviewDirect || inStartRevert || inReviewRevert;
+    if (!isDenseWord) return null;
+    const displayRemaining = (liveDenseRemainingSec != null ? liveDenseRemainingSec : (st.waiting_remaining_sec ?? 0));
+    return {
+      attemptsLeft: st.attempts_left || 0,
+      waitingRemainingSec: Math.max(0, displayRemaining),
+      inStartDirect,
+      inReviewDirect,
+      inStartRevert,
+      inReviewRevert,
+    };
+  };
+
   // Вспомогательная функция для перемешивания массива
   const shuffleArray = (arr) => {
     const a = [...arr];
@@ -148,16 +252,52 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return [id, ...subcategories.map(c => parseInt(c.id, 10))];
   }, [categoryId, subcategories]);
 
+  // Плотное дообучение активно: есть ожидание или есть слова в очереди — обычную тренировку в категории блокируем
+  const isDenseActive = useMemo(() => {
+    const st = denseSessionState;
+    if (!st?.exists) return false;
+    const waiting = (liveDenseRemainingSec != null ? liveDenseRemainingSec : (st.waiting_remaining_sec ?? 0)) > 0;
+    const hasQueue = buildDenseQueueFromState(st).length > 0;
+    return waiting || hasQueue;
+  }, [denseSessionState, liveDenseRemainingSec]);
+
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
     // ID для настройки кастомных компонентов
   }, [dictionaryId, categoryId]);
 
-  // Сбрасываем выбранные слова и режим выбора при смене категории
+  // Сбрасываем выбранные слова и режимы при смене категории
   useEffect(() => {
     setSelectedWordIds([]);
     setShowBulkActions(false);
+    setDenseAddMode(false);
   }, [categoryId]);
+
+  useEffect(() => {
+    fetchDenseState('get_dense_training_state');
+  }, [currentDenseCategoryId, dictionaryWords.length]);
+
+  // Синхронизация локального счётчика с серверным waiting_remaining_sec
+  useEffect(() => {
+    const sec = denseSessionState?.waiting_remaining_sec;
+    if (sec != null && sec > 0) setLiveDenseRemainingSec(sec);
+    else if (sec === 0 || !denseSessionState?.exists) setLiveDenseRemainingSec(null);
+  }, [denseSessionState?.waiting_remaining_sec, denseSessionState?.exists]);
+
+  // Обновление счётчика плотного дообучения раз в секунду
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveDenseRemainingSec((prev) => {
+        if (prev == null || prev <= 0) return null;
+        if (prev === 1) {
+          fetchDenseState('get_dense_training_state');
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Обновляем currentTime: интервал для таймера + при возврате на вкладку
   const refreshCurrentTime = () => setCurrentTime(Date.now());
@@ -204,13 +344,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   // Форматировать время (используем функцию из helpers)
   const formatTime = formatTimeHelper;
 
-  // Проверить, изучено ли слово (correct_attempts >= 2 ИЛИ correct_attempts_revert >= 2)
+  // Слово считается выученным только когда оба направления: по 2+ правильных в прямом и в обратном
   const isWordLearned = (wordId) => {
     const userData = userWordsData[wordId];
     if (!userData) return false;
-    
-    // Показываем слово, если правильно ответили >= 2 раз хотя бы в одном направлении
-    return userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2;
+    return userData.correct_attempts >= 2 && userData.correct_attempts_revert >= 2;
   };
 
   // Список слов категории (без фильтра по готовности к тренировке). scopeCategoryIds = allCategoryIds или [subId].
@@ -348,6 +486,39 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       return;
     }
 
+    // Если есть активная dense-сессия для текущей категории — запускаем окно проверки строго в dense-режиме.
+    // Запрашиваем состояние без ротации (no_rotate), чтобы при открытии не сбрасывать сессию по 15 мин.
+    if (currentDenseCategoryId) {
+      const denseState = await fetchDenseStateForStart();
+      if (denseState?.exists) {
+        const denseQueue = buildDenseQueueFromState(denseState);
+        if (denseQueue.length > 0) {
+          setDenseTrainingMode(true);
+          setTrainingQueue(denseQueue);
+          setCurrentQueueIndex(0);
+          setTrainingPhase(denseQueue[0].phase || 'direct');
+          setTrainingScopeIds([currentDenseCategoryId]);
+          setTrainingMode(true);
+          setCurrentWord(denseQueue[0].word);
+          setCurrentMode(denseQueue[0].mode);
+          setUserAnswer('');
+          setShowResult(false);
+          setAttemptCount(0);
+          return;
+        }
+        if ((denseState.waiting_remaining_sec || 0) > 0) {
+          const mm = Math.floor((denseState.waiting_remaining_sec || 0) / 60);
+          const ss = (denseState.waiting_remaining_sec || 0) % 60;
+          setDenseMessagePopup({
+            title: 'Плотное дообучение',
+            message: `После правильного ответа нужно подождать ${mm}:${String(ss).padStart(2, '0')} до следующего раунда.`,
+          });
+          return;
+        }
+      }
+    }
+    setDenseTrainingMode(false);
+
     // Главная кнопка: используем allCategoryIds (корень + подкатегории)
     const scopeIds = subcategoryId != null
       ? [parseInt(subcategoryId, 10)]
@@ -465,30 +636,44 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setAttemptCount(0);
   };
 
-  // Обновить попытки слова на сервере
+  // Обновить попытки слова на сервере (обычный режим или плотный — не трогаем логику обычного обучения)
   const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
     try {
+      if (denseTrainingMode) {
+        const formData = new FormData();
+        formData.append('action', 'dense_training_submit_answer');
+        formData.append('category_id', currentDenseCategoryId);
+        formData.append('word_id', wordId);
+        formData.append('is_revert', isRevertMode ? 1 : 0);
+        formData.append('is_correct', isCorrect ? 1 : 0);
+        const res = await axios.post(window.myajax.url, formData);
+        if (res.data?.success) {
+          setDenseSessionState(res.data.data || null);
+          if (onRefreshUserData) await onRefreshUserData();
+        } else {
+          console.error('Ошибка dense_training_submit_answer:', res.data?.message);
+        }
+        return;
+      }
+
       const userData = userWordsData[currentWord?.id];
       let me = isRevertMode ? userData?.mode_education_revert : userData?.mode_education;
 
-			const formData = new FormData();
+      const formData = new FormData();
       formData.append("action", "update_word_attempts");
       formData.append("word_id", wordId);
       formData.append("is_revert", isRevertMode ? 1 : 0);
       formData.append("is_correct", isCorrect ? 1 : 0);
-      formData.append("is_first_attempt", me ? 0 : 1); // Первая попытка если attemptCount = 0
+      formData.append("is_first_attempt", me ? 0 : 1);
 
-			const response = await axios.post(window.myajax.url, formData);
+      const response = await axios.post(window.myajax.url, formData);
 
-			if (response.data.success) {
-        // Обновляем локальные данные пользователя и ждём завершения
-        if (onRefreshUserData) {
-          await onRefreshUserData();
-        }
-			} else {
+      if (response.data.success) {
+        if (onRefreshUserData) await onRefreshUserData();
+      } else {
         console.error('Ошибка при записи попытки:', response.data.message);
-			}
-		} catch (err) {
+      }
+    } catch (err) {
       console.error('Ошибка при отправке попытки:', err.message);
     }
   };
@@ -521,6 +706,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       const response = await axios.post(window.myajax.url, formData);
 
       if (response.data.success) {
+        await clearDenseSessionForCategory(currentDenseCategoryId);
         alert('Данные категории сброшены! Все тренировочные данные обнулены.');
         if (onRefreshUserData) {
           onRefreshUserData();
@@ -531,6 +717,49 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     } catch (err) {
       console.error('Ошибка при сбросе категории:', err);
       alert('Ошибка: ' + err.message);
+    }
+  };
+
+  /** Клик по слову в режиме «В плотное»: добавить в плотное или убрать. */
+  const handleDenseToggleWord = async (wordId) => {
+    if (!currentDenseCategoryId) return;
+    const inDense = getDenseWordMeta(wordId);
+    try {
+      if (inDense) {
+        const formData = new FormData();
+        formData.append('action', 'remove_dense_training_word');
+        formData.append('category_id', currentDenseCategoryId);
+        formData.append('word_id', wordId);
+        const response = await axios.post(window.myajax.url, formData);
+        if (response.data?.success) setDenseSessionState(response.data.data || null);
+      } else {
+        const formData = new FormData();
+        formData.append('action', 'add_dense_training_words');
+        formData.append('category_id', currentDenseCategoryId);
+        formData.append('dictionary_id', dictionaryId);
+        formData.append('word_ids', JSON.stringify([wordId]));
+        formData.append('use_random', 1);
+        const response = await axios.post(window.myajax.url, formData);
+        if (response.data?.success) setDenseSessionState(response.data.data || null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /** Сбросить плотную сессию для категории (без подтверждения). Вызывается в конце дообучения и при «Сбросить». */
+  const clearDenseSessionForCategory = async (categoryIdToClear) => {
+    if (!categoryIdToClear) return;
+    try {
+      const formData = new FormData();
+      formData.append('action', 'clear_dense_training');
+      formData.append('category_id', categoryIdToClear);
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data?.success) {
+        setDenseSessionState(response.data.data || null);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -559,6 +788,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const handleCheckAnswer = async (overrideAnswer) => {
     const toCheck = (overrideAnswer != null && String(overrideAnswer).trim()) ? String(overrideAnswer).trim() : userAnswer.trim();
     if (!currentWord || isUpdating) return;
+    if (checkAnswerSubmittingRef.current) return;
+    checkAnswerSubmittingRef.current = true;
 
     let correct = false;
 
@@ -612,6 +843,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       
       // Показываем результат только после успешного обновления
       setShowResult(true);
+      if (correct) setDenseAddMode(false); // выключить режим выбора слов для плотного после первого правильного ответа
 
       // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
       setTimeout(() => {
@@ -624,6 +856,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       console.error('Ошибка при обновлении данных:', error);
     } finally {
       setIsUpdating(false);
+      checkAnswerSubmittingRef.current = false;
     }
   };
 
@@ -643,9 +876,42 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return directAvailable;
   };
 
-  const handleNextWord = () => {
+  const handleNextWord = async () => {
     // Сбрасываем состояние обновления при переходе к следующему слову
     setIsUpdating(false);
+
+    if (denseTrainingMode) {
+      const denseState = await fetchDenseState('dense_training_tick');
+      const denseQueue = buildDenseQueueFromState(denseState);
+      if (denseQueue.length === 0) {
+        if ((denseState?.waiting_remaining_sec || 0) > 0) {
+          const mm = Math.floor((denseState.waiting_remaining_sec || 0) / 60);
+          const ss = (denseState.waiting_remaining_sec || 0) % 60;
+          setDenseMessagePopup({
+            title: 'Плотное дообучение',
+            message: `После правильного ответа нужно подождать ${mm}:${String(ss).padStart(2, '0')} до следующего раунда.`,
+          });
+        } else {
+          await clearDenseSessionForCategory(currentDenseCategoryId);
+          setDenseMessagePopup({
+            title: 'Плотное дообучение',
+            message: 'Слова пройдены для плотного дообучения.',
+          });
+        }
+        handleFinishTraining();
+        return;
+      }
+
+      setTrainingQueue(denseQueue);
+      setCurrentQueueIndex(0);
+      setCurrentWord(denseQueue[0].word);
+      setCurrentMode(denseQueue[0].mode);
+      setTrainingPhase(denseQueue[0].phase || 'direct');
+      setUserAnswer('');
+      setShowResult(false);
+      setAttemptCount(0);
+      return;
+    }
     
     // Ищем следующее доступное слово в очереди
     let nextIndex = currentQueueIndex + 1;
@@ -753,6 +1019,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   };
 
   const handleFinishTraining = () => {
+    setDenseTrainingMode(false);
     setTrainingMode(false);
     setTrainingQueue([]);
     setCurrentQueueIndex(0);
@@ -842,6 +1109,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           <button
             onClick={() => startTraining()}
             className="training-start-button"
+            title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
           >
             🎯 Начать тренировку
           </button>
@@ -866,7 +1134,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           >
             🎮 Мини-игра
           </button>
-          
+
+          <button
+            type="button"
+            onClick={() => setDenseAddMode(prev => !prev)}
+            className={`training-start-button training-start-button--dense ${denseAddMode ? 'training-start-button--dense-active' : ''}`}
+            title={denseAddMode ? 'Клик по слову — добавить/убрать из плотного. Повторный клик по кнопке — выйти' : 'Включить режим: клик по слову добавляет или убирает его из плотного дообучения'}
+          >
+            {denseAddMode ? '🔓 Выберите слова' : `🔒 В плотное (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
+          </button>
+
           <div className="training-control-buttons">
             <button
               onClick={() => setShowHelp(true)}
@@ -901,7 +1178,77 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       )}
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
-      <MatchGameModal isOpen={showMatchGame} onClose={() => setShowMatchGame(false)} words={retrainingWordsForGame} />
+      {denseMessagePopup && (
+        <div
+          className="dense-message-overlay"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}
+          onClick={() => setDenseMessagePopup(null)}
+          role="dialog"
+          aria-labelledby="dense-message-title"
+        >
+          <div
+            className="training-interface training-retraining-notice dense-message-popup"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '90vw', margin: '1rem' }}
+          >
+            <div className="training-retraining-notice-text">
+              <h3 id="dense-message-title" className="dense-message-popup-title">{denseMessagePopup.title}</h3>
+              <p className="dense-message-popup-message" style={{ whiteSpace: 'pre-wrap' }}>{denseMessagePopup.message}</p>
+            </div>
+            <div className="training-retraining-notice-buttons">
+              <button
+                type="button"
+                className="training-button training-retraining-continue-btn"
+                onClick={() => setDenseMessagePopup(null)}
+              >
+                Понятно
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <MatchGameModal
+        isOpen={showMatchGame}
+        onClose={() => setShowMatchGame(false)}
+        words={retrainingWordsForGame}
+        denseWaitingRemainingSec={liveDenseRemainingSec != null ? liveDenseRemainingSec : (denseSessionState?.waiting_remaining_sec ?? 0)}
+        onFullSuccess={async () => {
+          if (!currentDenseCategoryId) return;
+          try {
+            const formData = new FormData();
+            formData.append('action', 'dense_match_game_success');
+            formData.append('category_id', currentDenseCategoryId);
+            const res = await axios.post(window.myajax.url, formData);
+            if (res.data?.success && res.data.data) {
+              const state = res.data.data;
+              setDenseSessionState(state);
+              setDenseAddMode(false); // выключить режим выбора слов после правильного ответа в мини-игре
+              if (onRefreshUserData) onRefreshUserData();
+              // Последняя попытка: бэкенд очистил сессию (exists: false) — сразу окно об окончании, закрыть мини-игру, счётчик пропадёт
+              if (!state?.exists) {
+                setShowMatchGame(false);
+                setDenseMessagePopup({
+                  title: 'Плотное дообучение',
+                  message: 'Слова пройдены для плотного дообучения.',
+                });
+                return;
+              }
+              // Иначе попап: подождать после правильного ответа
+              const sec = state?.waiting_remaining_sec ?? 0;
+              if (sec > 0) {
+                const mm = Math.floor(sec / 60);
+                const ss = sec % 60;
+                setDenseMessagePopup({
+                  title: 'Плотное дообучение',
+                  message: `После правильного ответа нужно подождать ${mm}:${String(ss).padStart(2, '0')} до следующего раунда.`,
+                });
+              }
+            }
+          } catch (e) {
+            console.error('dense_match_game_success:', e);
+          }
+        }}
+      />
 
       {trainingMode && showRetrainingNotice && (
         <div
@@ -1019,18 +1366,21 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           const displayStatus = getWordDisplayStatus(word.id);
           const userData = userWordsData[word.id];
           const isSelected = selectedWordIds.includes(word.id);
-          const showCheckbox = showBulkActions && isAdminModeActive;
+          const showCheckbox = isAdminModeActive && showBulkActions;
+          const denseMeta = getDenseWordMeta(word.id);
           return (
             <WordRow
               key={word.id}
               word={word}
               userData={userData}
               displayStatus={displayStatus}
+              denseMeta={denseMeta}
               formatTime={formatTime}
               dictionaryId={dictionaryId}
               editingWordId={editingWordId}
               onToggleEdit={toggleEdit}
               onRefreshDictionaryWords={onRefreshDictionaryWords}
+              onRefreshUserData={onRefreshUserData}
               onDeleteWord={handleDeleteWord}
               categoryIdForDelete={catId}
               mode="examen"
@@ -1042,6 +1392,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   return [...prev, word.id];
                 });
               }}
+              denseAddMode={denseAddMode}
+              onDenseToggle={handleDenseToggleWord}
             />
           );
         };
@@ -1072,11 +1424,12 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                         type="button"
                         onClick={() => startTraining(sub.id)}
                         className="training-start-button"
+                        title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
                       >
                         🎯 Начать тренировку
                       </button>
                     </h4>
-                    <ul className="words-education-list">{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
+                    <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
                   </section>
                 );
               })}
@@ -1085,7 +1438,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   <h4 className="examen-category-block-title">
                     <span>Оставшиеся слова</span>
                   </h4>
-                  <ul className="words-education-list">{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
+                  <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
                 </section>
               )}
               <CategoryWordManagement
@@ -1104,7 +1457,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
         return (
           <>
-            <ul className="words-education-list">
+            <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>
               {realWords}
             </ul>
             <CategoryWordManagement

@@ -817,13 +817,62 @@ body:has(.galleries.horizontal-mode) {
     background-color: #e63939; /* Тёмно-красный при наведении */
 }
 
+.words-education-list {
+    padding-left: 0;
+}
+
 .words-education-list li {
     display: flex;
+    position: relative;
 }
 
 .words-education-list__row--has-info {
     flex-wrap: wrap;
     cursor: pointer;
+}
+
+.words-education-list__row--dense {
+    background: linear-gradient(90deg, rgba(142, 36, 170, 0.12) 0%, rgba(142, 36, 170, 0.04) 42%, transparent 100%);
+}
+
+.words-education-list--dense-add-mode li {
+    cursor: pointer;
+}
+.words-education-list--dense-add-mode li:hover {
+    background: rgba(142, 36, 170, 0.08);
+}
+
+.words-education-list__dense-badge {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(94, 53, 177, 0.4);
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+.words-education-list__dense-badge-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.words-education-list__dense-badge-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #5e35b1;
+}
+
+.words-education-list__dense-badge-time {
+    font-size: 11px;
+    color: #e65100;
+    font-weight: 600;
 }
 
 /* Затемнённая область — клик закрывает подсказку; поповер внутри */
@@ -2559,6 +2608,13 @@ h2 .small {
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
+/* Кнопка «В плотное»: по умолчанию как остальные (зелёная), при активации — выделение */
+.training-start-button--dense.training-start-button--dense-active {
+    background: #2e7d32 !important;
+    background-image: none !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 4px 15px rgba(46, 125, 50, 0.4);
+}
+
 .training-reset-button {
     padding: 12px 24px;
     font-size: 16px;
@@ -2898,6 +2954,19 @@ h2 .small {
     background: #e3f2fd;
 }
 
+.match-game-word-row--correct {
+    border-color: #4caf50;
+    background: #e8f5e9;
+}
+
+.match-game-word-row--correct .match-game-dropped {
+    background: #4caf50;
+}
+
+.match-game-word-row--correct .match-game-dropped:hover {
+    background: #43a047;
+}
+
 .match-game-word-text {
     flex: 0 0 auto;
     font-weight: 600;
@@ -2922,7 +2991,10 @@ h2 .small {
     color: #fff;
     border-radius: 6px;
     font-size: 14px;
-    cursor: pointer;
+    cursor: grab;
+}
+.match-game-dropped:active {
+    cursor: grabbing;
 }
 
 .match-game-dropped:hover {
@@ -3103,15 +3175,26 @@ h2 .small {
 }
 
 .training-buttons-container {
-    margin-bottom: 20px;
+    width: 100%;
+    margin: 0 0 20px 0;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: stretch;
     align-items: center;
+}
+
+.training-buttons-container .training-start-button {
+    flex: 1 1 0;
+    min-width: 120px;
 }
 
 .training-control-buttons {
     display: flex;
+    flex: 1 1 100%;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 /* Адаптивные стили для кнопок */
@@ -3274,11 +3357,50 @@ h2 .small {
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
-    margin: 0;
+    margin: 0 0 0 auto;
 }
 
 .word-editor .close-button:hover {
     background: #c82333;
+}
+
+.word-editor h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.word-editor-progress-row {
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+.word-editor-progress-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.word-editor-progress-btn:hover {
+    background: #5a6268;
+}
+.word-editor-progress-meta {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+.word-editor-progress-status {
+    margin: 10px 0 0 0;
+    color: #28a745;
+    font-weight: 600;
+}
+.word-editor-progress-modal .field-row {
+    margin-bottom: 8px;
+}
+.word-editor-progress-save {
+    margin-top: 12px;
+    padding: 8px 20px;
 }
 
 .word-editor .field-row {

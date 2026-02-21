@@ -400,3 +400,40 @@ function add_translation_input_variable_to_words_table() {
 }
 
 add_action('after_setup_theme', 'add_translation_input_variable_to_words_table');
+
+/**
+ * Таблица сессий плотного дообучения (user x category).
+ * Храним 4 стека (direct/revert + review), счётчик кругов и время старта ожидания 15 минут.
+ */
+function create_dense_training_sessions_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'dense_training_sessions';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $table_name (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) unsigned NOT NULL,
+            dictionary_id mediumint(9) NOT NULL DEFAULT 0,
+            category_id mediumint(9) NOT NULL,
+            dense_word_ids_direct longtext NULL,
+            dense_review_word_ids_direct longtext NULL,
+            dense_word_ids_revert longtext NULL,
+            dense_review_word_ids_revert longtext NULL,
+            attempts_left smallint(5) unsigned NOT NULL DEFAULT 3,
+            waiting_since datetime NULL,
+            use_random tinyint(1) NOT NULL DEFAULT 1,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_user_category (user_id, category_id),
+            KEY idx_user (user_id),
+            KEY idx_category (category_id)
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+    }
+}
+add_action('after_setup_theme', 'create_dense_training_sessions_table');

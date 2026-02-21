@@ -98,6 +98,81 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
 }
 
 /**
+ * Получить запись прогресса обучения для одного слова и пользователя (для админ-редактирования).
+ * @param int $user_id ID пользователя
+ * @param int $word_id ID слова (dict_word_id)
+ * @return array|null Запись из user_dict_words или null
+ */
+function get_single_word_progress($user_id, $word_id) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $row = $wpdb->get_row($wpdb->prepare("
+        SELECT id, user_id, dict_word_id, attempts, correct_attempts, attempts_revert, correct_attempts_revert,
+               last_shown, last_shown_revert, easy_education, mode_education, mode_education_revert,
+               attempts_all, correct_attempts_all, easy_correct, easy_correct_revert
+        FROM $user_dict_words_table
+        WHERE user_id = %d AND dict_word_id = %d
+    ", $user_id, $word_id), ARRAY_A);
+    if (!$row) {
+        return null;
+    }
+    $row['attempts'] = (int) $row['attempts'];
+    $row['correct_attempts'] = (int) $row['correct_attempts'];
+    $row['attempts_revert'] = (int) $row['attempts_revert'];
+    $row['correct_attempts_revert'] = (int) $row['correct_attempts_revert'];
+    $row['mode_education'] = (int) $row['mode_education'];
+    $row['mode_education_revert'] = (int) $row['mode_education_revert'];
+    $row['attempts_all'] = (int) ($row['attempts_all'] ?? 0);
+    $row['correct_attempts_all'] = (int) ($row['correct_attempts_all'] ?? 0);
+    return $row;
+}
+
+/**
+ * Обновить запись прогресса обучения для слова текущего пользователя (только для админа).
+ * @param int $user_id ID пользователя (текущий админ)
+ * @param int $word_id ID слова (dict_word_id)
+ * @param array $data Поля для обновления: attempts, correct_attempts, attempts_revert, correct_attempts_revert, mode_education, mode_education_revert, last_shown, last_shown_revert
+ * @return bool
+ */
+function update_single_word_progress_admin($user_id, $word_id, $data) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $allowed = ['attempts', 'correct_attempts', 'attempts_revert', 'correct_attempts_revert',
+                'mode_education', 'mode_education_revert', 'last_shown', 'last_shown_revert',
+                'attempts_all', 'correct_attempts_all', 'easy_education', 'easy_correct', 'easy_correct_revert'];
+    $update = [];
+    foreach ($allowed as $key) {
+        if (array_key_exists($key, $data)) {
+            if (in_array($key, ['last_shown', 'last_shown_revert'], true)) {
+                $update[$key] = $data[$key] === '' || $data[$key] === null ? null : sanitize_text_field($data[$key]);
+            } else {
+                $update[$key] = (int) $data[$key];
+            }
+        }
+    }
+    if (empty($update)) {
+        return true;
+    }
+    $exists = $wpdb->get_row($wpdb->prepare("
+        SELECT id FROM $user_dict_words_table WHERE user_id = %d AND dict_word_id = %d
+    ", $user_id, $word_id), ARRAY_A);
+    if ($exists) {
+        return $wpdb->update($user_dict_words_table, $update, ['user_id' => $user_id, 'dict_word_id' => $word_id]) !== false;
+    }
+    $insert = array_merge([
+        'user_id' => $user_id,
+        'dict_word_id' => $word_id,
+        'attempts' => 0,
+        'correct_attempts' => 0,
+        'attempts_revert' => 0,
+        'correct_attempts_revert' => 0,
+        'mode_education' => 0,
+        'mode_education_revert' => 0,
+    ], $update);
+    return $wpdb->insert($user_dict_words_table, $insert) !== false;
+}
+
+/**
  * Сбросить прогресс категории - установить easy_education = 1 для всех слов категории
  * @param int $user_id ID пользователя
  * @param int $category_id ID категории
@@ -921,4 +996,477 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
     error_log("📊 Итого: создано=" . count($new_word_ids) . ", обновлено=" . count($reset_word_ids) . " записей");
     
     return true;
+}
+
+if (!defined('LBP_DENSE_INTERVAL_SEC')) {
+    define('LBP_DENSE_INTERVAL_SEC', 20); // для теста 20 сек, потом вернуть 900 (15 мин)
+}
+
+function lbp_dense_table_name() {
+    global $wpdb;
+    return $wpdb->prefix . 'dense_training_sessions';
+}
+
+function lbp_dense_decode_ids($raw) {
+    if ($raw === null || $raw === '') return [];
+    // Уже массив (например после maybe_rotate) — не передавать в json_decode, иначе получим []
+    if (is_array($raw)) {
+        $ids = array_map('intval', $raw);
+        $ids = array_filter($ids, function($v) { return $v > 0; });
+        return array_values(array_unique($ids));
+    }
+    $arr = json_decode($raw, true);
+    if (!is_array($arr)) return [];
+    $ids = array_map('intval', $arr);
+    $ids = array_filter($ids, function($v) { return $v > 0; });
+    return array_values(array_unique($ids));
+}
+
+function lbp_dense_encode_ids($arr) {
+    $ids = array_map('intval', is_array($arr) ? $arr : []);
+    $ids = array_filter($ids, function($v) { return $v > 0; });
+    $ids = array_values(array_unique($ids));
+    return wp_json_encode($ids, JSON_UNESCAPED_UNICODE);
+}
+
+function lbp_dense_remove_id($arr, $word_id) {
+    $wid = intval($word_id);
+    return array_values(array_filter($arr, function($id) use ($wid) {
+        return intval($id) !== $wid;
+    }));
+}
+
+function lbp_dense_prepare_row($row) {
+    if (!$row) return null;
+    $row['id'] = intval($row['id']);
+    $row['user_id'] = intval($row['user_id']);
+    $row['dictionary_id'] = intval($row['dictionary_id']);
+    $row['category_id'] = intval($row['category_id']);
+    $row['attempts_left'] = intval($row['attempts_left']);
+    $row['use_random'] = intval($row['use_random']) ? 1 : 0;
+    return $row;
+}
+
+function lbp_dense_fetch_session($user_id, $category_id) {
+    global $wpdb;
+    $t = lbp_dense_table_name();
+    $row = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $t WHERE user_id = %d AND category_id = %d LIMIT 1",
+        intval($user_id),
+        intval($category_id)
+    ), ARRAY_A);
+    return lbp_dense_prepare_row($row);
+}
+
+/**
+ * Засчитать успешную мини-игру: счётчик (attempts_left) −1 и запуск отката (waiting_since = сейчас).
+ * Не меняет сессию, если откат уже идёт (повторное «Проверить» во время ожидания не уменьшает счётчик).
+ *
+ * @param int $user_id ID пользователя
+ * @param int $category_id ID категории
+ * @return array Состояние плотной сессии после обновления (lbp_dense_to_state).
+ */
+function lbp_dense_count_match_game_success($user_id, $category_id) {
+    global $wpdb;
+    $t = lbp_dense_table_name();
+    $user_id = intval($user_id);
+    $category_id = intval($category_id);
+
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    if (!$row || $row['attempts_left'] <= 0) {
+        return $row ? lbp_dense_to_state($row) : lbp_dense_to_state(null);
+    }
+    // Не засчитывать повторный успех, пока идёт откат.
+    if (!empty($row['waiting_since'])) {
+        $waiting_ts = strtotime($row['waiting_since'] . ' UTC');
+        $elapsed = $waiting_ts !== false ? (time() - $waiting_ts) : 0;
+        if ($elapsed < LBP_DENSE_INTERVAL_SEC) {
+            return lbp_dense_to_state($row);
+        }
+    }
+
+    $attempts_left = intval($row['attempts_left']);
+    if ($attempts_left <= 1) {
+        // Последняя попытка: сразу завершаем тренировку без отката, сессия очищается, счётчик пропадает.
+        return lbp_dense_clear_session($user_id, $category_id);
+    }
+
+    // Завершаем раунд: переносим текущие стеки в review, чтобы после отката ротация вернула слова.
+    $direct = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+    $review_direct = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+    $revert = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+    $review_revert = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+
+    $row['dense_word_ids_direct'] = [];
+    $row['dense_review_word_ids_direct'] = array_values(array_unique(array_merge($direct, $review_direct)));
+    $row['dense_word_ids_revert'] = [];
+    $row['dense_review_word_ids_revert'] = array_values(array_unique(array_merge($revert, $review_revert)));
+    $row['attempts_left'] = max(0, $attempts_left - 1);
+    $row['waiting_since'] = gmdate('Y-m-d H:i:s');
+    lbp_dense_save_session($row);
+
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    return lbp_dense_to_state($row);
+}
+
+function lbp_dense_save_session($session) {
+    global $wpdb;
+    $t = lbp_dense_table_name();
+
+    $data = [
+        'dense_word_ids_direct' => lbp_dense_encode_ids($session['dense_word_ids_direct']),
+        'dense_review_word_ids_direct' => lbp_dense_encode_ids($session['dense_review_word_ids_direct']),
+        'dense_word_ids_revert' => lbp_dense_encode_ids($session['dense_word_ids_revert']),
+        'dense_review_word_ids_revert' => lbp_dense_encode_ids($session['dense_review_word_ids_revert']),
+        'attempts_left' => max(0, intval($session['attempts_left'])),
+        'waiting_since' => !empty($session['waiting_since']) ? $session['waiting_since'] : null,
+        'use_random' => intval($session['use_random']) ? 1 : 0,
+        'updated_at' => gmdate('Y-m-d H:i:s'),
+    ];
+
+    if (!empty($session['id'])) {
+        $wpdb->update($t, $data, ['id' => intval($session['id'])]);
+        return intval($session['id']);
+    }
+
+    $now = gmdate('Y-m-d H:i:s');
+    $data['user_id'] = intval($session['user_id']);
+    $data['dictionary_id'] = intval($session['dictionary_id']);
+    $data['category_id'] = intval($session['category_id']);
+    $data['created_at'] = $now;
+
+    $wpdb->insert($t, $data);
+    return intval($wpdb->insert_id);
+}
+
+function lbp_dense_to_state($row) {
+    if (!$row) {
+        return [
+            'exists' => false,
+            'attempts_left' => 0,
+            'waiting_since' => null,
+            'waiting_remaining_sec' => 0,
+            'use_random' => 1,
+            'dense_word_ids_direct' => [],
+            'dense_review_word_ids_direct' => [],
+            'dense_word_ids_revert' => [],
+            'dense_review_word_ids_revert' => [],
+            'active_word_ids' => [],
+        ];
+    }
+
+    $direct = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+    $review_direct = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+    $revert = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+    $review_revert = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+    $active = array_values(array_unique(array_merge($direct, $review_direct, $revert, $review_revert)));
+
+    $remaining = 0;
+    if (!empty($row['waiting_since'])) {
+        $waiting_ts = strtotime($row['waiting_since'] . ' UTC');
+        if ($waiting_ts !== false) {
+            $remaining = max(0, LBP_DENSE_INTERVAL_SEC - (time() - $waiting_ts));
+        }
+    }
+
+    return [
+        'exists' => true,
+        'attempts_left' => intval($row['attempts_left']),
+        'waiting_since' => $row['waiting_since'] ?: null,
+        'waiting_remaining_sec' => $remaining,
+        'use_random' => intval($row['use_random']) ? 1 : 0,
+        'dense_word_ids_direct' => $direct,
+        'dense_review_word_ids_direct' => $review_direct,
+        'dense_word_ids_revert' => $revert,
+        'dense_review_word_ids_revert' => $review_revert,
+        'active_word_ids' => $active,
+    ];
+}
+
+function lbp_dense_maybe_rotate_session($row) {
+    if (!$row) return null;
+
+    $row['dense_word_ids_direct'] = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+    $row['dense_review_word_ids_direct'] = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+    $row['dense_word_ids_revert'] = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+    $row['dense_review_word_ids_revert'] = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+    $row['attempts_left'] = intval($row['attempts_left']);
+    $row['use_random'] = intval($row['use_random']) ? 1 : 0;
+
+    $changed = false;
+    $direct_done = empty($row['dense_word_ids_direct']);
+    $revert_done = empty($row['dense_word_ids_revert']);
+    $has_review_direct = !empty($row['dense_review_word_ids_direct']);
+    $has_review_revert = !empty($row['dense_review_word_ids_revert']);
+    // Лок 15 мин только когда оба направления пройдены: оба стартовых стека пусты И в обоих review есть слова.
+    $both_directions_done = $direct_done && $revert_done && $has_review_direct && $has_review_revert;
+
+    // Счётчик уменьшаем сразу при старте отката (завершение раунда), а не после отката.
+    if ($both_directions_done && empty($row['waiting_since']) && $row['attempts_left'] > 1) {
+        $row['attempts_left'] = max(0, $row['attempts_left'] - 1);
+        $row['waiting_since'] = gmdate('Y-m-d H:i:s');
+        $changed = true;
+    }
+
+    if (!empty($row['waiting_since'])) {
+        $waiting_ts = strtotime($row['waiting_since'] . ' UTC');
+        $elapsed = $waiting_ts !== false ? (time() - $waiting_ts) : 0;
+        if ($elapsed >= LBP_DENSE_INTERVAL_SEC) {
+            if ($row['attempts_left'] <= 0) {
+                // Последний круг завершён — очищаем стеки.
+                $row['attempts_left'] = 0;
+                $row['dense_word_ids_direct'] = [];
+                $row['dense_review_word_ids_direct'] = [];
+                $row['dense_word_ids_revert'] = [];
+                $row['dense_review_word_ids_revert'] = [];
+                $row['waiting_since'] = null;
+            } else {
+                // Только ротация; счётчик уже уменьшен при старте отката.
+                $row['dense_word_ids_direct'] = $row['dense_review_word_ids_direct'];
+                $row['dense_review_word_ids_direct'] = [];
+                $row['dense_word_ids_revert'] = $row['dense_review_word_ids_revert'];
+                $row['dense_review_word_ids_revert'] = [];
+                $row['waiting_since'] = null;
+            }
+            $changed = true;
+        }
+    }
+
+    if ($changed) {
+        lbp_dense_save_session($row);
+    }
+    return $row;
+}
+
+/**
+ * @param int $user_id
+ * @param int $category_id
+ * @param bool $apply_rotate — применять ли ротацию/очистку по 15 мин (false при открытии окна, чтобы не сбросить сессию)
+ */
+function lbp_dense_get_state($user_id, $category_id, $apply_rotate = true) {
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    if ($row && $apply_rotate) {
+        $row = lbp_dense_maybe_rotate_session($row);
+    }
+    return lbp_dense_to_state($row);
+}
+
+/**
+ * Установить mode_education = 1 и mode_education_revert = 1 для слов (при добавлении в плотное дообучение).
+ *
+ * @param int $user_id ID пользователя
+ * @param int[] $word_ids Массив dict_word_id
+ */
+function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $word_ids = array_values(array_unique(array_filter(array_map('intval', (array) $word_ids), function ($v) {
+        return $v > 0;
+    })));
+    if (empty($word_ids)) {
+        return;
+    }
+    foreach ($word_ids as $word_id) {
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT 1 FROM $user_dict_words_table WHERE user_id = %d AND dict_word_id = %d LIMIT 1",
+            $user_id,
+            $word_id
+        ));
+        if ($exists) {
+            $wpdb->update(
+                $user_dict_words_table,
+                ['mode_education' => 1, 'mode_education_revert' => 1],
+                ['user_id' => $user_id, 'dict_word_id' => $word_id]
+            );
+        } else {
+            $wpdb->insert(
+                $user_dict_words_table,
+                [
+                    'user_id' => $user_id,
+                    'dict_word_id' => $word_id,
+                    'attempts' => 0,
+                    'attempts_revert' => 0,
+                    'correct_attempts' => 0,
+                    'correct_attempts_revert' => 0,
+                    'mode_education' => 1,
+                    'mode_education_revert' => 1,
+                ]
+            );
+        }
+    }
+}
+
+function lbp_dense_add_words($user_id, $dictionary_id, $category_id, $word_ids, $use_random = 1) {
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    if (!$row) {
+        $row = [
+            'id' => 0,
+            'user_id' => intval($user_id),
+            'dictionary_id' => intval($dictionary_id),
+            'category_id' => intval($category_id),
+            'dense_word_ids_direct' => [],
+            'dense_review_word_ids_direct' => [],
+            'dense_word_ids_revert' => [],
+            'dense_review_word_ids_revert' => [],
+            'attempts_left' => 3,
+            'waiting_since' => null,
+            'use_random' => intval($use_random) ? 1 : 0,
+        ];
+    } else {
+        $row['dense_word_ids_direct'] = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+        $row['dense_review_word_ids_direct'] = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+        $row['dense_word_ids_revert'] = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+        $row['dense_review_word_ids_revert'] = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+    }
+
+    $ids = array_values(array_unique(array_filter(array_map('intval', (array) $word_ids), function($v) {
+        return $v > 0;
+    })));
+    if (empty($ids)) {
+        return lbp_dense_to_state($row);
+    }
+
+    foreach ($ids as $wid) {
+        $row['dense_word_ids_direct'] = lbp_dense_remove_id($row['dense_word_ids_direct'], $wid);
+        $row['dense_review_word_ids_direct'] = lbp_dense_remove_id($row['dense_review_word_ids_direct'], $wid);
+        $row['dense_word_ids_revert'] = lbp_dense_remove_id($row['dense_word_ids_revert'], $wid);
+        $row['dense_review_word_ids_revert'] = lbp_dense_remove_id($row['dense_review_word_ids_revert'], $wid);
+        $row['dense_word_ids_direct'][] = $wid;
+        $row['dense_word_ids_revert'][] = $wid;
+    }
+
+    $row['dense_word_ids_direct'] = array_values(array_unique($row['dense_word_ids_direct']));
+    $row['dense_word_ids_revert'] = array_values(array_unique($row['dense_word_ids_revert']));
+    $row['attempts_left'] = 3;
+    $row['waiting_since'] = null;
+    $row['use_random'] = intval($use_random) ? 1 : 0;
+    lbp_dense_save_session($row);
+
+    // Слова, добавленные в плотное, переводим в режим дообучения в обычной тренировке
+    lbp_dense_set_words_retraining_mode($user_id, $ids);
+
+    $fresh = lbp_dense_fetch_session($user_id, $category_id);
+    return lbp_dense_to_state($fresh);
+}
+
+/**
+ * Удалить одно слово из плотной сессии (из всех стеков).
+ *
+ * @param int $user_id
+ * @param int $category_id
+ * @param int $word_id
+ * @return array Состояние после удаления.
+ */
+function lbp_dense_remove_word($user_id, $category_id, $word_id) {
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    if (!$row) {
+        return lbp_dense_to_state(null);
+    }
+    $row['dense_word_ids_direct'] = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+    $row['dense_review_word_ids_direct'] = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+    $row['dense_word_ids_revert'] = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+    $row['dense_review_word_ids_revert'] = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+    $wid = intval($word_id);
+    $row['dense_word_ids_direct'] = array_values(array_filter($row['dense_word_ids_direct'], function ($id) use ($wid) { return (int) $id !== $wid; }));
+    $row['dense_review_word_ids_direct'] = array_values(array_filter($row['dense_review_word_ids_direct'], function ($id) use ($wid) { return (int) $id !== $wid; }));
+    $row['dense_word_ids_revert'] = array_values(array_filter($row['dense_word_ids_revert'], function ($id) use ($wid) { return (int) $id !== $wid; }));
+    $row['dense_review_word_ids_revert'] = array_values(array_filter($row['dense_review_word_ids_revert'], function ($id) use ($wid) { return (int) $id !== $wid; }));
+    if (empty($row['dense_word_ids_direct']) && empty($row['dense_review_word_ids_direct']) && empty($row['dense_word_ids_revert']) && empty($row['dense_review_word_ids_revert'])) {
+        lbp_dense_clear_session($user_id, $category_id);
+        return lbp_dense_to_state(null);
+    }
+    lbp_dense_save_session($row);
+    $fresh = lbp_dense_fetch_session($user_id, $category_id);
+    return lbp_dense_to_state($fresh);
+}
+
+/**
+ * Очистить плотную сессию для пользователя и категории (удалить запись).
+ *
+ * @param int $user_id
+ * @param int $category_id
+ * @return array Состояние после очистки (exists => false).
+ */
+function lbp_dense_clear_session($user_id, $category_id) {
+    global $wpdb;
+    $t = lbp_dense_table_name();
+    $wpdb->delete($t, [
+        'user_id' => intval($user_id),
+        'category_id' => intval($category_id),
+    ], ['%d', '%d']);
+    return lbp_dense_to_state(null);
+}
+
+function lbp_dense_submit_answer($user_id, $category_id, $word_id, $is_revert, $is_correct) {
+    $row = lbp_dense_fetch_session($user_id, $category_id);
+    if (!$row) {
+        return lbp_dense_to_state(null);
+    }
+
+    $row = lbp_dense_maybe_rotate_session($row);
+    if (!$row) return lbp_dense_to_state(null);
+
+    // Декодируем все четыре стека; меняем только один направление за запрос, второй не трогаем.
+    $direct_start = lbp_dense_decode_ids($row['dense_word_ids_direct']);
+    $direct_review = lbp_dense_decode_ids($row['dense_review_word_ids_direct']);
+    $revert_start = lbp_dense_decode_ids($row['dense_word_ids_revert']);
+    $revert_review = lbp_dense_decode_ids($row['dense_review_word_ids_revert']);
+
+    $wid = intval($word_id);
+    $is_revert = (int) $is_revert ? 1 : 0;
+
+    if ($is_revert) {
+        // Обновляем только обратное направление; direct не трогаем.
+        if (intval($is_correct) === 1) {
+            $revert_start = lbp_dense_remove_id($revert_start, $wid);
+            if (!in_array($wid, $revert_review, true)) {
+                $revert_review[] = $wid;
+            }
+        } else {
+            $revert_review = lbp_dense_remove_id($revert_review, $wid);
+            if (!in_array($wid, $revert_start, true)) {
+                $revert_start[] = $wid;
+            }
+        }
+    } else {
+        // Обновляем только прямое направление; revert не трогаем.
+        if (intval($is_correct) === 1) {
+            $direct_start = lbp_dense_remove_id($direct_start, $wid);
+            if (!in_array($wid, $direct_review, true)) {
+                $direct_review[] = $wid;
+            }
+        } else {
+            $direct_review = lbp_dense_remove_id($direct_review, $wid);
+            if (!in_array($wid, $direct_start, true)) {
+                $direct_start[] = $wid;
+            }
+        }
+    }
+
+    $row['dense_word_ids_direct'] = $direct_start;
+    $row['dense_review_word_ids_direct'] = $direct_review;
+    $row['dense_word_ids_revert'] = $revert_start;
+    $row['dense_review_word_ids_revert'] = $revert_review;
+
+    $direct_done = empty($row['dense_word_ids_direct']);
+    $revert_done = empty($row['dense_word_ids_revert']);
+    $has_review_direct = !empty($row['dense_review_word_ids_direct']);
+    $has_review_revert = !empty($row['dense_review_word_ids_revert']);
+    $both_directions_done = $direct_done && $revert_done && $has_review_direct && $has_review_revert;
+
+    if ($row['attempts_left'] <= 1 && $direct_done && $revert_done) {
+        $row['attempts_left'] = 0;
+        $row['dense_word_ids_direct'] = [];
+        $row['dense_review_word_ids_direct'] = [];
+        $row['dense_word_ids_revert'] = [];
+        $row['dense_review_word_ids_revert'] = [];
+        $row['waiting_since'] = null;
+    } elseif ($both_directions_done && empty($row['waiting_since']) && $row['attempts_left'] > 1) {
+        $row['attempts_left'] = max(0, $row['attempts_left'] - 1);
+        $row['waiting_since'] = gmdate('Y-m-d H:i:s');
+    }
+
+    lbp_dense_save_session($row);
+    $fresh = lbp_dense_fetch_session($user_id, $category_id);
+    return lbp_dense_to_state($fresh);
 }
