@@ -841,7 +841,6 @@ body:has(.galleries.horizontal-mode) {
 }
 
 .words-education-list__row--has-info {
-    flex-wrap: wrap;
     cursor: pointer;
 }
 
@@ -1058,7 +1057,7 @@ body:has(.galleries.horizontal-mode) {
 .words-education-list__translation_1,
 .words-education-list__translation_2,
 .words-education-list__translation_3 {
-    display: inline-block;
+    display: inline;
 }
 
 .words-education-list__translation-wrap {
