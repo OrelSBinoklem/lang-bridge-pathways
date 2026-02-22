@@ -4142,10 +4142,18 @@ h2 .small {
     background: #f9f9f9;
 }
 
-.word-field-vertical .words-education-list__translation-wrap {
-    white-space: normal;
-    overflow: visible;
-    flex: none;
+.words-education-list__translation-wrap {
+    flex: 0 0 auto;
+}
+
+@media screen and (max-width: 767px) {
+    .words-education-list__translation-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 .word-field-vertical .words-education-list__word,
