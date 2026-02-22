@@ -116,6 +116,9 @@ const WordRow = ({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
+        const tag = e.target?.tagName?.toLowerCase();
+        const isFormField = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable;
+        if (isFormField || e.target?.closest?.('.word-editor')) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleRowClick(e);
@@ -290,7 +293,7 @@ const WordRow = ({
       )}
 
       {editingWordId === word.id && (
-        <div style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
+        <div className="word-editor-wrap">
           <WordEditor 
             dictionaryId={dictionaryId} 
             word={word} 

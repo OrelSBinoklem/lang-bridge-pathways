@@ -719,7 +719,6 @@ function reset_exam_progress_for_category($user_id, $category_id) {
 
 /**
  * Сбросить тренировочные данные одного слова для пользователя.
- * ВАЖНО: attempts/attempts_revert не трогаем (нужны для статистики).
  *
  * @param int $user_id
  * @param int $word_id
@@ -738,6 +737,8 @@ function reset_training_word_data($user_id, $word_id) {
     $result = $wpdb->update(
         $user_dict_words_table,
         [
+            'attempts' => 0,
+            'attempts_revert' => 0,
             'correct_attempts' => 0,
             'correct_attempts_revert' => 0,
             'last_shown' => null,
@@ -794,7 +795,9 @@ function reset_training_category_data($user_id, $category_id = null, $word_ids =
     // Обновляем только те записи, которые существуют (сохраняя attempts_all и correct_attempts_all)
     $result = $wpdb->query($wpdb->prepare("
         UPDATE $user_dict_words_table 
-        SET correct_attempts = 0,
+        SET attempts = 0,
+            attempts_revert = 0,
+            correct_attempts = 0,
             correct_attempts_revert = 0,
             last_shown = NULL,
             last_shown_revert = NULL,
