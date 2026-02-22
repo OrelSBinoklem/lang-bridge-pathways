@@ -25,9 +25,11 @@ const MatchGameModal = ({ isOpen, onClose, words = [], onFullSuccess, denseWaiti
       .filter(p => p.wordText !== '' && p.translationText !== '');
   }, [words]);
 
-  const rightItems = useMemo(() => {
-    return shuffleArray(pairs.map((p, i) => ({ id: `right-${p.wordId}-${i}`, wordId: p.wordId, text: p.translationText })));
-  }, [pairs, isOpen]);
+  const pairsSignature = useMemo(
+    () => pairs.map(p => `${p.wordId}:${p.translationText}`).join('|'),
+    [pairs]
+  );
+  const [rightItems, setRightItems] = useState([]);
 
   const [assigned, setAssigned] = useState({});
   const [checkResult, setCheckResult] = useState(null);
@@ -36,11 +38,17 @@ const MatchGameModal = ({ isOpen, onClose, words = [], onFullSuccess, denseWaiti
 
   useEffect(() => {
     if (isOpen) {
+      // Перемешиваем только при открытии окна/смене набора слов, а не на каждом ререндере.
+      setRightItems(shuffleArray(pairs.map((p, i) => ({
+        id: `right-${p.wordId}-${i}`,
+        wordId: p.wordId,
+        text: p.translationText,
+      }))));
       setAssigned({});
       setCheckResult(null);
       setVerifiedCorrectIds(null);
     }
-  }, [isOpen]);
+  }, [isOpen, pairsSignature]);
 
   if (!isOpen) return null;
 
@@ -117,6 +125,17 @@ const MatchGameModal = ({ isOpen, onClose, words = [], onFullSuccess, denseWaiti
   const takenItemIds = new Set(Object.values(assigned).map(a => a?.itemId).filter(Boolean));
   const rightColumnItems = rightItems.filter(item => !takenItemIds.has(item.id));
 
+  const resetGame = () => {
+    setRightItems(shuffleArray(pairs.map((p, i) => ({
+      id: `right-${p.wordId}-${i}-${Date.now()}`,
+      wordId: p.wordId,
+      text: p.translationText,
+    }))));
+    setAssigned({});
+    setCheckResult(null);
+    setVerifiedCorrectIds(null);
+  };
+
   const handleCheck = () => {
     const correctCount = pairs.filter(p => assigned[p.wordId]?.text === p.translationText).length;
     const correct = correctCount === pairs.length;
@@ -125,6 +144,7 @@ const MatchGameModal = ({ isOpen, onClose, words = [], onFullSuccess, denseWaiti
     setCheckResult({ correct, correctCount, total: pairs.length });
     if (correct && typeof onFullSuccess === 'function') {
       onFullSuccess();
+      resetGame();
     }
   };
 

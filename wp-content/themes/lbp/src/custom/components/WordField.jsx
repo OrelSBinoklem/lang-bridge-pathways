@@ -166,7 +166,8 @@ const WordField = ({
           </span>
         )}
       </span>
-      
+
+      <span className="words-education-list__translation-wrap">
       {/* Перевод 1 */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
@@ -248,6 +249,7 @@ const WordField = ({
           )}
         </span>
       )}
+      </span>
 
       {showEditButton && isAdminModeActive && (
         <button

@@ -999,7 +999,7 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
 }
 
 if (!defined('LBP_DENSE_INTERVAL_SEC')) {
-    define('LBP_DENSE_INTERVAL_SEC', 20); // для теста 20 сек, потом вернуть 900 (15 мин)
+    define('LBP_DENSE_INTERVAL_SEC', 900); // 15 минут
 }
 
 function lbp_dense_table_name() {
@@ -1266,7 +1266,9 @@ function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
     if (empty($word_ids)) {
         return;
     }
+    $user_id = (int) $user_id;
     foreach ($word_ids as $word_id) {
+        $word_id = (int) $word_id;
         $exists = $wpdb->get_var($wpdb->prepare(
             "SELECT 1 FROM $user_dict_words_table WHERE user_id = %d AND dict_word_id = %d LIMIT 1",
             $user_id,
@@ -1275,8 +1277,15 @@ function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
         if ($exists) {
             $wpdb->update(
                 $user_dict_words_table,
-                ['mode_education' => 1, 'mode_education_revert' => 1],
-                ['user_id' => $user_id, 'dict_word_id' => $word_id]
+                [
+                    'mode_education' => 1,
+                    'mode_education_revert' => 1,
+                    'last_shown' => '0000-00-00 00:00:00',
+                    'last_shown_revert' => null,
+                ],
+                ['user_id' => $user_id, 'dict_word_id' => $word_id],
+                ['%d', '%d', '%s', '%s'],
+                ['%d', '%d']
             );
         } else {
             $wpdb->insert(
@@ -1288,9 +1297,17 @@ function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
                     'attempts_revert' => 0,
                     'correct_attempts' => 0,
                     'correct_attempts_revert' => 0,
+                    'last_shown' => '0000-00-00 00:00:00',
+                    'last_shown_revert' => null,
+                    'easy_education' => 0,
                     'mode_education' => 1,
                     'mode_education_revert' => 1,
-                ]
+                    'attempts_all' => 0,
+                    'correct_attempts_all' => 0,
+                    'easy_correct' => 0,
+                    'easy_correct_revert' => 0,
+                ],
+                ['%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d']
             );
         }
     }

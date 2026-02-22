@@ -479,6 +479,13 @@ body:has(.galleries.horizontal-mode) {
     -webkit-text-stroke: 0.35px currentColor;
 }
 
+@media screen and (max-width: 767px) {
+    .dictionary-info {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
 #super-logo-bg {
     position: absolute;
     left: 50%;
@@ -791,6 +798,13 @@ body:has(.galleries.horizontal-mode) {
 
 .training-words-examen-wrapper {
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.examen-root {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .words-education-window__close {
@@ -840,6 +854,48 @@ body:has(.galleries.horizontal-mode) {
 }
 .words-education-list--dense-add-mode li:hover {
     background: rgba(142, 36, 170, 0.08);
+}
+
+.dense-add-mode-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px 0;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #1a1a1a;
+    background: rgba(40, 167, 69, 0.12);
+    border: 1px solid rgba(40, 167, 69, 0.35);
+    border-radius: 8px;
+}
+.dense-add-mode-hint__text {
+    flex: 1;
+    min-width: 0;
+}
+.dense-add-mode-hint__close {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.dense-add-mode-hint__close:hover {
+    background: #fff;
+    color: #c62828;
+    border-color: rgba(198, 40, 40, 0.4);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .words-education-list__dense-badge {
@@ -1005,6 +1061,14 @@ body:has(.galleries.horizontal-mode) {
     display: inline-block;
 }
 
+.words-education-list__translation-wrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
 /* Большие кнопки выбора режима */
 .mode-button {
     padding: 20px 40px;
@@ -1032,7 +1096,7 @@ body:has(.galleries.horizontal-mode) {
 }
 
 .category-three {
-
+    padding-left: 0;
 }
 
 .category-three > li {
@@ -2643,6 +2707,30 @@ h2 .small {
     box-shadow: 0 6px 18px rgba(23, 162, 184, 0.4);
 }
 
+.training-help-button--right {
+    margin-left: auto;
+    margin-right: 12px;
+    align-self: flex-end;
+}
+
+@media screen and (max-width: 559px) {
+    .training-help-button--standalone {
+        display: none;
+    }
+}
+
+.training-actions-menu-item--help {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+}
+.training-actions-menu-item--help-mobile {
+    display: none;
+}
+@media screen and (max-width: 559px) {
+    .training-actions-menu-item--help-mobile {
+        display: block;
+    }
+}
+
 .training-reorder-button {
     padding: 12px 24px;
     font-size: 16px;
@@ -3190,6 +3278,18 @@ h2 .small {
     min-width: 120px;
 }
 
+.training-buttons-container .training-start-button--fit-content {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: auto;
+    max-width: 100%;
+}
+
+.training-buttons-spacer {
+    flex: 1 1 0;
+    min-width: 12px;
+}
+
 .training-control-buttons {
     display: flex;
     flex: 1 1 100%;
@@ -3226,11 +3326,170 @@ h2 .small {
     }
 
     .training-buttons-container {
-        flex-direction: column;
-        gap: 15px;
+
     }
 
     .training-control-buttons {
+        justify-content: center;
+    }
+}
+
+/* Простое бургер-меню без сложных эффектов */
+.training-actions-burger-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    min-width: 52px;
+}
+
+.training-burger-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, rgba(40, 167, 69, 0.95), rgba(32, 201, 151, 0.9));
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+    z-index: 2;
+}
+
+.training-burger-btn--open {
+    background: linear-gradient(145deg, rgba(46, 125, 50, 0.98), rgba(32, 201, 151, 0.95));
+    box-shadow: 0 6px 24px rgba(40, 167, 69, 0.5);
+}
+
+.training-burger-line {
+    width: 22px;
+    height: 3px;
+    border-radius: 2px;
+    background: #fff;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+    transform-origin: center;
+}
+
+.training-burger-btn--open .training-burger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.training-burger-btn--open .training-burger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+.training-burger-btn--open .training-burger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ВАЖНО: выпадает ВНИЗ */
+.training-actions-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-4px);
+    filter: blur(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease, visibility 0.25s ease;
+    z-index: 10;
+}
+
+.training-actions-menu--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    filter: blur(0);
+}
+
+.training-actions-menu-item {
+    padding: 12px 22px;
+    font-size: 14px;
+    line-height: 1.3;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(255, 255, 255, 0.35), 0 0 24px rgba(255, 255, 255, 0.45), 0 0 48px rgba(255, 255, 255, 0.25);
+    opacity: 0.7;
+    filter: blur(4px);
+    transform: translateY(-2px);
+    transition: opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease;
+}
+
+.training-actions-menu--open .training-actions-menu-item {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+.training-actions-menu-item--easy {
+    padding-left: 27px;
+    padding-right: 27px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(56, 142, 60, 0.9));
+}
+.training-actions-menu-item--game {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.9));
+}
+.training-actions-menu-item--game.training-actions-menu-item--disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+.training-actions-menu-item-wrap--game {
+    position: relative;
+}
+.training-actions-game-disabled-popover {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(100% + 8px);
+    z-index: 100;
+    min-width: 200px;
+    max-width: 260px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #1a1a1a;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    white-space: normal;
+    pointer-events: none;
+}
+.training-actions-menu-item--dense {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.95), rgba(32, 201, 151, 0.9));
+}
+.training-actions-menu-item--dense-active {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.98), rgba(30, 100, 40, 0.92)) !important;
+}
+.training-actions-menu-item--reorder {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(245, 124, 0, 0.9));
+}
+.training-actions-menu-item--clear {
+    background: linear-gradient(135deg, rgba(255, 220, 224, 0.98), rgba(255, 190, 195, 0.95));
+    color: #b71c1c;
+}
+
+/* Возвращаем красноватый тон для «Сбросить» в goo-слое */
+.training-actions-goo-blob--below {
+    background: radial-gradient(circle at 30% 30%, #ff9aa4 0%, #e45463 58%, #b23a45 100%);
+}
+
+@media screen and (max-width: 767px) {
+    .training-actions-burger-wrap {
         justify-content: center;
     }
 }
@@ -3880,6 +4139,12 @@ h2 .small {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     background: #f9f9f9;
+}
+
+.word-field-vertical .words-education-list__translation-wrap {
+    white-space: normal;
+    overflow: visible;
+    flex: none;
 }
 
 .word-field-vertical .words-education-list__word,

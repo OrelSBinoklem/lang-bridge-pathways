@@ -64,6 +64,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [denseAddMode, setDenseAddMode] = useState(false); // Режим «клик по слову = добавить/убрать из плотного»
   const [isUpdating, setIsUpdating] = useState(false); // Идёт обновление данных на сервере
   const checkAnswerSubmittingRef = useRef(false); // Защита от двойной отправки при проверке ответа
+  const burgerWrapRef = useRef(null); // контейнер бургер-меню для клика снаружи
   const [trainingQueue, setTrainingQueue] = useState([]); // Очередь пар слов для тренировки
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0); // Текущая позиция в очереди
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
@@ -77,6 +78,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [denseTrainingMode, setDenseTrainingMode] = useState(false); // Окно проверки работает только по dense-стекам
   const [liveDenseRemainingSec, setLiveDenseRemainingSec] = useState(null); // Локальный обратный отсчёт для отображения в лайве (обновление раз в секунду)
   const [denseMessagePopup, setDenseMessagePopup] = useState(null); // { title, message } — попап как в окне результата (подождать / слова пройдены)
+  const [showActionsMenu, setShowActionsMenu] = useState(false); // бургер-меню: Лёгкая, Мини-игра, В плотное, Сбросить и др.
+  const [showGameDisabledPopover, setShowGameDisabledPopover] = useState(false); // поповер «почему заблокирована мини-игра»
+  const lastDenseAddTimeRef = useRef(null); // для логирования обновлённого состояния слов после добавления в плотное
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
   useEffect(() => {
@@ -261,6 +265,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return waiting || hasQueue;
   }, [denseSessionState, liveDenseRemainingSec]);
 
+  // В режиме плотного дообучения нет слов в пуле — кнопку мини-игры блокируем (чтобы не «палились» слова на атаке)
+  const denseMatchGameDisabled = useMemo(() => {
+    if (!currentDenseCategoryId) return false;
+    const n = denseSessionState?.active_word_ids?.length ?? 0;
+    return n === 0;
+  }, [currentDenseCategoryId, denseSessionState?.active_word_ids]);
+
   // Логируем ID для настройки кастомных компонентов
   useEffect(() => {
     // ID для настройки кастомных компонентов
@@ -276,6 +287,21 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   useEffect(() => {
     fetchDenseState('get_dense_training_state');
   }, [currentDenseCategoryId, dictionaryWords.length]);
+
+  // После добавления слова в плотное: при обновлении userWordsData вывести в консоль обновлённое состояние слов категории
+  useEffect(() => {
+    const t = lastDenseAddTimeRef.current;
+    if (t == null || Date.now() - t > 5000) return;
+    const categoryWords = (categoryId === 0 || allCategoryIds.length === 0)
+      ? (categoryId === 0 ? dictionaryWords : dictionaryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10))))
+      : dictionaryWords.filter(w => wordBelongsToAnyOfCategories(w, allCategoryIds));
+    const wordsState = {};
+    categoryWords.forEach(w => {
+      wordsState[w.id] = userWordsData[w.id] != null ? { ...userWordsData[w.id], word: w.word } : null;
+    });
+    console.log('[Плотное] Слова категории после обновления с сервера (userWordsData):', wordsState);
+    lastDenseAddTimeRef.current = null;
+  }, [userWordsData, categoryId, allCategoryIds, dictionaryWords]);
 
   // Синхронизация локального счётчика с серверным waiting_remaining_sec
   useEffect(() => {
@@ -298,6 +324,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }, 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Закрытие бургер-меню по клику снаружи
+  useEffect(() => {
+    if (!showActionsMenu) return;
+    const handleClick = (e) => {
+      if (burgerWrapRef.current && !burgerWrapRef.current.contains(e.target)) setShowActionsMenu(false);
+    };
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, [showActionsMenu]);
 
   // Обновляем currentTime: интервал для таймера + при возврате на вкладку
   const refreshCurrentTime = () => setCurrentTime(Date.now());
@@ -410,7 +446,17 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       return inDense || inEasy || oneDirectionNotLearned;
     });
     return forGame.length > 0 ? forGame : list;
-  }, [dictionaryWords, allCategoryIds, categoryId, userWordsData, currentTime]);
+  }, [dictionaryWords, allCategoryIds, categoryId, userWordsData]);
+
+  // В мини-игре при активном плотном дообучении показываем только слова из плотного пула (active_word_ids).
+  const matchGameWords = useMemo(() => {
+    const denseIds = denseSessionState?.active_word_ids;
+    if (currentDenseCategoryId && Array.isArray(denseIds) && denseIds.length > 0) {
+      const idSet = new Set(denseIds.map(id => parseInt(id, 10)));
+      return retrainingWordsForGame.filter(w => idSet.has(parseInt(w.id, 10)));
+    }
+    return retrainingWordsForGame;
+  }, [currentDenseCategoryId, denseSessionState?.active_word_ids, retrainingWordsForGame]);
 
   // Формирование очереди тренировки. scopeCategoryIds — вся категория (allCategoryIds) или одна подкатегория
   const buildTrainingQueue = (scopeCategoryIds = null) => {
@@ -740,7 +786,22 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         formData.append('word_ids', JSON.stringify([wordId]));
         formData.append('use_random', 1);
         const response = await axios.post(window.myajax.url, formData);
-        if (response.data?.success) setDenseSessionState(response.data.data || null);
+        if (response.data?.success) {
+          const newState = response.data.data || null;
+          setDenseSessionState(newState);
+          // Логирование: состояние плотного от сервера и текущие данные слов категории
+          console.log('[Плотное] Обновлённое состояние плотного (ответ сервера):', newState);
+          const categoryWords = (categoryId === 0 || allCategoryIds.length === 0)
+            ? (categoryId === 0 ? dictionaryWords : dictionaryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10))))
+            : dictionaryWords.filter(w => wordBelongsToAnyOfCategories(w, allCategoryIds));
+          const wordsState = {};
+          categoryWords.forEach(w => {
+            wordsState[w.id] = userWordsData[w.id] != null ? { ...userWordsData[w.id], word: w.word } : null;
+          });
+          console.log('[Плотное] Слова категории (userWordsData до обновления с сервера):', wordsState);
+          lastDenseAddTimeRef.current = Date.now();
+          if (onRefreshUserData) onRefreshUserData();
+        }
       }
     } catch (err) {
       console.error(err);
@@ -1103,76 +1164,106 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   };
 
 	return (
-		<div>
+		<div className="examen-root">
       {!trainingMode && (
         <div className="training-buttons-container">
           <button
             onClick={() => startTraining()}
-            className="training-start-button"
+            className="training-start-button training-start-button--fit-content"
             title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
           >
             🎯 Начать тренировку
           </button>
 
+          <span className="training-buttons-spacer" aria-hidden="true" />
           <button
-            onClick={handleEasyTraining}
-            className="training-start-button"
-            style={{
-              backgroundColor: '#4CAF50',
-            }}
-            title="Откат 30 минут вместо 20 часов для всех слов категории"
+            onClick={() => setShowHelp(true)}
+            className="training-help-button training-help-button--right training-help-button--standalone"
+            title="Показать справку"
           >
-            😊 Лёгкая тренировка
+            ❓ Справка
           </button>
 
-          <button
-            type="button"
-            onClick={() => setShowMatchGame(true)}
-            className="training-start-button"
-            title="Мини-игра: сопоставь слова и переводы (не влияет на прогресс)"
-            style={{ backgroundColor: '#2196F3' }}
-          >
-            🎮 Мини-игра
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDenseAddMode(prev => !prev)}
-            className={`training-start-button training-start-button--dense ${denseAddMode ? 'training-start-button--dense-active' : ''}`}
-            title={denseAddMode ? 'Клик по слову — добавить/убрать из плотного. Повторный клик по кнопке — выйти' : 'Включить режим: клик по слову добавляет или убирает его из плотного дообучения'}
-          >
-            {denseAddMode ? '🔓 Выберите слова' : `🔒 В плотное (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
-          </button>
-
-          <div className="training-control-buttons">
+          <div className="training-actions-burger-wrap" ref={burgerWrapRef}>
             <button
-              onClick={() => setShowHelp(true)}
-              className="training-help-button"
-              title="Показать справку"
+              type="button"
+              className={`training-burger-btn ${showActionsMenu ? 'training-burger-btn--open' : ''}`}
+              onClick={() => setShowActionsMenu(prev => !prev)}
+              title={showActionsMenu ? 'Закрыть меню' : 'Ещё действия'}
+              aria-expanded={showActionsMenu}
             >
-              ❓ Справка
+              <span className="training-burger-line" />
+              <span className="training-burger-line" />
+              <span className="training-burger-line" />
             </button>
-            
-            {isAdminModeActive && (
+
+            <div
+              className={`training-actions-menu ${showActionsMenu ? 'training-actions-menu--open' : ''}`}
+              aria-hidden={!showActionsMenu}
+            >
               <button
-                onClick={() => {
-                  setShowReorder(true);
-                }}
-                className="training-reorder-button"
-                title="Изменить порядок слов в категории"
+                type="button"
+                className="training-actions-menu-item training-actions-menu-item--easy"
+                onClick={() => { handleEasyTraining(); setShowActionsMenu(false); }}
+                title="Откат 30 минут вместо 20 часов для всех слов категории"
               >
-                🔄 Порядок слов
+                😊 Лёгкая тренировка
               </button>
-            )}
-            
-            <button
-              onClick={() => {
-                resetCategoryFromTraining();
-              }}
-              className="training-clear-button"
-            >
-              🚫 Сбросить
-            </button>
+              <div
+                className="training-actions-menu-item-wrap training-actions-menu-item-wrap--game"
+                onMouseEnter={() => denseMatchGameDisabled && setShowGameDisabledPopover(true)}
+                onMouseLeave={() => setShowGameDisabledPopover(false)}
+              >
+                {denseMatchGameDisabled && showGameDisabledPopover && (
+                  <div className="training-actions-game-disabled-popover" role="tooltip">
+                    Нет слов в плотном дообучении. Добавьте слова через «В плотное».
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className={`training-actions-menu-item training-actions-menu-item--game ${denseMatchGameDisabled ? 'training-actions-menu-item--disabled' : ''}`}
+                  disabled={denseMatchGameDisabled}
+                  onClick={() => { if (!denseMatchGameDisabled) { setShowMatchGame(true); setShowActionsMenu(false); } }}
+                  title={denseMatchGameDisabled ? '' : 'Мини-игра: сопоставь слова и переводы'}
+                >
+                  🎮 Мини-игра
+                </button>
+              </div>
+              <button
+                type="button"
+                className={`training-actions-menu-item training-actions-menu-item--dense ${denseAddMode ? 'training-actions-menu-item--dense-active' : ''}`}
+                onClick={() => { setDenseAddMode(prev => !prev); setShowActionsMenu(false); }}
+                title={denseAddMode ? 'Клик по слову — добавить/убрать из плотного' : 'Включить режим выбора слов для плотного дообучения'}
+              >
+                {denseAddMode ? '🔓 Выберите слова' : `🔒 В плотное (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
+              </button>
+              {isAdminModeActive && (
+                <button
+                  type="button"
+                  className="training-actions-menu-item training-actions-menu-item--reorder"
+                  onClick={() => { setShowReorder(true); setShowActionsMenu(false); }}
+                  title="Изменить порядок слов в категории"
+                >
+                  🔄 Порядок слов
+                </button>
+              )}
+              <button
+                type="button"
+                className="training-actions-menu-item training-actions-menu-item--help training-actions-menu-item--help-mobile"
+                onClick={() => { setShowHelp(true); setShowActionsMenu(false); }}
+                title="Показать справку"
+              >
+                ❓ Справка
+              </button>
+              <button
+                type="button"
+                className="training-actions-menu-item training-actions-menu-item--clear"
+                onClick={() => { resetCategoryFromTraining(); setShowActionsMenu(false); }}
+                title="Сбросить тренировочные данные категории"
+              >
+                🚫 Сбросить
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1210,7 +1301,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       <MatchGameModal
         isOpen={showMatchGame}
         onClose={() => setShowMatchGame(false)}
-        words={retrainingWordsForGame}
+        words={matchGameWords}
         denseWaitingRemainingSec={liveDenseRemainingSec != null ? liveDenseRemainingSec : (denseSessionState?.waiting_remaining_sec ?? 0)}
         onFullSuccess={async () => {
           if (!currentDenseCategoryId) return;
@@ -1413,6 +1504,20 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         if (hasSubs) {
           return (
             <>
+              {denseAddMode && (
+                <div className="dense-add-mode-hint" role="status">
+                  <span className="dense-add-mode-hint__text">Клик по слову — добавить или убрать. Тяжело запоминаемое слово…</span>
+                  <button
+                    type="button"
+                    className="dense-add-mode-hint__close"
+                    onClick={() => setDenseAddMode(false)}
+                    title="Выйти из режима выбора слов"
+                    aria-label="Выйти из режима выбора слов"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               {subcategories.map((sub) => {
                 const subWords = categoryWords.filter(w => wordBelongsToCategoryId(w, parseInt(sub.id, 10)));
                 if (subWords.length === 0) return null;
@@ -1457,6 +1562,20 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
         return (
           <>
+            {denseAddMode && (
+              <div className="dense-add-mode-hint" role="status">
+                <span className="dense-add-mode-hint__text">Клик по слову — добавить или убрать. Тяжело запоминаемое слово…</span>
+                <button
+                  type="button"
+                  className="dense-add-mode-hint__close"
+                  onClick={() => setDenseAddMode(false)}
+                  title="Выйти из режима выбора слов"
+                  aria-label="Выйти из режима выбора слов"
+                >
+                  ×
+                </button>
+              </div>
+            )}
             <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>
               {realWords}
             </ul>

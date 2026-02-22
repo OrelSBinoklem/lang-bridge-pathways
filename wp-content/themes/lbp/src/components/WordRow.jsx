@@ -163,7 +163,8 @@ const WordRow = ({
         )}
         </span>
       </span>
-      
+
+      <span className="words-education-list__translation-wrap">
       {/* Перевод 1 — key принуждает remount при смене режима */}
       <span className="words-education-list__translation_1">
         {renderProgressIndicator()}
@@ -225,6 +226,7 @@ const WordRow = ({
           )}
         </span>
       )}
+      </span>
 
       {showInfoHint && (
         <span

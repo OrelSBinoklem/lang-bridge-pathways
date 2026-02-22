@@ -1109,6 +1109,10 @@ class WordsAjaxHandler {
         }
 
         $state = lbp_dense_add_words($user_id, $dictionary_id, $category_id, $word_ids, $use_random);
+
+        // Перевести слова в режим дообучения (mode_education = 1, mode_education_revert = 1) — вызываем здесь, чтобы запись в user_dict_words гарантированно выполнялась
+        lbp_dense_set_words_retraining_mode($user_id, $word_ids);
+
         wp_send_json_success($state);
         wp_die();
     }
