@@ -3443,7 +3443,7 @@ h2 .small {
     background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.9));
 }
 .training-actions-menu-item--game.training-actions-menu-item--disabled {
-    opacity: 0.65;
+    opacity: 0.85;
     cursor: not-allowed;
 }
 .training-actions-menu-item-wrap--game {

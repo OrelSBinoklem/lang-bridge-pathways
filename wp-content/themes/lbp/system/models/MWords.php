@@ -717,6 +717,47 @@ function reset_exam_progress_for_category($user_id, $category_id) {
     return true;
 }
 
+/**
+ * Сбросить тренировочные данные одного слова для пользователя.
+ * ВАЖНО: attempts/attempts_revert не трогаем (нужны для статистики).
+ *
+ * @param int $user_id
+ * @param int $word_id
+ * @return bool
+ */
+function reset_training_word_data($user_id, $word_id) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+
+    $user_id = intval($user_id);
+    $word_id = intval($word_id);
+    if ($user_id <= 0 || $word_id <= 0) {
+        return false;
+    }
+
+    $result = $wpdb->update(
+        $user_dict_words_table,
+        [
+            'correct_attempts' => 0,
+            'correct_attempts_revert' => 0,
+            'last_shown' => null,
+            'last_shown_revert' => null,
+            'easy_education' => 0,
+            'easy_correct' => 0,
+            'easy_correct_revert' => 0,
+            'mode_education' => 0,
+            'mode_education_revert' => 0
+        ],
+        [
+            'user_id' => $user_id,
+            'dict_word_id' => $word_id
+        ]
+    );
+
+    // 0 = запись уже была в нужном состоянии; считаем успешным.
+    return $result !== false;
+}
+
 function reset_training_category_data($user_id, $category_id = null, $word_ids = null) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
@@ -753,9 +794,7 @@ function reset_training_category_data($user_id, $category_id = null, $word_ids =
     // Обновляем только те записи, которые существуют (сохраняя attempts_all и correct_attempts_all)
     $result = $wpdb->query($wpdb->prepare("
         UPDATE $user_dict_words_table 
-        SET attempts = 0,
-            attempts_revert = 0,
-            correct_attempts = 0,
+        SET correct_attempts = 0,
             correct_attempts_revert = 0,
             last_shown = NULL,
             last_shown_revert = NULL,
@@ -888,7 +927,6 @@ function set_category_to_easy_mode($user_id, $category_id_or_ids) {
 function create_easy_mode_for_new_words($user_id, $word_ids) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
-    $current_time = gmdate('Y-m-d H:i:s'); // UTC время
     
     error_log("🆕 create_easy_mode_for_new_words: user_id=$user_id, words=" . count($word_ids));
     
@@ -954,8 +992,8 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
                 "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 0, 0, 0, 0, 0)",
                 $user_id,
                 $word_id,
-                $current_time,
-                $current_time
+                '0000-00-00 00:00:00',
+                null
             );
         }
         
@@ -981,7 +1019,9 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
         $result = $wpdb->query($wpdb->prepare("
             UPDATE $user_dict_words_table 
             SET mode_education = 1, 
-                mode_education_revert = 1
+                mode_education_revert = 1,
+                last_shown = '0000-00-00 00:00:00',
+                last_shown_revert = NULL
             WHERE user_id = %d 
             AND dict_word_id IN ($reset_word_ids_str)
         ", $user_id));
