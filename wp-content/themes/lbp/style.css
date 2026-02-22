@@ -3007,6 +3007,8 @@ h2 .small {
     gap: 20px;
     margin-bottom: 16px;
     min-height: 200px;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .match-game-col {
