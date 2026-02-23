@@ -11,6 +11,7 @@ import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, forma
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 import { TRAINING_CONFIG } from "../config/trainingConfig";
+import { playWordAudio } from "../config/audioConfig";
 
 const { useEffect, useState, useMemo, useRef } = wp.element;
 
@@ -54,7 +55,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [userAnswer, setUserAnswer] = useState(''); // Ответ пользователя
   const [showResult, setShowResult] = useState(false); // Показать результат
   const [isCorrect, setIsCorrect] = useState(false); // Правильный ли ответ
-  const [currentMode, setCurrentMode] = useState(null); // Текущий режим (прямой/обратный)
+  const [currentMode, setCurrentMode] = useState(false); // Текущий режим: false = прямой (лат→рус), true = обратный (рус→лат). Всегда boolean.
   const [attemptCount, setAttemptCount] = useState(0); // Счетчик попыток для текущего слова
   const [currentTime, setCurrentTime] = useState(Date.now()); // Для обновления таймеров
   const [showHelp, setShowHelp] = useState(false); // Показать справку
@@ -546,10 +547,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           setTrainingScopeIds([currentDenseCategoryId]);
           setTrainingMode(true);
           setCurrentWord(denseQueue[0].word);
-          setCurrentMode(denseQueue[0].mode);
+          setCurrentMode(Boolean(denseQueue[0].mode));
           setUserAnswer('');
           setShowResult(false);
           setAttemptCount(0);
+          if (!denseQueue[0].mode && denseQueue[0].word) playWordAudio(denseQueue[0].word.word, denseQueue[0].word.learn_lang);
           return;
         }
         if ((denseState.waiting_remaining_sec || 0) > 0) {
@@ -676,10 +678,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     // Устанавливаем первое слово из очереди
     const firstItem = queue[0];
     setCurrentWord(firstItem.word);
-    setCurrentMode(firstItem.mode);
+    setCurrentMode(Boolean(firstItem.mode));
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
+    if (!firstItem.mode && firstItem.word) playWordAudio(firstItem.word.word, firstItem.word.learn_lang);
   };
 
   // Обновить попытки слова на сервере (обычный режим или плотный — не трогаем логику обычного обучения)
@@ -905,6 +908,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       // Показываем результат только после успешного обновления
       setShowResult(true);
       if (correct) setDenseAddMode(false); // выключить режим выбора слов для плотного после первого правильного ответа
+      // Звук после ответа только в обратном режиме (рус→лат): разгадывали латышское слово — даём услышать произношение
+      if (currentMode) playWordAudio(currentWord.word, currentWord.learn_lang);
 
       // Устанавливаем фокус на кнопку "Следующее слово" после показа результата
       setTimeout(() => {
@@ -966,11 +971,12 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       setTrainingQueue(denseQueue);
       setCurrentQueueIndex(0);
       setCurrentWord(denseQueue[0].word);
-      setCurrentMode(denseQueue[0].mode);
+      setCurrentMode(Boolean(denseQueue[0].mode));
       setTrainingPhase(denseQueue[0].phase || 'direct');
       setUserAnswer('');
       setShowResult(false);
       setAttemptCount(0);
+      if (!denseQueue[0].mode && denseQueue[0].word) playWordAudio(denseQueue[0].word.word, denseQueue[0].word.learn_lang);
       return;
     }
     
@@ -987,11 +993,12 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       if (isWordAvailableForMode(nextItem.word, nextItem.mode)) {
         setCurrentQueueIndex(nextIndex);
         setCurrentWord(nextItem.word);
-        setCurrentMode(nextItem.mode);
+        setCurrentMode(Boolean(nextItem.mode));
         setTrainingPhase(nextItem.phase || 'direct');
         setUserAnswer('');
         setShowResult(false);
         setAttemptCount(0);
+        if (!nextItem.mode && nextItem.word) playWordAudio(nextItem.word.word, nextItem.word.learn_lang);
         found = true;
         break;
       }
@@ -1040,11 +1047,12 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           setStackHasNonRetrainingWord(hasNonRetrainingForNew);
           setCurrentQueueIndex(0);
           setCurrentWord(firstItem.word);
-          setCurrentMode(firstItem.mode);
+          setCurrentMode(Boolean(firstItem.mode));
           setTrainingPhase(firstItem.phase || 'direct');
           setUserAnswer('');
           setShowResult(false);
           setAttemptCount(0);
+          if (!firstItem.mode && firstItem.word) playWordAudio(firstItem.word.word, firstItem.word.learn_lang);
           setTimeout(() => {
             if (selectionMode) {
               const firstChoice = document.querySelector('.training-choice-btn');
@@ -1087,6 +1095,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setTrainingPhase('direct');
     setTrainingScopeIds(null);
     setCurrentWord(null);
+    setCurrentMode(false);
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
@@ -1108,13 +1117,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setStackHasNonRetrainingWord(hasNonRetrainingForNew);
     setCurrentQueueIndex(0);
     setCurrentWord(firstItem.word);
-    setCurrentMode(firstItem.mode);
+    setCurrentMode(Boolean(firstItem.mode));
     setTrainingPhase(firstItem.phase || 'direct');
     setUserAnswer('');
     setShowResult(false);
     setAttemptCount(0);
     setShowRetrainingNotice(false);
     setPendingRetrainingState(null);
+    if (!firstItem.mode && firstItem.word) playWordAudio(firstItem.word.word, firstItem.word.learn_lang);
     setTimeout(() => {
       if (selectionMode) {
         const firstChoice = document.querySelector('.training-choice-btn');
@@ -1216,7 +1226,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               >
                 {denseMatchGameDisabled && showGameDisabledPopover && (
                   <div className="training-actions-game-disabled-popover" role="tooltip">
-                    Нет слов в плотном дообучении. Добавьте слова через «В плотное».
+                    Вы не пометили труднозапоминаемые слова. Добавьте слова через «В плотное».
                   </div>
                 )}
                 <button
@@ -1226,7 +1236,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   onClick={() => { if (!denseMatchGameDisabled) { setShowMatchGame(true); setShowActionsMenu(false); } }}
                   title={denseMatchGameDisabled ? '' : 'Мини-игра: сопоставь слова и переводы'}
                 >
-                  🎮 Мини-игра
+                  🎮 Труднозапоминаемые-игра
                 </button>
               </div>
               <button
@@ -1235,7 +1245,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                 onClick={() => { setDenseAddMode(prev => !prev); setShowActionsMenu(false); }}
                 title={denseAddMode ? 'Клик по слову — добавить/убрать из плотного' : 'Включить режим выбора слов для плотного дообучения'}
               >
-                {denseAddMode ? '🔓 Выберите слова' : `🔒 В плотное (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
+                {denseAddMode ? '🔓 Выберите слова' : `🔒 Труднозапоминаемые слова (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
               </button>
               {isAdminModeActive && (
                 <button

@@ -1,38 +1,8 @@
-import React, { useEffect } from 'react';
-import { AUDIO_CONFIG, getLanguageConfig, isLanguageSupported } from '../config/audioConfig';
+import React from 'react';
+import { playWordAudio } from '../config/audioConfig';
 import { stripParenthesesAndPunctuation } from '../custom/utils/helpers';
 
-// Универсальная функция проигрывания звука
-const playAudio = (word, learnLang) => {
-  try {
-    // Определяем язык (по умолчанию из конфига)
-    const language = learnLang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-    
-    // Проверяем поддержку языка
-    if (!isLanguageSupported(language)) {
-      console.warn('⚠️ Неподдерживаемый язык:', language, 'Поддерживаемые языки:', Object.keys(AUDIO_CONFIG.SUPPORTED_LANGUAGES));
-      return;
-    }
-    
-    // Получаем конфигурацию языка
-    const langConfig = getLanguageConfig(language);
-    
-    // Генерируем имя файла используя функцию slugify из конфига
-    const fileName = langConfig.slugify(word) + AUDIO_CONFIG.AUDIO_EXTENSION;
-    
-    // Строим путь к файлу
-    const audioPath = `${AUDIO_CONFIG.BASE_PATH}/${langConfig.folder}/audio/${fileName}`;
-    
-    console.log('🔊 Воспроизводим:', word, `(${language} - ${langConfig.name}) → файл:`, fileName);
-    
-    const audio = new Audio(audioPath);
-    audio.play().catch(error => {
-      console.warn('⚠️ Не удалось воспроизвести звук для:', word, error.message);
-    });
-  } catch (error) {
-    console.warn('⚠️ Ошибка при попытке воспроизведения звука:', error.message);
-  }
-};
+// Звук при смене слова вызывается колбэком из Examen (только прямой режим). Здесь только по клику.
 
 const TrainingInterface = ({
   currentWord,
@@ -49,29 +19,6 @@ const TrainingInterface = ({
   selectionMode = false,
   choiceOptions = []
 }) => {
-  // Автоматически проигрываем слово при смене слова
-  useEffect(() => {
-    if (currentWord) {
-      // Проигрываем слово только если это прямой перевод (лат→рус)
-      // При обратном переводе (рус→лат) звук воспроизводим только после ответа
-      if (!currentMode) {
-        const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-        playAudio(currentWord.word, learnLang);
-      }
-    }
-  }, [currentWord, currentMode]);
-
-  // Воспроизводим звук после показа результата при обратном переводе
-  useEffect(() => {
-    if (showResult && currentMode && currentWord) {
-      // Небольшая задержка чтобы результат успел отобразиться
-      setTimeout(() => {
-        const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-        playAudio(currentWord.word, learnLang);
-      }, 100);
-    }
-  }, [showResult, currentMode, currentWord]);
-
   if (!currentWord) return null;
 
   return (
@@ -97,10 +44,7 @@ const TrainingInterface = ({
         {/* Кнопка повтора звука для прямого перевода (лат→рус) */}
         {!currentMode && (
           <button
-            onClick={() => {
-              const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-              playAudio(currentWord.word, learnLang);
-            }}
+            onClick={() => playWordAudio(currentWord.word, currentWord.learn_lang)}
             className="training-audio-button"
             title="Повторить звук"
             type="button"
@@ -181,10 +125,7 @@ const TrainingInterface = ({
               {currentMode ? (
                 <div
                   className="correct-answer-with-audio"
-                  onClick={() => {
-                    const learnLang = currentWord.learn_lang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
-                    playAudio(currentWord.word, learnLang);
-                  }}
+                  onClick={() => playWordAudio(currentWord.word, currentWord.learn_lang)}
                   title="Кликните для воспроизведения звука"
                   style={{ cursor: 'pointer' }}
                 >

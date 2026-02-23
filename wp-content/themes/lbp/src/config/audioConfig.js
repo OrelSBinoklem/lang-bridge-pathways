@@ -74,3 +74,18 @@ export const isLanguageSupported = (langCode) => {
 export const getSupportedLanguages = () => {
   return Object.keys(AUDIO_CONFIG.SUPPORTED_LANGUAGES);
 };
+
+// Воспроизведение звука по слову (для тренировки). Вызывать из колбэка при смене слова в прямом режиме.
+export const playWordAudio = (wordText, learnLang) => {
+  try {
+    const language = learnLang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
+    if (!isLanguageSupported(language)) return;
+    const langConfig = getLanguageConfig(language);
+    const fileName = langConfig.slugify(wordText) + AUDIO_CONFIG.AUDIO_EXTENSION;
+    const audioPath = `${AUDIO_CONFIG.BASE_PATH}/${langConfig.folder}/audio/${fileName}`;
+    const audio = new Audio(audioPath);
+    audio.play().catch(() => {});
+  } catch (e) {
+    // ignore
+  }
+};
