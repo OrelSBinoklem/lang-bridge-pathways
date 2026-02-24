@@ -283,11 +283,21 @@ function create_user_dict_words_table() {
             dict_word_id mediumint(9) NOT NULL,
             attempts mediumint(9) NOT NULL DEFAULT 0,
             correct_attempts mediumint(9) NOT NULL DEFAULT 0,
+            attempts_revert mediumint(9) NOT NULL DEFAULT 0,
+            correct_attempts_revert mediumint(9) NOT NULL DEFAULT 0,
+            statistic_attempts mediumint(9) NOT NULL DEFAULT 0,
+            statistic_attempts_revert mediumint(9) NOT NULL DEFAULT 0,
+            statistic_correct_attempts mediumint(9) NOT NULL DEFAULT 0,
+            statistic_correct_attempts_revert mediumint(9) NOT NULL DEFAULT 0,
             last_shown datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            last_shown_revert datetime DEFAULT NULL,
             easy_education tinyint(1) NOT NULL DEFAULT 0,
             mode_education tinyint(1) NOT NULL DEFAULT 0,
+            mode_education_revert tinyint(1) NOT NULL DEFAULT 0,
             attempts_all mediumint(9) NOT NULL DEFAULT 0,
             correct_attempts_all mediumint(9) NOT NULL DEFAULT 0,
+            easy_correct tinyint(1) NOT NULL DEFAULT 0,
+            easy_correct_revert tinyint(1) NOT NULL DEFAULT 0,
             PRIMARY KEY (id),
             KEY user_id (user_id),
             KEY dict_word_id (dict_word_id)
@@ -335,6 +345,26 @@ function add_revert_fields_to_user_dict_words_table() {
     if (!in_array('easy_correct_revert', $columns)) {
         $wpdb->query("ALTER TABLE $table_name ADD COLUMN easy_correct_revert tinyint(1) NOT NULL DEFAULT 0 AFTER easy_correct");
         error_log('Added easy_correct_revert field to user_dict_words table');
+    }
+
+    if (!in_array('statistic_attempts', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN statistic_attempts mediumint(9) NOT NULL DEFAULT 0 AFTER correct_attempts_revert");
+        error_log('Added statistic_attempts field to user_dict_words table');
+    }
+
+    if (!in_array('statistic_attempts_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN statistic_attempts_revert mediumint(9) NOT NULL DEFAULT 0 AFTER statistic_attempts");
+        error_log('Added statistic_attempts_revert field to user_dict_words table');
+    }
+
+    if (!in_array('statistic_correct_attempts', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN statistic_correct_attempts mediumint(9) NOT NULL DEFAULT 0 AFTER statistic_attempts_revert");
+        error_log('Added statistic_correct_attempts field to user_dict_words table');
+    }
+
+    if (!in_array('statistic_correct_attempts_revert', $columns)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN statistic_correct_attempts_revert mediumint(9) NOT NULL DEFAULT 0 AFTER statistic_correct_attempts");
+        error_log('Added statistic_correct_attempts_revert field to user_dict_words table');
     }
 }
 

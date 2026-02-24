@@ -19,6 +19,10 @@ const DEFAULT_PROGRESS = {
   correct_attempts: 0,
   attempts_revert: 0,
   correct_attempts_revert: 0,
+  statistic_attempts: 0,
+  statistic_attempts_revert: 0,
+  statistic_correct_attempts: 0,
+  statistic_correct_attempts_revert: 0,
   mode_education: 0,
   mode_education_revert: 0,
   last_shown: '',
@@ -66,6 +70,10 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
           correct_attempts: p?.correct_attempts ?? 0,
           attempts_revert: p?.attempts_revert ?? 0,
           correct_attempts_revert: p?.correct_attempts_revert ?? 0,
+          statistic_attempts: p?.statistic_attempts ?? 0,
+          statistic_attempts_revert: p?.statistic_attempts_revert ?? 0,
+          statistic_correct_attempts: p?.statistic_correct_attempts ?? 0,
+          statistic_correct_attempts_revert: p?.statistic_correct_attempts_revert ?? 0,
           mode_education: p?.mode_education ?? 0,
           mode_education_revert: p?.mode_education_revert ?? 0,
           last_shown: p?.last_shown ? String(p.last_shown).replace(' ', 'T').slice(0, 19) : '',
@@ -96,6 +104,10 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
       fd.append('correct_attempts', progressForm.correct_attempts);
       fd.append('attempts_revert', progressForm.attempts_revert);
       fd.append('correct_attempts_revert', progressForm.correct_attempts_revert);
+      fd.append('statistic_attempts', progressForm.statistic_attempts);
+      fd.append('statistic_attempts_revert', progressForm.statistic_attempts_revert);
+      fd.append('statistic_correct_attempts', progressForm.statistic_correct_attempts);
+      fd.append('statistic_correct_attempts_revert', progressForm.statistic_correct_attempts_revert);
       fd.append('mode_education', progressForm.mode_education);
       fd.append('mode_education_revert', progressForm.mode_education_revert);
       fd.append('last_shown', progressForm.last_shown ? progressForm.last_shown.replace('T', ' ') : '');
@@ -171,27 +183,43 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
               <p className="word-editor-progress-meta"><strong>Пользователь:</strong> {progressUserDisplay || '—'}</p>
               <p className="word-editor-progress-meta"><strong>Слово:</strong> {word?.word ?? ''} (ID: {word?.id ?? '—'})</p>
               <div className="field-row">
-                <label>attempts (прямой):</label>
+                <label>attempts:</label>
                 <input type="number" min="0" name="attempts" value={progressForm.attempts} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">
-                <label>correct_attempts (прямой):</label>
+                <label>correct_attempts:</label>
                 <input type="number" min="0" name="correct_attempts" value={progressForm.correct_attempts} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">
-                <label>attempts_revert (обратный):</label>
+                <label>attempts_revert:</label>
                 <input type="number" min="0" name="attempts_revert" value={progressForm.attempts_revert} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">
-                <label>correct_attempts_revert (обратный):</label>
+                <label>correct_attempts_revert:</label>
                 <input type="number" min="0" name="correct_attempts_revert" value={progressForm.correct_attempts_revert} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">
-                <label>mode_education (0/1):</label>
+                <label>statistic_attempts:</label>
+                <input type="number" min="0" name="statistic_attempts" value={progressForm.statistic_attempts} onChange={handleProgressFieldChange} />
+              </div>
+              <div className="field-row">
+                <label>statistic_correct_attempts:</label>
+                <input type="number" min="0" name="statistic_correct_attempts" value={progressForm.statistic_correct_attempts} onChange={handleProgressFieldChange} />
+              </div>
+              <div className="field-row">
+                <label>statistic_attempts_revert:</label>
+                <input type="number" min="0" name="statistic_attempts_revert" value={progressForm.statistic_attempts_revert} onChange={handleProgressFieldChange} />
+              </div>
+              <div className="field-row">
+                <label>statistic_correct_attempts_revert:</label>
+                <input type="number" min="0" name="statistic_correct_attempts_revert" value={progressForm.statistic_correct_attempts_revert} onChange={handleProgressFieldChange} />
+              </div>
+              <div className="field-row">
+                <label>mode_education:</label>
                 <input type="number" min="0" max="1" name="mode_education" value={progressForm.mode_education} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">
-                <label>mode_education_revert (0/1):</label>
+                <label>mode_education_revert:</label>
                 <input type="number" min="0" max="1" name="mode_education_revert" value={progressForm.mode_education_revert} onChange={handleProgressFieldChange} />
               </div>
               <div className="field-row">

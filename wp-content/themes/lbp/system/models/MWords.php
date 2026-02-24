@@ -64,7 +64,8 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
     $query = $wpdb->prepare("
         SELECT dict_word_id, attempts, correct_attempts, last_shown, last_shown_revert,
                easy_education, mode_education, mode_education_revert, attempts_all, correct_attempts_all,
-               attempts_revert, correct_attempts_revert, easy_correct, easy_correct_revert
+               attempts_revert, correct_attempts_revert, easy_correct, easy_correct_revert,
+               statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert
         FROM $user_dict_words_table 
         WHERE user_id = %d AND dict_word_id IN (
             SELECT id FROM $words_table WHERE dictionary_id = %d
@@ -89,6 +90,10 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
         $row['correct_attempts_revert'] = intval($row['correct_attempts_revert']);
         $row['easy_correct'] = intval($row['easy_correct']);
         $row['easy_correct_revert'] = intval($row['easy_correct_revert']);
+        $row['statistic_attempts'] = intval($row['statistic_attempts'] ?? 0);
+        $row['statistic_attempts_revert'] = intval($row['statistic_attempts_revert'] ?? 0);
+        $row['statistic_correct_attempts'] = intval($row['statistic_correct_attempts'] ?? 0);
+        $row['statistic_correct_attempts_revert'] = intval($row['statistic_correct_attempts_revert'] ?? 0);
         // last_shown и last_shown_revert остаются строками (datetime)
         
         $user_words_data[$row['dict_word_id']] = $row;
@@ -109,7 +114,8 @@ function get_single_word_progress($user_id, $word_id) {
     $row = $wpdb->get_row($wpdb->prepare("
         SELECT id, user_id, dict_word_id, attempts, correct_attempts, attempts_revert, correct_attempts_revert,
                last_shown, last_shown_revert, easy_education, mode_education, mode_education_revert,
-               attempts_all, correct_attempts_all, easy_correct, easy_correct_revert
+               attempts_all, correct_attempts_all, easy_correct, easy_correct_revert,
+               statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert
         FROM $user_dict_words_table
         WHERE user_id = %d AND dict_word_id = %d
     ", $user_id, $word_id), ARRAY_A);
@@ -124,6 +130,10 @@ function get_single_word_progress($user_id, $word_id) {
     $row['mode_education_revert'] = (int) $row['mode_education_revert'];
     $row['attempts_all'] = (int) ($row['attempts_all'] ?? 0);
     $row['correct_attempts_all'] = (int) ($row['correct_attempts_all'] ?? 0);
+    $row['statistic_attempts'] = (int) ($row['statistic_attempts'] ?? 0);
+    $row['statistic_attempts_revert'] = (int) ($row['statistic_attempts_revert'] ?? 0);
+    $row['statistic_correct_attempts'] = (int) ($row['statistic_correct_attempts'] ?? 0);
+    $row['statistic_correct_attempts_revert'] = (int) ($row['statistic_correct_attempts_revert'] ?? 0);
     return $row;
 }
 
@@ -139,7 +149,8 @@ function update_single_word_progress_admin($user_id, $word_id, $data) {
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
     $allowed = ['attempts', 'correct_attempts', 'attempts_revert', 'correct_attempts_revert',
                 'mode_education', 'mode_education_revert', 'last_shown', 'last_shown_revert',
-                'attempts_all', 'correct_attempts_all', 'easy_education', 'easy_correct', 'easy_correct_revert'];
+                'attempts_all', 'correct_attempts_all', 'easy_education', 'easy_correct', 'easy_correct_revert',
+                'statistic_attempts', 'statistic_attempts_revert', 'statistic_correct_attempts', 'statistic_correct_attempts_revert'];
     $update = [];
     foreach ($allowed as $key) {
         if (array_key_exists($key, $data)) {
@@ -166,6 +177,10 @@ function update_single_word_progress_admin($user_id, $word_id, $data) {
         'correct_attempts' => 0,
         'attempts_revert' => 0,
         'correct_attempts_revert' => 0,
+        'statistic_attempts' => 0,
+        'statistic_attempts_revert' => 0,
+        'statistic_correct_attempts' => 0,
+        'statistic_correct_attempts_revert' => 0,
         'mode_education' => 0,
         'mode_education_revert' => 0,
     ], $update);
@@ -237,6 +252,10 @@ function reset_category_progress($user_id, $category_id) {
                     'correct_attempts_all' => 0,
                     'attempts_revert' => 0,
                     'correct_attempts_revert' => 0,
+                    'statistic_attempts' => 0,
+                    'statistic_attempts_revert' => 0,
+                    'statistic_correct_attempts' => 0,
+                    'statistic_correct_attempts_revert' => 0,
                     'easy_correct' => 0,
                     'easy_correct_revert' => 0
                 ]
@@ -450,6 +469,10 @@ function update_word_progress($user_id, $word_id, $is_revert) {
             'correct_attempts_all' => 0,
             'attempts_revert' => 0,
             'correct_attempts_revert' => 0,
+            'statistic_attempts' => 0,
+            'statistic_attempts_revert' => 0,
+            'statistic_correct_attempts' => 0,
+            'statistic_correct_attempts_revert' => 0,
             'easy_correct' => 0,
             'easy_correct_revert' => 0
         ];
@@ -529,7 +552,8 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
         if ($is_revert) {
             // Обратный перевод
             $update_data = [
-                'attempts_revert' => $exists['attempts_revert'] + 1
+                'attempts_revert' => $exists['attempts_revert'] + 1,
+                'statistic_attempts_revert' => (int)($exists['statistic_attempts_revert'] ?? 0) + 1
             ];
             
             if ($is_correct) {
@@ -537,6 +561,7 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
                 if ($is_first_attempt) {
                     // С первой попытки - добавляем балл
                     $update_data['correct_attempts_revert'] = $exists['correct_attempts_revert'] + 1;
+                    $update_data['statistic_correct_attempts_revert'] = (int)($exists['statistic_correct_attempts_revert'] ?? 0) + 1;
                     $update_data['last_shown_revert'] = $current_time;
                     $update_data['mode_education_revert'] = 0; // Выключаем режим обучения
                 } else {
@@ -560,7 +585,8 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
         } else {
             // Прямой перевод
             $update_data = [
-                'attempts' => $exists['attempts'] + 1
+                'attempts' => $exists['attempts'] + 1,
+                'statistic_attempts' => (int)($exists['statistic_attempts'] ?? 0) + 1
             ];
             
             if ($is_correct) {
@@ -568,6 +594,7 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
                 if ($is_first_attempt) {
                     // С первой попытки - добавляем балл
                     $update_data['correct_attempts'] = $exists['correct_attempts'] + 1;
+                    $update_data['statistic_correct_attempts'] = (int)($exists['statistic_correct_attempts'] ?? 0) + 1;
                     $update_data['last_shown'] = $current_time;
                     $update_data['mode_education'] = 0; // Выключаем режим обучения
                 } else {
@@ -598,22 +625,30 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
             'attempts_revert' => 0,
             'correct_attempts' => 0,
             'correct_attempts_revert' => 0,
+            'statistic_attempts' => 0,
+            'statistic_attempts_revert' => 0,
+            'statistic_correct_attempts' => 0,
+            'statistic_correct_attempts_revert' => 0,
             'mode_education' => 0,
             'mode_education_revert' => 0
         ];
         
         if ($is_revert) {
             $insert_data['attempts_revert'] = 1;
+            $insert_data['statistic_attempts_revert'] = 1;
             if ($is_correct && $is_first_attempt) {
                 $insert_data['correct_attempts_revert'] = 1;
+                $insert_data['statistic_correct_attempts_revert'] = 1;
                 $insert_data['last_shown_revert'] = $current_time;
             } else if (!$is_correct) {
                 $insert_data['mode_education_revert'] = 1;
             }
         } else {
             $insert_data['attempts'] = 1;
+            $insert_data['statistic_attempts'] = 1;
             if ($is_correct && $is_first_attempt) {
                 $insert_data['correct_attempts'] = 1;
+                $insert_data['statistic_correct_attempts'] = 1;
                 $insert_data['last_shown'] = $current_time;
             } else if (!$is_correct) {
                 $insert_data['mode_education'] = 1;
@@ -896,6 +931,10 @@ function set_category_to_easy_mode($user_id, $category_id_or_ids) {
                     'attempts_revert' => 0,
                     'correct_attempts' => 0,
                     'correct_attempts_revert' => 0,
+                    'statistic_attempts' => 0,
+                    'statistic_attempts_revert' => 0,
+                    'statistic_correct_attempts' => 0,
+                    'statistic_correct_attempts_revert' => 0,
                     'last_shown' => gmdate('Y-m-d H:i:s'), // UTC время
                     'last_shown_revert' => gmdate('Y-m-d H:i:s'), // UTC время
                     'mode_education' => 1,              // Режим обучения включен
@@ -992,7 +1031,7 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
         $values = [];
         foreach ($new_word_ids as $word_id) {
             $values[] = $wpdb->prepare(
-                "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 0, 0, 0, 0, 0)",
+                "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)",
                 $user_id,
                 $word_id,
                 '0000-00-00 00:00:00',
@@ -1003,7 +1042,8 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
         $sql = "INSERT INTO $user_dict_words_table 
                 (user_id, dict_word_id, attempts, attempts_revert, correct_attempts, correct_attempts_revert, 
                  last_shown, last_shown_revert, mode_education, mode_education_revert, 
-                 attempts_all, correct_attempts_all, easy_education, easy_correct, easy_correct_revert) 
+                 attempts_all, correct_attempts_all, easy_education, easy_correct, easy_correct_revert,
+                 statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert) 
                 VALUES " . implode(', ', $values);
         
         $result = $wpdb->query($sql);
@@ -1340,6 +1380,10 @@ function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
                     'attempts_revert' => 0,
                     'correct_attempts' => 0,
                     'correct_attempts_revert' => 0,
+                    'statistic_attempts' => 0,
+                    'statistic_attempts_revert' => 0,
+                    'statistic_correct_attempts' => 0,
+                    'statistic_correct_attempts_revert' => 0,
                     'last_shown' => '0000-00-00 00:00:00',
                     'last_shown_revert' => null,
                     'easy_education' => 0,
@@ -1350,7 +1394,7 @@ function lbp_dense_set_words_retraining_mode($user_id, $word_ids) {
                     'easy_correct' => 0,
                     'easy_correct_revert' => 0,
                 ],
-                ['%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d']
+                ['%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d']
             );
         }
     }

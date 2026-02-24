@@ -3846,7 +3846,7 @@ li:has(.word-editor-wrap) {
 
 .info-wysiwyg-modal {
     width: 100%;
-    max-width: 900px;
+    max-width: 480px;
     height: 85vh;
     max-height: 700px;
     background: #fff;
