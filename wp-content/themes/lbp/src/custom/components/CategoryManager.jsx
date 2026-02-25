@@ -387,12 +387,12 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
               </div>
             </form>
           ) : (
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '18px', cursor: 'move' }} title="Перетащите для изменения порядка">☰</span>
                 <strong>{category.name}</strong> (ID: {category.id}, Порядок: {category.order || 0})
               </div>
-              <div style={{ marginTop: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <button onClick={() => handleEdit(category)} disabled={loading}>Редактировать</button>
                 <button onClick={() => handleDelete(category.id)} disabled={loading} style={{ marginLeft: '10px', backgroundColor: '#dc3545', color: 'white' }}>Удалить</button>
               </div>
