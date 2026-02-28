@@ -19,20 +19,30 @@ wp_nav_menu(array(
 ?>
 
 <div class="lang-content-buttons <?=$lang !== 'LV'?'d-none':''?>">
-    <button type="button" class="lang-modal-btn" data-modal="lang-modal-184">Общая грамматика</button>
-    <button type="button" class="lang-modal-btn" data-modal="lang-modal-187">Понятия</button>
+    <button type="button" class="btn btn-outline-primary lang-modal-btn" data-bs-toggle="modal" data-bs-target="#lang-modal-184">Общая грамматика</button>
+    <button type="button" class="btn btn-outline-primary lang-modal-btn" data-bs-toggle="modal" data-bs-target="#lang-modal-187">Понятия</button>
 </div>
 
-<div id="lang-modal-184" class="lang-modal-overlay" aria-hidden="true">
-    <div class="lang-modal-wrap">
-        <button type="button" class="lang-modal-close" aria-label="Закрыть">&times;</button>
-        <div id="lang-modal-184-content" class="lang-modal-content"></div>
+<div id="lang-modal-184" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Общая грамматика</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div id="lang-modal-184-content" class="modal-body lang-modal-content"></div>
+        </div>
     </div>
 </div>
-<div id="lang-modal-187" class="lang-modal-overlay" aria-hidden="true">
-    <div class="lang-modal-wrap">
-        <button type="button" class="lang-modal-close" aria-label="Закрыть">&times;</button>
-        <div id="lang-modal-187-content" class="lang-modal-content"></div>
+<div id="lang-modal-187" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Понятия</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div id="lang-modal-187-content" class="modal-body lang-modal-content"></div>
+        </div>
     </div>
 </div>
 
@@ -58,26 +68,6 @@ wp_nav_menu(array(
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".lang-modal-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-modal");
-        const modal = document.getElementById(id);
-        if (modal) { modal.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; }
-      });
-    });
-    document.querySelectorAll(".lang-modal-overlay .lang-modal-close, .lang-modal-overlay").forEach(el => {
-      el.addEventListener("click", (e) => {
-        if (e.target === el || e.target.classList.contains("lang-modal-close")) {
-          const overlay = el.closest(".lang-modal-overlay") || el;
-          overlay.setAttribute("aria-hidden", "true");
-          document.body.style.overflow = "";
-        }
-      });
-    });
-    document.querySelectorAll(".lang-modal-wrap").forEach(wrap => {
-      wrap.addEventListener("click", (e) => e.stopPropagation());
-    });
-
     const blocks = document.querySelectorAll(".menu-dictionaries h2");
 
     if (blocks.length === 0) return;

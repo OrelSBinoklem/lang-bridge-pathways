@@ -5,7 +5,7 @@ import React from 'react';
  */
 export default function LangModalConceptsContent() {
   return (
-    <div className="lang-modal-inner">
+    <div className="container-fluid px-0">
       <h1>Основные понятия языка</h1>
 
       <p><strong>Части речи</strong> — классы слов по значению и роли в предложении (всего 10).</p>
