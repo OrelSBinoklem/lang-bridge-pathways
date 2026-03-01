@@ -16,6 +16,7 @@ const TrainingInterface = ({
   onFinishTraining,
   isUpdating = false,
   inEducationMode = false,
+  manualInputError = false,
   selectionMode = false,
   choiceOptions = []
 }) => {
@@ -64,7 +65,7 @@ const TrainingInterface = ({
             onKeyPress={(e) => e.key === 'Enter' && onCheckAnswer()}
             placeholder="Введите ваш ответ..."
             autoFocus={!selectionMode}
-            className="training-input"
+            className={`training-input ${manualInputError ? 'training-input--error' : ''}`}
           />
 
           {selectionMode && choiceOptions.length > 0 && (

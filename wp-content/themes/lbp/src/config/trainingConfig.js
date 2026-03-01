@@ -7,4 +7,6 @@
  */
 export const TRAINING_CONFIG = {
   RETRAINING_NOTICE_MODE: 'always',
+  // Доп. попытка при ручном вводе: даём только если ошибка НЕ только в гарумзиме.
+  ALLOW_SECOND_MANUAL_ATTEMPT_NON_GARUM: true,
 };

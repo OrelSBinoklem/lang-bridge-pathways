@@ -71,6 +71,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [trainingPhase, setTrainingPhase] = useState('direct'); // Фаза тренировки: 'direct', 'revert', 'alternating'
   const [trainingScopeIds, setTrainingScopeIds] = useState(null); // Область тренировки: null = вся категория, иначе [id подкатегории]
   const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
+  const [manualRetryUsed, setManualRetryUsed] = useState(false); // Уже использована доп. попытка ручного ввода для текущего слова
+  const [manualInputError, setManualInputError] = useState(false); // Подсветка поля ввода при ошибке перед доп. попыткой
   const [showRetrainingNotice, setShowRetrainingNotice] = useState(false); // Показать сообщение о режиме дообучения
   const [showMatchGame, setShowMatchGame] = useState(false); // Мини-игра: сопоставь переводы
   const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
@@ -105,6 +107,12 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     window.addEventListener('training-answer-mode-changed', onModeChange);
     return () => window.removeEventListener('training-answer-mode-changed', onModeChange);
   }, []);
+
+  // При смене слова/направления сбрасываем доп. попытку и подсветку поля.
+  useEffect(() => {
+    setManualRetryUsed(false);
+    setManualInputError(false);
+  }, [currentWord?.id, currentMode]);
 
   // Фокус на кнопку «Продолжить отвечать» при открытии окна режима дообучения (чтобы Enter срабатывал)
   useEffect(() => {
@@ -686,7 +694,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   };
 
   // Обновить попытки слова на сервере (обычный режим или плотный — не трогаем логику обычного обучения)
-  const updateWordAttempts = async (wordId, isRevertMode, isCorrect) => {
+  const updateWordAttempts = async (wordId, isRevertMode, isCorrect, forceNonFirstAttempt = false) => {
     try {
       if (denseTrainingMode) {
         const formData = new FormData();
@@ -713,7 +721,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       formData.append("word_id", wordId);
       formData.append("is_revert", isRevertMode ? 1 : 0);
       formData.append("is_correct", isCorrect ? 1 : 0);
-      formData.append("is_first_attempt", me ? 0 : 1);
+      const isFirstAttempt = forceNonFirstAttempt ? 0 : (me ? 0 : 1);
+      formData.append("is_first_attempt", isFirstAttempt);
 
       const response = await axios.post(window.myajax.url, formData);
 
@@ -848,6 +857,22 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return variants;
   };
 
+  const removeGarumMarks = (text) => {
+    return normalizeString(text).replace(/[āēīūō]/g, (char) => {
+      const map = { ā: 'a', ē: 'e', ī: 'i', ū: 'u', ō: 'o' };
+      return map[char] || char;
+    });
+  };
+
+  // "Только гарумзиме": если без долгих гласных ответ совпадает с правильным вариантом.
+  const isGarumOnlyMismatch = (typedAnswer, acceptableAnswers) => {
+    const normalizedTypedWithoutGarum = removeGarumMarks(stripParenthesesAndPunctuation(typedAnswer || ''));
+    return acceptableAnswers.some(answer => {
+      const normalizedAnswerWithoutGarum = removeGarumMarks(stripParenthesesAndPunctuation(answer || ''));
+      return normalizedTypedWithoutGarum === normalizedAnswerWithoutGarum;
+    });
+  };
+
   // Обработчики для TrainingInterface. overrideAnswer — при выборе из вариантов (режим «выбор»)
   const handleCheckAnswer = async (overrideAnswer) => {
     const toCheck = (overrideAnswer != null && String(overrideAnswer).trim()) ? String(overrideAnswer).trim() : userAnswer.trim();
@@ -856,6 +881,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     checkAnswerSubmittingRef.current = true;
 
     let correct = false;
+    let allAcceptableVariants = [];
 
     // Если пользователь нажал «Посмотреть правильный ответ» (пустой ввод) — считаем неправильным, записываем попытку
     if (toCheck) {
@@ -879,7 +905,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         }
       }
       
-      const allAcceptableVariants = [];
+      allAcceptableVariants = [];
       correctAnswers.forEach(answer => {
         const variants = generateAnswerVariants(answer);
         allAcceptableVariants.push(...variants);
@@ -893,14 +919,32 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       });
     }
 
+    const isManualTypedAttempt = !selectionMode && overrideAnswer == null;
+    const canOfferSecondManualAttempt = (
+      TRAINING_CONFIG.ALLOW_SECOND_MANUAL_ATTEMPT_NON_GARUM &&
+      isManualTypedAttempt &&
+      toCheck &&
+      !correct &&
+      !manualRetryUsed &&
+      allAcceptableVariants.length > 0
+    );
+
+    if (canOfferSecondManualAttempt && !isGarumOnlyMismatch(toCheck, allAcceptableVariants)) {
+      setManualRetryUsed(true);
+      setManualInputError(true);
+      checkAnswerSubmittingRef.current = false;
+      return;
+    }
+
     setIsCorrect(correct);
+    setManualInputError(false);
     
     // Блокируем кнопку и показываем лоадер
     setIsUpdating(true);
 
     try {
       // Обновляем прогресс в базе данных и ждём завершения
-      await updateWordAttempts(currentWord.id, currentMode, correct);
+      await updateWordAttempts(currentWord.id, currentMode, correct, manualRetryUsed);
       
       // Увеличиваем счетчик попыток
       setAttemptCount(prev => prev + 1);
@@ -924,6 +968,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       setIsUpdating(false);
       checkAnswerSubmittingRef.current = false;
     }
+  };
+
+  const handleManualAnswerChange = (value) => {
+    setUserAnswer(value);
+    if (manualInputError) setManualInputError(false);
   };
 
   // Проверка доступности слова для тренировки в указанном режиме (учёт лёгкого режима)
@@ -1097,6 +1146,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setCurrentWord(null);
     setCurrentMode(false);
     setUserAnswer('');
+    setManualRetryUsed(false);
+    setManualInputError(false);
     setShowResult(false);
     setAttemptCount(0);
     setShowRetrainingNotice(false);
@@ -1397,13 +1448,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           currentWord={currentWord}
           currentMode={currentMode}
           userAnswer={userAnswer}
-          setUserAnswer={setUserAnswer}
+          setUserAnswer={handleManualAnswerChange}
           showResult={showResult}
           isCorrect={isCorrect}
           onCheckAnswer={handleCheckAnswer}
           onNextWord={handleNextWord}
           onFinishTraining={handleFinishTraining}
           isUpdating={isUpdating}
+          manualInputError={manualInputError}
           selectionMode={selectionMode}
           choiceOptions={choiceOptions}
           inEducationMode={(() => {
