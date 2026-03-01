@@ -18,6 +18,7 @@ import { useAdminMode } from '../contexts/AdminModeContext';
 const CategoryWordManagement = ({ 
   dictionaryId, 
   categoryId, 
+  sourceCategoryIds = [],
   categoryWords = [],
   onWordsChanged,
   onBulkActionsToggle,
@@ -95,6 +96,7 @@ const CategoryWordManagement = ({
             <WordBulkActions
               dictionaryId={dictionaryId}
               categoryId={categoryId}
+              sourceCategoryIds={sourceCategoryIds}
               words={categoryWords}
               selectedWordIds={selectedWordIds}
               onSelectAll={() => {

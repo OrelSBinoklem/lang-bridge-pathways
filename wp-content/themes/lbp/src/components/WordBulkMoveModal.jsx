@@ -12,7 +12,7 @@ const { useState: wpUseState, useEffect: wpUseEffect } = wp.element;
  * @param {function} onClose - Колбэк закрытия модального окна
  * @param {function} onComplete - Колбэк после успешного выполнения операции
  */
-const WordBulkMoveModal = ({ wordIds = [], sourceCategoryId, sourceDictionaryId, onClose, onComplete }) => {
+const WordBulkMoveModal = ({ wordIds = [], sourceCategoryId, sourceCategoryIds = [], sourceDictionaryId, onClose, onComplete }) => {
   const [dictionaries, setDictionaries] = useState([]);
   const [selectedDictionaryId, setSelectedDictionaryId] = useState(sourceDictionaryId);
   const [categories, setCategories] = useState([]);
@@ -121,6 +121,12 @@ const WordBulkMoveModal = ({ wordIds = [], sourceCategoryId, sourceDictionaryId,
       formData.append('action', operation === 'move' ? 'move_words_to_category' : 'copy_words_to_category');
       formData.append('word_ids', JSON.stringify(wordIds));
       formData.append('source_category_id', sourceCategoryId || 0);
+      if (Array.isArray(sourceCategoryIds) && sourceCategoryIds.length > 0) {
+        const ids = sourceCategoryIds.map(id => parseInt(id, 10)).filter(Boolean);
+        if (ids.length > 0) {
+          formData.append('source_category_ids', JSON.stringify(ids));
+        }
+      }
       formData.append('target_category_id', selectedCategoryId);
       
       // Если словарь отличается, передаем его ID

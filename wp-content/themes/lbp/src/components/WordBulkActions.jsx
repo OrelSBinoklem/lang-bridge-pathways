@@ -19,6 +19,7 @@ const { useState: wpUseState, useEffect: wpUseEffect } = wp.element;
 const WordBulkActions = ({ 
   words = [], 
   categoryId, 
+  sourceCategoryIds = [],
   dictionaryId, 
   selectedWordIds = [],
   onSelectAll,
@@ -123,6 +124,7 @@ const WordBulkActions = ({
         <WordBulkMoveModal
           wordIds={selectedWordIds}
           sourceCategoryId={categoryId}
+          sourceCategoryIds={sourceCategoryIds}
           sourceDictionaryId={dictionaryId}
           onClose={() => setShowMoveModal(false)}
           onComplete={handleMoveComplete}

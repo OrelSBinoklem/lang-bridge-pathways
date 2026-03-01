@@ -69,6 +69,17 @@ const WordRow = ({
       !displayStatus.cooldownDirect && !displayStatus.cooldownRevert) ||
     Boolean(denseMeta);
 
+  const openGlosbe = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const w = word.word != null ? String(word.word).trim() : '';
+    if (w && canOpenGlosbe) {
+      window.open(GLOSBE_BASE + encodeURIComponent(w), '_blank');
+    }
+  };
+
   useEffect(() => {
     if (isEditingThisRow) {
       closeInfoPopover();
@@ -87,25 +98,37 @@ const WordRow = ({
     if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal, .words-education-list__info-hint')) return;
     if (denseAddMode && onDenseToggle) {
       onDenseToggle(word.id);
-      return;
     }
-    const w = word.word != null ? String(word.word).trim() : '';
-    if (w && canOpenGlosbe) window.open(GLOSBE_BASE + encodeURIComponent(w), '_blank');
   };
 
   // Рендер индикатора прогресса (в лёгком режиме не показываем ✓ как выученное)
   const inEasyMode = Number(displayStatus.modeEducation) === 1 || Number(displayStatus.modeEducationRevert) === 1;
   const renderProgressIndicator = () => {
+    const clickableProps = canOpenGlosbe
+      ? {
+          role: 'button',
+          tabIndex: 0,
+          title: 'Открыть в Glosbe',
+          onClick: openGlosbe,
+          onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') openGlosbe(e); },
+          style: { cursor: 'pointer' }
+        }
+      : {};
+
     return userData && displayStatus.hasAttempts ? (
       <span className={`words-progress-indicator ${
         displayStatus.fullyLearned ? 'fully-learned' :
         !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-      }`}>
+      }`} {...clickableProps}>
         {displayStatus.fullyLearned ? "✓" :
          !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
          <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
       </span>
-    ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
+    ) : (
+      <span {...clickableProps}>
+        &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+      </span>
+    );
   };
 
   return (

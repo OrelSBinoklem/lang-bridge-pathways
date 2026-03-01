@@ -549,7 +549,7 @@ class WordsService {
      * @param int $target_dictionary_id ID целевого словаря (если отличается от исходного)
      * @return array|WP_Error Результат операции
      */
-    public static function move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id = null) {
+    public static function move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id = null, $source_category_ids = []) {
         global $wpdb;
 
         $word_category_table = $wpdb->prefix . 'd_word_category';
@@ -609,23 +609,27 @@ class WordsService {
                     ['%d', '%d']
                 );
 
-                // Удаляем связь со старой категорией (если указана)
-                if ($source_category_id) {
-                    $wpdb->delete(
-                        $word_category_table,
-                        ['word_id' => $word_id, 'category_id' => $source_category_id],
-                        ['%d', '%d']
-                    );
+                // Удаляем связь(и) со старой категорией/категориями
+                $delete_source_ids = !empty($source_category_ids)
+                    ? array_values(array_filter(array_map('intval', $source_category_ids)))
+                    : ($source_category_id ? [intval($source_category_id)] : []);
+                if (!empty($delete_source_ids)) {
+                    $placeholders = implode(',', array_fill(0, count($delete_source_ids), '%d'));
+                    $params = array_merge([$word_id], $delete_source_ids);
+                    $sql = "DELETE FROM $word_category_table WHERE word_id = %d AND category_id IN ($placeholders)";
+                    $wpdb->query($wpdb->prepare($sql, ...$params));
                 }
             } else {
                 // Слова в том же словаре - просто меняем категорию
-                // Удаляем старую связь
-                if ($source_category_id) {
-                    $wpdb->delete(
-                        $word_category_table,
-                        ['word_id' => $word_id, 'category_id' => $source_category_id],
-                        ['%d', '%d']
-                    );
+                // Удаляем старую связь(и) по исходной категории/категориям
+                $delete_source_ids = !empty($source_category_ids)
+                    ? array_values(array_filter(array_map('intval', $source_category_ids)))
+                    : ($source_category_id ? [intval($source_category_id)] : []);
+                if (!empty($delete_source_ids)) {
+                    $placeholders = implode(',', array_fill(0, count($delete_source_ids), '%d'));
+                    $params = array_merge([$word_id], $delete_source_ids);
+                    $sql = "DELETE FROM $word_category_table WHERE word_id = %d AND category_id IN ($placeholders)";
+                    $wpdb->query($wpdb->prepare($sql, ...$params));
                 }
 
                 // Проверяем, нет ли уже связи с целевой категорией

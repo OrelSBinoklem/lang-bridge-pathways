@@ -889,6 +889,9 @@ class WordsAjaxHandler {
         $word_ids_raw = $_POST['word_ids'] ?? '';
         $word_ids = $word_ids_raw ? json_decode(stripslashes($word_ids_raw), true) : [];
         $source_category_id = intval($_POST['source_category_id'] ?? 0);
+        $source_category_ids_raw = $_POST['source_category_ids'] ?? '';
+        $source_category_ids = $source_category_ids_raw ? json_decode(stripslashes($source_category_ids_raw), true) : [];
+        $source_category_ids = is_array($source_category_ids) ? array_values(array_filter(array_map('intval', $source_category_ids))) : [];
         $target_category_id = intval($_POST['target_category_id'] ?? 0);
         $target_dictionary_id = !empty($_POST['target_dictionary_id']) ? intval($_POST['target_dictionary_id']) : null;
 
@@ -897,7 +900,7 @@ class WordsAjaxHandler {
             wp_die();
         }
 
-        $result = WordsService::move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id);
+        $result = WordsService::move_words_to_category($word_ids, $source_category_id, $target_category_id, $target_dictionary_id, $source_category_ids);
 
         if (is_wp_error($result)) {
             wp_send_json_error(['message' => $result->get_error_message()]);
