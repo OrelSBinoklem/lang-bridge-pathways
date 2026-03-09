@@ -892,28 +892,26 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     let correct = false;
     let allAcceptableVariants = [];
 
+    // Список всех вариантов правильного ответа (один в revert, несколько в direct)
+    let correctAnswers = [];
+    if (currentMode) {
+      correctAnswers = [currentWord.word].filter(Boolean);
+    } else {
+      correctAnswers = [
+        currentWord.translation_1,
+        currentWord.translation_2,
+        currentWord.translation_3
+      ].filter(t => t && t !== '0');
+      if (currentWord.translation_input_variable && currentWord.translation_input_variable.trim()) {
+        correctAnswers.push(...currentWord.translation_input_variable
+          .split(',')
+          .map(v => v.trim())
+          .filter(v => v.length > 0));
+      }
+    }
+
     // Если пользователь нажал «Посмотреть правильный ответ» (пустой ввод) — считаем неправильным, записываем попытку
     if (toCheck) {
-      let correctAnswers = [];
-
-      if (currentMode) {
-        correctAnswers = [currentWord.word];
-      } else {
-        correctAnswers = [
-          currentWord.translation_1,
-          currentWord.translation_2,
-          currentWord.translation_3
-        ].filter(t => t && t !== '0');
-        
-        if (currentWord.translation_input_variable && currentWord.translation_input_variable.trim()) {
-          const additionalVariants = currentWord.translation_input_variable
-            .split(',')
-            .map(v => v.trim())
-            .filter(v => v.length > 0);
-          correctAnswers.push(...additionalVariants);
-        }
-      }
-      
       allAcceptableVariants = [];
       correctAnswers.forEach(answer => {
         const variants = generateAnswerVariants(answer);
@@ -930,9 +928,10 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
     const isManualTypedAttempt = !selectionMode && overrideAnswer == null;
     const minPhraseWords = TRAINING_CONFIG.PHRASE_WORD_MIN_COUNT ?? 3;
-    // Фраза = задание требует ввести 3+ слов (считаем по правильному ответу), не по вводу пользователя
-    const mainCorrectAnswer = currentMode ? (currentWord.word || '') : (currentWord.translation_1 || '');
-    const correctAnswerIsPhrase = countPhraseWords(mainCorrectAnswer) >= minPhraseWords;
+    // Фраза = 3+ слов после того же фильтра (скобки/пунктуация), считаем по всем вариантам ответа — берём максимум
+    const phraseWordCounts = correctAnswers.map(a => countPhraseWords(stripParenthesesAndPunctuation(a || '')));
+    const maxPhraseWords = phraseWordCounts.length ? Math.max(...phraseWordCounts) : 0;
+    const correctAnswerIsPhrase = maxPhraseWords >= minPhraseWords;
     const canOfferPhraseRetry = (
       TRAINING_CONFIG.ALLOW_SECOND_ATTEMPT_FOR_PHRASE &&
       isManualTypedAttempt &&
