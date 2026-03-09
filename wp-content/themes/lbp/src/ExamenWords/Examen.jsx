@@ -73,6 +73,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [selectionMode, setSelectionMode] = useState(false); // Режим выбора из предложенных (иначе ввод вручную)
   const [manualRetryUsed, setManualRetryUsed] = useState(false); // Уже использована доп. попытка ручного ввода для текущего слова
   const [manualInputError, setManualInputError] = useState(false); // Подсветка поля ввода при ошибке перед доп. попыткой
+  const [phraseRetryUsed, setPhraseRetryUsed] = useState(false); // Использована доп. попытка «для фраз» по текущему слову
   const [showRetrainingNotice, setShowRetrainingNotice] = useState(false); // Показать сообщение о режиме дообучения
   const [showMatchGame, setShowMatchGame] = useState(false); // Мини-игра: сопоставь переводы
   const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
@@ -108,10 +109,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return () => window.removeEventListener('training-answer-mode-changed', onModeChange);
   }, []);
 
-  // При смене слова/направления сбрасываем доп. попытку и подсветку поля.
+  // При смене слова/направления сбрасываем доп. попытки и подсветку поля.
   useEffect(() => {
     setManualRetryUsed(false);
     setManualInputError(false);
+    setPhraseRetryUsed(false);
   }, [currentWord?.id, currentMode]);
 
   // Фокус на кнопку «Продолжить отвечать» при открытии окна режима дообучения (чтобы Enter срабатывал)
@@ -873,6 +875,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     });
   };
 
+  // Количество «слов» в строке: разбивка по пробелам и спецзнакам (пунктуация и т.п.).
+  const countPhraseWords = (text) => {
+    if (!text || typeof text !== 'string') return 0;
+    const tokens = text.trim().replace(/[\s.,;:!?\-—–'"()\[\]{}…]+/g, ' ').split(/\s+/).filter(Boolean);
+    return tokens.length;
+  };
+
   // Обработчики для TrainingInterface. overrideAnswer — при выборе из вариантов (режим «выбор»)
   const handleCheckAnswer = async (overrideAnswer) => {
     const toCheck = (overrideAnswer != null && String(overrideAnswer).trim()) ? String(overrideAnswer).trim() : userAnswer.trim();
@@ -920,6 +929,24 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }
 
     const isManualTypedAttempt = !selectionMode && overrideAnswer == null;
+    const minPhraseWords = TRAINING_CONFIG.PHRASE_WORD_MIN_COUNT ?? 3;
+    // Фраза = задание требует ввести 3+ слов (считаем по правильному ответу), не по вводу пользователя
+    const mainCorrectAnswer = currentMode ? (currentWord.word || '') : (currentWord.translation_1 || '');
+    const correctAnswerIsPhrase = countPhraseWords(mainCorrectAnswer) >= minPhraseWords;
+    const canOfferPhraseRetry = (
+      TRAINING_CONFIG.ALLOW_SECOND_ATTEMPT_FOR_PHRASE &&
+      isManualTypedAttempt &&
+      toCheck &&
+      !correct &&
+      !phraseRetryUsed &&
+      correctAnswerIsPhrase
+    );
+    if (canOfferPhraseRetry) {
+      setPhraseRetryUsed(true);
+      checkAnswerSubmittingRef.current = false;
+      return;
+    }
+
     const canOfferSecondManualAttempt = (
       TRAINING_CONFIG.ALLOW_SECOND_MANUAL_ATTEMPT_NON_GARUM &&
       isManualTypedAttempt &&
@@ -928,7 +955,6 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       !manualRetryUsed &&
       allAcceptableVariants.length > 0
     );
-
     if (canOfferSecondManualAttempt && !isGarumOnlyMismatch(toCheck, allAcceptableVariants)) {
       setManualRetryUsed(true);
       setManualInputError(true);
@@ -944,7 +970,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
     try {
       // Обновляем прогресс в базе данных и ждём завершения
-      await updateWordAttempts(currentWord.id, currentMode, correct, manualRetryUsed);
+      await updateWordAttempts(currentWord.id, currentMode, correct, manualRetryUsed || phraseRetryUsed);
       
       // Увеличиваем счетчик попыток
       setAttemptCount(prev => prev + 1);
@@ -1148,6 +1174,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setUserAnswer('');
     setManualRetryUsed(false);
     setManualInputError(false);
+    setPhraseRetryUsed(false);
     setShowResult(false);
     setAttemptCount(0);
     setShowRetrainingNotice(false);
@@ -1456,6 +1483,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
           onFinishTraining={handleFinishTraining}
           isUpdating={isUpdating}
           manualInputError={manualInputError}
+          phraseRetryTooltip={phraseRetryUsed && !showResult}
+          phraseMinWords={TRAINING_CONFIG.PHRASE_WORD_MIN_COUNT ?? 3}
           selectionMode={selectionMode}
           choiceOptions={choiceOptions}
           inEducationMode={(() => {

@@ -123,7 +123,7 @@ const CategoryTree = ({ dictionaryId, onCategoryClick, dictionaryWords = [], cat
             <li
               onClick={() => subCat && onCategoryClick && onCategoryClick(category)}
               key={category.id}
-              className={isClickable ? 'category-item-with-progress' : ''}
+              className={isClickable ? `category-item-with-progress${progress >= 1 ? ' category-progress-full' : ''}` : ''}
               style={isClickable ? { '--category-progress': progress } : undefined}
             >
               <span className="category-three-name">{category.name}</span>

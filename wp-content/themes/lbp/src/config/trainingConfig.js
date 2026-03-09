@@ -8,5 +8,8 @@
 export const TRAINING_CONFIG = {
   RETRAINING_NOTICE_MODE: 'always',
   // Доп. попытка при ручном вводе: даём только если ошибка НЕ только в гарумзиме.
-  ALLOW_SECOND_MANUAL_ATTEMPT_NON_GARUM: true,
+  ALLOW_SECOND_MANUAL_ATTEMPT_NON_GARUM: false,
+  // Доп. попытка для фраз: при любой ошибке, если в ответе >= N слов (ручной ввод).
+  ALLOW_SECOND_ATTEMPT_FOR_PHRASE: true,
+  PHRASE_WORD_MIN_COUNT: 3,
 };

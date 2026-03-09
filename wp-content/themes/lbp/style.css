@@ -1229,6 +1229,9 @@ body:has(.galleries.horizontal-mode) {
     z-index: 0;
     transition: width 0.25s ease;
 }
+.category-item-with-progress.category-progress-full::before {
+    background: #c8e6c9;
+}
 .category-item-with-progress {
     display: flex;
     flex-wrap: wrap;
@@ -2367,6 +2370,16 @@ h2 .small {
     border: 2px solid #dee2e6;
 }
 
+.training-phrase-retry-tooltip {
+    text-align: center;
+    font-size: 13px;
+    color: #1565c0;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    border: 1px solid #90caf9;
+}
 .training-input {
     width: 100%;
     padding: 12px;

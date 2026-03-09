@@ -17,6 +17,8 @@ const TrainingInterface = ({
   isUpdating = false,
   inEducationMode = false,
   manualInputError = false,
+  phraseRetryTooltip = false,
+  phraseMinWords = 3,
   selectionMode = false,
   choiceOptions = []
 }) => {
@@ -57,6 +59,11 @@ const TrainingInterface = ({
 
       {!showResult && (
         <>
+          {phraseRetryTooltip && (
+            <div className="training-phrase-retry-tooltip" role="status">
+              Ещё одна попытка для фраз — фраза это {phraseMinWords} и более слов
+            </div>
+          )}
           <input
             data-training-input
             type="text"
