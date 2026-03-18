@@ -938,7 +938,9 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       toCheck &&
       !correct &&
       !phraseRetryUsed &&
-      correctAnswerIsPhrase
+      correctAnswerIsPhrase &&
+      allAcceptableVariants.length > 0 &&
+      !isGarumOnlyMismatch(toCheck, allAcceptableVariants)
     );
     if (canOfferPhraseRetry) {
       setPhraseRetryUsed(true);
