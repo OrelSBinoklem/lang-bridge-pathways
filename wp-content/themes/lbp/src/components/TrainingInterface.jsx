@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { playWordAudio } from '../config/audioConfig';
 import { stripParenthesesAndPunctuation } from '../custom/utils/helpers';
 
@@ -23,6 +23,25 @@ const TrainingInterface = ({
   choiceOptions = []
 }) => {
   if (!currentWord) return null;
+
+  const [showWordInfoPopover, setShowWordInfoPopover] = useState(false);
+  const popoverRef = useRef(null);
+
+  const hasWordInfo = Boolean(currentWord?.info && String(currentWord.info).trim());
+
+  // Закрываем поповер при смене слова/экрана результата
+  useEffect(() => {
+    setShowWordInfoPopover(false);
+  }, [currentWord?.id, showResult, isCorrect]);
+
+  useEffect(() => {
+    if (!showWordInfoPopover) return;
+    const onDoc = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) setShowWordInfoPopover(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [showWordInfoPopover]);
 
   return (
     <div className="training-interface">
@@ -126,6 +145,28 @@ const TrainingInterface = ({
               </>
             )}
           </div>
+
+          {showWordInfoPopover && hasWordInfo && (
+            <div
+              className="word-info-popover-backdrop"
+              aria-hidden="true"
+              style={{ position: 'fixed', inset: 0, zIndex: 100000 }}
+              onClick={() => setShowWordInfoPopover(false)}
+            >
+              <div
+                ref={popoverRef}
+                className="word-info-popover"
+                role="dialog"
+                aria-label="Подсказка"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div
+                  className="word-info-popover__content"
+                  dangerouslySetInnerHTML={{ __html: currentWord.info || '' }}
+                />
+              </div>
+            </div>
+          )}
           {!isCorrect && (
             <>
               <div className="training-correct-answer">
@@ -139,13 +180,43 @@ const TrainingInterface = ({
                 >
                   <span className="correct-answer-text">{currentWord.word}</span>
                   <span className="training-audio-button-inline">🔊</span>
+                  {hasWordInfo && (
+                    <button
+                      type="button"
+                      className="training-correct-answer-info-btn"
+                      aria-label="Подсказка"
+                      title="Подсказка"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowWordInfoPopover((v) => !v);
+                      }}
+                    >
+                      ?
+                    </button>
+                  )}
                 </div>
               ) : (
-                <span className="correct-answer-text">
-                  {' '}{currentWord.translation_1}
-                  {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
-                  {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
-                </span>
+                <>
+                  <span className="correct-answer-text">
+                    {' '}{currentWord.translation_1}
+                    {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
+                    {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
+                  </span>
+                  {hasWordInfo && (
+                    <button
+                      type="button"
+                      className="training-correct-answer-info-btn"
+                      aria-label="Подсказка"
+                      title="Подсказка"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowWordInfoPopover((v) => !v);
+                      }}
+                    >
+                      ?
+                    </button>
+                  )}
+                </>
               )}
               </div>
             </>

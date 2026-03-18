@@ -2518,6 +2518,28 @@ h2 .small {
     color: #664d03;
 }
 
+.training-correct-answer-info-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #1976d2;
+    background: #fff;
+    color: #1976d2;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 0;
+    line-height: 1;
+}
+
+.training-correct-answer-info-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.25);
+}
+
 .correct-answer-text {
     display: inline-block;
     font-size: 20px;
