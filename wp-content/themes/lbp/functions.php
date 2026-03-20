@@ -1341,6 +1341,16 @@ function lbp_check_glosbe_has_translation() {
 add_action('wp_ajax_check_glosbe_has_translation', 'lbp_check_glosbe_has_translation');
 add_action('wp_ajax_nopriv_check_glosbe_has_translation', 'lbp_check_glosbe_has_translation');
 
+// Проверка статуса авторизации для фронтенда (тренировка/кнопки)
+function lbp_check_logged_in() {
+    wp_send_json_success([
+        'is_logged_in' => is_user_logged_in(),
+        'user_id' => get_current_user_id(),
+    ]);
+}
+add_action('wp_ajax_check_logged_in', 'lbp_check_logged_in');
+add_action('wp_ajax_nopriv_check_logged_in', 'lbp_check_logged_in');
+
 // NOTE: 8 - before `wp_print_head_scripts`
 add_action( 'wp_head', 'myajax_data', 8 );
 function myajax_data(){

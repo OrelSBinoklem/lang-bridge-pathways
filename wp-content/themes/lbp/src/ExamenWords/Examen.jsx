@@ -49,6 +49,15 @@ const wordBelongsToAnyOfCategories = (word, categoryIds) => {
 
 const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], userWordsData = {}, dictionaryWords = [], onRefreshUserData, onRefreshDictionaryWords }) => {
   const { isAdminModeActive } = useAdminMode();
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
+    try {
+      const fromAjax = Boolean(typeof window !== 'undefined' && window.myajax && window.myajax.is_logged_in);
+      const fromCookie = typeof document !== 'undefined' && document.cookie.split(';').some((c) => c.trim().startsWith('wordpress_logged_in_'));
+      return fromAjax || fromCookie;
+    } catch (e) {
+      return false;
+    }
+  });
   const [editingWordId, setEditingWordId] = useState(null); // ID текущего редактируемого слова
   const [trainingMode, setTrainingMode] = useState(false); // Режим тренировки
   const [currentWord, setCurrentWord] = useState(null); // Текущее слово для тренировки
@@ -97,6 +106,38 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     const defaultMode = isMobile ? 'select' : 'type';
     setTrainingAnswerMode(defaultMode);
     setSelectionMode(defaultMode === 'select');
+  }, []);
+
+  // Периодически проверяем, залогинен ли пользователь (myajax + auth cookie)
+  useEffect(() => {
+    const tick = async () => {
+      try {
+        const ajaxUrl = window?.myajax?.url;
+        if (!ajaxUrl) return;
+        const formData = new FormData();
+        formData.append('action', 'check_logged_in');
+        const response = await axios.post(ajaxUrl, formData);
+        const next = Boolean(response?.data?.success && response?.data?.data?.is_logged_in);
+        if (window?.myajax) {
+          window.myajax.is_logged_in = next;
+          window.myajax.user_id = Number(response?.data?.data?.user_id || 0);
+        }
+        setIsUserLoggedIn(prev => (prev === next ? prev : next));
+      } catch (e) {
+        // fallback: если ajax недоступен, используем cookie + текущий myajax
+        try {
+          const fromAjax = Boolean(window.myajax && window.myajax.is_logged_in);
+          const fromCookie = document.cookie.split(';').some((c) => c.trim().startsWith('wordpress_logged_in_'));
+          const next = fromAjax || fromCookie;
+          setIsUserLoggedIn(prev => (prev === next ? prev : next));
+        } catch (err) {
+          // ignore
+        }
+      }
+    };
+    tick();
+    const id = setInterval(tick, 20000);
+    return () => clearInterval(id);
   }, []);
 
   // Синхронизация с переключателем в шапке (до #default-mobile-lang-controls)
@@ -538,7 +579,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   // Начать тренировку. subcategoryId = null — вся категория (2 уровень + все подкатегории 3); иначе только эта подкатегория
   const startTraining = async (subcategoryId = null) => {
     // Проверяем авторизацию
-    if (!window.myajax || !window.myajax.is_logged_in) {
+    if (!isUserLoggedIn) {
       alert('Для тренировки необходимо войти в систему');
       return;
     }
@@ -1256,13 +1297,19 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 		<div className="examen-root">
       {!trainingMode && (
         <div className="training-buttons-container">
-          <button
-            onClick={() => startTraining()}
-            className="training-start-button training-start-button--fit-content"
-            title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
-          >
-            🎯 Начать тренировку
-          </button>
+          <div className={`training-start-button-wrap ${!isUserLoggedIn ? 'training-start-button-wrap--needs-auth' : ''}`}>
+            <button
+              onClick={() => startTraining()}
+              className="training-start-button training-start-button--fit-content"
+              disabled={!isUserLoggedIn}
+              title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
+            >
+              🎯 Начать тренировку
+            </button>
+            {!isUserLoggedIn && (
+              <div className="training-start-auth-hint" role="tooltip">Залогиньтесь или авторизуйтесь</div>
+            )}
+          </div>
 
           <span className="training-buttons-spacer" aria-hidden="true" />
           <button
@@ -1617,14 +1664,20 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   <section key={sub.id} className="examen-category-block examen-category-sub">
                     <h4 className="examen-category-block-title">
                       <span>{sub.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => startTraining(sub.id)}
-                        className="training-start-button"
-                        title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
-                      >
-                        🎯 Начать тренировку
-                      </button>
+                      <div className={`training-start-button-wrap ${!isUserLoggedIn ? 'training-start-button-wrap--needs-auth' : ''}`}>
+                        <button
+                          type="button"
+                          onClick={() => startTraining(sub.id)}
+                          className="training-start-button"
+                          disabled={!isUserLoggedIn}
+                          title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
+                        >
+                          🎯 Начать тренировку
+                        </button>
+                        {!isUserLoggedIn && (
+                          <div className="training-start-auth-hint" role="tooltip">Залогиньтесь или авторизуйтесь</div>
+                        )}
+                      </div>
                     </h4>
                     <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
                   </section>

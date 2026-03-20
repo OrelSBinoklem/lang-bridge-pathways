@@ -2611,6 +2611,40 @@ h2 .small {
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
+.training-start-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.training-start-button-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.training-start-auth-hint {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(33, 37, 41, 0.96);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 30;
+    transition: opacity 0.12s ease, visibility 0.12s ease;
+}
+
+.training-start-button-wrap--needs-auth:hover .training-start-auth-hint {
+    opacity: 1;
+    visibility: visible;
+}
+
 /* Кнопка «В плотное»: по умолчанию как остальные (зелёная), при активации — выделение */
 .training-start-button--dense.training-start-button--dense-active {
     background: #2e7d32 !important;
