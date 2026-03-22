@@ -10,6 +10,12 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
   const [newCategoryOrder, setNewCategoryOrder] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dictionaries, setDictionaries] = useState([]);
+  const [movingCategory, setMovingCategory] = useState(null);
+  const [targetDictionaryId, setTargetDictionaryId] = useState('');
+  const [targetParentId, setTargetParentId] = useState('');
+  const [targetCategories, setTargetCategories] = useState([]);
+  const [loadingTargetCategories, setLoadingTargetCategories] = useState(false);
 
   // Загружаем категории при монтировании компонента
   useEffect(() => {
@@ -141,6 +147,117 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
         setError('');
       } else {
         setError(response.data.message || 'Ошибка удаления категории');
+      }
+    } catch (err) {
+      setError('Ошибка сети: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const flattenCategoriesForSelect = (cats, level = 0, parentName = '') => {
+    if (!Array.isArray(cats)) return [];
+    let result = [];
+    cats.forEach(cat => {
+      const fullName = parentName ? `${parentName} > ${cat.name}` : cat.name;
+      result.push({ id: cat.id, name: fullName, level });
+      if (Array.isArray(cat.children) && cat.children.length > 0) {
+        result = result.concat(flattenCategoriesForSelect(cat.children, level + 1, fullName));
+      }
+    });
+    return result;
+  };
+
+  const fetchDictionaries = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('action', 'get_all_dictionaries');
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data.success) {
+        setDictionaries(response.data.data || []);
+        return response.data.data || [];
+      }
+      setError(response.data.message || 'Ошибка загрузки словарей');
+      return [];
+    } catch (err) {
+      setError('Ошибка сети: ' + err.message);
+      return [];
+    }
+  };
+
+  const openMoveCategoryModal = async (category) => {
+    setMovingCategory(category);
+    setTargetDictionaryId('');
+    setTargetParentId('');
+    setTargetCategories([]);
+    if (!dictionaries.length) {
+      await fetchDictionaries();
+    }
+  };
+
+  useEffect(() => {
+    const loadTargetCategories = async () => {
+      if (!targetDictionaryId) {
+        setTargetCategories([]);
+        setTargetParentId('');
+        return;
+      }
+      try {
+        setLoadingTargetCategories(true);
+        const formData = new FormData();
+        formData.append('action', 'get_category_tree');
+        formData.append('dictionary_id', targetDictionaryId);
+        const response = await axios.post(window.myajax.url, formData);
+        if (response.data.success) {
+          setTargetCategories(flattenCategoriesForSelect(response.data.data || []));
+        } else {
+          setError(response.data.message || 'Ошибка загрузки категорий целевого словаря');
+          setTargetCategories([]);
+        }
+      } catch (err) {
+        setError('Ошибка сети: ' + err.message);
+        setTargetCategories([]);
+      } finally {
+        setLoadingTargetCategories(false);
+      }
+    };
+    loadTargetCategories();
+  }, [targetDictionaryId]);
+
+  const handleMoveCategoryToDictionary = async () => {
+    if (!movingCategory) return;
+    if (!targetDictionaryId) {
+      setError('Выберите целевой словарь');
+      return;
+    }
+
+    const confirmed = confirm(
+      `Перенести категорию "${movingCategory.name}" вместе с подкатегориями и словами в другой словарь?`
+    );
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('action', 'move_category_to_dictionary');
+      formData.append('category_id', movingCategory.id);
+      formData.append('target_dictionary_id', targetDictionaryId);
+      if (targetParentId) {
+        formData.append('target_parent_id', targetParentId);
+      }
+      formData.append('nonce', window.myajax.nonce);
+
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data.success) {
+        setMovingCategory(null);
+        setTargetDictionaryId('');
+        setTargetParentId('');
+        setTargetCategories([]);
+        await fetchCategories();
+        if (onCategoriesChange) onCategoriesChange();
+        setError('');
+      } else {
+        setError(response.data.message || 'Ошибка переноса категории');
       }
     } catch (err) {
       setError('Ошибка сети: ' + err.message);
@@ -394,6 +511,22 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <button onClick={() => handleEdit(category)} disabled={loading}>Редактировать</button>
+                <button
+                  onClick={() => openMoveCategoryModal(category)}
+                  disabled={loading}
+                  style={{
+                    marginLeft: '10px',
+                    background: 'linear-gradient(135deg, #0d6efd, #3b82f6)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    boxShadow: '0 4px 12px rgba(13, 110, 253, 0.25)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Перенести в словарь
+                </button>
                 <button onClick={() => handleDelete(category.id)} disabled={loading} style={{ marginLeft: '10px', backgroundColor: '#dc3545', color: 'white' }}>Удалить</button>
               </div>
             </div>
@@ -469,6 +602,109 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
           <p>Категории не найдены. Создайте первую категорию!</p>
         )}
       </div>
+
+      {movingCategory && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(2px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setMovingCategory(null); }}
+        >
+          <div
+            style={{
+              width: 'min(640px, 92vw)',
+              background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
+              borderRadius: '14px',
+              padding: '20px',
+              border: '1px solid #dbeafe',
+              boxShadow: '0 20px 50px rgba(2, 6, 23, 0.25)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: '8px', color: '#0f172a' }}>🚚 Перенос категории в другой словарь</h3>
+            <p style={{ marginTop: 0, marginBottom: '14px', color: '#334155' }}>
+              Категория: <strong>{movingCategory.name}</strong> (ID: {movingCategory.id})
+            </p>
+
+            <div style={{ marginBottom: '12px', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, color: '#0f172a' }}>Целевой словарь:</label>
+              <select
+                value={targetDictionaryId}
+                onChange={(e) => setTargetDictionaryId(e.target.value)}
+                style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff' }}
+              >
+                <option value="">-- Выберите словарь --</option>
+                {dictionaries
+                  .filter(d => parseInt(d.id, 10) !== parseInt(dictionaryId, 10))
+                  .map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} (ID: {d.id})
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, color: '#0f172a' }}>
+                Родительская категория в целевом словаре (необязательно):
+              </label>
+              {loadingTargetCategories ? (
+                <div style={{ color: '#64748b' }}>Загрузка категорий...</div>
+              ) : (
+                <select
+                  value={targetParentId}
+                  onChange={(e) => setTargetParentId(e.target.value)}
+                  disabled={!targetDictionaryId}
+                  style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff' }}
+                >
+                  <option value="">-- В корень словаря --</option>
+                  {targetCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {'—'.repeat(cat.level)} {cat.name} (ID: {cat.id})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setMovingCategory(null)}
+                disabled={loading}
+                style={{ borderRadius: '8px', padding: '8px 12px', border: '1px solid #cbd5e1', background: '#fff' }}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={handleMoveCategoryToDictionary}
+                disabled={loading || !targetDictionaryId}
+                style={{
+                  background: 'linear-gradient(135deg, #0d6efd, #3b82f6)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  boxShadow: '0 6px 14px rgba(13, 110, 253, 0.25)'
+                }}
+              >
+                {loading ? 'Перенос...' : 'Перенести'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Управление словами */}
       <WordManager dictionaryId={dictionaryId} categories={categories} />

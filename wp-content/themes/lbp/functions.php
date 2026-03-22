@@ -798,6 +798,43 @@ class WordsAjaxHandler {
     }
 
     /**
+     * AJAX-метод для переноса категории (с поддеревом и словами) в другой словарь
+     */
+    public static function handle_move_category_to_dictionary() {
+        // Только для админов
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Недостаточно прав доступа']);
+            wp_die();
+        }
+
+        // Проверяем nonce для безопасности
+        if (!wp_verify_nonce($_POST['nonce'], 'category_management_nonce')) {
+            wp_send_json_error(['message' => 'Ошибка безопасности']);
+            wp_die();
+        }
+
+        $category_id = intval($_POST['category_id'] ?? 0);
+        $target_dictionary_id = intval($_POST['target_dictionary_id'] ?? 0);
+        $target_parent_id = isset($_POST['target_parent_id']) && $_POST['target_parent_id'] !== ''
+            ? intval($_POST['target_parent_id'])
+            : null;
+
+        if (!$category_id || !$target_dictionary_id) {
+            wp_send_json_error(['message' => 'Некорректные входные данные']);
+            wp_die();
+        }
+
+        $result = CategoriesService::move_category_to_dictionary($category_id, $target_dictionary_id, $target_parent_id);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()]);
+        } else {
+            wp_send_json_success($result);
+        }
+        wp_die();
+    }
+
+    /**
      * AJAX-метод для создания слова
      */
     public static function handle_create_word() {
@@ -1295,6 +1332,7 @@ add_action('wp_ajax_create_category', ['WordsAjaxHandler', 'handle_create_catego
 add_action('wp_ajax_get_categories', ['WordsAjaxHandler', 'handle_get_categories']);
 add_action('wp_ajax_update_category', ['WordsAjaxHandler', 'handle_update_category']);
 add_action('wp_ajax_delete_category', ['WordsAjaxHandler', 'handle_delete_category']);
+add_action('wp_ajax_move_category_to_dictionary', ['WordsAjaxHandler', 'handle_move_category_to_dictionary']);
 
 // AJAX обработчики для управления словами
 add_action('wp_ajax_create_word', ['WordsAjaxHandler', 'handle_create_word']);
