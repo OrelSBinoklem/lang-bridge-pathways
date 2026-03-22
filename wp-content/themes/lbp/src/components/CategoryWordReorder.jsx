@@ -103,6 +103,25 @@ const CategoryWordReorder = ({
   const handleGroupDragOver = (e, targetGroupIndex, targetWordIndex) => {
     e.preventDefault();
     if (!hasGroups) return;
+    // Внутри одной подкатегории переставляем сразу на dragOver (как в плоском режиме),
+    // иначе при drop на соседний элемент визуально может казаться, что порядок не меняется.
+    if (
+      draggedGroup !== null &&
+      draggedWordIndex !== null &&
+      draggedGroup === targetGroupIndex &&
+      targetWordIndex >= 0 &&
+      draggedWordIndex !== targetWordIndex
+    ) {
+      setGroups(prev => {
+        const next = prev.map(gr => ({ ...gr, words: [...gr.words] }));
+        const list = next[targetGroupIndex].words;
+        const moved = list[draggedWordIndex];
+        list.splice(draggedWordIndex, 1);
+        list.splice(targetWordIndex, 0, moved);
+        return next;
+      });
+      setDraggedWordIndex(targetWordIndex);
+    }
     setDropTarget({ groupIndex: targetGroupIndex, wordIndex: targetWordIndex });
   };
 
