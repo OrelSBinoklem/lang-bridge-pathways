@@ -117,27 +117,43 @@ const CategoryWordReorder = ({
         const list = next[targetGroupIndex].words;
         const moved = list[draggedWordIndex];
         list.splice(draggedWordIndex, 1);
-        list.splice(targetWordIndex, 0, moved);
+        let insertAt = targetWordIndex;
+        // При движении вниз после удаления индекс сдвигается на -1 (off-by-one),
+        // иначе визуально "тащится соседний" элемент.
+        if (insertAt > draggedWordIndex) insertAt -= 1;
+        list.splice(insertAt, 0, moved);
         return next;
       });
-      setDraggedWordIndex(targetWordIndex);
+      let nextDraggedIndex = targetWordIndex;
+      if (nextDraggedIndex > draggedWordIndex) nextDraggedIndex -= 1;
+      setDraggedWordIndex(nextDraggedIndex);
     }
     setDropTarget({ groupIndex: targetGroupIndex, wordIndex: targetWordIndex });
   };
 
+  const getDropIndexByPointer = (e, wordIndex) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isLowerHalf = (e.clientY - rect.top) > rect.height / 2;
+    return isLowerHalf ? wordIndex + 1 : wordIndex;
+  };
+
   const handleGroupDrop = (e, targetGroupIndex, targetWordIndex) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!hasGroups || draggedGroup === null || draggedWordIndex === null) return;
     const g = groups.map(gr => ({ ...gr, words: [...gr.words] }));
     const src = g[draggedGroup];
     const word = src.words[draggedWordIndex];
     if (draggedGroup === targetGroupIndex) {
-      const list = [...src.words];
-      list.splice(draggedWordIndex, 1);
-      let insertAt = targetWordIndex < 0 ? list.length : Math.min(targetWordIndex, list.length);
-      if (insertAt > draggedWordIndex) insertAt -= 1;
-      list.splice(insertAt, 0, word);
-      g[targetGroupIndex] = { ...src, words: list };
+      // Внутри той же группы порядок уже обновляется в handleGroupDragOver.
+      // На drop дублировать перестановку нельзя — иначе получается смещение "на 1 позицию".
+      // Исключение: дроп в пустую область группы (targetWordIndex = -1) — отправляем в конец.
+      if (targetWordIndex < 0) {
+        const list = [...src.words];
+        list.splice(draggedWordIndex, 1);
+        list.push(word);
+        g[targetGroupIndex] = { ...src, words: list };
+      }
     } else {
       src.words.splice(draggedWordIndex, 1);
       const target = g[targetGroupIndex];
@@ -235,6 +251,10 @@ const CategoryWordReorder = ({
           }
         }
         for (const group of groups) {
+          // Пустые группы не отправляем: backend ожидает непустой массив word_orders.
+          if (!Array.isArray(group.words) || group.words.length === 0) {
+            continue;
+          }
           const wordOrders = group.words.map((w, i) => ({ word_id: w.id, order: i + 1 }));
           const formData = new FormData();
           formData.append('action', 'reorder_category_words');
@@ -454,9 +474,13 @@ const CategoryWordReorder = ({
                             onDragOver={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              handleGroupDragOver(e, groupIndex, wordIndex);
+                              const dropIndex = getDropIndexByPointer(e, wordIndex);
+                              handleGroupDragOver(e, groupIndex, dropIndex);
                             }}
-                            onDrop={(e) => handleGroupDrop(e, groupIndex, wordIndex)}
+                            onDrop={(e) => {
+                              const dropIndex = getDropIndexByPointer(e, wordIndex);
+                              handleGroupDrop(e, groupIndex, dropIndex);
+                            }}
                             onDragEnd={handleDragEnd}
                           >
                             <span className="word-order">{wordIndex + 1}</span>
