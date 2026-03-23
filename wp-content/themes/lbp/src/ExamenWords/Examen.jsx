@@ -1696,6 +1696,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                 categoryId={categoryId}
                 sourceCategoryIds={[parseInt(categoryId, 10), ...subcategories.map(s => parseInt(s.id, 10)).filter(Boolean)]}
                 categoryWords={categoryWords}
+                dictionaryWords={dictionaryWords}
+                categories={categories}
                 onWordsChanged={onRefreshDictionaryWords}
                 externalShowBulkActions={showBulkActions}
                 externalSelectedWordIds={selectedWordIds}
@@ -1730,6 +1732,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               categoryId={categoryId}
               sourceCategoryIds={[parseInt(categoryId, 10)].filter(Boolean)}
               categoryWords={categoryWords}
+              dictionaryWords={dictionaryWords}
+              categories={categories}
               onWordsChanged={onRefreshDictionaryWords}
               externalShowBulkActions={showBulkActions}
               externalSelectedWordIds={selectedWordIds}

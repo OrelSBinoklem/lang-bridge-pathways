@@ -20,6 +20,8 @@ const CategoryWordManagement = ({
   categoryId, 
   sourceCategoryIds = [],
   categoryWords = [],
+  dictionaryWords = [],
+  categories = [],
   onWordsChanged,
   onBulkActionsToggle,
   onSelectedWordsChange,
@@ -65,6 +67,8 @@ const CategoryWordManagement = ({
       <WordManagement
         dictionaryId={dictionaryId}
         categoryId={categoryId}
+        existingDictionaryWords={dictionaryWords}
+        categoryTree={categories}
         onWordsChanged={onWordsChanged}
       />
 

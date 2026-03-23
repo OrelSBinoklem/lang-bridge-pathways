@@ -5,7 +5,7 @@ import axios from 'axios';
  * Компонент для управления словами прямо в категории
  * Отображается только для админов
  */
-const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
+const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = [], categoryTree = [], onWordsChanged }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showBulkInsert, setShowBulkInsert] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,9 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [bulkTargetCategoryId, setBulkTargetCategoryId] = useState(categoryId);
   const [bulkTargetOptions, setBulkTargetOptions] = useState([]);
+  const [dictionaryWords, setDictionaryWords] = useState([]);
+  const [dictionaryWordsLoading, setDictionaryWordsLoading] = useState(false);
+  const [duplicateCheckValue, setDuplicateCheckValue] = useState('');
   const [newWord, setNewWord] = useState({
     word: '',
     translation_1: '',
@@ -99,6 +102,136 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
 
     fetchTargetCategories();
   }, [showBulkInsert, dictionaryId, categoryId]);
+
+  useEffect(() => {
+    // Если слова уже переданы родителем, используем их и не ходим в AJAX.
+    if (Array.isArray(existingDictionaryWords) && existingDictionaryWords.length > 0) {
+      setDictionaryWords(existingDictionaryWords);
+      setDictionaryWordsLoading(false);
+      return;
+    }
+
+    if (!showBulkInsert || !dictionaryId) return;
+    const fetchDictionaryWords = async () => {
+      try {
+        setDictionaryWordsLoading(true);
+        const formData = new FormData();
+        formData.append('action', 'get_dictionary_words');
+        formData.append('dictionary_id', dictionaryId);
+        const response = await axios.post(window.myajax.url, formData);
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          setDictionaryWords(response.data.data);
+        } else {
+          setDictionaryWords([]);
+        }
+      } catch (err) {
+        setDictionaryWords([]);
+      } finally {
+        setDictionaryWordsLoading(false);
+      }
+    };
+    fetchDictionaryWords();
+  }, [showBulkInsert, dictionaryId, existingDictionaryWords]);
+
+  const normalizeWord = (value) => String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[.,;:!?()[\]{}"'`]/g, '')
+    .replace(/\s+/g, ' ');
+
+  const levenshtein = (a, b) => {
+    const s = normalizeWord(a);
+    const t = normalizeWord(b);
+    const m = s.length;
+    const n = t.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        const cost = s[i - 1] === t[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return dp[m][n];
+  };
+
+  const similarityScore = (query, candidate) => {
+    const q = normalizeWord(query);
+    const c = normalizeWord(candidate);
+    if (!q || !c) return -1;
+    if (q === c) return 1000;
+    if (c.startsWith(q)) return 700 - (c.length - q.length);
+    if (c.includes(q)) return 500 - (c.length - q.length);
+    const dist = levenshtein(q, c);
+    const maxLen = Math.max(q.length, c.length);
+    const ratio = maxLen > 0 ? (1 - dist / maxLen) : 0;
+    return Math.round(ratio * 100);
+  };
+
+  const categoryMetaById = React.useMemo(() => {
+    const map = new Map();
+    const walk = (nodes, depth = 0) => {
+      if (!Array.isArray(nodes)) return;
+      nodes.forEach((node) => {
+        const id = parseInt(node.id, 10);
+        if (!Number.isNaN(id)) {
+          map.set(id, { name: String(node.name || ''), depth });
+        }
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          walk(node.children, depth + 1);
+        }
+      });
+    };
+    walk(categoryTree, 0);
+    return map;
+  }, [categoryTree]);
+
+  const getDeepestCategoryNames = (word) => {
+    const ids = Array.isArray(word?.category_ids) ? word.category_ids.map(v => parseInt(v, 10)).filter(Boolean) : [];
+    if (ids.length === 0) return '';
+    const entries = ids
+      .map((id) => ({ id, meta: categoryMetaById.get(id) }))
+      .filter((entry) => entry.meta && entry.meta.name);
+    if (entries.length === 0) return '';
+    const maxDepth = Math.max(...entries.map((e) => e.meta.depth));
+    const deepestNames = entries
+      .filter((e) => e.meta.depth === maxDepth)
+      .map((e) => e.meta.name)
+      .filter((v, i, arr) => arr.indexOf(v) === i);
+    return deepestNames.join(', ');
+  };
+
+  const duplicateMatches = React.useMemo(() => {
+    const q = normalizeWord(duplicateCheckValue);
+    if (!q || dictionaryWords.length === 0) return { exact: [], similar: [] };
+
+    const words = dictionaryWords
+      .map(w => ({
+        id: w.id,
+        word: w.word,
+        translation_1: w.translation_1 || '',
+        category_ids: Array.isArray(w.category_ids) ? w.category_ids : []
+      }))
+      .filter(w => normalizeWord(w.word).length > 0);
+
+    const exact = words.filter(w => normalizeWord(w.word) === q);
+    if (exact.length > 0) return { exact, similar: [] };
+
+    const similar = words
+      .map(w => ({ ...w, _score: similarityScore(q, w.word) }))
+      .filter(w => w._score >= 20)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 5);
+
+    return { exact: [], similar };
+  }, [duplicateCheckValue, dictionaryWords]);
 
   const handleCreateWord = async (e) => {
     e.preventDefault();
@@ -582,6 +715,46 @@ const WordManagement = ({ dictionaryId, categoryId, onWordsChanged }) => {
 
       {showBulkInsert && (
         <div style={{ padding: '15px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px' }}>
+          <div style={{ marginBottom: '14px', padding: '10px', border: '1px solid #e0e0e0', borderRadius: '6px', background: '#fafafa' }}>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>
+              Проверка похожих слов (в текущем словаре):
+            </label>
+            <input
+              type="text"
+              value={duplicateCheckValue}
+              onChange={(e) => setDuplicateCheckValue(e.target.value)}
+              placeholder="Введите слово для проверки дублей..."
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+              disabled={bulkLoading}
+            />
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#555' }}>
+              {dictionaryWordsLoading ? 'Проверяю словарь...' : (
+                duplicateCheckValue.trim() ? (
+                  duplicateMatches.exact.length > 0 ? (
+                    <div style={{ color: '#c62828', fontWeight: 'bold' }}>
+                      Полное совпадение: {duplicateMatches.exact[0].word}
+                      {duplicateMatches.exact[0].translation_1 ? ` — ${duplicateMatches.exact[0].translation_1}` : ''}
+                      {getDeepestCategoryNames(duplicateMatches.exact[0]) ? ` — ${getDeepestCategoryNames(duplicateMatches.exact[0])}` : ''}
+                    </div>
+                  ) : duplicateMatches.similar.length > 0 ? (
+                    <div>
+                      <div style={{ marginBottom: '4px' }}>Похожие слова:</div>
+                      <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                        {duplicateMatches.similar.map(item => (
+                          <li key={item.id}>
+                            {item.word}
+                            {item.translation_1 ? ` — ${item.translation_1}` : ''}
+                            {getDeepestCategoryNames(item) ? ` — ${getDeepestCategoryNames(item)}` : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : 'Совпадений не найдено'
+                ) : 'Введите слово выше, чтобы увидеть совпадения'
+              )}
+            </div>
+          </div>
+
           <div style={{ marginBottom: '10px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Куда добавить слова:
