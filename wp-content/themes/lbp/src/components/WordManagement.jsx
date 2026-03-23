@@ -177,35 +177,50 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
 
   const categoryMetaById = React.useMemo(() => {
     const map = new Map();
-    const walk = (nodes, depth = 0) => {
+    const walk = (nodes, depth = 0, parentId = null) => {
       if (!Array.isArray(nodes)) return;
       nodes.forEach((node) => {
         const id = parseInt(node.id, 10);
         if (!Number.isNaN(id)) {
-          map.set(id, { name: String(node.name || ''), depth });
+          map.set(id, { name: String(node.name || ''), depth, parentId });
         }
         if (Array.isArray(node.children) && node.children.length > 0) {
-          walk(node.children, depth + 1);
+          walk(node.children, depth + 1, id);
         }
       });
     };
-    walk(categoryTree, 0);
+    walk(categoryTree, 0, null);
     return map;
   }, [categoryTree]);
 
-  const getDeepestCategoryNames = (word) => {
+  const buildCategoryPath = (categoryId) => {
+    const parts = [];
+    let currentId = categoryId;
+    const guard = new Set();
+    while (currentId && !guard.has(currentId)) {
+      guard.add(currentId);
+      const meta = categoryMetaById.get(currentId);
+      if (!meta || !meta.name) break;
+      parts.unshift(meta.name);
+      currentId = meta.parentId || null;
+    }
+    return parts.join(' > ');
+  };
+
+  const getDeepestCategoryPaths = (word) => {
     const ids = Array.isArray(word?.category_ids) ? word.category_ids.map(v => parseInt(v, 10)).filter(Boolean) : [];
-    if (ids.length === 0) return '';
+    if (ids.length === 0) return [];
     const entries = ids
       .map((id) => ({ id, meta: categoryMetaById.get(id) }))
       .filter((entry) => entry.meta && entry.meta.name);
-    if (entries.length === 0) return '';
+    if (entries.length === 0) return [];
     const maxDepth = Math.max(...entries.map((e) => e.meta.depth));
-    const deepestNames = entries
+    const deepestPaths = entries
       .filter((e) => e.meta.depth === maxDepth)
-      .map((e) => e.meta.name)
+      .map((e) => buildCategoryPath(e.id))
+      .filter(Boolean)
       .filter((v, i, arr) => arr.indexOf(v) === i);
-    return deepestNames.join(', ');
+    return deepestPaths;
   };
 
   const duplicateMatches = React.useMemo(() => {
@@ -732,9 +747,15 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
                 duplicateCheckValue.trim() ? (
                   duplicateMatches.exact.length > 0 ? (
                     <div style={{ color: '#c62828', fontWeight: 'bold' }}>
-                      Полное совпадение: {duplicateMatches.exact[0].word}
-                      {duplicateMatches.exact[0].translation_1 ? ` — ${duplicateMatches.exact[0].translation_1}` : ''}
-                      {getDeepestCategoryNames(duplicateMatches.exact[0]) ? ` — ${getDeepestCategoryNames(duplicateMatches.exact[0])}` : ''}
+                      <span style={{ color: '#111', fontWeight: 700 }}>
+                        Полное совпадение: {duplicateMatches.exact[0].word}
+                        {duplicateMatches.exact[0].translation_1 ? ` — ${duplicateMatches.exact[0].translation_1}` : ''}
+                      </span>
+                      {getDeepestCategoryPaths(duplicateMatches.exact[0]).length > 0 && (
+                        <span style={{ color: '#546e7a', fontWeight: 500, fontStyle: 'italic', fontSize: '12px' }}>
+                          {' — '}{getDeepestCategoryPaths(duplicateMatches.exact[0]).join(', ')}
+                        </span>
+                      )}
                     </div>
                   ) : duplicateMatches.similar.length > 0 ? (
                     <div>
@@ -742,9 +763,15 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
                       <ul style={{ margin: 0, paddingLeft: '18px' }}>
                         {duplicateMatches.similar.map(item => (
                           <li key={item.id}>
-                            {item.word}
-                            {item.translation_1 ? ` — ${item.translation_1}` : ''}
-                            {getDeepestCategoryNames(item) ? ` — ${getDeepestCategoryNames(item)}` : ''}
+                            <span style={{ color: '#111', fontWeight: 600 }}>
+                              {item.word}
+                              {item.translation_1 ? ` — ${item.translation_1}` : ''}
+                            </span>
+                            {getDeepestCategoryPaths(item).length > 0 && (
+                              <span style={{ color: '#546e7a', fontWeight: 500, fontStyle: 'italic', fontSize: '12px' }}>
+                                {' — '}{getDeepestCategoryPaths(item).join(', ')}
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
