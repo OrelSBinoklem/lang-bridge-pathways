@@ -746,17 +746,40 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
               {dictionaryWordsLoading ? 'Проверяю словарь...' : (
                 duplicateCheckValue.trim() ? (
                   duplicateMatches.exact.length > 0 ? (
-                    <div style={{ color: '#c62828', fontWeight: 'bold' }}>
-                      <span style={{ color: '#111', fontWeight: 700 }}>
-                        Полное совпадение: {duplicateMatches.exact[0].word}
-                        {duplicateMatches.exact[0].translation_1 ? ` — ${duplicateMatches.exact[0].translation_1}` : ''}
-                      </span>
-                      {getDeepestCategoryPaths(duplicateMatches.exact[0]).length > 0 && (
-                        <span style={{ color: '#546e7a', fontWeight: 500, fontStyle: 'italic', fontSize: '12px' }}>
-                          {' — '}{getDeepestCategoryPaths(duplicateMatches.exact[0]).join(', ')}
+                    duplicateMatches.exact.length === 1 ? (
+                      <div style={{ color: '#c62828', fontWeight: 'bold' }}>
+                        <span style={{ color: '#111', fontWeight: 700 }}>
+                          Полное совпадение: {duplicateMatches.exact[0].word}
+                          {duplicateMatches.exact[0].translation_1 ? ` — ${duplicateMatches.exact[0].translation_1}` : ''}
                         </span>
-                      )}
-                    </div>
+                        {getDeepestCategoryPaths(duplicateMatches.exact[0]).length > 0 && (
+                          <span style={{ color: '#546e7a', fontWeight: 500, fontStyle: 'italic', fontSize: '12px' }}>
+                            {' — '}{getDeepestCategoryPaths(duplicateMatches.exact[0]).join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ color: '#c62828', fontWeight: 'bold' }}>
+                        <div style={{ marginBottom: '4px', color: '#111' }}>
+                          Полные совпадения ({duplicateMatches.exact.length}):
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: '18px', fontWeight: 'normal' }}>
+                          {duplicateMatches.exact.map((item) => (
+                            <li key={item.id}>
+                              <span style={{ color: '#111', fontWeight: 700 }}>
+                                {item.word}
+                                {item.translation_1 ? ` — ${item.translation_1}` : ''}
+                              </span>
+                              {getDeepestCategoryPaths(item).length > 0 && (
+                                <span style={{ color: '#546e7a', fontWeight: 500, fontStyle: 'italic', fontSize: '12px' }}>
+                                  {' — '}{getDeepestCategoryPaths(item).join(', ')}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
                   ) : duplicateMatches.similar.length > 0 ? (
                     <div>
                       <div style={{ marginBottom: '4px' }}>Похожие слова:</div>
