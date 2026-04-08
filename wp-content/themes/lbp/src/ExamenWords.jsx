@@ -20,6 +20,27 @@ const findCategoryInTree = (tree, categoryId, parent = null) => {
 	return null;
 };
 
+const CATEGORY_URL_PARAM = 'category';
+
+/** ID категории из query (?category=) — без перезагрузки страницы */
+const readCategoryFromUrl = () => {
+	const v = new URLSearchParams(window.location.search).get(CATEGORY_URL_PARAM);
+	if (v == null || v === '') return 0;
+	const n = parseInt(v, 10);
+	return Number.isFinite(n) && n > 0 ? n : 0;
+};
+
+const buildUrlWithCategory = (categoryId) => {
+	const u = new URL(window.location.href);
+	const id = parseInt(categoryId, 10);
+	if (Number.isFinite(id) && id > 0) {
+		u.searchParams.set(CATEGORY_URL_PARAM, String(id));
+	} else {
+		u.searchParams.delete(CATEGORY_URL_PARAM);
+	}
+	return `${u.pathname}${u.search}${u.hash}`;
+};
+
 const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefreshUserData, dictionaryWords = [], loadingDictionaryWords, onRefreshDictionaryWords, categories = [], loadingCategories, onExamenCategoryChange }) => {
 
 	const { dictionary, loading, error } = useDictionary(dictionaryId);
@@ -28,64 +49,97 @@ const ExamenWords = ({ dictionaryId, userWordsData = {}, loadingUserData, onRefr
 	const [showExamen, setShowExamen] = useState(false);
 	const showExamenRef = useRef(false); // Для доступа к актуальному значению в обработчике popstate
 	const categoryIdRef = useRef(0); // Сохраняем categoryId для использования в обработчике popstate
+	const initialUrlSyncedRef = useRef(false);
 
-	const handleCategoryClick = (cat) => {
-		categoryIdRef.current = cat.id;
-		setCategoryId(cat.id);
-		showExamenRef.current = true;
-		setShowExamen(true);
-		// Добавляем запись в историю браузера при начале тренировки
-		window.history.pushState({ examenActive: true, categoryId: cat.id }, '', window.location.href);
+	const stripCategoryFromUrl = () => {
+		const next = buildUrlWithCategory(0);
+		const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+		if (cur !== next) {
+			window.history.replaceState({ examenActive: false }, '', next);
+		}
 	};
 
-	const handleBackToCategories = () => {
+	const openExamenWithCategory = (catId) => {
+		const id = parseInt(catId, 10);
+		categoryIdRef.current = id;
+		setCategoryId(id);
+		showExamenRef.current = true;
+		setShowExamen(true);
+		const nextUrl = buildUrlWithCategory(id);
+		window.history.pushState({ examenActive: true, categoryId: id }, '', nextUrl);
+	};
+
+	const closeExamenToCategories = () => {
 		showExamenRef.current = false;
 		setShowExamen(false);
 		categoryIdRef.current = 0;
 		setCategoryId(0);
+		stripCategoryFromUrl();
 	};
 
-	// Обработка кнопки "Назад" и "Вперед" браузера
+	const handleCategoryClick = (cat) => {
+		openExamenWithCategory(cat.id);
+	};
+
+	// Синхронизация с URL при «Назад» / «Вперёд» (без location.reload)
 	useEffect(() => {
-		const handlePopState = (event) => {
-			if (event.state && event.state.examenActive) {
-				// Возвращаемся вперед к тренировке
-				const savedCategoryId = event.state.categoryId || 0;
-				categoryIdRef.current = savedCategoryId;
+		const handlePopState = () => {
+			const cid = readCategoryFromUrl();
+			if (cid > 0) {
+				categoryIdRef.current = cid;
 				showExamenRef.current = true;
-				setCategoryId(savedCategoryId);
+				setCategoryId(cid);
 				setShowExamen(true);
-			} else {
-				// Возвращаемся назад к категориям
-				// Используем ref для проверки актуального состояния
-				if (showExamenRef.current || categoryIdRef.current !== 0) {
-					categoryIdRef.current = 0;
-					showExamenRef.current = false;
-					setCategoryId(0);
-					setShowExamen(false);
-				}
+			} else if (showExamenRef.current || categoryIdRef.current !== 0) {
+				categoryIdRef.current = 0;
+				showExamenRef.current = false;
+				setCategoryId(0);
+				setShowExamen(false);
 			}
 		};
 
 		window.addEventListener('popstate', handlePopState);
-		
+
 		return () => {
 			window.removeEventListener('popstate', handlePopState);
 		};
-	}, []); // Пустой массив зависимостей, используем refs
+	}, []);
 
-	// Обработка клика по заголовку - возврат к категориям
+	// Первый заход по ссылке с ?category= — открыть тренировку после загрузки дерева
+	useEffect(() => {
+		if (initialUrlSyncedRef.current) return;
+		if (loadingCategories) return;
+
+		const cid = readCategoryFromUrl();
+		if (cid <= 0) {
+			initialUrlSyncedRef.current = true;
+			return;
+		}
+		if (!categories || categories.length === 0) return;
+
+		const found = findCategoryInTree(categories, cid);
+		if (!found) {
+			window.history.replaceState({}, '', buildUrlWithCategory(0));
+			initialUrlSyncedRef.current = true;
+			return;
+		}
+
+		initialUrlSyncedRef.current = true;
+		categoryIdRef.current = cid;
+		showExamenRef.current = true;
+		setCategoryId(cid);
+		setShowExamen(true);
+		window.history.replaceState({ examenActive: true, categoryId: cid }, '', window.location.href);
+	}, [categories, loadingCategories]);
+
+	// Клик по заголовку словаря
 	useEffect(() => {
 		const handleReturnToCategories = () => {
-			// Сбрасываем состояние тренировки
-			showExamenRef.current = false;
-			setShowExamen(false);
-			categoryIdRef.current = 0;
-			setCategoryId(0);
+			closeExamenToCategories();
 		};
 
 		window.addEventListener('returnToCategories', handleReturnToCategories);
-		
+
 		return () => {
 			window.removeEventListener('returnToCategories', handleReturnToCategories);
 		};

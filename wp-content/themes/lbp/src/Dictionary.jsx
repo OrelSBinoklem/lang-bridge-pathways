@@ -282,10 +282,9 @@ if(document.getElementById('react-app-dictionary')) {
 			}
 		}, [dictionaryWords, categories, loadingCategories, loadingDictionaryWords]);
 
-	// Обработчик клика по заголовку - возврат к категориям
+	// Клик по заголовку: только SPA — событие снимает категорию и чистит ?category= в URL (без перезагрузки)
 	const handleTitleClick = (e) => {
 		e.preventDefault();
-		// Отправляем событие для сброса состояния тренировки
 		window.dispatchEvent(new CustomEvent('returnToCategories'));
 	};
 
@@ -317,8 +316,8 @@ if(document.getElementById('react-app-dictionary')) {
 				<div className="dictionary-info">
 					<h1 className="dictionary-title">
 					{isExamenActive ? (
-						<a 
-							href={`${window.location.pathname}?refresh=${Date.now()}`}
+						<a
+							href={window.location.pathname}
 							onClick={handleTitleClick}
 							title="Вернуться к категориям"
 							style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
