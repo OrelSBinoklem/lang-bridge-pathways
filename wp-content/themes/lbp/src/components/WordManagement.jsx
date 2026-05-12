@@ -1,5 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
+import WordEditor from '../WordEditor';
+
+/**
+ * Разбор строк CSV: валидные записи и ошибки (номер строки с 1).
+ */
+function analyzeBulkCsvLines(text) {
+  const validRows = [];
+  const invalidLines = [];
+  const lines = String(text || '').split(/\n/);
+
+  lines.forEach((rawLine, idx) => {
+    const lineNum = idx + 1;
+    const trimmed = rawLine.trim();
+    if (!trimmed) return;
+
+    const parts = trimmed.split(/[,\t;]/).map((p) => p.trim()).filter((p) => p.length > 0);
+
+    if (parts.length < 2) {
+      invalidLines.push({
+        lineNum,
+        rawLine: trimmed,
+        message: 'Нужны минимум 2 колонки: слово, перевод1 (остальные опционально)',
+      });
+      return;
+    }
+
+    const word = parts[0];
+    const translation_1 = parts[1];
+
+    if (!String(word).trim()) {
+      invalidLines.push({
+        lineNum,
+        rawLine: trimmed,
+        message: 'Первый столбец (слово) пустой',
+      });
+      return;
+    }
+    if (!String(translation_1).trim()) {
+      invalidLines.push({
+        lineNum,
+        rawLine: trimmed,
+        message: 'Второй столбец (перевод 1) пустой',
+      });
+      return;
+    }
+
+    validRows.push({
+      lineNum,
+      rawLine: trimmed,
+      word,
+      translation_1,
+      translation_2: parts[2] || '',
+      translation_3: parts[3] || '',
+      translation_input_variable: '',
+      difficult_translation: '',
+      info: '',
+      sound_url: '',
+      level: '',
+      maxLevel: '',
+      type: '',
+      gender: '',
+      is_phrase: '0',
+    });
+  });
+
+  return { validRows, invalidLines };
+}
 
 /**
  * Компонент для управления словами прямо в категории
@@ -19,6 +86,8 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
   const [dictionaryWords, setDictionaryWords] = useState([]);
   const [dictionaryWordsLoading, setDictionaryWordsLoading] = useState(false);
   const [duplicateCheckValue, setDuplicateCheckValue] = useState('');
+  const [showBulkSimilarPanel, setShowBulkSimilarPanel] = useState(false);
+  const [similarPanelEditingWordId, setSimilarPanelEditingWordId] = useState(null);
   const [newWord, setNewWord] = useState({
     word: '',
     translation_1: '',
@@ -133,6 +202,18 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
     fetchDictionaryWords();
   }, [showBulkInsert, dictionaryId, existingDictionaryWords]);
 
+  useEffect(() => {
+    if (similarPanelEditingWordId == null) return;
+    if (!dictionaryWords.some((w) => String(w.id) === String(similarPanelEditingWordId))) {
+      setSimilarPanelEditingWordId(null);
+    }
+  }, [dictionaryWords, similarPanelEditingWordId]);
+
+  const similarPanelEditWord = useMemo(() => {
+    if (similarPanelEditingWordId == null) return null;
+    return dictionaryWords.find((x) => String(x.id) === String(similarPanelEditingWordId)) || null;
+  }, [similarPanelEditingWordId, dictionaryWords]);
+
   const normalizeWord = (value) => String(value || '')
     .toLowerCase()
     .trim()
@@ -175,7 +256,7 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
     return Math.round(ratio * 100);
   };
 
-  const categoryMetaById = React.useMemo(() => {
+  const categoryMetaById = useMemo(() => {
     const map = new Map();
     const walk = (nodes, depth = 0, parentId = null) => {
       if (!Array.isArray(nodes)) return;
@@ -223,30 +304,35 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
     return deepestPaths;
   };
 
-  const duplicateMatches = React.useMemo(() => {
-    const q = normalizeWord(duplicateCheckValue);
+  const getMatchesForQuery = useCallback((queryValue) => {
+    const q = normalizeWord(queryValue);
     if (!q || dictionaryWords.length === 0) return { exact: [], similar: [] };
 
     const words = dictionaryWords
-      .map(w => ({
+      .map((w) => ({
         id: w.id,
         word: w.word,
         translation_1: w.translation_1 || '',
-        category_ids: Array.isArray(w.category_ids) ? w.category_ids : []
+        category_ids: Array.isArray(w.category_ids) ? w.category_ids : [],
       }))
-      .filter(w => normalizeWord(w.word).length > 0);
+      .filter((w) => normalizeWord(w.word).length > 0);
 
-    const exact = words.filter(w => normalizeWord(w.word) === q);
+    const exact = words.filter((w) => normalizeWord(w.word) === q);
     if (exact.length > 0) return { exact, similar: [] };
 
     const similar = words
-      .map(w => ({ ...w, _score: similarityScore(q, w.word) }))
-      .filter(w => w._score >= 20)
+      .map((w) => ({ ...w, _score: similarityScore(q, w.word) }))
+      .filter((w) => w._score >= 20)
       .sort((a, b) => b._score - a._score)
       .slice(0, 5);
 
     return { exact: [], similar };
-  }, [duplicateCheckValue, dictionaryWords]);
+  }, [dictionaryWords]);
+
+  const duplicateMatches = useMemo(
+    () => getMatchesForQuery(duplicateCheckValue),
+    [duplicateCheckValue, getMatchesForQuery]
+  );
 
   const handleCreateWord = async (e) => {
     e.preventDefault();
@@ -293,33 +379,47 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
   };
 
   const parseBulkText = (text) => {
-    const lines = text.split('\n').filter(line => line.trim());
-    const words = [];
+    const { validRows } = analyzeBulkCsvLines(text);
+    return validRows.map((row) => ({
+      word: row.word,
+      translation_1: row.translation_1,
+      translation_2: row.translation_2,
+      translation_3: row.translation_3,
+      translation_input_variable: row.translation_input_variable,
+      difficult_translation: row.difficult_translation,
+      info: row.info,
+      sound_url: row.sound_url,
+      level: row.level,
+      maxLevel: row.maxLevel,
+      type: row.type,
+      gender: row.gender,
+      is_phrase: row.is_phrase,
+    }));
+  };
 
-    for (const line of lines) {
-      // Поддерживаем запятую, табуляцию и точку с запятой как разделители
-      const parts = line.split(/[,\t;]/).map(part => part.trim()).filter(part => part);
-      
-      if (parts.length >= 2) {
-        words.push({
-          word: parts[0],
-          translation_1: parts[1],
-          translation_2: parts[2] || '',
-          translation_3: parts[3] || '',
-          translation_input_variable: '',
-          difficult_translation: '',
-          info: '',
-          sound_url: '',
-          level: '',
-          maxLevel: '',
-          type: '',
-          gender: '',
-          is_phrase: '0'
-        });
+  const bulkSimilarReport = useMemo(() => {
+    if (!showBulkSimilarPanel || !bulkText.trim()) return null;
+    const { validRows, invalidLines } = analyzeBulkCsvLines(bulkText);
+    const rowsWithMatches = validRows.map((row) => ({
+      lineNum: row.lineNum,
+      inputWord: row.word,
+      inputTranslation_1: row.translation_1,
+      ...getMatchesForQuery(row.word),
+    }));
+    return { invalidLines, rowsWithMatches };
+  }, [showBulkSimilarPanel, bulkText, getMatchesForQuery]);
+
+  const handleToggleBulkSimilarPanel = () => {
+    if (!showBulkSimilarPanel) {
+      if (!bulkText.trim()) {
+        setError('Вставьте текст в поле списка, чтобы открыть проверку похожих слов');
+        return;
       }
+      setError('');
+      setShowBulkSimilarPanel(true);
+      return;
     }
-
-    return words;
+    setShowBulkSimilarPanel(false);
   };
 
   const handleBulkInsert = async () => {
@@ -369,7 +469,8 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
 
       setBulkText('');
       setShowBulkInsert(false);
-      
+      setShowBulkSimilarPanel(false);
+
       if (errorCount > 0) {
         setError(`Создано: ${successCount}, ошибок: ${errorCount}`);
       } else {
@@ -418,6 +519,72 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
 
     const response = await axios.post(window.myajax.url, formData);
     return response.data;
+  };
+
+  const handleSimilarMatchDelete = async (wordId) => {
+    const w = dictionaryWords.find((x) => String(x.id) === String(wordId));
+    const label = w?.word ?? wordId;
+    if (!window.confirm(`Удалить слово «${label}» из этой категории?`)) return;
+    try {
+      const result = await deleteWord(wordId, categoryId);
+      if (result.success) {
+        setDictionaryWords((prev) => prev.filter((x) => String(x.id) !== String(wordId)));
+        setSimilarPanelEditingWordId((cur) => (String(cur) === String(wordId) ? null : cur));
+        setError('');
+        if (onWordsChanged) onWordsChanged();
+      } else {
+        setError(result.message || result.data?.message || 'Не удалось удалить слово');
+      }
+    } catch (err) {
+      setError('Ошибка при удалении: ' + err.message);
+    }
+  };
+
+  const openSimilarWordEditor = (wordId) => {
+    const w = dictionaryWords.find((x) => String(x.id) === String(wordId));
+    if (w) setSimilarPanelEditingWordId(wordId);
+  };
+
+  const renderSimilarDictWordRow = (item) => {
+    const rest = { ...item };
+    delete rest._score;
+    return (
+      <span className="bulk-similar-match">
+        <span className="bulk-similar-match__text">
+          <span style={{ fontWeight: 600, color: '#111' }}>{rest.word}</span>
+          {rest.translation_1 ? ` — ${rest.translation_1}` : ''}
+          {getDeepestCategoryPaths(rest).length > 0 && (
+            <span style={{ color: '#546e7a', fontStyle: 'italic' }}>
+              {' — '}{getDeepestCategoryPaths(rest).join(', ')}
+            </span>
+          )}
+        </span>
+        <button
+          type="button"
+          className="edit-button"
+          title="Редактировать слово"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openSimilarWordEditor(rest.id);
+          }}
+        >
+          ✏️
+        </button>
+        <button
+          type="button"
+          className="delete-button"
+          title="Удалить из категории"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSimilarMatchDelete(rest.id);
+          }}
+        >
+          🗑️
+        </button>
+      </span>
+    );
   };
 
   const handleDeleteAllWords = async () => {
@@ -515,7 +682,10 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
           <button 
             onClick={() => {
               setShowAddForm(false);
-              setShowBulkInsert(!showBulkInsert);
+              setShowBulkInsert((prev) => {
+                if (prev) setShowBulkSimilarPanel(false);
+                return !prev;
+              });
             }}
             style={{ 
               padding: '8px 16px', 
@@ -730,6 +900,8 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
 
       {showBulkInsert && (
         <div style={{ padding: '15px', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '4px' }}>
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 280px', minWidth: 0 }}>
           <div style={{ marginBottom: '14px', padding: '10px', border: '1px solid #e0e0e0', borderRadius: '6px', background: '#fafafa' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>
               Проверка похожих слов (в текущем словаре):
@@ -847,6 +1019,25 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
               }}
               disabled={bulkLoading}
             />
+            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={handleToggleBulkSimilarPanel}
+                disabled={bulkLoading}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: showBulkSimilarPanel ? '#607d8b' : '#0288d1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: bulkLoading ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                }}
+              >
+                {showBulkSimilarPanel ? '◀ Скрыть проверку по списку' : '▶ Проверка похожих по списку CSV'}
+              </button>
+            </div>
           </div>
 
           {(bulkLoading || deleteAllLoading) && bulkProgress.total > 0 && (
@@ -884,6 +1075,160 @@ const WordManagement = ({ dictionaryId, categoryId, existingDictionaryWords = []
             >
               {bulkLoading ? `Обработка... (${bulkProgress.current}/${bulkProgress.total})` : '✓ Вставить слова'}
             </button>
+          </div>
+            </div>
+
+            {showBulkSimilarPanel && bulkSimilarReport && (
+              <aside
+                style={{
+                  flex: '0 0 min(360px, 40vw)',
+                  maxWidth: '400px',
+                  minWidth: '260px',
+                  maxHeight: 'min(78vh, 640px)',
+                  overflowY: 'auto',
+                  position: 'sticky',
+                  top: '8px',
+                  padding: '12px',
+                  backgroundColor: '#f5f5f5',
+                  border: '1px solid #bdbdbd',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  alignSelf: 'flex-start',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#37474f' }}>Похожие в словаре</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkSimilarPanel(false)}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '12px',
+                      border: '1px solid #90a4ae',
+                      borderRadius: '4px',
+                      background: '#fff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Закрыть
+                  </button>
+                </div>
+
+                {dictionaryWordsLoading ? (
+                  <div style={{ color: '#555' }}>Загружается словарь…</div>
+                ) : (
+                  <>
+                    {bulkSimilarReport.invalidLines.length > 0 && (
+                      <div
+                        style={{
+                          marginBottom: '12px',
+                          padding: '8px',
+                          backgroundColor: '#fff3e0',
+                          border: '1px solid #ff9800',
+                          borderRadius: '4px',
+                          color: '#5d4037',
+                        }}
+                      >
+                        <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>
+                          Ошибки формата ({bulkSimilarReport.invalidLines.length} строк)
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                          {bulkSimilarReport.invalidLines.map((err) => (
+                            <li key={err.lineNum} style={{ marginBottom: '4px' }}>
+                              <span style={{ fontWeight: 600 }}>Стр. {err.lineNum}:</span> {err.message}
+                              <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#6d4c41', marginTop: '2px' }}>
+                                {err.rawLine}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {bulkSimilarReport.rowsWithMatches.length === 0 ? (
+                      <div style={{ color: '#666' }}>
+                        {bulkSimilarReport.invalidLines.length > 0
+                          ? 'Нет строк с корректным форматом «слово,перевод…» для сравнения с словарём.'
+                          : 'Нет непустых строк в списке.'}
+                      </div>
+                    ) : (
+                      bulkSimilarReport.rowsWithMatches.map((row) => (
+                        <div
+                          key={`${row.lineNum}-${row.inputWord}`}
+                          style={{
+                            marginBottom: '12px',
+                            paddingBottom: '10px',
+                            borderBottom: '1px solid #e0e0e0',
+                          }}
+                        >
+                          <div style={{ fontWeight: 'bold', color: '#263238', marginBottom: '4px' }}>
+                            Стр. {row.lineNum}: <span style={{ color: '#1565c0' }}>{row.inputWord}</span>
+                            {row.inputTranslation_1 ? (
+                              <span style={{ fontWeight: 600, color: '#37474f' }}> — {row.inputTranslation_1}</span>
+                            ) : null}
+                          </div>
+                          {row.exact.length > 0 ? (
+                            <div style={{ color: '#c62828', fontWeight: 'bold', fontSize: '11px' }}>
+                              {row.exact.length === 1 ? (
+                                <div>
+                                  <span style={{ marginRight: '4px' }}>Полное совпадение:</span>
+                                  {renderSimilarDictWordRow(row.exact[0])}
+                                </div>
+                              ) : (
+                                <>
+                                  <div>Полные совпадения ({row.exact.length}):</div>
+                                  <ul style={{ margin: '4px 0 0', paddingLeft: 0, listStyle: 'none', fontWeight: 'normal' }}>
+                                    {row.exact.map((item) => (
+                                      <li key={item.id}>
+                                        {renderSimilarDictWordRow(item)}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </>
+                              )}
+                            </div>
+                          ) : row.similar.length > 0 ? (
+                            <div>
+                              <div style={{ marginBottom: '2px', color: '#455a64' }}>Похожие:</div>
+                              <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+                                {row.similar.map((item) => (
+                                    <li key={item.id}>
+                                      {renderSimilarDictWordRow(item)}
+                                    </li>
+                                  ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <div style={{ color: '#2e7d32', fontSize: '11px' }}>Совпадений в словаре не найдено</div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+              </aside>
+            )}
+          </div>
+        </div>
+      )}
+
+      {similarPanelEditWord && (
+        <div
+          className="bulk-similar-word-editor-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSimilarPanelEditingWordId(null);
+          }}
+          role="presentation"
+        >
+          <div className="bulk-similar-word-editor-inner" onClick={(e) => e.stopPropagation()}>
+            <WordEditor
+              dictionaryId={dictionaryId}
+              word={similarPanelEditWord}
+              onClose={() => setSimilarPanelEditingWordId(null)}
+              onRefreshDictionaryWords={() => {
+                if (onWordsChanged) onWordsChanged();
+              }}
+            />
           </div>
         </div>
       )}
