@@ -353,6 +353,13 @@ class WordsAjaxHandler {
             'statistic_correct_attempts_revert' => isset($_POST['statistic_correct_attempts_revert']) ? (int) $_POST['statistic_correct_attempts_revert'] : null,
             'mode_education' => isset($_POST['mode_education']) ? (int) $_POST['mode_education'] : null,
             'mode_education_revert' => isset($_POST['mode_education_revert']) ? (int) $_POST['mode_education_revert'] : null,
+            'easy_education' => isset($_POST['easy_education']) ? (int) $_POST['easy_education'] : null,
+            'attempts_all' => isset($_POST['attempts_all']) ? (int) $_POST['attempts_all'] : null,
+            'correct_attempts_all' => isset($_POST['correct_attempts_all']) ? (int) $_POST['correct_attempts_all'] : null,
+            'easy_correct' => isset($_POST['easy_correct']) ? (int) $_POST['easy_correct'] : null,
+            'easy_correct_revert' => isset($_POST['easy_correct_revert']) ? (int) $_POST['easy_correct_revert'] : null,
+            'cooldown_tier' => isset($_POST['cooldown_tier']) ? (int) $_POST['cooldown_tier'] : null,
+            'cooldown_tier_revert' => isset($_POST['cooldown_tier_revert']) ? (int) $_POST['cooldown_tier_revert'] : null,
             'last_shown' => isset($_POST['last_shown']) ? sanitize_text_field($_POST['last_shown']) : null,
             'last_shown_revert' => isset($_POST['last_shown_revert']) ? sanitize_text_field($_POST['last_shown_revert']) : null,
         ];
@@ -591,7 +598,8 @@ class WordsAjaxHandler {
     }
 
     /**
-     * Установить длительность отката между 1-м и 2-м баллом для слов категории (cooldown_tier: 0=20ч, 1=30мин, 2=3ч).
+     * Режим откатов между 1-м и 2-м баллом задаётся кукой lbp_cooldown_tier_pref в браузере (0=20ч, 1=30мин, 2=3ч).
+     * Запрос оставлен для совместимости с меню; запись в БД по категории не выполняется.
      */
     public static function handle_set_category_cooldown_tier() {
         $user_id = get_current_user_id();
@@ -616,15 +624,8 @@ class WordsAjaxHandler {
             wp_die();
         }
 
-        $tier = isset($_POST['cooldown_tier']) ? intval($_POST['cooldown_tier']) : 0;
-        $tier = max(0, min(2, $tier));
-
-        $result = set_category_cooldown_tier($user_id, $category_ids, $tier);
-        if ($result) {
-            wp_send_json_success(['message' => 'Режим откатов обновлён', 'cooldown_tier' => $tier]);
-        } else {
-            wp_send_json_error(['message' => 'Не удалось обновить откаты']);
-        }
+        $tier = isset($_POST['cooldown_tier']) ? max(0, min(2, (int) $_POST['cooldown_tier'])) : 0;
+        wp_send_json_success(['message' => 'Режим сохранён в браузере (кука).', 'cooldown_tier' => $tier]);
         wp_die();
     }
 

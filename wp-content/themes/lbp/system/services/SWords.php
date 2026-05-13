@@ -231,8 +231,8 @@ class WordsService {
         // Фильтруем допустимые поля
         $allowed_fields = [
             'word', 'translation_1', 'translation_2', 'translation_3',
-            'translation_input_variable', 'difficult_translation', 'info', 'sound_url', 
-            'level', 'maxLevel', 'type', 'gender', 'is_phrase'
+            'translation_input_variable', 'difficult_translation', 'info', 'sound_url',
+            'level', 'maxLevel', 'type', 'gender', 'is_phrase', 'learn_lang', 'order',
         ];
 
         $update_data = array_intersect_key($fields, array_flip($allowed_fields));

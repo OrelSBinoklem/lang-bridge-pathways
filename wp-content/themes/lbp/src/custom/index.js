@@ -30,6 +30,8 @@ export {
   getCooldownTime,
   getWordDisplayStatusEducation,
   getWordDisplayStatusExamen,
+  learnedWithSimplifiedTierTwo,
+  getLearnCooldownTierPreference,
 } from './utils/helpers';
 
 // Примеры компонентов

@@ -183,6 +183,16 @@ const NORMAL_COOLDOWN_SECOND = 20 * 60 * 60 * 1000;  // 20 часов (втор�
 const COOLDOWN_TIER_EASY_SECOND = 30 * 60 * 1000;   // 30 мин (лёгкая / tier 1)
 const COOLDOWN_TIER_MEDIUM_SECOND = 3 * 60 * 60 * 1000; // 3 ч (упрощённая / tier 2)
 
+/** Текущий выбранный интервал откатов из куки (0/1/2). Не путать со снимком в БД при 2-м балле. */
+export function getLearnCooldownTierPreference() {
+  if (typeof document === 'undefined') return 0;
+  const m = document.cookie.match(/(?:^|;)\s*lbp_cooldown_tier_pref=([^;]+)/);
+  if (!m) return 0;
+  const v = parseInt(m[1].trim(), 10);
+  if (v === 0 || v === 1 || v === 2) return v;
+  return 0;
+}
+
 /**
  * @param {string} lastShown
  * @param {number} correctAttempts
@@ -265,6 +275,16 @@ export const getWordDisplayStatusEducation = (userData) => {
   };
 };
 
+/** Хотя бы одно направление доведено до 2 баллов в упрощённом режиме (tier 2 = 3 ч между 1-м и 2-м баллом). */
+export const learnedWithSimplifiedTierTwo = (userData) => {
+  if (!userData) return false;
+  const directDone = Number(userData.correct_attempts) >= 2;
+  const revertDone = Number(userData.correct_attempts_revert) >= 2;
+  const directSimplified = directDone && Number(userData.cooldown_tier) === 2;
+  const revertSimplified = revertDone && Number(userData.cooldown_tier_revert) === 2;
+  return directSimplified || revertSimplified;
+};
+
 /**
  * Получить статус отображения слова для режима Examen
  * @param {object} userData - Данные пользователя по слову
@@ -314,16 +334,17 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   }
   
   // Обычная запись с реальными попытками
+  const liveTier = getLearnCooldownTierPreference();
   const cooldownDirect = getCooldownTime(
     userData.last_shown,
     userData.correct_attempts,
-    userData.cooldown_tier ?? 0,
+    liveTier,
     currentTime
   );
   const cooldownRevert = getCooldownTime(
     userData.last_shown_revert,
     userData.correct_attempts_revert,
-    userData.cooldown_tier ?? 0,
+    liveTier,
     currentTime
   );
   

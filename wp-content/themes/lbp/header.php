@@ -274,6 +274,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.cookie = TRAINING_MODE_KEY + '=' + mode + '; path=/; max-age=' + TRAINING_MODE_MAX_AGE + '; SameSite=Lax';
     }
 
+    const COOLDOWN_TIER_COOKIE = 'lbp_cooldown_tier_pref';
+    const COOLDOWN_TIER_MAX_AGE = 365 * 24 * 60 * 60;
+    function getCooldownTierCookie() {
+        const m = document.cookie.match(new RegExp('(^|;)\\s*' + COOLDOWN_TIER_COOKIE + '=([^;]+)'));
+        if (!m) return 0;
+        const v = parseInt(m[2].trim(), 10);
+        return (v === 0 || v === 1 || v === 2) ? v : 0;
+    }
+    function setCooldownTierCookie(tier) {
+        document.cookie = COOLDOWN_TIER_COOKIE + '=' + tier + '; path=/; max-age=' + COOLDOWN_TIER_MAX_AGE + '; SameSite=Lax';
+    }
+
     // Увеличенный шрифт для таблиц (куки lbp_mobile_font_large, 1 неделя)
     const MOBILE_FONT_KEY = 'lbp_mobile_font_large';
     const MOBILE_FONT_MAX_AGE = 7 * 24 * 60 * 60;
@@ -315,15 +327,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn20.classList.remove('is-active');
                 return;
             }
-            const tier = typeof detail.dominantCooldownTier === 'number' ? detail.dominantCooldownTier : 0;
+            const tier = typeof detail.dominantCooldownTier === 'number' ? detail.dominantCooldownTier : getCooldownTierCookie();
             btn3h.classList.toggle('is-active', tier === 2);
             btn20.classList.toggle('is-active', tier === 0);
         }
         function postCooldownTier(tier) {
-            const m = window.myajax;
             const scope = window.lbpExamenTrainingMenuScope;
-            if (!m || !m.url) {
-                alert('Страница не готова к запросу.');
+            const m = window.myajax;
+            if (!m) {
+                alert('Страница не готова.');
                 return;
             }
             if (!m.is_logged_in) {
@@ -334,34 +346,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Сначала откройте тренировку и выберите категорию.');
                 return;
             }
-            const fd = new FormData();
-            fd.append('action', 'set_category_cooldown_tier');
-            fd.append('category_ids', JSON.stringify(scope.categoryIds));
-            fd.append('cooldown_tier', String(tier));
-            btn3h.disabled = true;
-            btn20.disabled = true;
-            fetch(m.url, { method: 'POST', body: fd, credentials: 'same-origin' })
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data && data.success) {
-                        if (scope) scope.dominantCooldownTier = tier;
-                        syncCooldownToggleUi(scope || { categoryIds: [], dominantCooldownTier: tier });
-                        window.dispatchEvent(new CustomEvent('lbp-training-cooldown-tier-changed', { detail: { tier: tier } }));
-                        if (tier === 2) {
-                            alert('Вы перешли в упрощённый режим заучивания слов: между первым и вторым баллом откат 3 часа вместо 20 часов. Режим «Учу» при этом не включается.');
-                        } else {
-                            alert('Вы перешли в стандартный режим: между первым и вторым баллом откат снова 20 часов (как по умолчанию).');
-                        }
-                    } else {
-                        const msg = (data && data.data && data.data.message) || (data && data.message) || 'Не удалось сохранить';
-                        alert(msg);
-                    }
-                })
-                .catch(function() { alert('Ошибка сети'); })
-                .finally(function() {
-                    btn3h.disabled = false;
-                    btn20.disabled = false;
-                });
+            setCooldownTierCookie(tier);
+            if (scope) scope.dominantCooldownTier = tier;
+            syncCooldownToggleUi({ categoryIds: scope.categoryIds, dominantCooldownTier: tier });
+            window.dispatchEvent(new CustomEvent('lbp-training-cooldown-tier-changed', { detail: { tier: tier } }));
+            if (tier === 2) {
+                alert('Упрощённый режим: между первым и вторым баллом откат 3 часа (сохранено в браузере). Режим «Учу» при этом не включается.');
+            } else {
+                alert('Стандартный режим: между первым и вторым баллом откат 20 часов (сохранено в браузере).');
+            }
         }
         btn3h.addEventListener('click', function(e) { e.stopPropagation(); postCooldownTier(2); });
         btn20.addEventListener('click', function(e) { e.stopPropagation(); postCooldownTier(0); });

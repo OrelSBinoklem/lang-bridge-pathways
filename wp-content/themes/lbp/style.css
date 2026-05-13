@@ -2398,6 +2398,17 @@ h2 .small {
     color: gray;
 }
 
+/* Звезда: упрощённый режим, 2 балла по направлению — цвет как у галочки (inherit) */
+.words-progress-indicator__easy-star {
+    position: absolute;
+    top: -0.2em;
+    right: -0.15em;
+    font-size: 0.55em;
+    line-height: 1;
+    color: inherit;
+    pointer-events: none;
+}
+
 /* Стили для скрытых частей слов */
 .words-hidden-text {
     color: #ccc;
@@ -3748,6 +3759,78 @@ li:has(.word-editor-wrap) {
     align-items: center;
     gap: 10px;
 }
+
+.word-editor-user-progress-section {
+    margin: 1.75rem 0 1rem;
+    padding: 1rem 1rem 1.25rem;
+    background: #f8f9fb;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.word-editor-section-heading {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a365d;
+    border-bottom: 2px solid #4299e1;
+    padding-bottom: 0.35rem;
+}
+
+.word-editor-section-heading--dict {
+    margin: 1.25rem 0 0.75rem;
+    color: #2d3748;
+    border-bottom-color: #cbd5e0;
+}
+
+.word-editor-user-progress-section .word-editor-progress-fieldset {
+    margin: 0 0 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: #fff;
+}
+
+.word-editor-user-progress-section .word-editor-progress-fieldset legend {
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.word-editor-progress-hint {
+    font-size: 12px;
+    color: #718096;
+    margin: 0.5rem 0 0;
+}
+
+.word-editor-progress-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0.25rem;
+}
+
+.word-editor-progress-actions .word-editor-progress-status {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+.word-editor-progress-reload {
+    padding: 8px 16px;
+    font-size: 14px;
+    background: #edf2f7;
+    color: #2d3748;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.word-editor-progress-reload:hover {
+    background: #e2e8f0;
+}
+
 .word-editor-progress-row {
     margin-top: 12px;
     margin-bottom: 8px;
@@ -3768,6 +3851,13 @@ li:has(.word-editor-wrap) {
     margin: 0 0 10px 0;
     font-size: 14px;
 }
+
+.word-editor-readonly-value {
+    color: #4a5568;
+    font-weight: 500;
+    user-select: text;
+}
+
 .word-editor-progress-status {
     margin: 10px 0 0 0;
     color: #28a745;

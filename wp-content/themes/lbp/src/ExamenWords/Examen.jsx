@@ -7,7 +7,7 @@ import MatchGameModal from "../components/MatchGameModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
-import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode } from "../custom/utils/helpers";
+import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode, getLearnCooldownTierPreference } from "../custom/utils/helpers";
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
 import { TRAINING_CONFIG } from "../config/trainingConfig";
@@ -94,6 +94,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [showActionsMenu, setShowActionsMenu] = useState(false); // бургер-меню: Лёгкая, Мини-игра, В плотное, Сбросить и др.
   const [showGameDisabledPopover, setShowGameDisabledPopover] = useState(false); // поповер «почему заблокирована мини-игра»
   const lastDenseAddTimeRef = useRef(null); // для логирования обновлённого состояния слов после добавления в плотное
+  const [cooldownMenuRev, setCooldownMenuRev] = useState(0); // перерисовка при смене куки откатов из меню
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
   useEffect(() => {
@@ -315,23 +316,11 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return allCategoryIds.length > 0 ? allCategoryIds : [id];
   }, [categoryId, allCategoryIds]);
 
-  /** Доминантный cooldown_tier по словам выбранной области (0/1/2) — подсветка «3 ч» / «20 ч» в меню (header.php) */
+  /** Режим откатов из куки lbp_cooldown_tier_pref — подсветка «3 ч» / «20 ч» в меню (header.php) */
   const dominantCooldownTierForMenu = useMemo(() => {
-    if (!trainingMenuScopeIds.length || !Array.isArray(dictionaryWords)) return 0;
-    const counts = [0, 0, 0];
-    for (const w of dictionaryWords) {
-      if (!wordBelongsToAnyOfCategories(w, trainingMenuScopeIds)) continue;
-      const t = Math.max(0, Math.min(2, parseInt(userWordsData[w.id]?.cooldown_tier ?? 0, 10)));
-      counts[t] += 1;
-    }
-    const sum = counts[0] + counts[1] + counts[2];
-    if (sum === 0) return 0;
-    let best = 0;
-    for (let t = 1; t <= 2; t += 1) {
-      if (counts[t] > counts[best]) best = t;
-    }
-    return best;
-  }, [trainingMenuScopeIds, dictionaryWords, userWordsData]);
+    if (!trainingMenuScopeIds.length) return 0;
+    return getLearnCooldownTierPreference();
+  }, [trainingMenuScopeIds, cooldownMenuRev]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -347,6 +336,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     const refresh = () => {
+      setCooldownMenuRev((v) => v + 1);
       if (onRefreshUserData) onRefreshUserData();
     };
     window.addEventListener('lbp-training-cooldown-tier-changed', refresh);
@@ -575,8 +565,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         directWords.push({ word, mode: false });
         revertWords.push({ word, mode: true });
       } else {
-        const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.cooldown_tier ?? 0, currentTime);
-        const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.cooldown_tier ?? 0, currentTime);
+        const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, getLearnCooldownTierPreference(), currentTime);
+        const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, getLearnCooldownTierPreference(), currentTime);
 
         if (directAvailable) {
           directWords.push({ word, mode: false });
@@ -1097,10 +1087,10 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     const easyRevert = Number(userData.mode_education_revert) === 1;
 
     if (mode) {
-      const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.cooldown_tier ?? 0, currentTime);
+      const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, getLearnCooldownTierPreference(), currentTime);
       return revertAvailable;
     }
-    const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.cooldown_tier ?? 0, currentTime);
+    const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, getLearnCooldownTierPreference(), currentTime);
     return directAvailable;
   };
 

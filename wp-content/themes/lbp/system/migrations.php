@@ -411,24 +411,45 @@ function add_cooldown_tier_to_user_dict_words_table() {
 add_action('after_setup_theme', 'add_cooldown_tier_to_user_dict_words_table');
 
 /**
- * Режим откатов (cooldown_tier) на момент получения 2-го балла по направлению — для статистики и будущих индикаторов в UI.
- * NULL = ещё не «выучено» по этому направлению (меньше 2 баллов). Значения 0–2 как у cooldown_tier.
+ * Удаляем устаревшие колонки exam_learned_tier_* (снимок режима теперь в cooldown_tier / cooldown_tier_revert).
  */
-function add_exam_learned_tier_columns_to_user_dict_words_table() {
+function lbp_drop_exam_learned_tier_columns_if_exist() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'user_dict_words';
-    $columns = $wpdb->get_col("DESCRIBE $table_name", 0);
-    if (!in_array('exam_learned_tier_direct', $columns, true)) {
-        $wpdb->query("ALTER TABLE $table_name ADD COLUMN exam_learned_tier_direct tinyint(1) NULL DEFAULT NULL AFTER cooldown_tier");
-        error_log('Added exam_learned_tier_direct to user_dict_words table');
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        return;
     }
-    if (!in_array('exam_learned_tier_revert', $columns, true)) {
-        $wpdb->query("ALTER TABLE $table_name ADD COLUMN exam_learned_tier_revert tinyint(1) NULL DEFAULT NULL AFTER exam_learned_tier_direct");
-        error_log('Added exam_learned_tier_revert to user_dict_words table');
+    $columns = $wpdb->get_col("DESCRIBE $table_name", 0);
+    if (in_array('exam_learned_tier_direct', $columns, true)) {
+        $wpdb->query("ALTER TABLE $table_name DROP COLUMN exam_learned_tier_direct");
+        error_log('Dropped exam_learned_tier_direct from user_dict_words');
+    }
+    if (in_array('exam_learned_tier_revert', $columns, true)) {
+        $wpdb->query("ALTER TABLE $table_name DROP COLUMN exam_learned_tier_revert");
+        error_log('Dropped exam_learned_tier_revert from user_dict_words');
     }
 }
 
-add_action('after_setup_theme', 'add_exam_learned_tier_columns_to_user_dict_words_table');
+add_action('after_setup_theme', 'lbp_drop_exam_learned_tier_columns_if_exist', 11);
+
+/**
+ * Режим откатов (0/1/2) на момент получения 2-го балла по обратному направлению.
+ */
+function add_cooldown_tier_revert_column_to_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+    $columns = $wpdb->get_col("DESCRIBE $table_name", 0);
+    if (!in_array('cooldown_tier_revert', $columns, true)) {
+        if (in_array('cooldown_tier', $columns, true)) {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN cooldown_tier_revert tinyint(1) NOT NULL DEFAULT 0 AFTER cooldown_tier");
+        } else {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN cooldown_tier_revert tinyint(1) NOT NULL DEFAULT 0 AFTER mode_education_revert");
+        }
+        error_log('Added cooldown_tier_revert to user_dict_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_cooldown_tier_revert_column_to_user_dict_words_table', 12);
 
 /** Добавляем поле order в таблицу категорий словарей
  * @return void

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import WordEditor from '../../WordEditor';
 import { useAdminMode } from '../contexts/AdminModeContext';
+import { learnedWithSimplifiedTierTwo } from '../utils/helpers';
 
 /**
  * Альтернативный компонент для отображения слова (копия WordRow)
@@ -75,32 +76,44 @@ const WordField = ({
     return base;
   };
   
-  // Рендер индикатора прогресса
+  // Рендер индикатора прогресса (логика классов как в WordRow)
   const renderProgressIndicator = () => {
-    if (vertical) {
-      // В вертикальном режиме показываем только галочки, без чёрточек
-      return userData && displayStatus.hasAttempts ? (
-        <span className={`words-progress-indicator ${
-          displayStatus.fullyLearned ? 'fully-learned' : 
-          (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-        }`}>
-          {displayStatus.fullyLearned ? "✓" :
-           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' : ''}&nbsp;&nbsp;
-        </span>
-      ) : '';
-    } else {
-      // Обычный режим с чёрточками
-      return userData && displayStatus.hasAttempts ? (
-        <span className={`words-progress-indicator ${
-          displayStatus.fullyLearned ? 'fully-learned' : 
-          (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-        }`}>
-          {displayStatus.fullyLearned ? "✓" :
-           (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
-           <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-        </span>
-      ) : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
+    if (!userData || !displayStatus.hasAttempts) {
+      return vertical ? '' : <span>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;</span>;
     }
+    const directLearned = userData.correct_attempts >= 2;
+    const revertLearned = userData.correct_attempts_revert >= 2;
+    const bothLearned = directLearned && revertLearned;
+
+    const showCheck = directLearned || revertLearned;
+    const progressClass = bothLearned
+      ? 'fully-learned'
+      : showCheck
+        ? 'partially-learned'
+        : 'not-learned';
+
+    const showStar = showCheck && learnedWithSimplifiedTierTwo(userData);
+    const wrapStyle = showStar ? { position: 'relative', display: 'inline-block' } : {};
+
+    const body = showCheck ? (
+      <>
+        ✓
+        {showStar && (
+          <span className="words-progress-indicator__easy-star" aria-hidden="true">★</span>
+        )}
+      </>
+    ) : vertical ? (
+      ''
+    ) : (
+      <span dangerouslySetInnerHTML={{ __html: '&mdash;' }} />
+    );
+
+    return (
+      <span className={`words-progress-indicator ${progressClass}`} style={wrapStyle}>
+        {body}
+        &nbsp;&nbsp;
+      </span>
+    );
   };
 
   // Определяем, нужно ли показывать поле для обратного перевода (rus→lat)

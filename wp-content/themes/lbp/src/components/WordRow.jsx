@@ -7,6 +7,7 @@ const PopoverHtmlContent = memo(({ html }) => (
 ));
 import WordEditor from '../WordEditor';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
+import { learnedWithSimplifiedTierTwo } from '../custom/utils/helpers';
 
 const GLOSBE_BASE = 'https://ru.glosbe.com/словарь-латышский-русский/';
 
@@ -101,7 +102,7 @@ const WordRow = ({
     }
   };
 
-  // Рендер индикатора прогресса (в лёгком режиме не показываем ✓ как выученное)
+  // Индикатор прогресса; в лёгком режиме при 2+ баллах по направлению — ✓ и ★ (упрощённый режим)
   const inEasyMode = Number(displayStatus.modeEducation) === 1 || Number(displayStatus.modeEducationRevert) === 1;
   const renderProgressIndicator = () => {
     const clickableProps = canOpenGlosbe
@@ -115,18 +116,63 @@ const WordRow = ({
         }
       : {};
 
-    return userData && displayStatus.hasAttempts ? (
-      <span className={`words-progress-indicator ${
-        displayStatus.fullyLearned ? 'fully-learned' :
-        !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? 'partially-learned' : 'not-learned'
-      }`} {...clickableProps}>
-        {displayStatus.fullyLearned ? "✓" :
-         !inEasyMode && (userData.correct_attempts >= 2 || userData.correct_attempts_revert >= 2) ? '✓' :
-         <span dangerouslySetInnerHTML={{__html: '&mdash;'}} />}&nbsp;&nbsp;
-      </span>
-    ) : (
-      <span {...clickableProps}>
-        &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+    const dash = <span dangerouslySetInnerHTML={{ __html: '&mdash;' }} />;
+
+    if (!userData || !displayStatus.hasAttempts) {
+      return (
+        <span {...clickableProps}>
+          &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+        </span>
+      );
+    }
+
+    const directLearned = userData.correct_attempts >= 2;
+    const revertLearned = userData.correct_attempts_revert >= 2;
+    const bothLearned = directLearned && revertLearned;
+    const showSimplifiedStar = learnedWithSimplifiedTierTwo(userData);
+
+    let progressClass = 'not-learned';
+    let showCheck = false;
+
+    if (bothLearned && !inEasyMode) {
+      progressClass = 'fully-learned';
+      showCheck = true;
+    } else if (bothLearned && inEasyMode) {
+      progressClass = 'fully-learned';
+      showCheck = true;
+    } else if (!inEasyMode && (directLearned || revertLearned)) {
+      progressClass = 'partially-learned';
+      showCheck = true;
+    } else if (inEasyMode && (directLearned || revertLearned)) {
+      progressClass = 'partially-learned';
+      showCheck = true;
+    }
+
+    const showStar = showCheck && showSimplifiedStar;
+    const indicatorStyle = {
+      ...(clickableProps.style || {}),
+      ...(showStar ? { position: 'relative', display: 'inline-block' } : {})
+    };
+
+    return (
+      <span
+        className={`words-progress-indicator ${progressClass}`}
+        {...clickableProps}
+        style={indicatorStyle}
+      >
+        {showCheck ? (
+          <>
+            ✓
+            {showStar && (
+              <span className="words-progress-indicator__easy-star" aria-hidden="true">
+                ★
+              </span>
+            )}
+          </>
+        ) : (
+          dash
+        )}
+        &nbsp;&nbsp;
       </span>
     );
   };

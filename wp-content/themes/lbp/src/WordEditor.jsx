@@ -25,6 +25,13 @@ const DEFAULT_PROGRESS = {
   statistic_correct_attempts_revert: 0,
   mode_education: 0,
   mode_education_revert: 0,
+  easy_education: 0,
+  cooldown_tier_snapshot: 0,
+  cooldown_tier_revert_snapshot: 0,
+  attempts_all: 0,
+  correct_attempts_all: 0,
+  easy_correct: 0,
+  easy_correct_revert: 0,
   last_shown: '',
   last_shown_revert: '',
 };
@@ -36,8 +43,8 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
   const [infoWysiwyg, setInfoWysiwyg] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showInfoHtmlModal, setShowInfoHtmlModal] = useState(false);
-  const [showProgressModal, setShowProgressModal] = useState(false);
   const [progressUserDisplay, setProgressUserDisplay] = useState('');
+  const [progressRecordId, setProgressRecordId] = useState(null);
   const [progressForm, setProgressForm] = useState({ ...DEFAULT_PROGRESS });
   const [progressStatus, setProgressStatus] = useState(null);
 
@@ -54,7 +61,7 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
     }));
   };
 
-  const loadProgressForModal = useCallback(async () => {
+  const loadProgress = useCallback(async () => {
     if (!word?.id) return;
     setProgressStatus(null);
     try {
@@ -65,17 +72,25 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
       if (res.data?.success) {
         const p = res.data.data?.progress || null;
         setProgressUserDisplay(res.data.data?.user_display || '');
+        setProgressRecordId(p?.id != null ? Number(p.id) : null);
         setProgressForm({
           attempts: p?.attempts ?? 0,
-          correct_attempts: p?.correct_attempts ?? 0,
+          correct_attempts: Math.min(2, Math.max(0, Number(p?.correct_attempts) || 0)),
           attempts_revert: p?.attempts_revert ?? 0,
-          correct_attempts_revert: p?.correct_attempts_revert ?? 0,
+          correct_attempts_revert: Math.min(2, Math.max(0, Number(p?.correct_attempts_revert) || 0)),
           statistic_attempts: p?.statistic_attempts ?? 0,
           statistic_attempts_revert: p?.statistic_attempts_revert ?? 0,
           statistic_correct_attempts: p?.statistic_correct_attempts ?? 0,
           statistic_correct_attempts_revert: p?.statistic_correct_attempts_revert ?? 0,
           mode_education: p?.mode_education ?? 0,
           mode_education_revert: p?.mode_education_revert ?? 0,
+          easy_education: p?.easy_education ?? 0,
+          cooldown_tier_snapshot: p?.cooldown_tier ?? 0,
+          cooldown_tier_revert_snapshot: p?.cooldown_tier_revert ?? 0,
+          attempts_all: p?.attempts_all ?? 0,
+          correct_attempts_all: p?.correct_attempts_all ?? 0,
+          easy_correct: p?.easy_correct ?? 0,
+          easy_correct_revert: p?.easy_correct_revert ?? 0,
           last_shown: p?.last_shown ? String(p.last_shown).replace(' ', 'T').slice(0, 19) : '',
           last_shown_revert: p?.last_shown_revert ? String(p.last_shown_revert).replace(' ', 'T').slice(0, 19) : '',
         });
@@ -86,8 +101,8 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
   }, [word?.id]);
 
   useEffect(() => {
-    if (showProgressModal && word?.id) loadProgressForModal();
-  }, [showProgressModal, word?.id, loadProgressForModal]);
+    if (isAdminModeActive && word?.id) loadProgress();
+  }, [isAdminModeActive, word?.id, loadProgress]);
 
   const handleProgressFieldChange = (e) => {
     const { name, value } = e.target;
@@ -110,11 +125,19 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
       fd.append('statistic_correct_attempts_revert', progressForm.statistic_correct_attempts_revert);
       fd.append('mode_education', progressForm.mode_education);
       fd.append('mode_education_revert', progressForm.mode_education_revert);
+      fd.append('easy_education', progressForm.easy_education);
+      fd.append('attempts_all', progressForm.attempts_all);
+      fd.append('correct_attempts_all', progressForm.correct_attempts_all);
+      fd.append('easy_correct', progressForm.easy_correct);
+      fd.append('easy_correct_revert', progressForm.easy_correct_revert);
+      fd.append('cooldown_tier', Math.min(2, Math.max(0, parseInt(progressForm.cooldown_tier_snapshot, 10) || 0)));
+      fd.append('cooldown_tier_revert', Math.min(2, Math.max(0, parseInt(progressForm.cooldown_tier_revert_snapshot, 10) || 0)));
       fd.append('last_shown', progressForm.last_shown ? progressForm.last_shown.replace('T', ' ') : '');
       fd.append('last_shown_revert', progressForm.last_shown_revert ? progressForm.last_shown_revert.replace('T', ' ') : '');
       const res = await axios.post(window.myajax.url, fd);
       if (res.data?.success) {
         setProgressStatus('Прогресс сохранён');
+        await loadProgress();
         if (onRefreshDictionaryWords) onRefreshDictionaryWords();
         if (onRefreshUserData) onRefreshUserData();
       } else {
@@ -157,85 +180,8 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
           ✕
         </button>
       </h3>
-      {isAdminModeActive && (
-        <div className="word-editor-progress-row">
-          <button
-            type="button"
-            className="word-editor-progress-btn"
-            onClick={() => setShowProgressModal(true)}
-            title="Редактировать прогресс обучения (текущий админ и это слово)"
-          >
-            Редактировать прогресс
-          </button>
-        </div>
-      )}
 
-      {showProgressModal && (
-        <div className="info-wysiwyg-modal-overlay" style={{ position: 'fixed', inset: 0, zIndex: 100002 }}>
-          <div className="info-wysiwyg-modal word-editor-progress-modal">
-            <div className="info-wysiwyg-modal-header">
-              <span>Редактирование прогресса обучения</span>
-              <button type="button" className="info-wysiwyg-modal-close" onClick={() => { setShowProgressModal(false); setProgressStatus(null); }}>
-                ✕
-              </button>
-            </div>
-            <div className="info-wysiwyg-modal-body">
-              <p className="word-editor-progress-meta"><strong>Пользователь:</strong> {progressUserDisplay || '—'}</p>
-              <p className="word-editor-progress-meta"><strong>Слово:</strong> {word?.word ?? ''} (ID: {word?.id ?? '—'})</p>
-              <div className="field-row">
-                <label>attempts:</label>
-                <input type="number" min="0" name="attempts" value={progressForm.attempts} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>correct_attempts:</label>
-                <input type="number" min="0" name="correct_attempts" value={progressForm.correct_attempts} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>attempts_revert:</label>
-                <input type="number" min="0" name="attempts_revert" value={progressForm.attempts_revert} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>correct_attempts_revert:</label>
-                <input type="number" min="0" name="correct_attempts_revert" value={progressForm.correct_attempts_revert} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>statistic_attempts:</label>
-                <input type="number" min="0" name="statistic_attempts" value={progressForm.statistic_attempts} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>statistic_correct_attempts:</label>
-                <input type="number" min="0" name="statistic_correct_attempts" value={progressForm.statistic_correct_attempts} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>statistic_attempts_revert:</label>
-                <input type="number" min="0" name="statistic_attempts_revert" value={progressForm.statistic_attempts_revert} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>statistic_correct_attempts_revert:</label>
-                <input type="number" min="0" name="statistic_correct_attempts_revert" value={progressForm.statistic_correct_attempts_revert} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>mode_education:</label>
-                <input type="number" min="0" max="1" name="mode_education" value={progressForm.mode_education} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>mode_education_revert:</label>
-                <input type="number" min="0" max="1" name="mode_education_revert" value={progressForm.mode_education_revert} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>last_shown:</label>
-                <input type="datetime-local" name="last_shown" value={progressForm.last_shown} onChange={handleProgressFieldChange} />
-              </div>
-              <div className="field-row">
-                <label>last_shown_revert:</label>
-                <input type="datetime-local" name="last_shown_revert" value={progressForm.last_shown_revert} onChange={handleProgressFieldChange} />
-              </div>
-              {progressStatus && <p className="word-editor-progress-status">{progressStatus}</p>}
-              <button type="button" className="word-editor-progress-save" onClick={handleSaveProgress}>Сохранить прогресс</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <h4 className="word-editor-section-heading word-editor-section-heading--dict">Поля слова в словаре</h4>
 
       <div className="field-row">
         <label>Слово:</label>
@@ -385,6 +331,154 @@ const WordEditor = ({ dictionaryId, word, onClose, onRefreshDictionaryWords, onR
           <option value="1">Да</option>
         </select>
       </div>
+
+      {isAdminModeActive && (
+        <section className="word-editor-user-progress-section" aria-labelledby="word-editor-user-progress-heading">
+          <h4 id="word-editor-user-progress-heading" className="word-editor-section-heading">
+            Состояние изучения для текущего пользователя
+          </h4>
+          <p className="word-editor-progress-meta">
+            <strong>Пользователь:</strong> {progressUserDisplay || '—'} · <strong>Слово:</strong> {word?.word ?? ''}{' '}
+            (dict_word_id: {word?.id ?? '—'})
+            {progressRecordId != null && (
+              <> · <strong>id строки прогресса:</strong> {progressRecordId}</>
+            )}
+          </p>
+
+          <div className="word-editor-progress-fieldset word-editor-progress-fieldset--all">
+            <div className="field-row">
+              <label>correct_attempts:</label>
+              <select
+                name="correct_attempts"
+                value={progressForm.correct_attempts}
+                onChange={(e) =>
+                  setProgressForm((prev) => ({ ...prev, correct_attempts: parseInt(e.target.value, 10) }))
+                }
+              >
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </select>
+            </div>
+            <div className="field-row">
+              <label>correct_attempts_revert:</label>
+              <select
+                name="correct_attempts_revert"
+                value={progressForm.correct_attempts_revert}
+                onChange={(e) =>
+                  setProgressForm((prev) => ({ ...prev, correct_attempts_revert: parseInt(e.target.value, 10) }))
+                }
+              >
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </select>
+            </div>
+            <div className="field-row">
+              <label>attempts:</label>
+              <input type="number" min="0" name="attempts" value={progressForm.attempts} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>attempts_revert:</label>
+              <input type="number" min="0" name="attempts_revert" value={progressForm.attempts_revert} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>attempts_all:</label>
+              <input type="number" min="0" name="attempts_all" value={progressForm.attempts_all} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>correct_attempts_all:</label>
+              <input type="number" min="0" name="correct_attempts_all" value={progressForm.correct_attempts_all} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>mode_education:</label>
+              <input type="number" min="0" max="1" name="mode_education" value={progressForm.mode_education} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>mode_education_revert:</label>
+              <input type="number" min="0" max="1" name="mode_education_revert" value={progressForm.mode_education_revert} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>easy_education:</label>
+              <input type="number" min="0" name="easy_education" value={progressForm.easy_education} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>easy_correct:</label>
+              <input type="number" min="0" name="easy_correct" value={progressForm.easy_correct} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>easy_correct_revert:</label>
+              <input type="number" min="0" name="easy_correct_revert" value={progressForm.easy_correct_revert} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>cooldown_tier:</label>
+              <select
+                value={Math.min(2, Math.max(0, Number(progressForm.cooldown_tier_snapshot) || 0))}
+                onChange={(e) =>
+                  setProgressForm((prev) => ({
+                    ...prev,
+                    cooldown_tier_snapshot: parseInt(e.target.value, 10),
+                  }))
+                }
+              >
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </select>
+            </div>
+            <div className="field-row">
+              <label>cooldown_tier_revert:</label>
+              <select
+                value={Math.min(2, Math.max(0, Number(progressForm.cooldown_tier_revert_snapshot) || 0))}
+                onChange={(e) =>
+                  setProgressForm((prev) => ({
+                    ...prev,
+                    cooldown_tier_revert_snapshot: parseInt(e.target.value, 10),
+                  }))
+                }
+              >
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </select>
+            </div>
+            <div className="field-row">
+              <label>statistic_attempts:</label>
+              <input type="number" min="0" name="statistic_attempts" value={progressForm.statistic_attempts} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>statistic_correct_attempts:</label>
+              <input type="number" min="0" name="statistic_correct_attempts" value={progressForm.statistic_correct_attempts} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>statistic_attempts_revert:</label>
+              <input type="number" min="0" name="statistic_attempts_revert" value={progressForm.statistic_attempts_revert} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>statistic_correct_attempts_revert:</label>
+              <input type="number" min="0" name="statistic_correct_attempts_revert" value={progressForm.statistic_correct_attempts_revert} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>last_shown:</label>
+              <input type="datetime-local" name="last_shown" value={progressForm.last_shown} onChange={handleProgressFieldChange} />
+            </div>
+            <div className="field-row">
+              <label>last_shown_revert:</label>
+              <input type="datetime-local" name="last_shown_revert" value={progressForm.last_shown_revert} onChange={handleProgressFieldChange} />
+            </div>
+          </div>
+
+          <div className="word-editor-progress-actions">
+            {progressStatus && <p className="word-editor-progress-status">{progressStatus}</p>}
+            <button type="button" className="word-editor-progress-save" onClick={handleSaveProgress}>
+              Сохранить прогресс
+            </button>
+            <button type="button" className="word-editor-progress-reload" onClick={() => loadProgress()}>
+              Обновить из БД
+            </button>
+          </div>
+        </section>
+      )}
 
       <br />
       <button onClick={handleSubmit}>Сохранить</button>
