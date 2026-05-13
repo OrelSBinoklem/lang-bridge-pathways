@@ -175,7 +175,12 @@ function update_single_word_progress_admin($user_id, $word_id, $data) {
     foreach ($allowed as $key) {
         if (array_key_exists($key, $data)) {
             if (in_array($key, ['last_shown', 'last_shown_revert'], true)) {
-                $update[$key] = $data[$key] === '' || $data[$key] === null ? null : sanitize_text_field($data[$key]);
+                // last_shown в таблице NOT NULL — пустая форма не должна давать NULL (INSERT падает).
+                if ($data[$key] === '' || $data[$key] === null) {
+                    $update[$key] = $key === 'last_shown' ? '0000-00-00 00:00:00' : null;
+                } else {
+                    $update[$key] = sanitize_text_field($data[$key]);
+                }
             } else {
                 $update[$key] = (int) $data[$key];
             }
