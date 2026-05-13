@@ -308,6 +308,51 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     return [id, ...subcategories.map(c => parseInt(c.id, 10))];
   }, [categoryId, subcategories]);
 
+  /** ID категорий для массовых действий (как в бургер-меню) — для переключателя откатов в header */
+  const trainingMenuScopeIds = useMemo(() => {
+    const id = parseInt(categoryId, 10);
+    if (!id) return [];
+    return allCategoryIds.length > 0 ? allCategoryIds : [id];
+  }, [categoryId, allCategoryIds]);
+
+  /** Доминантный cooldown_tier по словам выбранной области (0/1/2) — подсветка «3 ч» / «20 ч» в меню (header.php) */
+  const dominantCooldownTierForMenu = useMemo(() => {
+    if (!trainingMenuScopeIds.length || !Array.isArray(dictionaryWords)) return 0;
+    const counts = [0, 0, 0];
+    for (const w of dictionaryWords) {
+      if (!wordBelongsToAnyOfCategories(w, trainingMenuScopeIds)) continue;
+      const t = Math.max(0, Math.min(2, parseInt(userWordsData[w.id]?.cooldown_tier ?? 0, 10)));
+      counts[t] += 1;
+    }
+    const sum = counts[0] + counts[1] + counts[2];
+    if (sum === 0) return 0;
+    let best = 0;
+    for (let t = 1; t <= 2; t += 1) {
+      if (counts[t] > counts[best]) best = t;
+    }
+    return best;
+  }, [trainingMenuScopeIds, dictionaryWords, userWordsData]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const detail = trainingMenuScopeIds.length
+      ? { categoryIds: trainingMenuScopeIds, dominantCooldownTier: dominantCooldownTierForMenu }
+      : null;
+    window.dispatchEvent(new CustomEvent('lbp-examen-training-scope', { detail }));
+    return () => {
+      window.dispatchEvent(new CustomEvent('lbp-examen-training-scope', { detail: null }));
+    };
+  }, [trainingMenuScopeIds, dominantCooldownTierForMenu]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const refresh = () => {
+      if (onRefreshUserData) onRefreshUserData();
+    };
+    window.addEventListener('lbp-training-cooldown-tier-changed', refresh);
+    return () => window.removeEventListener('lbp-training-cooldown-tier-changed', refresh);
+  }, [onRefreshUserData]);
+
   // Плотное дообучение активно: есть ожидание или есть слова в очереди — обычную тренировку в категории блокируем
   const isDenseActive = useMemo(() => {
     const st = denseSessionState;
@@ -530,8 +575,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         directWords.push({ word, mode: false });
         revertWords.push({ word, mode: true });
       } else {
-        const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
-        const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+        const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.cooldown_tier ?? 0, currentTime);
+        const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.cooldown_tier ?? 0, currentTime);
 
         if (directAvailable) {
           directWords.push({ word, mode: false });
@@ -1052,10 +1097,10 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     const easyRevert = Number(userData.mode_education_revert) === 1;
 
     if (mode) {
-      const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.mode_education_revert, currentTime);
+      const revertAvailable = (userData.correct_attempts_revert < 2 || easyRevert) && !getCooldownTime(userData.last_shown_revert, userData.correct_attempts_revert, userData.cooldown_tier ?? 0, currentTime);
       return revertAvailable;
     }
-    const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.mode_education, currentTime);
+    const directAvailable = (userData.correct_attempts < 2 || easyDirect) && !getCooldownTime(userData.last_shown, userData.correct_attempts, userData.cooldown_tier ?? 0, currentTime);
     return directAvailable;
   };
 
@@ -1293,6 +1338,33 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }
   };
 
+  /** С 2 баллов на 1 — чтобы снова проходить слова как при пересдаче (прямо и/или обратно). */
+  const handleDemoteScoresToOne = async () => {
+    if (!categoryId || categoryId === 0) {
+      alert('Выберите категорию');
+      return;
+    }
+    const idsToUpdate = allCategoryIds.length > 0 ? allCategoryIds : [categoryId];
+    if (!confirm('Для слов, где уже 2 балла (прямо и/или обратно), сбросить на 1 балл и снять таймер отката — чтобы можно было пересдать эти слова? Остальные слова не изменятся.')) {
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('action', 'demote_category_scores_to_one');
+      formData.append('category_ids', JSON.stringify(idsToUpdate));
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data.success) {
+        if (onRefreshUserData) await onRefreshUserData();
+        alert('Готово: где было 2 балла — теперь 1, можно пересдавать эти слова.');
+      } else {
+        alert('Ошибка: ' + (response.data.message || 'Не удалось обновить'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка сети: ' + err.message);
+    }
+  };
+
 	return (
 		<div className="examen-root">
       {!trainingMode && (
@@ -1341,9 +1413,17 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                 type="button"
                 className="training-actions-menu-item training-actions-menu-item--easy"
                 onClick={() => { handleEasyTraining(); setShowActionsMenu(false); }}
-                title="Откат 30 минут вместо 20 часов для всех слов категории"
+                title="Откат 30 минут вместо 20 часов для всех слов категории; включается режим «Учу»"
               >
                 😊 Лёгкая тренировка
+              </button>
+              <button
+                type="button"
+                className="training-actions-menu-item training-actions-menu-item--demote"
+                onClick={() => { handleDemoteScoresToOne(); setShowActionsMenu(false); }}
+                title="Где уже 2 балла (прямо или обратно): сброс на 1 балл и снятие таймера отката — чтобы снова проходить эти слова, как при пересдаче"
+              >
+                📉 С 2 баллов на 1 — пересдать слова
               </button>
               <div
                 className="training-actions-menu-item-wrap training-actions-menu-item-wrap--game"

@@ -63,7 +63,9 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
     
     $query = $wpdb->prepare("
         SELECT dict_word_id, attempts, correct_attempts, last_shown, last_shown_revert,
-               easy_education, mode_education, mode_education_revert, attempts_all, correct_attempts_all,
+               easy_education, mode_education, mode_education_revert, cooldown_tier,
+               exam_learned_tier_direct, exam_learned_tier_revert,
+               attempts_all, correct_attempts_all,
                attempts_revert, correct_attempts_revert, easy_correct, easy_correct_revert,
                statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert
         FROM $user_dict_words_table 
@@ -84,6 +86,11 @@ function get_user_dict_words_data($user_id, $dictionary_id) {
         $row['easy_education'] = intval($row['easy_education']);
         $row['mode_education'] = intval($row['mode_education']);
         $row['mode_education_revert'] = intval($row['mode_education_revert']);
+        $row['cooldown_tier'] = isset($row['cooldown_tier']) ? intval($row['cooldown_tier']) : 0;
+        $row['exam_learned_tier_direct'] = array_key_exists('exam_learned_tier_direct', $row) && $row['exam_learned_tier_direct'] !== null && $row['exam_learned_tier_direct'] !== ''
+            ? intval($row['exam_learned_tier_direct']) : null;
+        $row['exam_learned_tier_revert'] = array_key_exists('exam_learned_tier_revert', $row) && $row['exam_learned_tier_revert'] !== null && $row['exam_learned_tier_revert'] !== ''
+            ? intval($row['exam_learned_tier_revert']) : null;
         $row['attempts_all'] = intval($row['attempts_all']);
         $row['correct_attempts_all'] = intval($row['correct_attempts_all']);
         $row['attempts_revert'] = intval($row['attempts_revert']);
@@ -113,7 +120,8 @@ function get_single_word_progress($user_id, $word_id) {
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
     $row = $wpdb->get_row($wpdb->prepare("
         SELECT id, user_id, dict_word_id, attempts, correct_attempts, attempts_revert, correct_attempts_revert,
-               last_shown, last_shown_revert, easy_education, mode_education, mode_education_revert,
+               last_shown, last_shown_revert, easy_education, mode_education, mode_education_revert, cooldown_tier,
+               exam_learned_tier_direct, exam_learned_tier_revert,
                attempts_all, correct_attempts_all, easy_correct, easy_correct_revert,
                statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert
         FROM $user_dict_words_table
@@ -128,6 +136,11 @@ function get_single_word_progress($user_id, $word_id) {
     $row['correct_attempts_revert'] = (int) $row['correct_attempts_revert'];
     $row['mode_education'] = (int) $row['mode_education'];
     $row['mode_education_revert'] = (int) $row['mode_education_revert'];
+    $row['cooldown_tier'] = (int) ($row['cooldown_tier'] ?? 0);
+    $row['exam_learned_tier_direct'] = array_key_exists('exam_learned_tier_direct', $row) && $row['exam_learned_tier_direct'] !== null && $row['exam_learned_tier_direct'] !== ''
+        ? (int) $row['exam_learned_tier_direct'] : null;
+    $row['exam_learned_tier_revert'] = array_key_exists('exam_learned_tier_revert', $row) && $row['exam_learned_tier_revert'] !== null && $row['exam_learned_tier_revert'] !== ''
+        ? (int) $row['exam_learned_tier_revert'] : null;
     $row['attempts_all'] = (int) ($row['attempts_all'] ?? 0);
     $row['correct_attempts_all'] = (int) ($row['correct_attempts_all'] ?? 0);
     $row['statistic_attempts'] = (int) ($row['statistic_attempts'] ?? 0);
@@ -148,7 +161,9 @@ function update_single_word_progress_admin($user_id, $word_id, $data) {
     global $wpdb;
     $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
     $allowed = ['attempts', 'correct_attempts', 'attempts_revert', 'correct_attempts_revert',
-                'mode_education', 'mode_education_revert', 'last_shown', 'last_shown_revert',
+                'mode_education', 'mode_education_revert', 'cooldown_tier',
+                'exam_learned_tier_direct', 'exam_learned_tier_revert',
+                'last_shown', 'last_shown_revert',
                 'attempts_all', 'correct_attempts_all', 'easy_education', 'easy_correct', 'easy_correct_revert',
                 'statistic_attempts', 'statistic_attempts_revert', 'statistic_correct_attempts', 'statistic_correct_attempts_revert'];
     $update = [];
@@ -156,6 +171,10 @@ function update_single_word_progress_admin($user_id, $word_id, $data) {
         if (array_key_exists($key, $data)) {
             if (in_array($key, ['last_shown', 'last_shown_revert'], true)) {
                 $update[$key] = $data[$key] === '' || $data[$key] === null ? null : sanitize_text_field($data[$key]);
+            } elseif (in_array($key, ['exam_learned_tier_direct', 'exam_learned_tier_revert'], true)) {
+                $update[$key] = ($data[$key] === '' || $data[$key] === null)
+                    ? null
+                    : max(0, min(2, (int) $data[$key]));
             } else {
                 $update[$key] = (int) $data[$key];
             }
@@ -547,6 +566,11 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
     
     $current_time = gmdate('Y-m-d H:i:s'); // UTC время
     
+    $tier_snapshot = static function (array $row) {
+        $t = isset($row['cooldown_tier']) ? (int) $row['cooldown_tier'] : 0;
+        return max(0, min(2, $t));
+    };
+
     if ($exists) {
         // Обновляем существующую запись
         if ($is_revert) {
@@ -560,10 +584,14 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
                 // Если правильно ответил
                 if ($is_first_attempt) {
                     // С первой попытки - добавляем балл
-                    $update_data['correct_attempts_revert'] = $exists['correct_attempts_revert'] + 1;
+                    $new_ca = (int) $exists['correct_attempts_revert'] + 1;
+                    $update_data['correct_attempts_revert'] = $new_ca;
                     $update_data['statistic_correct_attempts_revert'] = (int)($exists['statistic_correct_attempts_revert'] ?? 0) + 1;
                     $update_data['last_shown_revert'] = $current_time;
                     $update_data['mode_education_revert'] = 0; // Выключаем режим обучения
+                    if ($new_ca === 2) {
+                        $update_data['exam_learned_tier_revert'] = $tier_snapshot($exists);
+                    }
                 } else {
                     // Не с первой попытки - выходим из режима обучения и запускаем откат
                     $update_data['last_shown_revert'] = $current_time;
@@ -593,10 +621,14 @@ function update_word_attempts($user_id, $word_id, $is_revert, $is_correct, $is_f
                 // Если правильно ответил
                 if ($is_first_attempt) {
                     // С первой попытки - добавляем балл
-                    $update_data['correct_attempts'] = $exists['correct_attempts'] + 1;
+                    $new_ca = (int) $exists['correct_attempts'] + 1;
+                    $update_data['correct_attempts'] = $new_ca;
                     $update_data['statistic_correct_attempts'] = (int)($exists['statistic_correct_attempts'] ?? 0) + 1;
                     $update_data['last_shown'] = $current_time;
                     $update_data['mode_education'] = 0; // Выключаем режим обучения
+                    if ($new_ca === 2) {
+                        $update_data['exam_learned_tier_direct'] = $tier_snapshot($exists);
+                    }
                 } else {
                     // Не с первой попытки - выходим из режима обучения и запускаем откат
                     $update_data['last_shown'] = $current_time;
@@ -840,7 +872,10 @@ function reset_training_category_data($user_id, $category_id = null, $word_ids =
             easy_correct = 0,
             easy_correct_revert = 0,
             mode_education = 0,
-            mode_education_revert = 0
+            mode_education_revert = 0,
+            cooldown_tier = 0,
+            exam_learned_tier_direct = NULL,
+            exam_learned_tier_revert = NULL
         WHERE user_id = %d 
         AND dict_word_id IN ($word_ids_str)
     ", $user_id));
@@ -910,6 +945,7 @@ function set_category_to_easy_mode($user_id, $category_id_or_ids) {
                 [
                     'mode_education' => 1,           // Включаем режим обучения
                     'mode_education_revert' => 1,    // Включаем режим обучения для реверса
+                    'cooldown_tier' => 1,            // Откат между баллами 30 мин / 30 мин
                 ],
                 [
                     'user_id' => $user_id,
@@ -939,6 +975,7 @@ function set_category_to_easy_mode($user_id, $category_id_or_ids) {
                     'last_shown_revert' => gmdate('Y-m-d H:i:s'), // UTC время
                     'mode_education' => 1,              // Режим обучения включен
                     'mode_education_revert' => 1,       // Режим обучения включен
+                    'cooldown_tier' => 1,
                     'attempts_all' => 0,
                     'correct_attempts_all' => 0,
                     'easy_education' => 0,
@@ -957,6 +994,88 @@ function set_category_to_easy_mode($user_id, $category_id_or_ids) {
     
     return true;
 }
+
+/**
+ * Установить для слов категории длительность отката между 1-м и 2-м баллом (cooldown_tier).
+ * 0 — 20 ч, 1 — 30 мин, 2 — 3 ч (первый интервал всегда 30 мин).
+ *
+ * @param int $user_id
+ * @param int|int[] $category_id_or_ids
+ * @param int $tier 0|1|2
+ * @return bool
+ */
+function set_category_cooldown_tier($user_id, $category_id_or_ids, $tier) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+
+    $tier = max(0, min(2, (int) $tier));
+    $category_ids = is_array($category_id_or_ids) ? array_map('intval', $category_id_or_ids) : [intval($category_id_or_ids)];
+    $category_ids = array_filter($category_ids);
+    if (empty($category_ids)) {
+        return false;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($category_ids), '%d'));
+    $sql = "
+        UPDATE $user_dict_words_table u
+        INNER JOIN (
+            SELECT DISTINCT w.id AS wid
+            FROM $words_table AS w
+            INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+            WHERE wc.category_id IN ($placeholders)
+        ) AS t ON t.wid = u.dict_word_id
+        SET u.cooldown_tier = %d
+        WHERE u.user_id = %d
+    ";
+    $params = array_merge($category_ids, [$tier, $user_id]);
+    $result = $wpdb->query($wpdb->prepare($sql, ...$params));
+    return $result !== false;
+}
+
+/**
+ * Для слов категории: если по направлению уже 2 балла — сбросить на 1 и очистить last_shown этого направления.
+ *
+ * @param int $user_id
+ * @param int|int[] $category_id_or_ids
+ * @return bool
+ */
+function demote_category_full_scores_to_one($user_id, $category_id_or_ids) {
+    global $wpdb;
+    $user_dict_words_table = $wpdb->prefix . 'user_dict_words';
+    $words_table = $wpdb->prefix . 'd_words';
+    $word_category_table = $wpdb->prefix . 'd_word_category';
+
+    $category_ids = is_array($category_id_or_ids) ? array_map('intval', $category_id_or_ids) : [intval($category_id_or_ids)];
+    $category_ids = array_filter($category_ids);
+    if (empty($category_ids)) {
+        return false;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($category_ids), '%d'));
+    $sql = "
+        UPDATE $user_dict_words_table u
+        INNER JOIN (
+            SELECT DISTINCT w.id AS wid
+            FROM $words_table AS w
+            INNER JOIN $word_category_table AS wc ON w.id = wc.word_id
+            WHERE wc.category_id IN ($placeholders)
+        ) AS t ON t.wid = u.dict_word_id
+        SET
+            u.last_shown = CASE WHEN u.correct_attempts >= 2 THEN NULL ELSE u.last_shown END,
+            u.last_shown_revert = CASE WHEN u.correct_attempts_revert >= 2 THEN NULL ELSE u.last_shown_revert END,
+            u.exam_learned_tier_direct = CASE WHEN u.correct_attempts >= 2 THEN NULL ELSE u.exam_learned_tier_direct END,
+            u.exam_learned_tier_revert = CASE WHEN u.correct_attempts_revert >= 2 THEN NULL ELSE u.exam_learned_tier_revert END,
+            u.correct_attempts = IF(u.correct_attempts >= 2, 1, u.correct_attempts),
+            u.correct_attempts_revert = IF(u.correct_attempts_revert >= 2, 1, u.correct_attempts_revert)
+        WHERE u.user_id = %d
+    ";
+    $params = array_merge($category_ids, [$user_id]);
+    $result = $wpdb->query($wpdb->prepare($sql, ...$params));
+    return $result !== false;
+}
+
 /**
  * Создать/обновить записи с mode_education = 1 для слов без БД записей ИЛИ со сброшенными записями
  * Сброшенная запись: attempts = 0 AND attempts_revert = 0 AND correct_attempts = 0 AND correct_attempts_revert = 0
@@ -1031,7 +1150,7 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
         $values = [];
         foreach ($new_word_ids as $word_id) {
             $values[] = $wpdb->prepare(
-                "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)",
+                "(%d, %d, 0, 0, 0, 0, %s, %s, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)",
                 $user_id,
                 $word_id,
                 '0000-00-00 00:00:00',
@@ -1041,7 +1160,7 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
         
         $sql = "INSERT INTO $user_dict_words_table 
                 (user_id, dict_word_id, attempts, attempts_revert, correct_attempts, correct_attempts_revert, 
-                 last_shown, last_shown_revert, mode_education, mode_education_revert, 
+                 last_shown, last_shown_revert, mode_education, mode_education_revert, cooldown_tier,
                  attempts_all, correct_attempts_all, easy_education, easy_correct, easy_correct_revert,
                  statistic_attempts, statistic_attempts_revert, statistic_correct_attempts, statistic_correct_attempts_revert) 
                 VALUES " . implode(', ', $values);
@@ -1063,6 +1182,7 @@ function create_easy_mode_for_new_words($user_id, $word_ids) {
             UPDATE $user_dict_words_table 
             SET mode_education = 1, 
                 mode_education_revert = 1,
+                cooldown_tier = 1,
                 last_shown = '0000-00-00 00:00:00',
                 last_shown_revert = NULL
             WHERE user_id = %d 

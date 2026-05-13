@@ -286,11 +286,122 @@ document.addEventListener('DOMContentLoaded', function() {
         document.cookie = MOBILE_FONT_KEY + '=' + (enabled ? 'true' : 'false') + '; path=/; max-age=' + MOBILE_FONT_MAX_AGE + '; SameSite=Lax';
     }
 
+    // Переключатель откатов 3 ч | 20 ч в primary-menu (рядом с «Ввод слов / Выбор слов»). Виден только при открытой тренировке словаря.
+    function ensureCooldownTierMenuToggle(primaryMenu) {
+        if (!primaryMenu || document.getElementById('cooldown-tier-menu-toggle')) return;
+
+        const cooldownLi = document.createElement('li');
+        cooldownLi.className = 'menu-item-mobile-controls';
+        cooldownLi.id = 'cooldown-tier-menu-toggle';
+        const cooldownWrap = document.createElement('div');
+        cooldownWrap.className = 'mobile-controls-wrapper training-mode-toggle-wrap';
+        const btn3h = document.createElement('button');
+        btn3h.type = 'button';
+        btn3h.className = 'training-mode-toggle-btn';
+        btn3h.setAttribute('data-cooldown-tier', '2');
+        btn3h.textContent = '3 ч';
+        btn3h.title = 'Упрощённая: 3 часа между первым и вторым баллом';
+        const btn20 = document.createElement('button');
+        btn20.type = 'button';
+        btn20.className = 'training-mode-toggle-btn';
+        btn20.setAttribute('data-cooldown-tier', '0');
+        btn20.textContent = '20 ч';
+        btn20.title = 'Стандарт: 20 часов между первым и вторым баллом';
+            function syncCooldownToggleUi(detail) {
+                const on = !!(detail && detail.categoryIds && detail.categoryIds.length);
+                cooldownLi.classList.toggle('cooldown-tier-menu-visible', on);
+            if (!on) {
+                btn3h.classList.remove('is-active');
+                btn20.classList.remove('is-active');
+                return;
+            }
+            const tier = typeof detail.dominantCooldownTier === 'number' ? detail.dominantCooldownTier : 0;
+            btn3h.classList.toggle('is-active', tier === 2);
+            btn20.classList.toggle('is-active', tier === 0);
+        }
+        function postCooldownTier(tier) {
+            const m = window.myajax;
+            const scope = window.lbpExamenTrainingMenuScope;
+            if (!m || !m.url) {
+                alert('Страница не готова к запросу.');
+                return;
+            }
+            if (!m.is_logged_in) {
+                alert('Войдите в аккаунт, чтобы менять режим откатов.');
+                return;
+            }
+            if (!scope || !scope.categoryIds || !scope.categoryIds.length) {
+                alert('Сначала откройте тренировку и выберите категорию.');
+                return;
+            }
+            const fd = new FormData();
+            fd.append('action', 'set_category_cooldown_tier');
+            fd.append('category_ids', JSON.stringify(scope.categoryIds));
+            fd.append('cooldown_tier', String(tier));
+            btn3h.disabled = true;
+            btn20.disabled = true;
+            fetch(m.url, { method: 'POST', body: fd, credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && data.success) {
+                        if (scope) scope.dominantCooldownTier = tier;
+                        syncCooldownToggleUi(scope || { categoryIds: [], dominantCooldownTier: tier });
+                        window.dispatchEvent(new CustomEvent('lbp-training-cooldown-tier-changed', { detail: { tier: tier } }));
+                        if (tier === 2) {
+                            alert('Вы перешли в упрощённый режим заучивания слов: между первым и вторым баллом откат 3 часа вместо 20 часов. Режим «Учу» при этом не включается.');
+                        } else {
+                            alert('Вы перешли в стандартный режим: между первым и вторым баллом откат снова 20 часов (как по умолчанию).');
+                        }
+                    } else {
+                        const msg = (data && data.data && data.data.message) || (data && data.message) || 'Не удалось сохранить';
+                        alert(msg);
+                    }
+                })
+                .catch(function() { alert('Ошибка сети'); })
+                .finally(function() {
+                    btn3h.disabled = false;
+                    btn20.disabled = false;
+                });
+        }
+        btn3h.addEventListener('click', function(e) { e.stopPropagation(); postCooldownTier(2); });
+        btn20.addEventListener('click', function(e) { e.stopPropagation(); postCooldownTier(0); });
+        cooldownWrap.appendChild(btn3h);
+        cooldownWrap.appendChild(btn20);
+        cooldownLi.appendChild(cooldownWrap);
+        cooldownLi.__lbpSyncCooldownUi = syncCooldownToggleUi;
+
+        if (!window.__lbpCooldownScopeListener) {
+            window.__lbpCooldownScopeListener = true;
+            window.addEventListener('lbp-examen-training-scope', function(ev) {
+                window.lbpExamenTrainingMenuScope = ev.detail;
+                window.lbpLastExamenTrainingScopeDetail = ev.detail;
+                const li = document.getElementById('cooldown-tier-menu-toggle');
+                if (!li || typeof li.__lbpSyncCooldownUi !== 'function') return;
+                li.__lbpSyncCooldownUi(ev.detail);
+            });
+        }
+
+        const fontItem = document.getElementById('mobile-font-toggle');
+        const langItem = document.getElementById('default-mobile-lang-controls');
+        if (fontItem && fontItem.parentNode === primaryMenu) {
+            primaryMenu.insertBefore(cooldownLi, fontItem);
+        } else if (langItem && langItem.parentNode === primaryMenu) {
+            primaryMenu.insertBefore(cooldownLi, langItem);
+        } else {
+            primaryMenu.appendChild(cooldownLi);
+        }
+
+        if (typeof cooldownLi.__lbpSyncCooldownUi === 'function') {
+            cooldownLi.__lbpSyncCooldownUi(window.lbpLastExamenTrainingScopeDetail || null);
+        }
+    }
+
     // Добавляем переключатель режима тренировки и мобильную кнопку языка в меню
     function addMobileLangButton() {
         const primaryMenu = document.getElementById('primary-menu');
         if (!primaryMenu) return;
-        if (document.getElementById('default-mobile-lang-controls')) return;
+
+        if (!document.getElementById('default-mobile-lang-controls')) {
 
         // Переключатель режима (до кнопки языка)
         const toggleItem = document.createElement('li');
@@ -369,6 +480,9 @@ document.addEventListener('DOMContentLoaded', function() {
         primaryMenu.appendChild(mobileLangItem);
         primaryMenu.insertBefore(toggleItem, mobileLangItem);
         primaryMenu.insertBefore(fontItem, mobileLangItem);
+        }
+
+        ensureCooldownTierMenuToggle(primaryMenu);
     }
     
     // Пробуем добавить несколько раз с разными задержками

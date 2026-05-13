@@ -3511,6 +3511,19 @@ h2 .small {
     padding-right: 27px;
     background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(56, 142, 60, 0.9));
 }
+
+.training-actions-menu-item--demote {
+    white-space: normal;
+    text-align: left;
+    max-width: min(100%, 22rem);
+    background: linear-gradient(135deg, rgba(123, 31, 162, 0.95), rgba(74, 20, 140, 0.92)) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 14px rgba(74, 20, 140, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+.training-actions-menu-item--demote:hover {
+    filter: brightness(1.08);
+}
 .training-actions-menu-item--game {
     background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.9));
 }
@@ -5086,6 +5099,14 @@ li:has(.word-editor-wrap) {
   color: #fff;
 }
 .training-mode-toggle-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Откаты 3 ч / 20 ч — пункт меню; показ только при открытой тренировке (класс задаётся из JS) */
+#cooldown-tier-menu-toggle {
+  display: none !important;
+}
+#cooldown-tier-menu-toggle.cooldown-tier-menu-visible {
+  display: block !important;
+}
 
 /* Кнопка увеличенного шрифта в мобильном меню */
 .mobile-font-toggle-btn {

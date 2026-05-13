@@ -395,6 +395,41 @@ function add_training_mode_fields_to_user_dict_words_table() {
 
 add_action('after_setup_theme', 'add_training_mode_fields_to_user_dict_words_table');
 
+/**
+ * Длительность отката между 1-м и 2-м баллом: 0 = 20 ч, 1 = 30 мин, 2 = 3 ч (первый интервал — 30 мин, как в логике тренировки).
+ */
+function add_cooldown_tier_to_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+    $columns = $wpdb->get_col("DESCRIBE $table_name", 0);
+    if (!in_array('cooldown_tier', $columns, true)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN cooldown_tier tinyint(1) NOT NULL DEFAULT 0 AFTER mode_education_revert");
+        error_log('Added cooldown_tier field to user_dict_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_cooldown_tier_to_user_dict_words_table');
+
+/**
+ * Режим откатов (cooldown_tier) на момент получения 2-го балла по направлению — для статистики и будущих индикаторов в UI.
+ * NULL = ещё не «выучено» по этому направлению (меньше 2 баллов). Значения 0–2 как у cooldown_tier.
+ */
+function add_exam_learned_tier_columns_to_user_dict_words_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'user_dict_words';
+    $columns = $wpdb->get_col("DESCRIBE $table_name", 0);
+    if (!in_array('exam_learned_tier_direct', $columns, true)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN exam_learned_tier_direct tinyint(1) NULL DEFAULT NULL AFTER cooldown_tier");
+        error_log('Added exam_learned_tier_direct to user_dict_words table');
+    }
+    if (!in_array('exam_learned_tier_revert', $columns, true)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN exam_learned_tier_revert tinyint(1) NULL DEFAULT NULL AFTER exam_learned_tier_direct");
+        error_log('Added exam_learned_tier_revert to user_dict_words table');
+    }
+}
+
+add_action('after_setup_theme', 'add_exam_learned_tier_columns_to_user_dict_words_table');
+
 /** Добавляем поле order в таблицу категорий словарей
  * @return void
  */

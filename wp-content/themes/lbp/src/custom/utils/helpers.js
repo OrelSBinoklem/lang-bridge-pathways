@@ -178,10 +178,18 @@ export const formatTime = (milliseconds) => {
 const TEST_COOLDOWN_MODE = false;
 const TEST_COOLDOWN_FIRST = 1 * 60 * 1000;   // 1 минута
 const TEST_COOLDOWN_SECOND = 2 * 60 * 1000;  // 2 минуты
-const NORMAL_COOLDOWN_FIRST = 30 * 60 * 1000;   // 30 минут
-const NORMAL_COOLDOWN_SECOND = 20 * 60 * 60 * 1000;  // 20 часов
+const NORMAL_COOLDOWN_FIRST = 30 * 60 * 1000;   // 30 минут (первый интервал)
+const NORMAL_COOLDOWN_SECOND = 20 * 60 * 60 * 1000;  // 20 часов (второй, стандарт)
+const COOLDOWN_TIER_EASY_SECOND = 30 * 60 * 1000;   // 30 мин (лёгкая / tier 1)
+const COOLDOWN_TIER_MEDIUM_SECOND = 3 * 60 * 60 * 1000; // 3 ч (упрощённая / tier 2)
 
-export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, currentTime = Date.now()) => {
+/**
+ * @param {string} lastShown
+ * @param {number} correctAttempts
+ * @param {number} cooldownTier 0 = 20 ч после 1-го балла, 1 = 30 мин, 2 = 3 ч (первый интервал всегда 30 мин)
+ * @param {number} currentTime
+ */
+export const getCooldownTime = (lastShown, correctAttempts, cooldownTier = 0, currentTime = Date.now()) => {
   // Проверяем на пустое значение или MySQL нулевую дату
   if (!lastShown || lastShown === '' || lastShown === '0000-00-00 00:00:00') {
     return null;
@@ -201,13 +209,20 @@ export const getCooldownTime = (lastShown, correctAttempts, modeEducation = 0, c
   const elapsed = currentTime - lastShownTime;
   
   let cooldownDuration;
-  const cooldownFirst = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_FIRST : NORMAL_COOLDOWN_FIRST;
-  const cooldownSecond = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : NORMAL_COOLDOWN_SECOND;
+  const first = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_FIRST : NORMAL_COOLDOWN_FIRST;
+  const secondStandard = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : NORMAL_COOLDOWN_SECOND;
+  const tier = Number(cooldownTier) || 0;
 
   if (correctAttempts === 0) {
-    cooldownDuration = cooldownFirst;   // 30 мин
+    cooldownDuration = first;
   } else if (correctAttempts === 1) {
-    cooldownDuration = cooldownSecond;  // 20 часов
+    if (tier === 1) {
+      cooldownDuration = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : COOLDOWN_TIER_EASY_SECOND;
+    } else if (tier === 2) {
+      cooldownDuration = TEST_COOLDOWN_MODE ? TEST_COOLDOWN_SECOND : COOLDOWN_TIER_MEDIUM_SECOND;
+    } else {
+      cooldownDuration = secondStandard;
+    }
   } else if (correctAttempts >= 2) {
     return null;
   }
@@ -300,15 +315,15 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   
   // Обычная запись с реальными попытками
   const cooldownDirect = getCooldownTime(
-    userData.last_shown, 
-    userData.correct_attempts, 
-    userData.mode_education,
+    userData.last_shown,
+    userData.correct_attempts,
+    userData.cooldown_tier ?? 0,
     currentTime
   );
   const cooldownRevert = getCooldownTime(
-    userData.last_shown_revert, 
-    userData.correct_attempts_revert, 
-    userData.mode_education_revert,
+    userData.last_shown_revert,
+    userData.correct_attempts_revert,
+    userData.cooldown_tier ?? 0,
     currentTime
   );
   

@@ -591,6 +591,79 @@ class WordsAjaxHandler {
     }
 
     /**
+     * Установить длительность отката между 1-м и 2-м баллом для слов категории (cooldown_tier: 0=20ч, 1=30мин, 2=3ч).
+     */
+    public static function handle_set_category_cooldown_tier() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_ids = [];
+        if (!empty($_POST['category_ids'])) {
+            $decoded = json_decode(stripslashes($_POST['category_ids']), true);
+            if (is_array($decoded)) {
+                $category_ids = array_map('intval', $decoded);
+            }
+        }
+        if (empty($category_ids) && isset($_POST['category_id'])) {
+            $category_ids = [intval($_POST['category_id'])];
+        }
+        $category_ids = array_filter($category_ids);
+        if (empty($category_ids)) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $tier = isset($_POST['cooldown_tier']) ? intval($_POST['cooldown_tier']) : 0;
+        $tier = max(0, min(2, $tier));
+
+        $result = set_category_cooldown_tier($user_id, $category_ids, $tier);
+        if ($result) {
+            wp_send_json_success(['message' => 'Режим откатов обновлён', 'cooldown_tier' => $tier]);
+        } else {
+            wp_send_json_error(['message' => 'Не удалось обновить откаты']);
+        }
+        wp_die();
+    }
+
+    /**
+     * Сбросить 2 балла до 1 (прямой и/или обратный) для слов категории, где уже ≥2.
+     */
+    public static function handle_demote_category_scores_to_one() {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Пользователь не авторизован']);
+            wp_die();
+        }
+
+        $category_ids = [];
+        if (!empty($_POST['category_ids'])) {
+            $decoded = json_decode(stripslashes($_POST['category_ids']), true);
+            if (is_array($decoded)) {
+                $category_ids = array_map('intval', $decoded);
+            }
+        }
+        if (empty($category_ids) && isset($_POST['category_id'])) {
+            $category_ids = [intval($_POST['category_id'])];
+        }
+        $category_ids = array_filter($category_ids);
+        if (empty($category_ids)) {
+            wp_send_json_error(['message' => 'Не передан ID категории']);
+            wp_die();
+        }
+
+        $result = demote_category_full_scores_to_one($user_id, $category_ids);
+        if ($result) {
+            wp_send_json_success(['message' => 'Баллы обновлены']);
+        } else {
+            wp_send_json_error(['message' => 'Не удалось обновить баллы']);
+        }
+        wp_die();
+    }
+
+    /**
      * Сбросить прогресс экзамена для всех слов категории
      * Вызывается при входе в режим легкого изучения (Education)
      */
@@ -1319,6 +1392,8 @@ add_action('wp_ajax_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handl
 add_action('wp_ajax_nopriv_create_easy_mode_for_new_words', ['WordsAjaxHandler', 'handle_create_easy_mode_for_new_words']);
 add_action('wp_ajax_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
 add_action('wp_ajax_nopriv_set_category_to_easy_mode', ['WordsAjaxHandler', 'handle_set_category_to_easy_mode']);
+add_action('wp_ajax_set_category_cooldown_tier', ['WordsAjaxHandler', 'handle_set_category_cooldown_tier']);
+add_action('wp_ajax_demote_category_scores_to_one', ['WordsAjaxHandler', 'handle_demote_category_scores_to_one']);
 add_action('wp_ajax_get_dense_training_state', ['WordsAjaxHandler', 'handle_get_dense_training_state']);
 add_action('wp_ajax_add_dense_training_words', ['WordsAjaxHandler', 'handle_add_dense_training_words']);
 add_action('wp_ajax_remove_dense_training_word', ['WordsAjaxHandler', 'handle_remove_dense_training_word']);
