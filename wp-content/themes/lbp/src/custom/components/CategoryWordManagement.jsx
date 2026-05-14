@@ -67,6 +67,7 @@ const CategoryWordManagement = ({
       <WordManagement
         dictionaryId={dictionaryId}
         categoryId={categoryId}
+        categoryWords={categoryWords}
         existingDictionaryWords={dictionaryWords}
         categoryTree={categories}
         onWordsChanged={onWordsChanged}

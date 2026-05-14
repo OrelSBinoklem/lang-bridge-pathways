@@ -20,6 +20,7 @@ const CategoryLayout = ({
   words,
   dictionaryId,
   dictionaryWords,
+  categories = [],
   dictionaryWordsById,
   userWordsData,
   displayStatuses,
@@ -305,6 +306,8 @@ const CategoryLayout = ({
         dictionaryId={dictionaryId}
         categoryId={categoryIdForManagement}
         categoryWords={words}
+        dictionaryWords={Array.isArray(dictionaryWords) ? dictionaryWords : []}
+        categories={categories}
         onWordsChanged={onRefreshDictionaryWords}
       />
     </>
