@@ -2,6 +2,32 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import WordManager from './WordManager';
 
+const NEW_CATEGORY_PARENT_COOKIE = 'lbp_new_category_parent';
+
+function getNewCategoryParentCookie(dictId) {
+  if (typeof document === 'undefined' || !dictId) return '';
+  const key = `${NEW_CATEGORY_PARENT_COOKIE}_${dictId}=`;
+  const parts = document.cookie.split(';');
+  for (let i = 0; i < parts.length; i++) {
+    const c = parts[i].trim();
+    if (c.startsWith(key)) {
+      try {
+        return decodeURIComponent(c.slice(key.length));
+      } catch {
+        return '';
+      }
+    }
+  }
+  return '';
+}
+
+function setNewCategoryParentCookie(dictId, parentId) {
+  if (typeof document === 'undefined' || !dictId) return;
+  const maxAge = 365 * 24 * 60 * 60;
+  const val = encodeURIComponent(parentId == null ? '' : String(parentId));
+  document.cookie = `${NEW_CATEGORY_PARENT_COOKIE}_${dictId}=${val};path=/;max-age=${maxAge};SameSite=Lax`;
+}
+
 const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
   const [categories, setCategories] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -67,7 +93,6 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
       
       if (response.data.success) {
         setNewCategoryName('');
-        setNewCategoryParent('');
         setNewCategoryOrder(0);
         fetchCategories();
         if (onCategoriesChange) {
@@ -295,6 +320,23 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
   useEffect(() => {
     setCategoriesState(categories);
   }, [categories]);
+
+  // Восстановление / проверка выбора «родитель при создании» из cookie (отдельно на каждый словарь)
+  useEffect(() => {
+    if (!dictionaryId) return;
+    const flat = getFlatCategories(categories);
+    const validIds = new Set(flat.map((c) => String(c.id)));
+    const cookieVal = getNewCategoryParentCookie(dictionaryId);
+    if (cookieVal && !validIds.has(String(cookieVal))) {
+      setNewCategoryParentCookie(dictionaryId, '');
+    }
+    setNewCategoryParent((prev) => {
+      const prevStr = prev === '' || prev == null ? '' : String(prev);
+      if (prevStr && validIds.has(prevStr)) return prevStr;
+      const fromCookie = cookieVal && validIds.has(String(cookieVal)) ? String(cookieVal) : '';
+      return fromCookie;
+    });
+  }, [dictionaryId, categories]);
 
   // Обработчики drag and drop
   const handleDragStart = (e, category, parentId) => {
@@ -565,7 +607,11 @@ const CategoryManager = ({ dictionaryId, onCategoriesChange }) => {
           <label style={{ display: 'block', marginBottom: '5px' }}>Родительская категория (необязательно):</label>
           <select
             value={newCategoryParent}
-            onChange={(e) => setNewCategoryParent(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setNewCategoryParent(v);
+              setNewCategoryParentCookie(dictionaryId, v);
+            }}
             style={{ width: '100%', padding: '8px' }}
           >
             <option value="">-- Корневая категория --</option>
