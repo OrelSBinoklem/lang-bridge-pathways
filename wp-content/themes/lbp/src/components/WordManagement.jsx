@@ -69,10 +69,26 @@ function analyzeBulkCsvLines(text) {
 }
 
 /**
+ * Порог для списка «похожие в словаре» (ветка similarityScore по Левенштейну даёт 0–100 как грубый % совпадения).
+ * Раньше было >= 20 — в список попадали слабые совпадения; префикс/вхождение и так дают score сотни.
+ */
+const SIMILAR_DICT_MIN_SCORE = 48;
+/** Сколько похожих показывать максимум. */
+const SIMILAR_DICT_MAX_RESULTS = 3;
+
+/**
  * Компонент для управления словами прямо в категории
  * Отображается только для админов
  */
-const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existingDictionaryWords = [], categoryTree = [], onWordsChanged }) => {
+const WordManagement = ({
+  dictionaryId,
+  categoryId,
+  categoryWords = [],
+  sourceCategoryIds = [],
+  existingDictionaryWords = [],
+  categoryTree = [],
+  onWordsChanged,
+}) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showBulkInsert, setShowBulkInsert] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -305,9 +321,11 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
     return deepestPaths;
   };
 
-  const getMatchesForQuery = useCallback((queryValue) => {
+  const getMatchesForQuery = useCallback((queryValue, excludeWordId = null) => {
     const q = normalizeWord(queryValue);
     if (!q || dictionaryWords.length === 0) return { exact: [], similar: [] };
+
+    const ex = excludeWordId != null && excludeWordId !== '' ? String(excludeWordId) : null;
 
     const words = dictionaryWords
       .map((w) => ({
@@ -318,14 +336,19 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
       }))
       .filter((w) => normalizeWord(w.word).length > 0);
 
-    const exact = words.filter((w) => normalizeWord(w.word) === q);
+    // Без исключения id исходного слова оно попадает в exact с самим собой → ранний return
+    // и блок «Похожие» никогда не считается (в панели по категории было только точное совпадение или «нет»).
+    const exact = words.filter(
+      (w) => normalizeWord(w.word) === q && (!ex || String(w.id) !== ex)
+    );
     if (exact.length > 0) return { exact, similar: [] };
 
     const similar = words
+      .filter((w) => !ex || String(w.id) !== ex)
       .map((w) => ({ ...w, _score: similarityScore(q, w.word) }))
-      .filter((w) => w._score >= 20)
+      .filter((w) => w._score >= SIMILAR_DICT_MIN_SCORE)
       .sort((a, b) => b._score - a._score)
-      .slice(0, 5);
+      .slice(0, SIMILAR_DICT_MAX_RESULTS);
 
     return { exact: [], similar };
   }, [dictionaryWords]);
@@ -343,7 +366,7 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
     return categoryWords
       .filter((cw) => normalizeWord(cw?.word || '').length > 0)
       .map((cw) => {
-        const { exact, similar } = getMatchesForQuery(cw.word);
+        const { exact, similar } = getMatchesForQuery(cw.word, cw.id);
         return {
           sourceId: cw.id,
           sourceWord: cw.word,
@@ -541,12 +564,45 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
     return response.data;
   };
 
+  /** Как у WordRow: в запрос уходит реальный id связи в d_word_category (часто подкатегория), а не только categoryId страницы. */
+  const resolveCategoryIdForDelete = useCallback(
+    (wordId) => {
+      const idStr = String(wordId);
+      const w =
+        dictionaryWords.find((x) => String(x.id) === idStr) ||
+        categoryWords.find((x) => String(x.id) === idStr);
+      const scope = (
+        Array.isArray(sourceCategoryIds) && sourceCategoryIds.length > 0
+          ? sourceCategoryIds
+          : [categoryId]
+      )
+        .map((id) => parseInt(id, 10))
+        .filter((n) => !Number.isNaN(n) && n > 0);
+      const scopeSet = new Set(scope);
+      const candidates = [];
+      if (w?.category_id != null && w.category_id !== '') {
+        candidates.push(parseInt(w.category_id, 10));
+      }
+      if (Array.isArray(w?.category_ids)) {
+        w.category_ids.forEach((id) => candidates.push(parseInt(id, 10)));
+      }
+      for (const cid of candidates) {
+        if (!Number.isNaN(cid) && cid > 0 && scopeSet.has(cid)) {
+          return cid;
+        }
+      }
+      const fallback = parseInt(categoryId, 10);
+      return !Number.isNaN(fallback) && fallback > 0 ? fallback : 0;
+    },
+    [dictionaryWords, categoryWords, sourceCategoryIds, categoryId]
+  );
+
   const handleSimilarMatchDelete = async (wordId) => {
     const w = dictionaryWords.find((x) => String(x.id) === String(wordId));
     const label = w?.word ?? wordId;
     if (!window.confirm(`Удалить слово «${label}» из этой категории?`)) return;
     try {
-      const result = await deleteWord(wordId, categoryId);
+      const result = await deleteWord(wordId, resolveCategoryIdForDelete(wordId));
       if (result.success) {
         setDictionaryWords((prev) => prev.filter((x) => String(x.id) !== String(wordId)));
         setSimilarPanelEditingWordId((cur) => (String(cur) === String(wordId) ? null : cur));
@@ -641,7 +697,7 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
         setBulkProgress({ current: i + 1, total: words.length });
         
         try {
-          const result = await deleteWord(words[i].id, categoryId);
+          const result = await deleteWord(words[i].id, resolveCategoryIdForDelete(words[i].id));
           if (result.success) {
             successCount++;
           } else {
@@ -1345,17 +1401,33 @@ const WordManagement = ({ dictionaryId, categoryId, categoryWords = [], existing
                 categorySimilarReport.map((row) => (
                   <div
                     key={row.sourceId}
+                    className="category-similar-source-block"
                     style={{
                       marginBottom: '12px',
                       paddingBottom: '10px',
                       borderBottom: '1px solid #e0e0e0',
                     }}
                   >
-                    <div style={{ fontWeight: 'bold', color: '#263238', marginBottom: '4px' }}>
-                      <span style={{ color: '#1565c0' }}>{row.sourceWord}</span>
-                      {row.sourceTranslation ? (
-                        <span style={{ fontWeight: 600, color: '#37474f' }}> — {row.sourceTranslation}</span>
-                      ) : null}
+                    <div className="category-similar-source-header">
+                      <div className="category-similar-source-header__title">
+                        <span style={{ color: '#1565c0' }}>{row.sourceWord}</span>
+                        {row.sourceTranslation ? (
+                          <span style={{ fontWeight: 600, color: '#37474f' }}> — {row.sourceTranslation}</span>
+                        ) : null}
+                      </div>
+                      <button
+                        type="button"
+                        className="category-similar-source-header__delete"
+                        title="Удалить слово из текущей категории"
+                        aria-label={`Удалить «${row.sourceWord}» из категории`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSimilarMatchDelete(row.sourceId);
+                        }}
+                      >
+                        🗑️
+                      </button>
                     </div>
                     {row.exact.length > 0 ? (
                       <div style={{ color: '#c62828', fontWeight: 'bold', fontSize: '11px' }}>
