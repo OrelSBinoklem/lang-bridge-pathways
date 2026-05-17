@@ -564,13 +564,60 @@ const WordManagement = ({
     return response.data;
   };
 
-  /** Как у WordRow: в запрос уходит реальный id связи в d_word_category (часто подкатегория), а не только categoryId страницы. */
-  const resolveCategoryIdForDelete = useCallback(
+  const findWordById = useCallback(
     (wordId) => {
       const idStr = String(wordId);
-      const w =
+      return (
         dictionaryWords.find((x) => String(x.id) === idStr) ||
-        categoryWords.find((x) => String(x.id) === idStr);
+        categoryWords.find((x) => String(x.id) === idStr) ||
+        null
+      );
+    },
+    [dictionaryWords, categoryWords]
+  );
+
+  /** id категории, где слово реально привязано в d_word_category (часто лист дерева). */
+  const pickDeleteCategoryIdFromWord = useCallback(
+    (w) => {
+      if (!w) return 0;
+      const ids = [];
+      if (w.category_id != null && w.category_id !== '') {
+        ids.push(parseInt(w.category_id, 10));
+      }
+      if (Array.isArray(w.category_ids)) {
+        w.category_ids.forEach((id) => ids.push(parseInt(id, 10)));
+      }
+      const valid = [...new Set(ids.filter((n) => !Number.isNaN(n) && n > 0))];
+      if (valid.length === 0) return 0;
+      if (valid.length === 1) return valid[0];
+      let best = valid[0];
+      let bestDepth = -1;
+      valid.forEach((cid) => {
+        const meta = categoryMetaById.get(cid);
+        const depth = meta ? meta.depth : 0;
+        if (depth >= bestDepth) {
+          bestDepth = depth;
+          best = cid;
+        }
+      });
+      return best;
+    },
+    [categoryMetaById]
+  );
+
+  /**
+   * restrictToPageScope: true — слово текущей категории (подкатегория из sourceCategoryIds).
+   * false — похожее из другого раздела словаря: category_id той категории, что в пути у строки.
+   */
+  const resolveCategoryIdForDelete = useCallback(
+    (wordId, { restrictToPageScope = true } = {}) => {
+      const w = findWordById(wordId);
+      if (!w) return 0;
+
+      if (!restrictToPageScope) {
+        return pickDeleteCategoryIdFromWord(w);
+      }
+
       const scope = (
         Array.isArray(sourceCategoryIds) && sourceCategoryIds.length > 0
           ? sourceCategoryIds
@@ -580,10 +627,10 @@ const WordManagement = ({
         .filter((n) => !Number.isNaN(n) && n > 0);
       const scopeSet = new Set(scope);
       const candidates = [];
-      if (w?.category_id != null && w.category_id !== '') {
+      if (w.category_id != null && w.category_id !== '') {
         candidates.push(parseInt(w.category_id, 10));
       }
-      if (Array.isArray(w?.category_ids)) {
+      if (Array.isArray(w.category_ids)) {
         w.category_ids.forEach((id) => candidates.push(parseInt(id, 10)));
       }
       for (const cid of candidates) {
@@ -591,20 +638,27 @@ const WordManagement = ({
           return cid;
         }
       }
-      const fallback = parseInt(categoryId, 10);
-      return !Number.isNaN(fallback) && fallback > 0 ? fallback : 0;
+      return 0;
     },
-    [dictionaryWords, categoryWords, sourceCategoryIds, categoryId]
+    [findWordById, pickDeleteCategoryIdFromWord, sourceCategoryIds, categoryId]
   );
 
-  const handleSimilarMatchDelete = async (wordId) => {
-    const w = dictionaryWords.find((x) => String(x.id) === String(wordId));
+  const handleSimilarMatchDelete = async (wordId, { restrictToPageScope = false } = {}) => {
+    const w = findWordById(wordId);
     const label = w?.word ?? wordId;
-    if (!window.confirm(`Удалить слово «${label}» из этой категории?`)) return;
+    const catId = resolveCategoryIdForDelete(wordId, { restrictToPageScope });
+    if (!catId) {
+      setError('Не удалось определить категорию для удаления (нет связи с текущим разделом)');
+      return;
+    }
+    const catHint = getDeepestCategoryPaths(w).join(', ') || `ID ${catId}`;
+    const scopeHint = restrictToPageScope
+      ? 'из текущего раздела категории'
+      : `из категории «${catHint}»`;
+    if (!window.confirm(`Удалить слово «${label}» ${scopeHint}?`)) return;
     try {
-      const result = await deleteWord(wordId, resolveCategoryIdForDelete(wordId));
+      const result = await deleteWord(wordId, catId);
       if (result.success) {
-        setDictionaryWords((prev) => prev.filter((x) => String(x.id) !== String(wordId)));
         setSimilarPanelEditingWordId((cur) => (String(cur) === String(wordId) ? null : cur));
         setError('');
         if (onWordsChanged) onWordsChanged();
@@ -654,7 +708,7 @@ const WordManagement = ({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handleSimilarMatchDelete(rest.id);
+            handleSimilarMatchDelete(rest.id, { restrictToPageScope: false });
           }}
         >
           🗑️
@@ -1423,7 +1477,7 @@ const WordManagement = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleSimilarMatchDelete(row.sourceId);
+                          handleSimilarMatchDelete(row.sourceId, { restrictToPageScope: true });
                         }}
                       >
                         🗑️
