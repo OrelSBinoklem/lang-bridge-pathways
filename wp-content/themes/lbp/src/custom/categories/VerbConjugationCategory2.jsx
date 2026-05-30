@@ -8,172 +8,317 @@ import VerbConjugationBase from './VerbConjugationBase';
  * Содержит глаголы из строк 344-1072
  */
 const VerbConjugationCategory2 = (props) => {
-  // Объект с глаголами и их спряжениями для второй категории
+  // Ячейка: ['forma', 'standard'] — standard = translation_1 в БД (напр. 'celt es pag')
   const verbs = {
     //B1
     'celt': {//+
       name: 'celt - поднимать',
 
-      'es_past': 'cēlu',
-      'es_present': 'ceļu',
-      //'es_future': 'celšu',
+      'es_past': ['cēlu', 'celt es pag'],
+      'es_present': ['ceļu', 'celt es tag'],
+      //'es_future': ['celšu', 'celt es nak'],
 
-      //'tu_past': 'cēli',
-      'tu_present': 'cel',
-      //'tu_future': 'celsi',
+      //'tu_past': ['cēli', 'celt tu pag'],
+      'tu_present': ['cel', 'celt tu tag'],
+      //'tu_future': ['celsi', 'celt tu nak'],
 
-      //'3pers_past': 'cēla',
-      //'3pers_present': 'ceļ',
-      //'3pers_future': 'cels',
+      //'3pers_past': ['cēla', 'celt 3p pag'],
+      //'3pers_present': ['ceļ', 'celt 3p tag'],
+      //'3pers_future': ['cels', 'celt 3p nak'],
 
-      //'we_past': 'cēlām',
-      //'we_present': 'ceļam',
-      //'we_future': 'celsim',
+      //'we_past': ['cēlām', 'celt mes pag'],
+      //'we_present': ['ceļam', 'celt mes tag'],
+      //'we_future': ['celsim', 'celt mes nak'],
 
-      //'you_pl_past': 'cēlāt',
-      //'you_pl_present': 'ceļat',
-      //'you_pl_future': 'celsiet',
+      //'you_pl_past': ['cēlāt', 'celt jus pag'],
+      //'you_pl_present': ['ceļat', 'celt jus tag'],
+      //'you_pl_future': ['celsiet', 'celt jus nak'],
     },
     'gūt': {//+
       name: 'gūt - получать, обрести',
 
-      'es_past': 'guvu',
-      'es_present': 'gūstu',
-      'es_future': 'gūšu',
+      'es_past': ['guvu', 'gūt es pag'],
+      'es_present': ['gūstu', 'gūt es tag'],
+      'es_future': ['gūšu', 'gūt es nak'],
 
-      //'tu_past': 'guvi',
-      //'tu_present': 'gūsti',
-      //'tu_future': 'gūsi',
+      //'tu_past': ['guvi', 'gūt tu pag'],
+      //'tu_present': ['gūsti', 'gūt tu tag'],
+      //'tu_future': ['gūsi', 'gūt tu nak'],
 
-      //'3pers_past': 'guva',
-      //'3pers_present': 'gūst',
-      //'3pers_future': 'gūs',
+      //'3pers_past': ['guva', 'gūt 3p pag'],
+      //'3pers_present': ['gūst', 'gūt 3p tag'],
+      //'3pers_future': ['gūs', 'gūt 3p nak'],
 
-      //'we_past': 'guvām',
-      //'we_present': 'gūstam',
-      //'we_future': 'gūsim',
+      //'we_past': ['guvām', 'gūt mes pag'],
+      //'we_present': ['gūstam', 'gūt mes tag'],
+      //'we_future': ['gūsim', 'gūt mes nak'],
 
-      //'you_pl_past': 'guvāt',
-      //'you_pl_present': 'gūstat',
-      //'you_pl_future': 'gūsiet',
+      //'you_pl_past': ['guvāt', 'gūt jus pag'],
+      //'you_pl_present': ['gūstat', 'gūt jus tag'],
+      //'you_pl_future': ['gūsiet', 'gūt jus nak'],
     },
     'kļūt': {//+
       name: 'kļūt - становиться',
 
-      'es_past': 'kļuvu',
-      'es_present': 'kļūstu',
-      //'es_future': 'kļūšu',
+      'es_past': ['kļuvu', 'kļūt es pag'],
+      'es_present': ['kļūstu', 'kļūt es tag'],
+      //'es_future': ['kļūšu', 'kļūt es nak'],
 
-      //'tu_past': 'kļuvi',
-      //'tu_present': 'kļūsti',
-      //'tu_future': 'kļūsi',
+      //'tu_past': ['kļuvi', 'kļūt tu pag'],
+      //'tu_present': ['kļūsti', 'kļūt tu tag'],
+      //'tu_future': ['kļūsi', 'kļūt tu nak'],
 
-      //'3pers_past': 'kļuva',
-      //'3pers_present': 'kļūst',
-      //'3pers_future': 'kļūs',
+      //'3pers_past': ['kļuva', 'kļūt 3p pag'],
+      //'3pers_present': ['kļūst', 'kļūt 3p tag'],
+      //'3pers_future': ['kļūs', 'kļūt 3p nak'],
 
-      //'we_past': 'kļuvām',
-      //'we_present': 'kļūstam',
-      //'we_future': 'kļūsim',
+      //'we_past': ['kļuvām', 'kļūt mes pag'],
+      //'we_present': ['kļūstam', 'kļūt mes tag'],
+      //'we_future': ['kļūsim', 'kļūt mes nak'],
 
-      //'you_pl_past': 'kļuvāt',
-      //'you_pl_present': 'kļūstat',
-      //'you_pl_future': 'kļūsiet',
+      //'you_pl_past': ['kļuvāt', 'kļūt jus pag'],
+      //'you_pl_present': ['kļūstat', 'kļūt jus tag'],
+      //'you_pl_future': ['kļūsiet', 'kļūt jus nak'],
     },
     'just': {//+
       name: 'just - чувствовать',
 
-      'es_past': 'jutu',
-      'es_present': 'jūtu',
-      'es_future': 'jutīšu',
+      'es_past': ['jutu', 'just es pag'],
+      'es_present': ['jūtu', 'just es tag'],
+      'es_future': ['jutīšu', 'just es nak'],
 
-      //'tu_past': 'juti',
-      //'tu_present': 'jūti',
-      //'tu_future': 'jutīsi',
+      //'tu_past': ['juti', 'just tu pag'],
+      //'tu_present': ['jūti', 'just tu tag'],
+      //'tu_future': ['jutīsi', 'just tu nak'],
 
-      //'3pers_past': 'juta',
-      //'3pers_present': 'jūt',
-      //'3pers_future': 'jutīs',
+      //'3pers_past': ['juta', 'just 3p pag'],
+      //'3pers_present': ['jūt', 'just 3p tag'],
+      //'3pers_future': ['jutīs', 'just 3p nak'],
 
-      //'we_past': 'jutām',
-      //'we_present': 'jūtam',
-      //'we_future': 'jutīsim',
+      //'we_past': ['jutām', 'just mes pag'],
+      //'we_present': ['jūtam', 'just mes tag'],
+      //'we_future': ['jutīsim', 'just mes nak'],
 
-      //'you_pl_past': 'jutāt',
-      //'you_pl_present': 'jūtat',
-      //'you_pl_future': 'jutīsiet',
+      //'you_pl_past': ['jutāt', 'just jus pag'],
+      //'you_pl_present': ['jūtat', 'just jus tag'],
+      //'you_pl_future': ['jutīsiet', 'just jus nak'],
     },
 
     "vest": {//+
       name: "vest - везти",
 
-      "es_past": "vedu",
-      "es_present": "vedu",
-      "es_future": "vedīšu",
+      "es_past": ["vedu", "vest es pag"],
+      "es_present": ["vedu", "vest es tag"],
+      "es_future": ["vedīšu", "vest es nak"],
 
-      //"tu_past": "vedi",
-      //"tu_present": "ved",
-      //"tu_future": "vedīsi",
+      //"tu_past": ["vedi", "vest tu pag"],
+      //"tu_present": ["ved", "vest tu tag"],
+      //"tu_future": ["vedīsi", "vest tu nak"],
 
-      //"3pers_past": "veda",
-      //"3pers_present": "ved",
-      //"3pers_future": "vedīs",
+      //"3pers_past": ["veda", "vest 3p pag"],
+      //"3pers_present": ["ved", "vest 3p tag"],
+      //"3pers_future": ["vedīs", "vest 3p nak"],
 
-      //"we_past": "vedām",
-      //"we_present": "vedam",
-      //"we_future": "vedīsim",
+      //"we_past": ["vedām", "vest mes pag"],
+      //"we_present": ["vedam", "vest mes tag"],
+      //"we_future": ["vedīsim", "vest mes nak"],
 
-      //"you_pl_past": "vedāt",
-      //"you_pl_present": "vedat",
-      //"you_pl_future": "vedīsiet"
+      //"you_pl_past": ["vedāt", "vest jus pag"],
+      //"you_pl_present": ["vedat", "vest jus tag"],
+      //"you_pl_future": ["vedīsiet", "vest jus nak"]
     },
 
     "mest": {//+
       name: "mest - бросать",
 
-      "es_past": "metu",
-      "es_present": "metu",
-      "es_future": "metīšu",
+      "es_past": ["metu", "mest es pag"],
+      "es_present": ["metu", "mest es tag"],
+      "es_future": ["metīšu", "mest es nak"],
 
-      //"tu_past": "meti",
-      //"tu_present": "met",
-      //"tu_future": "metīsi",
+      //"tu_past": ["meti", "mest tu pag"],
+      //"tu_present": ["met", "mest tu tag"],
+      //"tu_future": ["metīsi", "mest tu nak"],
 
-      //"3pers_past": "meta",
-      //"3pers_present": "met",
-      //"3pers_future": "metīs",
+      //"3pers_past": ["meta", "mest 3p pag"],
+      //"3pers_present": ["met", "mest 3p tag"],
+      //"3pers_future": ["metīs", "mest 3p nak"],
 
-      //"we_past": "metām",
-      //"we_present": "metam",
-      //"we_future": "metīsim",
+      //"we_past": ["metām", "mest mes pag"],
+      //"we_present": ["metam", "mest mes tag"],
+      //"we_future": ["metīsim", "mest mes nak"],
 
-      //"you_pl_past": "metāt",
-      //"you_pl_present": "metat",
-      //"you_pl_future": "metīsiet"
+      //"you_pl_past": ["metāt", "mest jus pag"],
+      //"you_pl_present": ["metat", "mest jus tag"],
+      //"you_pl_future": ["metīsiet", "mest jus nak"]
     },
 
     "zust": {
       name: "zust - исчезать",
 
-      "es_past": "zudu",
-      "es_present": "zūdu",
-      "es_future": "zudīšu",
+      "es_past": ["zudu", "zust es pag"],
+      "es_present": ["zūdu", "zust es tag"],
+      "es_future": ["zudīšu", "zust es nak"],
 
-      //"tu_past": "zudi",
-      //"tu_present": "zūdi",
-      //"tu_future": "zudīsi",
+      //"tu_past": ["zudi", "zust tu pag"],
+      //"tu_present": ["zūdi", "zust tu tag"],
+      //"tu_future": ["zudīsi", "zust tu nak"],
 
-      //"3pers_past": "zuda",
-      //"3pers_present": "zūd",
-      //"3pers_future": "zudīs",
+      //"3pers_past": ["zuda", "zust 3p pag"],
+      //"3pers_present": ["zūd", "zust 3p tag"],
+      //"3pers_future": ["zudīs", "zust 3p nak"],
 
-      //"we_past": "zudām",
-      //"we_present": "zūdam",
-      //"we_future": "zudīsim",
+      //"we_past": ["zudām", "zust mes pag"],
+      //"we_present": ["zūdam", "zust mes tag"],
+      //"we_future": ["zudīsim", "zust mes nak"],
 
-      //"you_pl_past": "zudāt",
-      //"you_pl_present": "zūdat",
-      //"you_pl_future": "zudīsiet"
+      //"you_pl_past": ["zudāt", "zust jus pag"],
+      //"you_pl_present": ["zūdat", "zust jus tag"],
+      //"you_pl_future": ["zudīsiet", "zust jus nak"]
+    },
+
+    "rasties": {//B2
+      "name": "rasties - возникать",
+
+      "es_past": ["rados", "rasties es pag"],
+      "es_present": ["rodos", "rasties es tag"],
+      "es_future": ["radīšos", "rasties es nak"],
+
+      //"tu_past": ["radies", "rasties tu pag"],
+      //"tu_present": ["rodies", "rasties tu tag"],
+      //"tu_future": ["radīsies", "rasties tu nak"],
+
+      //"3pers_past": ["radās", "rasties 3p pag"],
+      //"3pers_present": ["rodas", "rasties 3p tag"],
+      //"3pers_future": ["radīsies", "rasties 3p nak"],
+
+      //"we_past": ["radāmies", "rasties mes pag"],
+      "we_present": ["radāmies", "rasties mes tag"],
+      //"we_future": ["radīsimies", "rasties mes nak"],
+
+      //"you_pl_past": ["radāties", "rasties jus pag"],
+      "you_pl_present": ["radāties", "rasties jus tag"],
+      //"you_pl_future": ["radīsieties", "rasties jus nak"]
+    },
+
+    'krist': {//+//B2
+      name: 'krist - падать',
+
+      'es_past': ['kritu', 'krist es pag'],
+      'es_present': ['krītu', 'krist es tag'],
+      'es_future': ['kritīšu', 'krist es nak'],
+
+      //'tu_past': ['kriti', 'krist tu pag'],
+      //'tu_present': ['krīti', 'krist tu tag'],
+      //'tu_future': ['kritīsi', 'krist tu nak'],
+
+      //'3pers_past': ['krita', 'krist 3p pag'],
+      //'3pers_present': ['krīt', 'krist 3p tag'],
+      //'3pers_future': ['kritīs', 'krist 3p nak'],
+
+      //'we_past': ['kritām', 'krist mes pag'],
+      //'we_present': ['krītam', 'krist mes tag'],
+      //'we_future': ['kritīsim', 'krist mes nak'],
+
+      //'you_pl_past': ['kritāt', 'krist jus pag'],
+      //'you_pl_present': ['krītat', 'krist jus tag'],
+      //'you_pl_future': ['kritīsiet', 'krist jus nak'],
+    },
+
+    // ✅ laist по Letonika
+    'laist': {//+//B2
+      name: 'laist - пускать, отпускать',
+
+      'es_past': ['laidu', 'laist es pag'],
+      'es_present': ['laižu', 'laist es tag'],
+      'es_future': ['laidīšu', 'laist es nak'],
+
+      //'tu_past': ['laidi', 'laist tu pag'],
+      'tu_present': ['laid', 'laist tu tag'],
+      //'tu_future': ['laidīsi', 'laist tu nak'],
+
+      //'3pers_past': ['laida', 'laist 3p pag'],
+      //'3pers_present': ['laiž', 'laist 3p tag'],
+      //'3pers_future': ['laidīs', 'laist 3p nak'],
+
+      //'we_past': ['laidām', 'laist mes pag'],
+      //'we_present': ['laižam', 'laist mes tag'],
+      //'we_future': ['laidīsim', 'laist mes nak'],
+
+      //'you_pl_past': ['laidāt', 'laist jus pag'],
+      //'you_pl_present': ['laižat', 'laist jus tag'],
+      //'you_pl_future': ['laidīsiet', 'laist jus nak'],
+    },
+
+    "kost": {//B2
+      name: "kost - кусать",
+
+      "es_past": ["kodu", "kost es pag"],
+      "es_present": ["kožu", "kost es tag"],
+      "es_future": ["kodīšu", "kost es nak"],
+
+      //"tu_past": ["kodi", "kost tu pag"],
+      "tu_present": ["kod", "kost tu tag"],
+      //"tu_future": ["kodīsi", "kost tu nak"],
+
+      //"3pers_past": ["koda", "kost 3p pag"],
+      //"3pers_present": ["kož", "kost 3p tag"],
+      //"3pers_future": ["kodīs", "kost 3p nak"],
+
+      //"we_past": ["kodām", "kost mes pag"],
+      //"we_present": ["kožam", "kost mes tag"],
+      //"we_future": ["kodīsim", "kost mes nak"],
+
+      //"you_pl_past": ["kodāt", "kost jus pag"],
+      //"you_pl_present": ["kožat", "kost jus tag"],
+      //"you_pl_future": ["kodīsiet", "kost jus nak"]
+    },
+
+    "plest": {//B2
+      name: "plest - раскрывать, рвать",
+
+      "es_past": ["pletu", "plest es pag"],
+      "es_present": ["plešu", "plest es tag"],
+      "es_future": ["pletīšu", "plest es nak"],
+
+      //"tu_past": ["pleti", "plest tu pag"],
+      "tu_present": ["plet", "plest tu tag"],
+      //"tu_future": ["pletīsi", "plest tu nak"],
+
+      //"3pers_past": ["pleta", "plest 3p pag"],
+      //"3pers_present": ["pleš", "plest 3p tag"],
+      //"3pers_future": ["pletīs", "plest 3p nak"],
+
+      //"we_past": ["pletām", "plest mes pag"],
+      //"we_present": ["plešam", "plest mes tag"],
+      //"we_future": ["pletīsim", "plest mes nak"],
+
+      //"you_pl_past": ["pletāt", "plest jus pag"],
+      //"you_pl_present": ["plešat", "plest jus tag"],
+      //"you_pl_future": ["pletīsiet", "plest jus nak"]
+    },
+
+    "spiest": {//B2
+      name: "spiest - нажимать",
+
+      "es_past": ["spiedu", "spiest es pag"],
+      "es_present": ["spiežu", "spiest es tag"],
+      "es_future": ["spiedīšu", "spiest es nak"],
+
+      //"tu_past": ["spiedi", "spiest tu pag"],
+      "tu_present": ["spiedz", "spiest tu tag"],
+      //"tu_future": ["spiedīsi", "spiest tu nak"],
+
+      //"3pers_past": ["spieda", "spiest 3p pag"],
+      //"3pers_present": ["spiež", "spiest 3p tag"],
+      //"3pers_future": ["spiedīs", "spiest 3p nak"],
+
+      //"we_past": ["spiedām", "spiest mes pag"],
+      //"we_present": ["spiežam", "spiest mes tag"],
+      //"we_future": ["spiedīsim", "spiest mes nak"],
+
+      //"you_pl_past": ["spiedāt", "spiest jus pag"],
+      //"you_pl_present": ["spiežat", "spiest jus tag"],
+      //"you_pl_future": ["spiedīsiet", "spiest jus nak"]
     },
 
     //B2
@@ -181,104 +326,59 @@ const VerbConjugationCategory2 = (props) => {
     'zagt': {//+
       name: 'zagt - воровать',
 
-      //'es_past': 'zagu',
-      'es_present': 'zogu',
-      //'es_future': 'zagšu',
+      //'es_past': ['zagu', 'zagt es pag'],
+      'es_present': ['zogu', 'zagt es tag'],
+      //'es_future': ['zagšu', 'zagt es nak'],
 
-      //'tu_past': 'zagi',
-      'tu_present': 'zodz',
-      //'tu_future': 'zagsi',
+      //'tu_past': ['zagi', 'zagt tu pag'],
+      'tu_present': ['zodz', 'zagt tu tag'],
+      //'tu_future': ['zagsi', 'zagt tu nak'],
 
-      //'3pers_past': 'zaga',
-      //'3pers_present': 'zog',
-      //'3pers_future': 'zags',
+      //'3pers_past': ['zaga', 'zagt 3p pag'],
+      //'3pers_present': ['zog', 'zagt 3p tag'],
+      //'3pers_future': ['zags', 'zagt 3p nak'],
 
-      //'we_past': 'zagām',
-      //'we_present': 'zogam',
-      //'we_future': 'zagsim',
+      //'we_past': ['zagām', 'zagt mes pag'],
+      //'we_present': ['zogam', 'zagt mes tag'],
+      //'we_future': ['zagsim', 'zagt mes nak'],
 
-      //'you_pl_past': 'zagāt',
-      //'you_pl_present': 'zogat',
-      //'you_pl_future': 'zagsiet',
+      //'you_pl_past': ['zagāt', 'zagt jus pag'],
+      //'you_pl_present': ['zogat', 'zagt jus tag'],
+      //'you_pl_future': ['zagsiet', 'zagt jus nak'],
     },
 
 
-    'krist': {//+
-      name: 'krist - падать',
-
-      'es_past': 'kritu',
-      'es_present': 'krītu',
-      'es_future': 'kritīšu',
-
-      //'tu_past': 'kriti',
-      //'tu_present': 'krīti',
-      //'tu_future': 'kritīsi',
-
-      //'3pers_past': 'krita',
-      //'3pers_present': 'krīt',
-      //'3pers_future': 'kritīs',
-
-      //'we_past': 'kritām',
-      //'we_present': 'krītam',
-      //'we_future': 'kritīsim',
-
-      //'you_pl_past': 'kritāt',
-      //'you_pl_present': 'krītat',
-      //'you_pl_future': 'kritīsiet',
-    },
+    
 
 
 
 
 
-    // ✅ laist по Letonika
-    'laist': {//+
-      name: 'laist - пускать, отпускать',
-
-      'es_past': 'laidu',
-      'es_present': 'laižu',
-      'es_future': 'laidīšu',
-
-      //'tu_past': 'laidi',
-      'tu_present': 'laid',
-      //'tu_future': 'laidīsi',
-
-      //'3pers_past': 'laida',
-      //'3pers_present': 'laiž',
-      //'3pers_future': 'laidīs',
-
-      //'we_past': 'laidām',
-      //'we_present': 'laižam',
-      //'we_future': 'laidīsim',
-
-      //'you_pl_past': 'laidāt',
-      //'you_pl_present': 'laižat',
-      //'you_pl_future': 'laidīsiet',
-    },
+    
 
     // ✅ kliegt по Letonika
     'kliegt': {//+
       name: 'kliegt - кричать',
 
-      'es_past': 'kliedzu',
-      'es_present': 'kliedzu',
-      //'es_future': 'kliegšu',
+      'es_past': ['kliedzu', 'kliegt es pag'],
+      'es_present': ['kliedzu', 'kliegt es tag'],
+      //'es_future': ['kliegšu', 'kliegt es nak'],
 
-      //'tu_past': 'kliedzi',
-      //'tu_present': 'kliedz',
-      //'tu_future': 'kliegsi',
+      //'tu_past': ['kliedzi', 'kliegt tu pag'],
+      //'tu_present': ['kliedz', 'kliegt tu tag'],
+      //'tu_future': ['kliegsi', 'kliegt tu nak'],
 
-      //'3pers_past': 'kliedza',
-      //'3pers_present': 'kliedz',
-      //'3pers_future': 'kliegs',
+      //'3pers_past': ['kliedza', 'kliegt 3p pag'],
+      //'3pers_present': ['kliedz', 'kliegt 3p tag'],
+      //'3pers_future': ['kliegs', 'kliegt 3p nak'],
 
-      //'we_past': 'kliedzām',
-      //'we_present': 'kliedzam',
-      //'we_future': 'kliegsim',
+      //'we_past': ['kliedzām', 'kliegt mes pag'],
+      //'we_present': ['kliedzam', 'kliegt mes tag'],
+      //'we_future': ['kliegsim', 'kliegt mes nak'],
 
-      //'you_pl_past': 'kliedzāt',
-      //'you_pl_present': 'kliedzat',
-      //'you_pl_future': 'kliegsiet',
+      //'you_pl_past': ['kliedzāt', 'kliegt jus pag'],
+      //'you_pl_present': ['kliedzat', 'kliegt jus tag'],
+      //'you_pl_future': ['kliegsiet', 'kliegt jus nak'],
     },
 
 
@@ -287,25 +387,25 @@ const VerbConjugationCategory2 = (props) => {
     'sēdēt': {//++
       name: 'sēdēt - сидеть',
 
-      //'es_past': 'sēdēju',
-      'es_present': 'sēžu',
-      //'es_future': 'sēdēšu',
+      //'es_past': ['sēdēju', 'sēdēt es pag'],
+      'es_present': ['sēžu', 'sēdēt es tag'],
+      //'es_future': ['sēdēšu', 'sēdēt es nak'],
 
-      //'tu_past': 'sēdēji',
-      'tu_present': 'sēdi',
-      //'tu_future': 'sēdēsi',
+      //'tu_past': ['sēdēji', 'sēdēt tu pag'],
+      'tu_present': ['sēdi', 'sēdēt tu tag'],
+      //'tu_future': ['sēdēsi', 'sēdēt tu nak'],
 
-      //'3pers_past': 'sēdēja',
-      //'3pers_present': 'sēž',
-      //'3pers_future': 'sēdēs',
+      //'3pers_past': ['sēdēja', 'sēdēt 3p pag'],
+      //'3pers_present': ['sēž', 'sēdēt 3p tag'],
+      //'3pers_future': ['sēdēs', 'sēdēt 3p nak'],
 
-      //'we_past': 'sēdējām',
-      //'we_present': 'sēžam',
-      //'we_future': 'sēdēsim',
+      //'we_past': ['sēdējām', 'sēdēt mes pag'],
+      //'we_present': ['sēžam', 'sēdēt mes tag'],
+      //'we_future': ['sēdēsim', 'sēdēt mes nak'],
 
-      //'you_pl_past': 'sēdējāt',
-      //'you_pl_present': 'sēžat',
-      //'you_pl_future': 'sēdēsiet',
+      //'you_pl_past': ['sēdējāt', 'sēdēt jus pag'],
+      //'you_pl_present': ['sēžat', 'sēdēt jus tag'],
+      //'you_pl_future': ['sēdēsiet', 'sēdēt jus nak'],
     },
 
 
@@ -313,77 +413,55 @@ const VerbConjugationCategory2 = (props) => {
     'dzīt': {//+
       name: 'dzīt - гнать',
 
-      'es_past': 'dzinu',
-      'es_present': 'dzenu',
-      //'es_future': 'dzīšu',
+      'es_past': ['dzinu', 'dzīt es pag'],
+      'es_present': ['dzenu', 'dzīt es tag'],
+      //'es_future': ['dzīšu', 'dzīt es nak'],
 
-      //'tu_past': 'dzini',
-      //'tu_present': 'dzen',
-      //'tu_future': 'dzīsi',
+      //'tu_past': ['dzini', 'dzīt tu pag'],
+      //'tu_present': ['dzen', 'dzīt tu tag'],
+      //'tu_future': ['dzīsi', 'dzīt tu nak'],
 
-      //'3pers_past': 'dzina',
-      //'3pers_present': 'dzen',
-      //'3pers_future': 'dzīs',
+      //'3pers_past': ['dzina', 'dzīt 3p pag'],
+      //'3pers_present': ['dzen', 'dzīt 3p tag'],
+      //'3pers_future': ['dzīs', 'dzīt 3p nak'],
 
-      //'we_past': 'dzinām',
-      //'we_present': 'dzenam',
-      //'we_future': 'dzīsim',
+      //'we_past': ['dzinām', 'dzīt mes pag'],
+      //'we_present': ['dzenam', 'dzīt mes tag'],
+      //'we_future': ['dzīsim', 'dzīt mes nak'],
 
-      //'you_pl_past': 'dzināt',
-      //'you_pl_present': 'dzenat',
-      //'you_pl_future': 'dzīsiet',
+      //'you_pl_past': ['dzināt', 'dzīt jus pag'],
+      //'you_pl_present': ['dzenat', 'dzīt jus tag'],
+      //'you_pl_future': ['dzīsiet', 'dzīt jus nak'],
     },
 
 
 
 
 
-    "kost": {
-      name: "kost - кусать",
-
-      "es_past": "kodu",
-      "es_present": "kožu",
-      "es_future": "kodīšu",
-
-      //"tu_past": "kodi",
-      "tu_present": "kod",
-      //"tu_future": "kodīsi",
-
-      //"3pers_past": "koda",
-      //"3pers_present": "kož",
-      //"3pers_future": "kodīs",
-
-      //"we_past": "kodām",
-      //"we_present": "kožam",
-      //"we_future": "kodīsim",
-
-      //"you_pl_past": "kodāt",
-      //"you_pl_present": "kožat",
-      //"you_pl_future": "kodīsiet"
-    },
+    
 
     "raut": {//+
       name: "raut - рвать, дёргать",
 
-      "es_past": "rāvu",
-      "es_present": "rauju",
-      //"es_future": "raušu",
+      "es_past": ["rāvu", "raut es pag"],
+      "es_present": ["rauju", "raut es tag"],
+      //"es_future": ["raušu", "raut es nak"],
 
-      //"tu_past": "rāvi",
-      //"tu_present": "rauj",
-      //"tu_future": "rausi",
+      //"tu_past": ["rāvi", "raut tu pag"],
+      //"tu_present": ["rauj", "raut tu tag"],
+      //"tu_future": ["rausi", "raut tu nak"],
 
-      //"3pers_past": "rāva",
-      //"3pers_present": "rauj",
-      //"3pers_future": "raus",
+      //"3pers_past": ["rāva", "raut 3p pag"],
+      //"3pers_present": ["rauj", "raut 3p tag"],
+      //"3pers_future": ["raus", "raut 3p nak"],
 
-      //"we_past": "rāvām",
-      //"we_present": "raujam",
-      //"we_future": "rausim",
+      //"we_past": ["rāvām", "raut mes pag"],
+      //"we_present": ["raujam", "raut mes tag"],
+      //"we_future": ["rausim", "raut mes nak"],
 
-      //"you_pl_past": "rāvāt",
-      //"you_pl_present": "raujat",
-      //"you_pl_future": "rausiet"
+      //"you_pl_past": ["rāvāt", "raut jus pag"],
+      //"you_pl_present": ["raujat", "raut jus tag"],
+      //"you_pl_future": ["rausiet", "raut jus nak"]
     },
 
 
@@ -392,111 +470,41 @@ const VerbConjugationCategory2 = (props) => {
 
 
 
-    "plest": {
-      name: "plest - раскрывать, рвать",
-
-      "es_past": "pletu",
-      "es_present": "plešu",
-      "es_future": "pletīšu",
-
-      //"tu_past": "pleti",
-      "tu_present": "plet",
-      //"tu_future": "pletīsi",
-
-      //"3pers_past": "pleta",
-      //"3pers_present": "pleš",
-      //"3pers_future": "pletīs",
-
-      //"we_past": "pletām",
-      //"we_present": "plešam",
-      //"we_future": "pletīsim",
-
-      //"you_pl_past": "pletāt",
-      //"you_pl_present": "plešat",
-      //"you_pl_future": "pletīsiet"
-    },
+    
 
     "liegt": {
       name: "liegt - запрещать",
 
-      "es_past": "liedzu",
-      "es_present": "liedzu",
-      //"es_future": "liegšu",
+      "es_past": ["liedzu", "liegt es pag"],
+      "es_present": ["liedzu", "liegt es tag"],
+      //"es_future": ["liegšu", "liegt es nak"],
 
-      //"tu_past": "liedzi",
-      //"tu_present": "liedz",
-      //"tu_future": "liegsi",
+      //"tu_past": ["liedzi", "liegt tu pag"],
+      //"tu_present": ["liedz", "liegt tu tag"],
+      //"tu_future": ["liegsi", "liegt tu nak"],
 
-      //"3pers_past": "liedza",
-      //"3pers_present": "liedz",
-      //"3pers_future": "liegs",
+      //"3pers_past": ["liedza", "liegt 3p pag"],
+      //"3pers_present": ["liedz", "liegt 3p tag"],
+      //"3pers_future": ["liegs", "liegt 3p nak"],
 
-      //"we_past": "liedzām",
-      //"we_present": "liedzam",
-      //"we_future": "liegsim",
+      //"we_past": ["liedzām", "liegt mes pag"],
+      //"we_present": ["liedzam", "liegt mes tag"],
+      //"we_future": ["liegsim", "liegt mes nak"],
 
-      //"you_pl_past": "liedzāt",
-      //"you_pl_present": "liedzat",
-      //"you_pl_future": "liegsiet"
+      //"you_pl_past": ["liedzāt", "liegt jus pag"],
+      //"you_pl_present": ["liedzat", "liegt jus tag"],
+      //"you_pl_future": ["liegsiet", "liegt jus nak"]
     },
 
-
-
-    "spiest": {
-      name: "spiest - нажимать",
-
-      "es_past": "spiedu",
-      "es_present": "spiežu",
-      "es_future": "spiedīšu",
-
-      //"tu_past": "spiedi",
-      "tu_present": "spiedz",
-      //"tu_future": "spiedīsi",
-
-      //"3pers_past": "spieda",
-      //"3pers_present": "spiež",
-      //"3pers_future": "spiedīs",
-
-      //"we_past": "spiedām",
-      //"we_present": "spiežam",
-      //"we_future": "spiedīsim",
-
-      //"you_pl_past": "spiedāt",
-      //"you_pl_present": "spiežat",
-      //"you_pl_future": "spiedīsiet"
-    },
 
     "snigt": {
       "name": "snigt - идти (о снеге)",
 
-      //"3pers_past": "sniga",
-      "3pers_present": "snieg",
-      //"3pers_future": "snigs",
+      //"3pers_past": ["sniga", "snigt 3p pag"],
+      "3pers_present": ["snieg", "snigt 3p tag"],
+      //"3pers_future": ["snigs", "snigt 3p nak"],
     },
 
-    "rasties": {
-      "name": "rasties - возникать",
-
-      "es_past": "rados",
-      "es_present": "rodos",
-      "es_future": "radīšos",
-
-      //"tu_past": "radies",
-      //"tu_present": "rodies",
-      //"tu_future": "radīsies",
-
-      //"3pers_past": "radās",
-      //"3pers_present": "rodas",
-      //"3pers_future": "radīsies",
-
-      //"we_past": "radāmies",
-      "we_present": "radāmies",
-      //"we_future": "radīsimies",
-
-      //"you_pl_past": "radāties",
-      "you_pl_present": "radāties",
-      //"you_pl_future": "radīsieties"
-    }
   };
 
   return <VerbConjugationBase verbs={verbs} {...props} />;

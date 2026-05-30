@@ -4,7 +4,7 @@ import useGroupCheck from '../hooks/useGroupCheck';
 import { WordProvider } from '../contexts/WordContext';
 import useGroupWords from '../hooks/useGroupWords';
 import WordInput from '../components/WordInput';
-import { getEligibleRevertTrainingWordIds, getVisibleWordsFromVerbTable } from '../utils/helpers';
+import { getEligibleRevertTrainingWordIds, getVisibleWordsFromVerbTable, parseVerbCell } from '../utils/helpers';
 
 const pickRandom = (ids) => {
   if (!ids.length) return null;
@@ -33,6 +33,7 @@ const VerbConjugationContent = ({
   getWordPropsByText,
   stats,
   getWordIdByText,
+  getWordIdByTranslation,
   getWordProps,
   getWord,
   dictionaryWordsById,
@@ -59,10 +60,18 @@ const VerbConjugationContent = ({
   const visibleWordIdsRef = useRef(new Set());
   const onCompleteRef = useRef(onInlineTrainingComplete);
 
+  const resolveVerbCellWordId = useCallback((cellValue, verbKey, conjKey) => {
+    const parsed = parseVerbCell(cellValue, verbKey, conjKey);
+    if (!parsed) return null;
+    const byTranslation = getWordIdByTranslation(parsed.lookupKey);
+    if (byTranslation) return byTranslation;
+    return getWordIdByText(parsed.form);
+  }, [getWordIdByTranslation, getWordIdByText]);
+
   // Только слова из непустых ячеек таблицы (необычные формы), не вся категория
   const visibleWords = useMemo(
-    () => getVisibleWordsFromVerbTable(verbs, getWordIdByText, dictionaryWordsById),
-    [verbs, getWordIdByText, dictionaryWordsById]
+    () => getVisibleWordsFromVerbTable(verbs, resolveVerbCellWordId, dictionaryWordsById),
+    [verbs, resolveVerbCellWordId, dictionaryWordsById]
   );
 
   const visibleWordIds = useMemo(
@@ -161,7 +170,9 @@ const VerbConjugationContent = ({
     setSubmitting(true);
     const wordId = activeWordId;
     try {
-      const results = await checkGroupWords([wordId], { [wordId]: answer }, true);
+      const results = await checkGroupWords([wordId], { [wordId]: answer }, true, {
+        creditDirectOnRevertCorrect: true,
+      });
       const isCorrect = results[wordId] === true;
       groupCheck.setResult(wordId, isCorrect);
       lastSubmitRef.current = { wordId, isCorrect };
@@ -171,8 +182,8 @@ const VerbConjugationContent = ({
     }
   };
 
-  const getWordInputProps = (wordText) => {
-    const wordId = getWordIdByText(wordText);
+  const getWordInputProps = (cellValue, verbKey, conjKey) => {
+    const wordId = resolveVerbCellWordId(cellValue, verbKey, conjKey);
     if (!wordId) return null;
 
     const word = dictionaryWordsById[wordId];
@@ -183,9 +194,10 @@ const VerbConjugationContent = ({
     const isActive = inlineTrainingActive && activeWordId === wordId;
     const isInTable = wordId && visibleWordIds.has(wordId);
     const onCooldown = Boolean(displayStatus?.cooldownRevert);
-    // Ввод только в активном поле; на откате — таймер, не маска █
-    const allowInput = inlineTrainingActive && isActive && isInTable && !onCooldown;
-    const forceHidden = inlineTrainingActive && isInTable && !isActive && !onCooldown;
+    const isLearnedRevert = Boolean(displayStatus?.showWord);
+    // Ввод только в активном поле; на откате — таймер; выученное — не маскируем
+    const allowInput = inlineTrainingActive && isActive && isInTable && !onCooldown && !isLearnedRevert;
+    const forceHidden = inlineTrainingActive && isInTable && !isActive && !onCooldown && !isLearnedRevert;
 
     return {
       word,
@@ -209,8 +221,8 @@ const VerbConjugationContent = ({
     };
   };
 
-  const renderWordField = (key, wordText, wordId) => {
-    const inputProps = getWordInputProps(wordText);
+  const renderWordField = (key, cellValue, verbKey, conjKey, wordId) => {
+    const inputProps = getWordInputProps(cellValue, verbKey, conjKey);
     return (
       <div
         key={key}
@@ -250,8 +262,8 @@ const VerbConjugationContent = ({
         </div>
 
         {Object.entries(verbs).map(([verbKey, verbData]) => {
-          const allWords = Object.values(verbData).filter(
-            (val) => val !== verbData.name && val && val !== '-'
+          const allWords = Object.entries(verbData).filter(
+            ([key, val]) => key !== 'name' && parseVerbCell(val, verbKey, key)
           );
           if (allWords.length === 0) return null;
 
@@ -267,8 +279,7 @@ const VerbConjugationContent = ({
                   {pronouns.map((pronoun, pronounIndex) => {
                     const hasConjugations = tenses.some((tense) => {
                       const key = `${pronoun.key}_${tense}`;
-                      const wordText = verbData[key];
-                      return wordText && wordText !== '-';
+                      return parseVerbCell(verbData[key], verbKey, key);
                     });
                     if (!hasConjugations) return null;
 
@@ -281,12 +292,12 @@ const VerbConjugationContent = ({
                         <div className="verb-words">
                           {tenses.map((tense) => {
                             const key = `${pronoun.key}_${tense}`;
-                            const wordText = verbData[key];
-                            if (!wordText || wordText === '-') {
+                            const cellValue = verbData[key];
+                            if (!parseVerbCell(cellValue, verbKey, key)) {
                               return <div key={key} className="word-input empty" />;
                             }
-                            const wordId = getWordIdByText(wordText);
-                            return renderWordField(key, wordText, wordId);
+                            const wordId = resolveVerbCellWordId(cellValue, verbKey, key);
+                            return renderWordField(key, cellValue, verbKey, key, wordId);
                           })}
                         </div>
                       </div>
@@ -299,10 +310,10 @@ const VerbConjugationContent = ({
                     const rows = pronouns
                       .map((pronoun) => {
                         const key = `${pronoun.key}_${tense}`;
-                        const wordText = verbData[key];
-                        if (!wordText || wordText === '-') return null;
-                        const wordId = getWordIdByText(wordText);
-                        return { pronoun, key, wordText, wordId };
+                        const cellValue = verbData[key];
+                        if (!parseVerbCell(cellValue, verbKey, key)) return null;
+                        const wordId = resolveVerbCellWordId(cellValue, verbKey, key);
+                        return { pronoun, key, cellValue, wordId };
                       })
                       .filter(Boolean);
 
@@ -311,8 +322,8 @@ const VerbConjugationContent = ({
                     return (
                       <section key={tense} className="verb-tense-group">
                         <h4 className="verb-tense-group__heading">{tenseLabels[tense]}</h4>
-                        {rows.map(({ pronoun, key, wordText, wordId }) => {
-                          const inputProps = getWordInputProps(wordText);
+                        {rows.map(({ pronoun, key, cellValue, wordId }) => {
+                          const inputProps = getWordInputProps(cellValue, verbKey, key);
                           return (
                             <div key={key} className="verb-tense-block">
                               <span className="verb-pronoun">{pronoun.label}</span>

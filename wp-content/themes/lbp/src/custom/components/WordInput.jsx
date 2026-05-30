@@ -2,6 +2,9 @@ import React, { useState, useEffect, memo, useRef } from 'react';
 import WordEditor from '../../WordEditor';
 import { useAdminMode } from '../contexts/AdminModeContext';
 
+/** Маска скрытого слова — фикс. 6 символов, без подсказки по длине */
+const HIDDEN_WORD_MASK = Array.from({ length: 6 }, () => '█').join(' ');
+
 /**
  * Компонент для ввода слова (упрощенная версия WordField)
  * 
@@ -210,9 +213,7 @@ const WordInput = ({
               </span>
             </>
           ) : (
-            word.word.split('').map((char, index) => 
-              char === ' ' ? ' ' : '█ '
-            ).join('')
+            HIDDEN_WORD_MASK
           )}
         </span>
       )}

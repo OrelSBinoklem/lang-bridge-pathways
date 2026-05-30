@@ -367,16 +367,46 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   };
 };
 
+/** Сокращения для standard-ключа (как в CSV: form,standard) */
+export const VERB_PRONOUN_ABBR = { es: 'es', tu: 'tu', '3pers': '3p', we: 'mes', you_pl: 'jus' };
+export const VERB_TENSE_ABBR = { past: 'pag', present: 'tag', future: 'nak' };
+
+/** standard-ключ из инфинитива и ключа ячейки: būt + es_past → "būt es pag" */
+export const buildVerbStandardKey = (verbKey, conjKey) => {
+  const match = conjKey.match(/^(es|tu|3pers|we|you_pl)_(past|present|future)$/);
+  if (!match) return null;
+  const [, pronoun, tense] = match;
+  return `${verbKey} ${VERB_PRONOUN_ABBR[pronoun]} ${VERB_TENSE_ABBR[tense]}`;
+};
+
+/**
+ * Ячейка таблицы: строка "biju" или пара [форма, standard] как в CSV translation_1
+ * @returns {{ form: string, lookupKey: string } | null}
+ */
+export const parseVerbCell = (cellValue, verbKey, conjKey) => {
+  if (!cellValue || cellValue === '-') return null;
+  if (Array.isArray(cellValue)) {
+    const [form, standardKey] = cellValue;
+    if (!form || !standardKey) return null;
+    return { form, lookupKey: standardKey };
+  }
+  if (typeof cellValue === 'string') {
+    const standardKey = buildVerbStandardKey(verbKey, conjKey);
+    return { form: cellValue, lookupKey: standardKey || cellValue };
+  }
+  return null;
+};
+
 /** Слова, реально показанные в таблице спряжений (только непустые ячейки verbs) */
-export const getVisibleWordsFromVerbTable = (verbs, getWordIdByText, dictionaryWordsById) => {
+export const getVisibleWordsFromVerbTable = (verbs, resolveVerbCellWordId, dictionaryWordsById) => {
   if (!verbs || typeof verbs !== 'object') return [];
   const seen = new Set();
   const list = [];
-  Object.values(verbs).forEach((verbData) => {
+  Object.entries(verbs).forEach(([verbKey, verbData]) => {
     if (!verbData || typeof verbData !== 'object') return;
-    Object.entries(verbData).forEach(([key, val]) => {
-      if (key === 'name' || !val || val === '-') return;
-      const wordId = getWordIdByText(val);
+    Object.entries(verbData).forEach(([conjKey, val]) => {
+      if (conjKey === 'name' || !parseVerbCell(val, verbKey, conjKey)) return;
+      const wordId = resolveVerbCellWordId(val, verbKey, conjKey);
       if (!wordId || seen.has(wordId)) return;
       const word = dictionaryWordsById[wordId];
       if (!word) return;
