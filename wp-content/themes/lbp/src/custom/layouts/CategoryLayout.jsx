@@ -2,6 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import { checkTranslation, getWordDisplayStatusEducation, getWordDisplayStatusExamen, formatTime, getCooldownTime, groupWordsByStatus, getWordsStats } from '../utils/helpers';
 import CategoryWordManagement from '../components/CategoryWordManagement';
+import ExamenViewModeSwitch from '../components/ExamenViewModeSwitch';
+import { hasCustomCategoryTemplate } from '../utils/examenViewMode';
+import { useAdminMode } from '../contexts/AdminModeContext';
 
 /**
  * Универсальный layout для кастомных категорий
@@ -20,7 +23,7 @@ const CategoryLayout = ({
   words,
   dictionaryId,
   dictionaryWords,
-  categories = [],
+  categories: categoriesProp = [],
   dictionaryWordsById,
   userWordsData,
   displayStatuses,
@@ -297,9 +300,13 @@ const CategoryLayout = ({
   // Определяем categoryId для управления словами
   // Приоритет: прямой проп categoryId > category.id > 0
   const categoryIdForManagement = categoryId || category?.id || (category && typeof category === 'object' && 'id' in category ? category.id : null) || 0;
-  
+  const { isAdminModeActive } = useAdminMode();
+  const showDefaultViewLink =
+    isAdminModeActive && hasCustomCategoryTemplate(dictionaryId, categoryIdForManagement);
+
   return (
     <>
+      {showDefaultViewLink && <ExamenViewModeSwitch forceDefaultView={false} />}
       {children(renderProps)}
       {/* Управление словами - отображается во всех категориях (и кастомных, и обычных) */}
       <CategoryWordManagement
@@ -307,7 +314,7 @@ const CategoryLayout = ({
         categoryId={categoryIdForManagement}
         categoryWords={words}
         dictionaryWords={Array.isArray(dictionaryWords) ? dictionaryWords : []}
-        categories={categories}
+        categories={categoriesProp}
         onWordsChanged={onRefreshDictionaryWords}
       />
     </>

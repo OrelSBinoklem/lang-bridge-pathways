@@ -7,6 +7,8 @@ import MatchGameModal from "../components/MatchGameModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent } from "../custom/config/customComponents";
+import ExamenViewModeSwitch from "../custom/components/ExamenViewModeSwitch";
+import { readForceDefaultExamenView } from "../custom/utils/examenViewMode";
 import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode, getLearnCooldownTierPreference } from "../custom/utils/helpers";
 import { generateChoiceOptions } from "../custom/utils/choiceOptionsGenerator";
 import { useAdminMode } from "../custom/contexts/AdminModeContext";
@@ -1630,8 +1632,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
         // Проверяем, есть ли кастомный компонент для категории
         const CustomCategoryComponent = getCustomCategoryComponent(dictionaryId, categoryId);
-        
-        if (CustomCategoryComponent) {
+        const forceDefaultExamenView = readForceDefaultExamenView();
+        const adminDefaultListSwitch =
+          CustomCategoryComponent && forceDefaultExamenView && isAdminModeActive ? (
+            <ExamenViewModeSwitch forceDefaultView />
+          ) : null;
+
+        if (CustomCategoryComponent && !forceDefaultExamenView) {
           // Получаем статусы для кастомного компонента (он может использовать displayStatuses для группировки)
           const displayStatuses = {};
           categoryWords.forEach(word => {
@@ -1643,6 +1650,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
             <CustomCategoryComponent
               category={{ id: categoryId, category_name: 'Категория ' + categoryId }}
               categoryId={categoryId}
+              categories={categories}
               words={categoryWords}
               dictionaryId={dictionaryId}
               dictionaryWords={dictionaryWords}
@@ -1713,6 +1721,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         if (hasSubs) {
           return (
             <>
+              {adminDefaultListSwitch}
               {denseAddMode && (
                 <div className="dense-add-mode-hint" role="status">
                   <span className="dense-add-mode-hint__text">Клик по слову — добавить или убрать. Тяжело запоминаемое слово…</span>
@@ -1780,6 +1789,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
         return (
           <>
+            {adminDefaultListSwitch}
             {denseAddMode && (
               <div className="dense-add-mode-hint" role="status">
                 <span className="dense-add-mode-hint__text">Клик по слову — добавить или убрать. Тяжело запоминаемое слово…</span>

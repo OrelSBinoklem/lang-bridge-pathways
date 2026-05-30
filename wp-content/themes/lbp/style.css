@@ -5734,6 +5734,63 @@ body.webgl-gui-visible .dg.ac {
   vertical-align: middle;
 }
 
+/* Админ: переключение кастомный шаблон ↔ список слов из БД */
+.examen-view-mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.examen-view-mode-switch--default-active {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.examen-view-mode-switch__label {
+  font-weight: 600;
+  color: #1565c0;
+}
+
+.examen-view-mode-switch__hint {
+  color: #546e7a;
+  font-size: 12px;
+}
+
+.examen-view-mode-switch__btn {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #90a4ae;
+  background: #fff;
+  color: #263238;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.examen-view-mode-switch__btn:hover {
+  background: #f5f5f5;
+  color: #111;
+}
+
+.examen-view-mode-switch__btn--primary {
+  background: #1976d2;
+  border-color: #1565c0;
+  color: #fff;
+}
+
+.examen-view-mode-switch__btn--primary:hover {
+  background: #1565c0;
+  color: #fff;
+}
+
 /* Стили для категории спряжения глаголов */
 .verb-container {
   background-color: #E3F2FD;
@@ -5765,36 +5822,6 @@ body.webgl-gui-visible .dg.ac {
   color: #666;
 }
 
-.verb-controls {
-  margin-left: 10px;
-  display: flex;
-  gap: 6px;
-}
-
-.verb-controls button {
-  padding: 8px 16px;
-  font-size: 15px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.btn-start-learning {
-  background-color: #2196F3;
-  color: white;
-}
-
-.btn-check-group {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.btn-reset-group {
-  background-color: #FF9800;
-  color: white;
-}
-
 .verb-rows {
   background-color: white;
   border-radius: 2px;
@@ -5814,7 +5841,7 @@ body.webgl-gui-visible .dg.ac {
 
 .verb-pronoun {
   font-weight: bold;
-  width: 120px;
+  width: 41px;
   font-size: 13px;
   flex-shrink: 0;
 }
@@ -5833,4 +5860,97 @@ body.webgl-gui-visible .dg.ac {
 
 .word-input.empty {
   width: 140px;
+}
+
+.verb-word-field {
+  display: contents;
+}
+
+.verb-rows__mobile {
+  display: none;
+}
+
+.verb-rows__desktop {
+  display: block;
+}
+
+/* Телефон: блок на каждое время — один заголовок, ниже все местоимения с полями */
+@media (max-width: 767px) {
+  .verb-rows__desktop {
+    display: none;
+  }
+
+  .verb-rows__mobile {
+    display: block;
+  }
+
+  .verb-tense-group {
+    border-bottom: 2px solid #cfd8dc;
+  }
+
+  .verb-tense-group:last-child {
+    border-bottom: none;
+  }
+
+  .verb-tense-group__heading {
+    margin: 0;
+    padding: 8px 6px 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #37474f;
+    text-transform: lowercase;
+    background: #eceff1;
+    border-bottom: 1px solid #cfd8dc;
+  }
+
+  .verb-tense-block {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 6px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .verb-tense-group .verb-tense-block:last-child {
+    border-bottom: none;
+  }
+
+  .verb-tense-block .verb-pronoun {
+    flex: 0 0 41px;
+    width: 41px;
+  }
+
+  .verb-tense-stack {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .verb-rows__mobile .word-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-shrink: 1 !important;
+  }
+
+  .verb-rows__mobile .word-input > span {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .verb-rows__mobile .word-input .word-input-field,
+  .verb-rows__mobile .word-input input[type="text"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .verb-rows__mobile .word-input > span > span {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
 }

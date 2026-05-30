@@ -102,7 +102,7 @@ const WordRow = ({
     }
   };
 
-  // Индикатор прогресса; в лёгком режиме при 2+ баллах по направлению — ✓ и ★ (упрощённый режим)
+  // Индикатор прогресса; в упрощённом режиме при 2+ баллах по направлению — ✓* (галочка + звёздочка)
   const inEasyMode = Number(displayStatus.modeEducation) === 1 || Number(displayStatus.modeEducationRevert) === 1;
   const renderProgressIndicator = () => {
     const clickableProps = canOpenGlosbe
@@ -165,7 +165,7 @@ const WordRow = ({
             ✓
             {showStar && (
               <span className="words-progress-indicator__easy-star" aria-hidden="true">
-                ★
+                *
               </span>
             )}
           </>

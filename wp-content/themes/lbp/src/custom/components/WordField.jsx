@@ -99,7 +99,7 @@ const WordField = ({
       <>
         ✓
         {showStar && (
-          <span className="words-progress-indicator__easy-star" aria-hidden="true">★</span>
+          <span className="words-progress-indicator__easy-star" aria-hidden="true">*</span>
         )}
       </>
     ) : vertical ? (

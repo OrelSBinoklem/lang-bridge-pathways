@@ -3,7 +3,6 @@ import CategoryLayout from '../layouts/CategoryLayout';
 import useGroupCheck from '../hooks/useGroupCheck';
 import { WordProvider } from '../contexts/WordContext';
 import useGroupWords from '../hooks/useGroupWords';
-import { createGroupCheckHandlers, startLearningForGroup } from '../utils/groupHandlers';
 import WordInput from '../components/WordInput';
 
 /**
@@ -18,15 +17,12 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
   
   // Состояние для значений полей ввода
   const [inputValues, setInputValues] = useState({});
-  // Состояние для отслеживания, начато ли обучение для каждого глагола
-  const [learningStarted, setLearningStarted] = useState({});
-  
+
   return (
     <CategoryLayout {...props}>
       {({ 
         getWordPropsByText, 
         stats, 
-        checkGroupWords, 
         getWordIdByText, 
         getWordProps, 
         getWord,
@@ -44,68 +40,6 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
       }) => {
         // isRevert: false = прямой перевод (lat→rus), true = обратный (rus→lat)
         // Для WordInput пользователь вводит латышское слово, поэтому нужно проверять само слово (isRevert: true)
-        const handlers = createGroupCheckHandlers(groupWords, groupCheck, checkGroupWords, getWordIdByText, true);
-        
-        // Проверяем, находится ли слово в начальном состоянии (без попыток)
-        const isWordInInitialState = (wordId) => {
-          const userData = userWordsData[wordId];
-          if (!userData) return true; // Если нет данных - считается начальным состоянием
-          
-          return (
-            userData.mode_education === 0 &&
-            userData.mode_education_revert === 0 &&
-            userData.attempts === 0 &&
-            userData.attempts_revert === 0 &&
-            userData.correct_attempts === 0 &&
-            userData.correct_attempts_revert === 0 &&
-            (!userData.last_shown || userData.last_shown === '' || userData.last_shown === '0000-00-00 00:00:00') &&
-            (!userData.last_shown_revert || userData.last_shown_revert === '' || userData.last_shown_revert === '0000-00-00 00:00:00')
-          );
-        };
-        
-        // Получаем все ID слов из массива слов
-        const getWordIdsFromWords = (words) => {
-          const wordIds = [];
-          words.forEach(wordText => {
-            const wordId = getWordIdByText(wordText);
-            if (wordId) wordIds.push(wordId);
-          });
-          return wordIds;
-        };
-        
-        // Проверяем, есть ли хотя бы одно слово с попытками
-        const hasWordsWithAttempts = (words) => {
-          const wordIds = getWordIdsFromWords(words);
-          return wordIds.some(wordId => !isWordInInitialState(wordId));
-        };
-        
-        // Функция для начала обучения
-        const handleStartLearning = async (words, verbKey) => {
-          const wordIds = getWordIdsFromWords(words);
-          
-          if (wordIds.length === 0) {
-            console.warn('⚠️ Нет слов для начала обучения');
-            return;
-          }
-          
-          const success = await startLearningForGroup(wordIds, onRefreshUserData);
-          if (success) {
-            setLearningStarted(prev => ({ ...prev, [verbKey]: true }));
-          }
-        };
-        
-        // Получаем статистику для группы слов
-        const getVerbStats = (words) => {
-          const wordIds = getWordIdsFromWords(words);
-          const total = wordIds.length;
-          const learned = wordIds.filter(wordId => {
-            const displayStatus = displayStatuses[wordId];
-            return displayStatus && displayStatus.fullyLearned;
-          }).length;
-          return { total, learned };
-        };
-        
-        
         // Обработчик изменения значения поля ввода
         const handleInputChange = (wordId, value) => {
           setInputValues(prev => ({ ...prev, [wordId]: value }));
@@ -154,6 +88,11 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
           { key: 'you_pl', label: 'Jūs' },
         ];
         const tenses = ['past', 'present', 'future'];
+        const tenseLabels = {
+          past: 'pagadne',
+          present: 'tagadne',
+          future: 'nakotne',
+        };
         
         return (
           <WordProvider 
@@ -175,7 +114,6 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
 
               {/* Глаголы - удаляйте ненужные ключи из объекта verbs, ячейки останутся пустыми */}
               {Object.entries(verbs).map(([verbKey, verbData]) => {
-                // Собираем все слова из объекта для статистики и кнопок
                 const allWords = Object.values(verbData).filter(val => val !== verbData.name && val && val !== '-');
                 
                 // Если нет ни одного спряжения, не отображаем таблицу
@@ -183,66 +121,86 @@ const VerbConjugationBase = ({ verbs, ...props }) => {
                   return null;
                 }
                 
-                const shouldShowStartLearning = !learningStarted[verbKey] && !hasWordsWithAttempts(allWords);
-                
                 return (
                   <div key={verbKey} className="verb-container">
                     <div className="verb-header">
                       <div className="verb-title">
                         <div className="verb-name">{verbData.name}</div>
                       </div>
-                      <div className="verb-controls">
-                        {shouldShowStartLearning ? (
-                          <button onClick={() => handleStartLearning(allWords, verbKey)} className="btn-start-learning">📚 Начать обучение</button>
-                        ) : (
-                          <>
-                            <button onClick={() => handlers.handleCheck(allWords)} className="btn-check-group">✓ Проверить</button>
-                            <button onClick={() => {
-                              handlers.handleReset(allWords);
-                              setInputValues(prev => {
-                                const next = { ...prev };
-                                allWords.forEach(w => {
-                                  const id = getWordIdByText(w);
-                                  if (id) delete next[id];
-                                });
-                                return next;
-                              });
-                            }} className="btn-reset-group">🔄 Очистить поля</button>
-                          </>
-                        )}
-                      </div>
                     </div>
                     <div className="verb-rows">
-                      {pronouns.map((pronoun, pronounIndex) => {
-                        // Проверяем, есть ли хотя бы одно спряжение для этого лица
-                        const hasConjugations = tenses.some(tense => {
-                          const key = `${pronoun.key}_${tense}`;
-                          const wordText = verbData[key];
-                          return wordText && wordText !== '-';
-                        });
+                      <div className="verb-rows__desktop">
+                        {pronouns.map((pronoun, pronounIndex) => {
+                          const hasConjugations = tenses.some((tense) => {
+                            const key = `${pronoun.key}_${tense}`;
+                            const wordText = verbData[key];
+                            return wordText && wordText !== '-';
+                          });
+                          if (!hasConjugations) return null;
 
-                        // Если нет ни одного спряжения для этого лица, не отображаем строку
-                        if (!hasConjugations) {
-                          return null;
-                        }
-
-                        return (
-                          <div key={pronoun.key} className={pronounIndex % 2 === 0 ? 'verb-row' : 'verb-row verb-row-even'}>
-                            <span className="verb-pronoun">{pronoun.label}</span>
-                            <div className="verb-words">
-                              {tenses.map(tense => {
-                                const key = `${pronoun.key}_${tense}`;
-                                const wordText = verbData[key];
-                                if (!wordText || wordText === '-') {
-                                  return <div key={key} className="word-input empty"></div>;
-                                }
-                                const inputProps = getWordInputProps(wordText);
-                                return inputProps ? <WordInput key={key} {...inputProps} /> : <div key={key} className="word-input empty"></div>;
-                              })}
+                          return (
+                            <div
+                              key={pronoun.key}
+                              className={pronounIndex % 2 === 0 ? 'verb-row' : 'verb-row verb-row-even'}
+                            >
+                              <span className="verb-pronoun">{pronoun.label}</span>
+                              <div className="verb-words">
+                                {tenses.map((tense) => {
+                                  const key = `${pronoun.key}_${tense}`;
+                                  const wordText = verbData[key];
+                                  if (!wordText || wordText === '-') {
+                                    return <div key={key} className="word-input empty" />;
+                                  }
+                                  const inputProps = getWordInputProps(wordText);
+                                  return (
+                                    <div key={key} className="verb-word-field">
+                                      {inputProps ? (
+                                        <WordInput {...inputProps} />
+                                      ) : (
+                                        <div className="word-input empty" />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+
+                      <div className="verb-rows__mobile">
+                        {tenses.map((tense) => {
+                          const rows = pronouns
+                            .map((pronoun) => {
+                              const key = `${pronoun.key}_${tense}`;
+                              const wordText = verbData[key];
+                              if (!wordText || wordText === '-') return null;
+                              const inputProps = getWordInputProps(wordText);
+                              return { pronoun, key, inputProps };
+                            })
+                            .filter(Boolean);
+
+                          if (rows.length === 0) return null;
+
+                          return (
+                            <section key={tense} className="verb-tense-group">
+                              <h4 className="verb-tense-group__heading">{tenseLabels[tense]}</h4>
+                              {rows.map(({ pronoun, key, inputProps }) => (
+                                <div key={key} className="verb-tense-block">
+                                  <span className="verb-pronoun">{pronoun.label}</span>
+                                  <div className="verb-tense-stack">
+                                    {inputProps ? (
+                                      <WordInput {...inputProps} />
+                                    ) : (
+                                      <div className="word-input empty" />
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </section>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 );
