@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useRef } from 'react';
 import WordEditor from '../../WordEditor';
 import { useAdminMode } from '../contexts/AdminModeContext';
 
@@ -23,6 +23,12 @@ import { useAdminMode } from '../contexts/AdminModeContext';
  * @param {function} onChange - Колбэк изменения значения: (wordId, value) => void
  * @param {boolean} highlightCorrect - Подсветка при правильном ответе
  * @param {boolean} highlightIncorrect - Подсветка при неправильном ответе
+ * @param {boolean} autoFocus - Автофокус на поле ввода
+ * @param {function} onSubmit - Колбэк по Enter
+ * @param {boolean} inputDisabled - Заблокировать ввод (идёт проверка)
+ * @param {boolean} fieldActive - Подсветка активного поля тренировки
+ * @param {boolean} forceHidden - Принудительно скрыть слово (неактивные поля в тренировке)
+ * @param {string} placeholder - Текст placeholder для поля ввода
  */
 const WordInput = ({
   word,
@@ -38,9 +44,22 @@ const WordInput = ({
   onChange = null,
   highlightCorrect = false,
   highlightIncorrect = false,
+  autoFocus = false,
+  onSubmit = null,
+  inputDisabled = false,
+  fieldActive = false,
+  forceHidden = false,
+  placeholder = 'Введите слово',
 }) => {
   const { isAdminModeActive } = useAdminMode();
   const [showTooltip, setShowTooltip] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (autoFocus && onChange && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus, onChange, word?.id]);
   
   // Показать всплывашку при неправильном ответе
   useEffect(() => {
@@ -91,8 +110,12 @@ const WordInput = ({
     };
   };
   
+  const showCooldown = Boolean(displayStatus.cooldownRevert);
+  const showRevealedWord = !forceHidden && displayStatus.showWord;
+  const showInput = Boolean(onChange);
+
   return (
-    <div className="word-input" style={{ 
+    <div className={`word-input${fieldActive ? ' word-input--field-active' : ''}${showCooldown ? ' word-input--cooldown' : ''}`} style={{
       display: 'flex', 
       alignItems: 'center', 
       gap: '4px',
@@ -102,12 +125,12 @@ const WordInput = ({
     }}>
       
       {/* Поле ввода или таймер — key избегает removeChild; minWidth сохраняет фикс. ширину */}
-      <span key={displayStatus.cooldownRevert ? 'cooldown' : displayStatus.showWord ? 'word' : onChange ? 'input' : 'hidden'} style={{ display: 'inline-block', width: '140px', minWidth: '140px', maxWidth: '140px', flexShrink: 0 }}>
-      {displayStatus.cooldownRevert ? (
+      <span key={showCooldown ? 'cooldown' : showRevealedWord ? 'word' : showInput ? 'input' : 'hidden'} style={{ display: 'inline-block', width: '140px', minWidth: '140px', maxWidth: '140px', flexShrink: 0 }}>
+      {showCooldown ? (
         <span style={getTimerStyle()}>
           ⏱️ {formatTime(displayStatus.cooldownRevert)}
         </span>
-      ) : displayStatus.showWord ? (
+      ) : showRevealedWord ? (
         // Если слово уже показано — фикс. ширина 140px
         <span style={{
           border: '1px solid #ced4da',
@@ -125,36 +148,35 @@ const WordInput = ({
         }}>
           {word.word}
         </span>
-      ) : onChange ? (
+      ) : showInput ? (
         // Показываем поле ввода
-        <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+        <span className="word-input-field-wrap" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
           <input
+            ref={inputRef}
             type="text"
             value={value}
             onChange={(e) => onChange(word.id, e.target.value)}
-            placeholder="Введите слово"
-            style={getFieldStyle(highlightCorrect, highlightIncorrect)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && onSubmit && !inputDisabled) {
+                e.preventDefault();
+                onSubmit();
+              }
+            }}
+            placeholder={placeholder}
+            disabled={inputDisabled}
+            style={{
+              ...getFieldStyle(highlightCorrect, highlightIncorrect),
+              ...(userData?.mode_education_revert === 1 ? { paddingRight: '26px' } : {}),
+            }}
             className="word-input-field"
           />
-          {/* Индикатор выученного слова */}
           {userData && displayStatus && displayStatus.fullyLearned && (
-            <span style={{ 
-              position: 'absolute',
-              right: '6px',
-              pointerEvents: 'none',
-              fontSize: '14px',
-              color: '#28a745',
-              fontWeight: 'bold'
-            }}>
+            <span className="word-input-field-badge word-input-field-badge--learned">
               ✓
             </span>
           )}
           {userData && userData.mode_education_revert === 1 && (
-            <span className="learning-mode-text learning-glow" style={{ 
-              position: 'absolute',
-              right: '6px',
-              pointerEvents: 'none'
-            }}>
+            <span className="learning-mode-text learning-glow learning-mode-icon-end">
               <span className="learning-mode-icon">📚</span>
             </span>
           )}
@@ -166,7 +188,7 @@ const WordInput = ({
         </span>
       ) : (
         // Если нет onChange — скрытое слово, фикс. ширина
-        <span className="words-hidden-text" style={{
+        <span className="words-hidden-text word-input-field-wrap" style={{
           border: '1px solid #ced4da',
           borderRadius: '3px',
           padding: '4px 8px',
@@ -178,11 +200,15 @@ const WordInput = ({
           flexShrink: 0,
           textAlign: 'center',
           display: 'inline-block',
+          position: 'relative',
         }}>
-          {userData && userData.mode_education_revert === 1 ? (
-            <span className="learning-mode-text">
-              <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}>{word.word}</span>
-            </span>
+          {userData && userData.mode_education_revert === 1 && !forceHidden ? (
+            <>
+              <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold', paddingRight: '20px' }}>{word.word}</span>
+              <span className="learning-mode-text learning-glow learning-mode-icon-end">
+                <span className="learning-mode-icon">📚</span>
+              </span>
+            </>
           ) : (
             word.word.split('').map((char, index) => 
               char === ' ' ? ' ' : '█ '
@@ -221,6 +247,14 @@ const WordInput = ({
 
 // Пропуск ре-рендера при редактировании (избегаем removeChild с ReactQuill)
 function arePropsEqual(prev, next) {
+  if (prev.fieldActive !== next.fieldActive) return false;
+  if (prev.autoFocus !== next.autoFocus) return false;
+  if (prev.onChange !== next.onChange) return false;
+  if (prev.onSubmit !== next.onSubmit) return false;
+  if (prev.inputDisabled !== next.inputDisabled) return false;
+  if (prev.forceHidden !== next.forceHidden) return false;
+  if (prev.placeholder !== next.placeholder) return false;
+
   const isEditingPrev = prev.editingWordId === prev.word?.id;
   const isEditingNext = next.editingWordId === next.word?.id;
   if (isEditingPrev && isEditingNext && prev.word?.id === next.word?.id) {

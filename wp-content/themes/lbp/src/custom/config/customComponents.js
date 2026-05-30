@@ -63,6 +63,18 @@ export const customCategoryComponents = {
  * @param {number|string} categoryId - ID категории
  * @returns {React.Component|null} - Кастомный компонент или null
  */
+/** Категории со спряжением: тренировка в полях таблицы, без модального окна */
+const INLINE_FIELD_TRAINING_KEYS = new Set([
+  '20:1721',
+  '20:1733',
+  '20:1736',
+  '20:1737',
+]);
+
+export const usesInlineFieldTraining = (dictionaryId, categoryId) => {
+  return INLINE_FIELD_TRAINING_KEYS.has(`${dictionaryId}:${categoryId}`);
+};
+
 export const getCustomCategoryComponent = (dictionaryId, categoryId) => {
   // Пробуем найти по точному совпадению dictionary:category
   const exactKey = `${dictionaryId}:${categoryId}`;

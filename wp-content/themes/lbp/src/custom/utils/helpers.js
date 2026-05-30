@@ -367,3 +367,38 @@ export const getWordDisplayStatusExamen = (userData, currentTime = Date.now()) =
   };
 };
 
+/** Слова, реально показанные в таблице спряжений (только непустые ячейки verbs) */
+export const getVisibleWordsFromVerbTable = (verbs, getWordIdByText, dictionaryWordsById) => {
+  if (!verbs || typeof verbs !== 'object') return [];
+  const seen = new Set();
+  const list = [];
+  Object.values(verbs).forEach((verbData) => {
+    if (!verbData || typeof verbData !== 'object') return;
+    Object.entries(verbData).forEach(([key, val]) => {
+      if (key === 'name' || !val || val === '-') return;
+      const wordId = getWordIdByText(val);
+      if (!wordId || seen.has(wordId)) return;
+      const word = dictionaryWordsById[wordId];
+      if (!word) return;
+      seen.add(wordId);
+      list.push(word);
+    });
+  });
+  return list;
+};
+
+/** Слова категории, доступные для обратной тренировки (ввод латышского) */
+export const getEligibleRevertTrainingWordIds = (wordsList, userWordsData, currentTime = Date.now()) => {
+  if (!Array.isArray(wordsList)) return [];
+  return wordsList
+    .filter((word) => {
+      const ds = getWordDisplayStatusExamen(userWordsData[word.id], currentTime);
+      if (ds.fullyLearned || ds.cooldownRevert || ds.showWord) return false;
+      const ud = userWordsData[word.id];
+      if (!ud) return true;
+      const easyRevert = Number(ud.mode_education_revert) === 1;
+      return ud.correct_attempts_revert < 2 || easyRevert;
+    })
+    .map((word) => word.id);
+};
+

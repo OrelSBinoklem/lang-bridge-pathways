@@ -6,7 +6,7 @@ import HelpModal from "../components/HelpModal";
 import MatchGameModal from "../components/MatchGameModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
-import { getCustomCategoryComponent } from "../custom/config/customComponents";
+import { getCustomCategoryComponent, usesInlineFieldTraining } from "../custom/config/customComponents";
 import ExamenViewModeSwitch from "../custom/components/ExamenViewModeSwitch";
 import { readForceDefaultExamenView } from "../custom/utils/examenViewMode";
 import { normalizeString, stripParenthesesAndPunctuation, getCooldownTime, formatTime as formatTimeHelper, getWordDisplayStatusExamen, getTrainingAnswerMode, setTrainingAnswerMode, getLearnCooldownTierPreference } from "../custom/utils/helpers";
@@ -97,6 +97,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [showGameDisabledPopover, setShowGameDisabledPopover] = useState(false); // поповер «почему заблокирована мини-игра»
   const lastDenseAddTimeRef = useRef(null); // для логирования обновлённого состояния слов после добавления в плотное
   const [cooldownMenuRev, setCooldownMenuRev] = useState(0); // перерисовка при смене куки откатов из меню
+  const [inlineFieldTrainingActive, setInlineFieldTrainingActive] = useState(false); // Тренировка в полях таблицы спряжений
 
   // Инициализация режима ответов из куки; на мобильных (≤768) по умолчанию «выбор», если нет куки
   useEffect(() => {
@@ -742,6 +743,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }
     
     // Формируем очередь тренировки (в той же области: вся категория или подкатегория)
+    const forceDefaultExamenView = readForceDefaultExamenView();
+    if (
+      usesInlineFieldTraining(dictionaryId, categoryId) &&
+      !forceDefaultExamenView &&
+      subcategoryId == null
+    ) {
+      setInlineFieldTrainingActive(true);
+      return;
+    }
+
     const queue = buildTrainingQueue(scopeIds);
 
     if (queue.length === 0) {
@@ -1359,7 +1370,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
 
 	return (
 		<div className="examen-root">
-      {!trainingMode && (
+      {!trainingMode && !inlineFieldTrainingActive && (
         <div className="training-buttons-container">
           <div className={`training-start-button-wrap ${!isUserLoggedIn ? 'training-start-button-wrap--needs-auth' : ''}`}>
             <button
@@ -1476,7 +1487,19 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         </div>
       )}
 
-      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      {inlineFieldTrainingActive && (
+        <div className="verb-inline-training-bar">
+          <span>🎯 Тренировка в таблице — вводите слово в подсвеченное поле</span>
+          <button
+            type="button"
+            className="verb-inline-training-bar__finish"
+            onClick={() => setInlineFieldTrainingActive(false)}
+          >
+            × Завершить
+          </button>
+        </div>
+      )}
+
       {denseMessagePopup && (
         <div
           className="dense-message-overlay"
@@ -1664,6 +1687,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               formatTime={formatTime}
               mode="examen"
               currentTime={currentTime}
+              inlineTrainingActive={inlineFieldTrainingActive}
+              onInlineTrainingComplete={() => setInlineFieldTrainingActive(false)}
             />
           );
         }
@@ -1852,9 +1877,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
       })()}
       
       {/* Модальное окно справки */}
-      {showHelp && (
-        <HelpModal onClose={() => setShowHelp(false)} />
-      )}
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 		</div>
 	);
 };
