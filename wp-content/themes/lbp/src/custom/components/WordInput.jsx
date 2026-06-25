@@ -73,13 +73,13 @@ const WordInput = ({
     }
   }, [highlightIncorrect]);
   
-  // Стили для поля ввода
+  // Стили для поля ввода (iOS Safari зумит при font-size < 16px)
   const getFieldStyle = (isCorrect, isIncorrect) => {
     const base = {
       border: '1px solid #ced4da',
       borderRadius: '3px',
       padding: '4px 8px',
-      fontSize: '13px',
+      fontSize: '16px',
       width: '140px',
       minWidth: '140px',
       maxWidth: '140px',
@@ -157,6 +157,12 @@ const WordInput = ({
           <input
             ref={inputRef}
             type="text"
+            inputMode="text"
+            enterKeyHint="go"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             value={value}
             onChange={(e) => onChange(word.id, e.target.value)}
             onKeyDown={(e) => {

@@ -11,6 +11,48 @@ const pickRandom = (ids) => {
   return ids[Math.floor(Math.random() * ids.length)];
 };
 
+/** На телефоне desktop-таблица скрыта — скроллим к видимой ячейке (mobile-layout) */
+const findVisibleActiveField = (activeWordId) => {
+  const root = document.querySelector('.verb-conjugation-category--training');
+  if (!root) return null;
+
+  if (activeWordId) {
+    const fields = root.querySelectorAll(`[data-verb-word-id="${activeWordId}"]`);
+    for (const field of fields) {
+      const rect = field.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        return field.querySelector('.word-input--field-active') || field;
+      }
+    }
+  }
+
+  for (const el of root.querySelectorAll('.word-input--field-active')) {
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) return el;
+  }
+  return null;
+};
+
+const scrollActiveFieldIntoView = (activeWordId) => {
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+
+  const doScroll = () => {
+    const el = findVisibleActiveField(activeWordId);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  if (isMobile) {
+    // После blur клавиатура закрывается — ждём пересчёт viewport
+    window.setTimeout(doScroll, 320);
+  } else {
+    requestAnimationFrame(() => requestAnimationFrame(doScroll));
+  }
+};
+
 const pronouns = [
   { key: 'es', label: 'Es' },
   { key: 'tu', label: 'Tu' },
@@ -116,10 +158,7 @@ const VerbConjugationContent = ({
 
   useEffect(() => {
     if (!inlineTrainingActive || !activeWordId) return;
-    requestAnimationFrame(() => {
-      const el = document.querySelector('.verb-conjugation-category--training .word-input--field-active');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    scrollActiveFieldIntoView(activeWordId);
   }, [activeWordId, inlineTrainingActive]);
 
   // Переключение только после ответа (advanceToken), не при тике таймеров

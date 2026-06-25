@@ -4,6 +4,7 @@ import WordRow from "../components/WordRow";
 import ExamenErrorBoundary from "../components/ExamenErrorBoundary";
 import HelpModal from "../components/HelpModal";
 import MatchGameModal from "../components/MatchGameModal";
+import DenseHardestPickerModal from "../components/DenseHardestPickerModal";
 import CategoryWordReorder from "../components/CategoryWordReorder";
 import CategoryWordManagement from "../custom/components/CategoryWordManagement";
 import { getCustomCategoryComponent, usesInlineFieldTraining } from "../custom/config/customComponents";
@@ -74,6 +75,13 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [selectedWordIds, setSelectedWordIds] = useState([]); // Выбранные слова для массовых операций (админ)
   const [showBulkActions, setShowBulkActions] = useState(false); // Режим массовых операций (админ: чекбоксы)
   const [denseAddMode, setDenseAddMode] = useState(false); // Режим «клик по слову = добавить/убрать из плотного»
+  const [showDifficultyStats, setShowDifficultyStats] = useState(() => {
+    try {
+      return localStorage.getItem('examen_show_difficulty_stats') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [isUpdating, setIsUpdating] = useState(false); // Идёт обновление данных на сервере
   const checkAnswerSubmittingRef = useRef(false); // Защита от двойной отправки при проверке ответа
   const burgerWrapRef = useRef(null); // контейнер бургер-меню для клика снаружи
@@ -87,6 +95,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
   const [phraseRetryUsed, setPhraseRetryUsed] = useState(false); // Использована доп. попытка «для фраз» по текущему слову
   const [showRetrainingNotice, setShowRetrainingNotice] = useState(false); // Показать сообщение о режиме дообучения
   const [showMatchGame, setShowMatchGame] = useState(false); // Мини-игра: сопоставь переводы
+  const [showDenseHardestPicker, setShowDenseHardestPicker] = useState(false);
   const [pendingRetrainingState, setPendingRetrainingState] = useState(null); // { queue, firstItem } — новая очередь после стека direct+revert
   const [stackHasNonRetrainingWord, setStackHasNonRetrainingWord] = useState(false); // Флаг: в текущем стеке есть хотя бы одно слово НЕ в режиме дообучения (выставляется при создании стека)
   const [denseSessionState, setDenseSessionState] = useState(null); // Новая сессия плотного дообучения (4 стека)
@@ -111,6 +120,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     setTrainingAnswerMode(defaultMode);
     setSelectionMode(defaultMode === 'select');
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('examen_show_difficulty_stats', showDifficultyStats ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+  }, [showDifficultyStats]);
 
   // Периодически проверяем, залогинен ли пользователь (myajax + auth cookie)
   useEffect(() => {
@@ -311,6 +328,15 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     if (!categoryId || categoryId === 0) return [];
     return [id, ...subcategories.map(c => parseInt(c.id, 10))];
   }, [categoryId, subcategories]);
+
+  const categoryWordsForDense = useMemo(() => {
+    if (categoryId === 0 || allCategoryIds.length === 0) {
+      return categoryId === 0
+        ? dictionaryWords
+        : dictionaryWords.filter(w => wordBelongsToCategoryId(w, parseInt(categoryId, 10)));
+    }
+    return dictionaryWords.filter(w => wordBelongsToAnyOfCategories(w, allCategoryIds));
+  }, [categoryId, allCategoryIds, dictionaryWords]);
 
   /** ID категорий для массовых действий (как в бургер-меню) — для переключателя откатов в header */
   const trainingMenuScopeIds = useMemo(() => {
@@ -1368,22 +1394,67 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
     }
   };
 
+  const openDenseHardestPicker = () => {
+    if (!isUserLoggedIn || !currentDenseCategoryId) {
+      alert('Залогиньтесь, чтобы добавить слова в плотное дообучение');
+      return;
+    }
+    setShowDenseHardestPicker(true);
+  };
+
+  const handleConfirmHardestToDense = async (percent, wordIds) => {
+    if (!wordIds.length || !currentDenseCategoryId) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('action', 'add_dense_training_words');
+      formData.append('category_id', currentDenseCategoryId);
+      formData.append('dictionary_id', dictionaryId);
+      formData.append('word_ids', JSON.stringify(wordIds));
+      formData.append('use_random', 1);
+      const response = await axios.post(window.myajax.url, formData);
+      if (response.data?.success) {
+        setDenseSessionState(response.data.data || null);
+        lastDenseAddTimeRef.current = Date.now();
+        if (onRefreshUserData) await onRefreshUserData();
+        setShowDenseHardestPicker(false);
+        alert(`Добавлено в плотное: ${wordIds.length} слов (${percent}% категории).`);
+      } else {
+        alert('Ошибка: ' + (response.data?.message || 'Не удалось добавить'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка сети: ' + err.message);
+    }
+  };
+
 	return (
 		<div className="examen-root">
       {!trainingMode && !inlineFieldTrainingActive && (
         <div className="training-buttons-container">
-          <div className={`training-start-button-wrap ${!isUserLoggedIn ? 'training-start-button-wrap--needs-auth' : ''}`}>
+          <div className="training-start-actions">
+            <div className={`training-start-button-wrap ${!isUserLoggedIn ? 'training-start-button-wrap--needs-auth' : ''}`}>
+              <button
+                onClick={() => startTraining()}
+                className="training-start-button training-start-button--fit-content"
+                disabled={!isUserLoggedIn}
+                title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
+              >
+                🎯 Начать тренировку
+              </button>
+              {!isUserLoggedIn && (
+                <div className="training-start-auth-hint" role="tooltip">Залогиньтесь или авторизуйтесь</div>
+              )}
+            </div>
             <button
-              onClick={() => startTraining()}
-              className="training-start-button training-start-button--fit-content"
+              type="button"
+              onClick={openDenseHardestPicker}
+              className="training-dense-auto-button"
               disabled={!isUserLoggedIn}
-              title={isDenseActive ? 'При активном плотном дообучении откроется плотная тренировка' : ''}
+              title="Выбрать долю трудных слов и добавить в плотное дообучение"
             >
-              🎯 Начать тренировку
+              🔒 Трудные в плотное
             </button>
-            {!isUserLoggedIn && (
-              <div className="training-start-auth-hint" role="tooltip">Залогиньтесь или авторизуйтесь</div>
-            )}
           </div>
 
           <span className="training-buttons-spacer" aria-hidden="true" />
@@ -1456,6 +1527,14 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               >
                 {denseAddMode ? '🔓 Выберите слова' : `🔒 Труднозапоминаемые слова (${Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids.length : 0})`}
               </button>
+              <button
+                type="button"
+                className={`training-actions-menu-item training-actions-menu-item--stats ${showDifficultyStats ? 'training-actions-menu-item--stats-active' : ''}`}
+                onClick={() => { setShowDifficultyStats((prev) => !prev); setShowActionsMenu(false); }}
+                title="Показать линии попыток у каждого слова (→ слева, ← справа, 10px за попытку)"
+              >
+                {showDifficultyStats ? '📊 Скрыть статистику' : '📊 Статистика сложности'}
+              </button>
               {isAdminModeActive && (
                 <button
                   type="button"
@@ -1495,7 +1574,8 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
             className="verb-inline-training-bar__finish"
             onClick={() => setInlineFieldTrainingActive(false)}
           >
-            × Завершить
+            <span className="verb-inline-training-bar__finish-x" aria-hidden="true">×</span>
+            Завершить
           </button>
         </div>
       )}
@@ -1727,6 +1807,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
               }}
               denseAddMode={denseAddMode}
               onDenseToggle={handleDenseToggleWord}
+              showDifficultyStats={showDifficultyStats}
             />
           );
         };
@@ -1783,7 +1864,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                         )}
                       </div>
                     </h4>
-                    <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
+                    <ul className={`words-education-list${denseAddMode ? ' words-education-list--dense-add-mode' : ''}${showDifficultyStats ? ' words-education-list--difficulty-stats' : ''}`}>{subWords.map(w => renderWordRow(w, parseInt(sub.id, 10)))}</ul>
                   </section>
                 );
               })}
@@ -1792,7 +1873,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                   <h4 className="examen-category-block-title">
                     <span>Оставшиеся слова</span>
                   </h4>
-                  <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
+                  <ul className={`words-education-list${denseAddMode ? ' words-education-list--dense-add-mode' : ''}${showDifficultyStats ? ' words-education-list--difficulty-stats' : ''}`}>{directWords.map(w => renderWordRow(w, parseInt(categoryId, 10)))}</ul>
                 </section>
               )}
               <CategoryWordManagement
@@ -1829,7 +1910,7 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
                 </button>
               </div>
             )}
-            <ul className={`words-education-list ${denseAddMode ? 'words-education-list--dense-add-mode' : ''}`}>
+            <ul className={`words-education-list${denseAddMode ? ' words-education-list--dense-add-mode' : ''}${showDifficultyStats ? ' words-education-list--difficulty-stats' : ''}`}>
               {realWords}
             </ul>
             <CategoryWordManagement
@@ -1876,6 +1957,16 @@ const Examen = ({ categoryId, dictionaryId, dictionary = null, categories = [], 
         );
       })()}
       
+      <DenseHardestPickerModal
+        isOpen={showDenseHardestPicker}
+        onClose={() => setShowDenseHardestPicker(false)}
+        words={categoryWordsForDense}
+        userWordsData={userWordsData}
+        activeDenseIds={Array.isArray(denseSessionState?.active_word_ids) ? denseSessionState.active_word_ids : []}
+        onConfirm={handleConfirmHardestToDense}
+        initialPercent={15}
+      />
+
       {/* Модальное окно справки */}
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 		</div>

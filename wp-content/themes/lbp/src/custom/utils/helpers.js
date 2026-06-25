@@ -155,9 +155,108 @@ export const getWordsStats = (words, displayStatuses, userWordsData) => {
   };
 };
 
+/** Метрики сложности слова по числу попыток (прямо и обратно) */
+export const getWordDifficultyMetrics = (userData) => {
+  if (!userData) return null;
+
+  const directAttempts = Math.max(0, Number(userData.attempts) || 0);
+  const revertAttempts = Math.max(0, Number(userData.attempts_revert) || 0);
+  const totalAttempts = directAttempts + revertAttempts;
+  const peakAttempts = Math.max(directAttempts, revertAttempts);
+
+  let heat = 0;
+  if (peakAttempts >= 10) heat = 3;
+  else if (peakAttempts >= 5) heat = 2;
+  else if (peakAttempts >= 1) heat = 1;
+
+  return {
+    directAttempts,
+    revertAttempts,
+    totalAttempts,
+    peakAttempts,
+    heat,
+  };
+};
+
+/** Выбрать top percent% слов категории по числу попыток (для плотного дообучения) */
+export const pickHardestWordsForDenseTraining = (words, userWordsData, percent = 15, excludeWordIds = [], deterministic = true) => {
+  if (!Array.isArray(words) || words.length === 0) {
+    return { wordIds: [], maxAttempts: 0, targetCount: 0, candidateCount: 0 };
+  }
+
+  const targetCount = Math.max(1, Math.ceil((words.length * percent) / 100));
+  const exclude = new Set((excludeWordIds || []).map(Number));
+
+  const scored = words
+    .map((w) => {
+      const metrics = getWordDifficultyMetrics(userWordsData[w.id]);
+      if (!metrics || metrics.totalAttempts <= 0) return null;
+      if (exclude.has(w.id)) return null;
+      return { id: w.id, totalAttempts: metrics.totalAttempts };
+    })
+    .filter(Boolean);
+
+  if (scored.length === 0) {
+    return { wordIds: [], maxAttempts: 0, targetCount, candidateCount: 0 };
+  }
+
+  scored.sort((a, b) => {
+    if (b.totalAttempts !== a.totalAttempts) return b.totalAttempts - a.totalAttempts;
+    return deterministic ? a.id - b.id : 0;
+  });
+
+  const maxAttempts = scored[0].totalAttempts;
+  const pickCount = Math.min(targetCount, scored.length);
+
+  return {
+    wordIds: scored.slice(0, pickCount).map((s) => s.id),
+    maxAttempts,
+    targetCount,
+    candidateCount: scored.length,
+  };
+};
+
+/** Данные для мини-графика попыток по словам категории (сортировка: больше попыток — левее) */
+export const getCategoryAttemptChartData = (words, userWordsData, selectedWordIds = [], excludeWordIds = []) => {
+  if (!Array.isArray(words) || words.length === 0) {
+    return { bars: [], maxAttempts: 0, chartMax: 1 };
+  }
+
+  const selected = new Set((selectedWordIds || []).map(Number));
+  const inDense = new Set((excludeWordIds || []).map(Number));
+
+  const bars = words.map((w) => {
+    const metrics = getWordDifficultyMetrics(userWordsData[w.id]);
+    const directAttempts = metrics?.directAttempts || 0;
+    const revertAttempts = metrics?.revertAttempts || 0;
+    const totalAttempts = metrics?.totalAttempts || 0;
+    return {
+      id: w.id,
+      word: w.word || '',
+      directAttempts,
+      revertAttempts,
+      totalAttempts,
+      inDense: inDense.has(w.id),
+      selected: selected.has(w.id),
+    };
+  });
+
+  bars.sort((a, b) => b.totalAttempts - a.totalAttempts || String(a.word).localeCompare(String(b.word)));
+
+  const maxAttempts = bars.length ? Math.max(...bars.map((b) => b.totalAttempts)) : 0;
+  const chartMax = Math.max(1, maxAttempts);
+
+  return {
+    bars: bars.map((b) => ({
+      ...b,
+      isMaxTier: maxAttempts > 0 && b.totalAttempts === maxAttempts,
+    })),
+    maxAttempts,
+    chartMax,
+  };
+};
+
 /**
- * Форматирование времени (для откатов)
- * @param {number} milliseconds - Миллисекунды
  * @returns {string} - Форматированное время "ч:мм"
  */
 export const formatTime = (milliseconds) => {
@@ -407,6 +506,52 @@ export const getVisibleWordsFromVerbTable = (verbs, resolveVerbCellWordId, dicti
     Object.entries(verbData).forEach(([conjKey, val]) => {
       if (conjKey === 'name' || !parseVerbCell(val, verbKey, conjKey)) return;
       const wordId = resolveVerbCellWordId(val, verbKey, conjKey);
+      if (!wordId || seen.has(wordId)) return;
+      const word = dictionaryWordsById[wordId];
+      if (!word) return;
+      seen.add(wordId);
+      list.push(word);
+    });
+  });
+  return list;
+};
+
+/** Сокращения для standard-ключа склонений (как в CSV) */
+export const NOUN_NUMBER_ABBR = { sing: 'viens', plur: 'daudz' };
+export const NOUN_CASE_ABBR = { kas: 'kas', ka: 'ka', kam: 'kam', ko: 'ko', kur: 'kur' };
+
+/** lemma + sing_kas → "tēvs viens kas" */
+export const buildNounStandardKey = (lemma, cellKey) => {
+  const match = cellKey.match(/^(sing|plur)_(kas|ka|kam|ko|kur)$/);
+  if (!match) return null;
+  const [, number, caseKey] = match;
+  return `${lemma} ${NOUN_NUMBER_ABBR[number]} ${NOUN_CASE_ABBR[caseKey]}`;
+};
+
+export const parseNounCell = (cellValue, lemma, cellKey) => {
+  if (!cellValue || cellValue === '-') return null;
+  if (Array.isArray(cellValue)) {
+    const [form, standardKey] = cellValue;
+    if (!form || !standardKey) return null;
+    return { form, lookupKey: standardKey };
+  }
+  if (typeof cellValue === 'string') {
+    const standardKey = buildNounStandardKey(lemma, cellKey);
+    return { form: cellValue, lookupKey: standardKey || cellValue };
+  }
+  return null;
+};
+
+/** Слова из непустых ячеек таблицы склонений */
+export const getVisibleWordsFromNounTable = (nouns, resolveNounCellWordId, dictionaryWordsById) => {
+  if (!nouns || typeof nouns !== 'object') return [];
+  const seen = new Set();
+  const list = [];
+  Object.entries(nouns).forEach(([lemma, nounData]) => {
+    if (!nounData || typeof nounData !== 'object') return;
+    Object.entries(nounData).forEach(([cellKey, val]) => {
+      if (cellKey === 'name' || !parseNounCell(val, lemma, cellKey)) return;
+      const wordId = resolveNounCellWordId(val, lemma, cellKey);
       if (!wordId || seen.has(wordId)) return;
       const word = dictionaryWordsById[wordId];
       if (!word) return;

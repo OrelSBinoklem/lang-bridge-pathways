@@ -6,6 +6,7 @@ const PopoverHtmlContent = memo(({ html }) => (
   <div className="word-info-popover__content" dangerouslySetInnerHTML={{ __html: html || '' }} />
 ));
 import WordEditor from '../WordEditor';
+import WordDifficultyStats from './WordDifficultyStats';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
 import { learnedWithSimplifiedTierTwo } from '../custom/utils/helpers';
 
@@ -32,6 +33,7 @@ const GLOSBE_BASE = 'https://ru.glosbe.com/словарь-латышский-р�
  * @param {function} onToggleSelect - Колбэк переключения выбора слова
  * @param {boolean} denseAddMode - Режим «клик по слову = добавить/убрать из плотного»
  * @param {function} onDenseToggle - Колбэк переключения слова в плотном: (wordId) => void
+ * @param {boolean} showDifficultyStats - Показать статистику сложности (баллы и ошибки)
  */
 const WordRow = ({
   word,
@@ -51,7 +53,8 @@ const WordRow = ({
   isSelected = false,
   onToggleSelect,
   denseAddMode = false,
-  onDenseToggle
+  onDenseToggle,
+  showDifficultyStats = false,
 }) => {
   const { isAdminModeActive } = useAdminMode();
   const [showInfoPopover, setShowInfoPopover] = useState(false);
@@ -96,7 +99,7 @@ const WordRow = ({
 
   const handleRowClick = (e) => {
     if (editingWordId === word.id) return;
-    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal, .words-education-list__info-hint')) return;
+    if (e.target?.closest?.('.edit-button, .delete-button, input[type="checkbox"], .word-editor, .word-info-popover, .info-wysiwyg-modal-overlay, .info-wysiwyg-modal, .words-education-list__info-hint, .word-difficulty-line')) return;
     if (denseAddMode && onDenseToggle) {
       onDenseToggle(word.id);
     }
@@ -180,7 +183,7 @@ const WordRow = ({
   return (
     <li
       key={word.id}
-      className={`${showInfoHint ? 'words-education-list__row--has-info' : ''} ${denseMeta ? 'words-education-list__row--dense' : ''}`}
+      className={`${showInfoHint ? 'words-education-list__row--has-info' : ''} ${denseMeta ? 'words-education-list__row--dense' : ''} ${showDifficultyStats ? 'words-education-list__row--with-stats' : ''}`}
       onClick={handleRowClick}
       role="button"
       tabIndex={0}
@@ -194,6 +197,8 @@ const WordRow = ({
         }
       }}
     >
+      {showDifficultyStats && <WordDifficultyStats userData={userData} />}
+
       {denseMeta && (
         <span className="words-education-list__dense-badge">
           <span className="words-education-list__dense-badge-icon">🔒</span>

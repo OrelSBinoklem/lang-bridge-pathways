@@ -13,6 +13,8 @@ import BaseTemplate from '../categories/BaseTemplate';
 import VerbConjugationCategory from '../categories/VerbConjugationCategory';
 import VerbConjugationCategory1 from '../categories/VerbConjugationCategory1';
 import VerbConjugationCategory2 from '../categories/VerbConjugationCategory2';
+import VerbConjugationCategory3 from '../categories/VerbConjugationCategory3';
+import NounDeclensionCategory from '../categories/NounDeclensionCategory';
 
 // Ваши компоненты:
 // import MyCategoryComponent from '../categories/MyCategoryComponent';
@@ -43,6 +45,8 @@ export const customCategoryComponents = {
   '20:1733': VerbConjugationCategory,    // Таблица спряжений глаголов
   '20:1736': VerbConjugationCategory1,    // Таблица спряжений глаголов (первая группа)
   '20:1737': VerbConjugationCategory2,    // Таблица спряжений глаголов (вторая группа)
+  '20:1983': VerbConjugationCategory3,    // 3 parastie + 3 atgriezeniskie
+  '20:1984': NounDeclensionCategory,       // 6 deklināciju tipi
   
   // Примеры регистрации:
   // '1:5': SimpleExampleCategory,    // Словарь ID=1, Категория ID=5
@@ -69,6 +73,8 @@ const INLINE_FIELD_TRAINING_KEYS = new Set([
   '20:1733',
   '20:1736',
   '20:1737',
+  '20:1983',
+  '20:1984',
 ]);
 
 export const usesInlineFieldTraining = (dictionaryId, categoryId) => {
