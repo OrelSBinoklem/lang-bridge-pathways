@@ -903,17 +903,41 @@ body:has(.galleries.horizontal-mode) {
 }
 
 .words-education-list--difficulty-stats li {
-    padding-bottom: 10px;
     overflow: visible;
+}
+
+.words-education-list__row--with-stats {
+    overflow: visible;
+}
+
+.word-difficulty-stats {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.word-difficulty-stats .word-difficulty-line {
+    pointer-events: auto;
 }
 
 .word-difficulty-line {
     position: absolute;
-    bottom: 3px;
+    top: 50%;
+    margin-top: -2.5px;
     height: 5px;
     border-radius: 3px;
     z-index: 2;
     cursor: default;
+    --attempt-step: 10px;
+    width: calc(var(--attempt-count, 0) * var(--attempt-step));
+}
+
+@media screen and (max-width: 719px) {
+    .word-difficulty-line {
+        --attempt-step: 5px;
+        opacity: 0.8;
+    }
 }
 
 .word-difficulty-line--direct {
@@ -3112,6 +3136,7 @@ h2 .small {
     justify-content: center;
     border-radius: 2px 2px 0 0;
     opacity: 0.85;
+    cursor: default;
 }
 
 .dense-hardest-modal__bar-col--max {
@@ -3134,7 +3159,7 @@ h2 .small {
     min-height: 2px;
     border-radius: 2px 2px 0 0;
     overflow: hidden;
-    cursor: default;
+    pointer-events: none;
 }
 
 .dense-hardest-modal__bar-tooltip {
@@ -3163,6 +3188,25 @@ h2 .small {
     font-size: 13px;
     color: #455a64;
     line-height: 1.35;
+}
+
+.dense-hardest-modal__bar-tooltip-attempts {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.dense-hardest-modal__bar-tooltip-attempts-direct {
+    color: #1565c0;
+}
+
+.dense-hardest-modal__bar-tooltip-attempts-revert {
+    color: #6a1b9a;
 }
 
 .dense-hardest-modal__bar-tooltip-info {
