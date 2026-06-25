@@ -233,6 +233,10 @@ export const getCategoryAttemptChartData = (words, userWordsData, selectedWordId
     return {
       id: w.id,
       word: w.word || '',
+      translation_1: w.translation_1 || '',
+      translation_2: w.translation_2 || '',
+      translation_3: w.translation_3 || '',
+      info: w.info || '',
       directAttempts,
       revertAttempts,
       totalAttempts,
