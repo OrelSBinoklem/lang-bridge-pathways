@@ -183,11 +183,25 @@ body {
     text-decoration: none;
 }
 
-.footer-telegram-link:hover {
+.footer-github-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #24292f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-telegram-link:hover,
+.footer-github-link:hover {
     filter: brightness(1.08);
 }
 
-.footer-telegram-icon {
+.footer-telegram-icon,
+.footer-github-icon {
     width: 18px;
     height: 18px;
     display: block;
