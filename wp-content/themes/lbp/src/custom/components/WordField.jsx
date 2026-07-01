@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WordEditor from '../../WordEditor';
+import WordWithPosHint from '../../components/WordWithPosHint';
 import { useAdminMode } from '../contexts/AdminModeContext';
 import { learnedWithSimplifiedTierTwo } from '../utils/helpers';
 
@@ -139,7 +140,7 @@ const WordField = ({
           </span>
         ) : (displayStatus.showWord || (showDirectField && !hideAvailableWord)) ? (
           // Если слово доступно ИЛИ (активен режим прямого перевода И не скрывать) - показываем слово
-          word.word
+          <WordWithPosHint text={word.word} hintFirst />
         ) : showReverseField && !displayStatus.showWord ? (
           // Если нужно отгадать латышское слово - показываем поле ввода
           <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -158,7 +159,7 @@ const WordField = ({
             )}
             {showReverseTooltip && (
               <span className="word-field-tooltip">
-                ✓ {word.word}
+                ✓ <WordWithPosHint text={word.word} hintFirst />
               </span>
             )}
           </span>
@@ -169,7 +170,7 @@ const WordField = ({
           <span className="words-hidden-text">
             {userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
-                <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}>{word.word}</span>
+                <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}><WordWithPosHint text={word.word} hintFirst /></span>
               </span>
             ) : (
               word.word.split('').map((char, index) => 

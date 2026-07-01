@@ -33,7 +33,7 @@ function json_parser_page() {
         // Укажите путь к вашему JSON файлу
 
         $dicts = [
-            [
+            /*[
                 'src' => '/system/dictionaries/Lat_Rus_5000-result.json',
                 'lang' => 'RU',
                 'learn_lang' => 'EN',
@@ -152,22 +152,54 @@ function json_parser_page() {
                 'level' => 1,
                 'maxLevel' => 4,
                 'sound' => 1,
+            ],*/
+			[
+                'src' => '/system/dictionaries/oxford-themes-en-us.json',
+                'lang' => 'RU',
+                'learn_lang' => 'EN',
+                'name' => 'Русско-Английский (Американский) Тематический',
+                'words' => 3784,
+                'level' => 1,
+                'maxLevel' => 4,
+                'sound' => 1,
             ],
 			
         ];
 
-        foreach ([$dicts[9]] as $dict) {
-            $json_file = get_template_directory() . $dict['src'];
+        foreach ($dicts as $dict) {
+            $json_file = resolve_dictionary_json_path($dict['src']);
+            if (!is_readable($json_file)) {
+                echo '<div class="notice notice-error"><p>JSON file not found or not readable: ' . esc_html($json_file) . '</p></div>';
+                continue;
+            }
             add_words_from_json($json_file, $dict['lang'], $dict['learn_lang'], $dict['name'], $dict['words'], $dict['level'], $dict['maxLevel'], $dict['sound']);
-            echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p>JSON data has been parsed and inserted: ' . esc_html($dict['name']) . '</p></div>';
         }
     }
+}
+
+function resolve_dictionary_json_path($src) {
+    $theme_path = get_template_directory() . $src;
+    if (is_readable($theme_path)) {
+        return $theme_path;
+    }
+    $public_path = ABSPATH . 'dictionaries/' . basename($src);
+    if (is_readable($public_path)) {
+        return $public_path;
+    }
+    return $theme_path;
 }
 
 function add_words_from_json($json_file, $lang, $learn_lang, $name, $words, $level, $maxLevel, $sound) {
     global $wpdb;
     $json_data = file_get_contents($json_file);
+    if ($json_data === false) {
+        throw new RuntimeException('Cannot read JSON file: ' . $json_file);
+    }
     $data = json_decode($json_data, true);
+    if (!is_array($data)) {
+        throw new RuntimeException('Invalid JSON in file: ' . $json_file);
+    }
 
 
     $table_name = $wpdb->prefix . 'dictionaries';
@@ -211,7 +243,14 @@ function add_words_recursion($data, $id_dictionary, $parent_category_id = null, 
     global $wpdb;
     $indexWord = 0;
 
+    if (!is_array($data)) {
+        return;
+    }
+
     foreach ($data as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
         $isCategory1 = isset($item['category']) || isset($item['sub_category']);
 
         if($isCategory1) {
@@ -253,7 +292,7 @@ function add_words_recursion($data, $id_dictionary, $parent_category_id = null, 
                     'gender' => $item['gender'] ?? null,
                     'order' => ++$indexWord
                 ),
-                array('%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%d')
+                array('%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%d')
             );
 
             $id_word = $wpdb->insert_id;

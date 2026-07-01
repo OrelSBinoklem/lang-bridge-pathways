@@ -60,6 +60,13 @@ export const AUDIO_CONFIG = {
   AUDIO_EXTENSION: ".mp3"
 };
 
+/** Убрать часть речи и прочее в скобках: "downstairs (adverb)" → "downstairs" */
+export const normalizeWordForAudio = (wordText) => {
+  return String(wordText || '')
+    .replace(/\s*\([^)]*\)\s*/g, ' ')
+    .trim();
+};
+
 // Функция для получения конфигурации языка
 export const getLanguageConfig = (langCode) => {
   return AUDIO_CONFIG.SUPPORTED_LANGUAGES[langCode] || AUDIO_CONFIG.SUPPORTED_LANGUAGES[AUDIO_CONFIG.DEFAULT_LANGUAGE];
@@ -81,7 +88,7 @@ export const playWordAudio = (wordText, learnLang) => {
     const language = learnLang || AUDIO_CONFIG.DEFAULT_LANGUAGE;
     if (!isLanguageSupported(language)) return;
     const langConfig = getLanguageConfig(language);
-    const fileName = langConfig.slugify(wordText) + AUDIO_CONFIG.AUDIO_EXTENSION;
+    const fileName = langConfig.slugify(normalizeWordForAudio(wordText)) + AUDIO_CONFIG.AUDIO_EXTENSION;
     const audioPath = `${AUDIO_CONFIG.BASE_PATH}/${langConfig.folder}/audio/${fileName}`;
     const audio = new Audio(audioPath);
     audio.play().catch(() => {});

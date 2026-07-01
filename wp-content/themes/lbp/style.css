@@ -1194,6 +1194,31 @@ body:has(.galleries.horizontal-mode) {
     font-weight: bold;
 }
 
+.words-education-list__word-text {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+    max-width: 100%;
+}
+
+.words-education-list__word .word-pos-hint--before {
+    color: #888;
+    font-weight: normal;
+    font-size: calc(1em - 2px);
+    margin-right: 0.35em;
+    order: -1;
+}
+
+.words-education-list__word .word-main {
+    font-weight: bold;
+}
+
+.word-pos-hint {
+    color: #888;
+    font-weight: normal;
+}
+
 .words-education-list__translation_1,
 .words-education-list__translation_2,
 .words-education-list__translation_3 {
@@ -2626,6 +2651,11 @@ h2 .small {
     background: #f8f9fa;
     border-radius: 8px;
     border: 2px solid #dee2e6;
+}
+
+.training-word-display .word-pos-hint {
+    color: #888;
+    font-weight: normal;
 }
 
 .training-phrase-retry-tooltip {

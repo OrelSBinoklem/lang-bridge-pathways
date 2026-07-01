@@ -6,6 +6,7 @@ const PopoverHtmlContent = memo(({ html }) => (
   <div className="word-info-popover__content" dangerouslySetInnerHTML={{ __html: html || '' }} />
 ));
 import WordEditor from '../WordEditor';
+import WordWithPosHint from './WordWithPosHint';
 import WordDifficultyStats from './WordDifficultyStats';
 import { useAdminMode } from '../custom/contexts/AdminModeContext';
 import { learnedWithSimplifiedTierTwo } from '../custom/utils/helpers';
@@ -220,16 +221,16 @@ const WordRow = ({
         ) : displayStatus.showWord ? (
           userData && Number(userData.mode_education_revert) === 1 ? (
             <span className="learning-mode-text">
-              <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}>{word.word}</span>
+              <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}><WordWithPosHint text={word.word} hintFirst /></span>
             </span>
           ) : (
-            word.word
+            <WordWithPosHint text={word.word} hintFirst />
           )
         ) : (
           <span className="words-hidden-text">
             {userData && userData.mode_education_revert === 1 ? (
               <span className="learning-mode-text">
-                <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}>{word.word}</span>
+                <span className="learning-mode-icon">📚</span> <span style={{ color: '#333', fontSize: '16px', fontWeight: 'bold' }}><WordWithPosHint text={word.word} hintFirst /></span>
               </span>
             ) : (
               word.word.split('').map((char, index) => 

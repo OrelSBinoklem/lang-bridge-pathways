@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { playWordAudio } from '../config/audioConfig';
+import WordWithPosHint from './WordWithPosHint';
 import { stripParenthesesAndPunctuation } from '../custom/utils/helpers';
 
 // Звук при смене слова вызывается колбэком из Examen (только прямой режим). Здесь только по клику.
@@ -61,7 +62,7 @@ const TrainingInterface = ({
             {currentWord.translation_2 && currentWord.translation_2 !== '0' && `, ${currentWord.translation_2}`}
             {currentWord.translation_3 && currentWord.translation_3 !== '0' && `, ${currentWord.translation_3}`}
           </>
-        ) : currentWord.word}
+        ) : <WordWithPosHint text={currentWord.word} />}
         
         {/* Кнопка повтора звука для прямого перевода (лат→рус) */}
         {!currentMode && (
